@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import 'aah-util-css';
 import 'styles/css-reset.css';
+import './compiled/app.css';
 
 import App from './App';
 import * as serviceWorker from './serviceWorker';
