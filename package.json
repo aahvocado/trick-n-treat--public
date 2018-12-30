@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "aah-util-css": "git+ssh://git@github.com/aahvocado/aah-util-css.git",
+    "js-schema": "^1.0.1",
     "less": "^3.9.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
