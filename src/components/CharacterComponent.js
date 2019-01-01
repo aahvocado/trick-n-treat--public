@@ -10,7 +10,7 @@ export class CharacterComponent extends PureComponent {
   /** @override */
   render() {
     return (
-      <div className='position-relative width-full'>
+      <div className='position-relative width-full mar-ver-2'>
         <CharacterNameComponent name='Daidan' />
 
         <CharacterMenuComponent />
