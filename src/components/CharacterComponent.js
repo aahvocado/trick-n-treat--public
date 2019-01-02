@@ -53,7 +53,7 @@ export class CharacterMenuComponent extends PureComponent {
   render() {
 
     return (
-      <div className='position-absolute pos-r-0 pos-t-0'>
+      <div className='position-absolute pos-r-0 pos-t-0 flex-col'>
         <CharacterButtonComponent>
           Inventory
         </CharacterButtonComponent>
@@ -82,9 +82,9 @@ export class CharacterButtonComponent extends PureComponent {
   render() {
 
     return (
-      <div className='bg-fourth fsize-4 color-primary text-left f-bold borradius-l-2 boxshadow-b-2-fifth pad-2 sibling-mar-t-4'>
+      <button className='bg-fourth fsize-4 color-primary text-left f-bold borradius-l-2 boxshadow-b-2-fifth pad-2 sibling-mar-t-4 cursor-pointer'>
         { this.props.children }
-      </div>
+      </button>
     )
   }
 }
