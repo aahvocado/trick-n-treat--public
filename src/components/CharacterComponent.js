@@ -11,13 +11,12 @@ export class CharacterComponent extends PureComponent {
   render() {
     return (
       <div className='position-relative width-full mar-ver-2'>
-        <CharacterNameComponent name='Daidan' />
 
-        <CharacterMenuComponent />
-
-        <div>
+        <div className='mar-b-2'>
           hello world
         </div>
+
+        <CharacterMenuComponent />
 
       </div>
     )
@@ -36,7 +35,7 @@ export class CharacterNameComponent extends PureComponent {
     const { name } = this.props;
 
     return (
-      <div className='position-absolute pos-l-0 pos-t-0 pad-2 bg-fourth fsize-6 color-primary text-center f-bold borradius-r-2 boxshadow-b-2-fifth'>
+      <div className='position-absolute pos-l-0 pos-t-0 pad-2 bg-fourth fsize-6 color-primary text-center f-bold borradius-r-2 bor-1-primary'>
         { name }
       </div>
     )
@@ -46,24 +45,21 @@ export class CharacterNameComponent extends PureComponent {
  *
  */
 export class CharacterMenuComponent extends PureComponent {
-  static defaultProps = {
-
-  }
   /** @override */
   render() {
 
     return (
-      <div className='position-absolute pos-r-0 pos-t-0 flex-col'>
+      <div className='flex-row-center'>
         <CharacterButtonComponent>
           Inventory
         </CharacterButtonComponent>
 
         <CharacterButtonComponent>
-          Friends
+          Controller
         </CharacterButtonComponent>
 
         <CharacterButtonComponent>
-          Stats
+          Friends
         </CharacterButtonComponent>
       </div>
     )
@@ -82,7 +78,13 @@ export class CharacterButtonComponent extends PureComponent {
   render() {
 
     return (
-      <button className='bg-fourth fsize-4 color-primary text-left f-bold borradius-l-2 boxshadow-b-2-fifth pad-2 sibling-mar-t-4 cursor-pointer'>
+      <button
+        className='bg-fourth fsize-4 color-primary text-center f-bold borradius-2 boxshadow-b-2-fifth pad-2 sibling-mar-l-1 cursor-pointer'
+        style={{
+          height: '120px',
+          width: '100px',
+        }}
+      >
         { this.props.children }
       </button>
     )
