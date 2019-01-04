@@ -84,7 +84,7 @@ export class CharacterButtonComponent extends PureComponent {
 
     return (
       <button
-        className='bg-fourth fsize-4 color-primary text-center f-bold borradius-2 boxshadow-b-2-fifth pad-2 sibling-mar-l-1 cursor-pointer'
+        className='fsize-4 color-primary text-center f-bold borradius-2 bg-fifth boxshadow-b-2-fourth pad-2 sibling-mar-l-1 cursor-pointer'
         style={{
           height: '120px',
           width: '100px',
