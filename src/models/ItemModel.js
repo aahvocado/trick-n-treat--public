@@ -13,7 +13,7 @@ const itemSchema = schema({
 })
 
 export const ITEM_TYPE_ID = {
-  WEAPON: 'HEALTH-ITEM-TYPE',
+  WEAPON: 'WEAPON-ITEM-TYPE',
   CONSUMABLE: 'CONSUMABLE-ITEM-TYPE',
 }
 
@@ -26,12 +26,32 @@ export class ItemModel extends Model {
 
     // apply default attributes and then override with given ones
     this.set(Object.assign({
-      name: '',
+      name: 'undefined item',
     }, newAttributes));
 
     // set schema and then validate
     this.schema = itemSchema;
     this.validate();
+  }
+}
+/**
+ * @typedef {ItemModel} WeaponModel
+ */
+export class WeaponModel extends ItemModel {
+  constructor(newAttributes = {}) {
+    super(Object.assign({
+      typeId: ITEM_TYPE_ID.WEAPON,
+    }, newAttributes));
+  }
+}
+/**
+ * @typedef {ItemModel} ConsumableModel
+ */
+export class ConsumableModel extends ItemModel {
+  constructor(newAttributes = {}) {
+    super(Object.assign({
+      typeId: ITEM_TYPE_ID.CONSUMABLE,
+    }, newAttributes));
   }
 }
 

@@ -1,5 +1,12 @@
 import React, { PureComponent } from 'react';
 
+import {WeaponModel} from 'models/ItemModel';
+const demoInventory = [
+  new WeaponModel({name: 'weapon 1'}),
+  new WeaponModel({name: 'weapon 2'}),
+  new WeaponModel({name: 'weapon 3'}),
+]
+
 /**
  * displays character data
  */
@@ -11,13 +18,8 @@ export class CharacterComponent extends PureComponent {
   render() {
     return (
       <div className='position-relative width-full mar-ver-2'>
-
-        <div className='mar-b-2'>
-          hello world
-        </div>
-
         <CharacterMenuComponent />
-
+        <CharacterInventoryComponent list={demoInventory} />
       </div>
     )
   }
@@ -49,7 +51,7 @@ export class CharacterMenuComponent extends PureComponent {
   render() {
 
     return (
-      <div className='flex-row-center'>
+      <div className='flex-row-center mar-b-3'>
         <CharacterButtonComponent>
           Inventory
         </CharacterButtonComponent>
@@ -87,6 +89,31 @@ export class CharacterButtonComponent extends PureComponent {
       >
         { this.props.children }
       </button>
+    )
+  }
+}
+/**
+ *
+ */
+export class CharacterInventoryComponent extends PureComponent {
+  static defaultProps = {
+    /** @type {Array<ItemModel>} */
+    list: [],
+  }
+  /** @override */
+  render() {
+    const { list } = this.props;
+
+    return (
+      <div className='bg-secondary'>
+        <h3>Inventory</h3>
+
+        <div className='flex-row'>
+          { list.map((model) => (
+            <div>{model.get('name')}</div>
+          ))}
+        </div>
+      </div>
     )
   }
 }
