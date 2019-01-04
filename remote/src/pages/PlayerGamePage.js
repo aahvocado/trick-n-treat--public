@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 
-import PieceSelectionButton from 'components/PieceSelectionButton';
+import PieceSelectionButton from '../components/PieceSelectionButton';
 
 /**
  * page to select the pieces

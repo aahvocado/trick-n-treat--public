@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import PlayerGamePage from 'pages/PlayerGamePage';
+import PlayerGamePage from './pages/PlayerGamePage';
 
 class App extends Component {
   render() {
