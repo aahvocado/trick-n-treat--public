@@ -5,6 +5,10 @@ const demoInventory = [
   new WeaponModel({name: 'weapon 1'}),
   new WeaponModel({name: 'weapon 2'}),
   new WeaponModel({name: 'weapon 3'}),
+  new WeaponModel({name: 'weapon 4'}),
+  new WeaponModel({name: 'weapon 5'}),
+  new WeaponModel({name: 'weapon 6'}),
+  new WeaponModel({name: 'weapon 7'}),
 ]
 
 /**
@@ -51,7 +55,7 @@ export class CharacterMenuComponent extends PureComponent {
   render() {
 
     return (
-      <div className='flex-row-center mar-b-3'>
+      <div className='flex-row-centered mar-b-3'>
         <CharacterButtonComponent>
           Inventory
         </CharacterButtonComponent>
@@ -67,7 +71,6 @@ export class CharacterMenuComponent extends PureComponent {
     )
   }
 }
-
 /**
  *
  */
@@ -106,16 +109,44 @@ export class CharacterInventoryComponent extends PureComponent {
 
     return (
       <div className='bg-secondary'>
-        <h3>Inventory</h3>
+        <h3 className='fsize-4 pad-2'>Inventory</h3>
 
-        <div className='flex-row'>
+        <div className='grid-cols-3'>
           { list.map((model) => (
-            <div>{model.get('name')}</div>
+            <InventoryItemComponent
+              key={model.id}
+              model={model}
+            />
           ))}
         </div>
       </div>
     )
   }
 }
+/**
+ *
+ */
+export class InventoryItemComponent extends PureComponent {
+  static defaultProps = {
+    /** @type {ItemModel} */
+    model: undefined,
+  }
+  /** @override */
+  render() {
+    const { model } = this.props;
 
+    return (
+      <div
+        className='mar-1 borradius-2 bg-secondary-lighter boxshadow-b-1-primary cursor-pointer flex-row-centered'
+        style={{
+          height: '100px',
+          width: '100px',
+          margin: '5px auto',
+        }}
+      >
+        { model.get('name') }
+      </div>
+    )
+  }
+}
 export default CharacterComponent;
