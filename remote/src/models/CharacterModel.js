@@ -1,6 +1,6 @@
 import schema from 'js-schema';
 
-import Model from 'models/Model';
+import Model from '../models/Model';
 import StatModel, { HealthModel, MovementModel } from 'models/StatModel';
 
 // define attribute types

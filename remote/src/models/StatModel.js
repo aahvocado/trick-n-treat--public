@@ -1,6 +1,6 @@
 import schema from 'js-schema';
 
-import Model from 'models/Model';
+import Model from '../models/Model';
 
 // define attribute types
 const statSchema = schema({
