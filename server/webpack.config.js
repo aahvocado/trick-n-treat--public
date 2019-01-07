@@ -3,6 +3,7 @@ var webpack = require('webpack');
 var nodeExternals = require('webpack-node-externals');
 
 const serverPath = path.resolve(__dirname, './src/');
+
 module.exports = {
   mode: 'development',
   target: 'node',
@@ -11,12 +12,11 @@ module.exports = {
     path: path.resolve(__dirname, 'compiled'),
     filename: 'index.js'
   },
-  // resolve: {
-  //   alias: {
-  //     components: path.resolve(serverPath, 'components'),
-  //     managers: path.resolve(serverPath, 'managers'),
-  //   }
-  // },
+  resolve: {
+    alias: {
+      managers: path.resolve(serverPath, 'managers'),
+    }
+  },
   externals: [nodeExternals()],
   module: {
     rules: [

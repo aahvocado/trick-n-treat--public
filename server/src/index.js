@@ -2,7 +2,8 @@ import "@babel/polyfill";
 
 import express from 'express';
 import http from 'http';
-import Server from 'socket.io';
+import * as websocketServer from 'managers/websocketServer';
+
 
 const SERVER_PORT = 666;
 
@@ -12,7 +13,7 @@ app.get('/status', function(req, resp) {
 });
 
 const server = http.createServer(app);
-const io = new Server(server);
+websocketServer.start(server);
 
 // START!
 server.listen(SERVER_PORT, async () => {
