@@ -10,7 +10,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'compiled'),
-    filename: 'index.js'
+    filename: 'server.js'
   },
   resolve: {
     alias: {

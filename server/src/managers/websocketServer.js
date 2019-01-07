@@ -14,5 +14,5 @@ let io;
  */
 export function start(httpServer) {
   io = new SocketServer(httpServer);
-  console.log('\x1b[36m', 'Websocket Connection Started'); //cyan
+  console.log('\x1b[36m', 'Websocket Connection Started'); // cyan
 }
