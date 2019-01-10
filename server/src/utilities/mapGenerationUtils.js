@@ -1,3 +1,5 @@
+import { getRandomIntInclusive } from 'utilities/mathUtils';
+
 // temporary constants just for reference
 const TILE_TYPE = {
   0: 'empty',
@@ -44,18 +46,6 @@ function generateRoom({width, height}) {
   }
 
   return map;
-}
-/**
- * generates a random integer
- *
- * @param {Number} min
- * @param {Number} max
- * @returns {Number}
- */
-function getRandomIntInclusive(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 /**
  * creates a random tile type
