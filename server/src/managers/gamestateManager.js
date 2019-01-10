@@ -22,8 +22,7 @@ const gamestateSchema = schema({
   // id of the character whose turn it is (consider how it could be an npc/entity?)
   activeCharacterId: String,
 })
-
-// this is the thing!
+// It's the BRAIN!
 const GAMESTATE = {
   map: [],
 }
@@ -33,17 +32,17 @@ const GAMESTATE = {
 export function getGamestate() {
   return GAMESTATE;
 }
-
 /**
- *
+ * generates a map
  */
 function initMap() {
   GAMESTATE.map = mapGenerationUtils.generateRoom();
 }
 /**
- *
+ * starts everything
  */
 export function start() {
   initMap();
+  console.log(getGamestate().map);
 }
 

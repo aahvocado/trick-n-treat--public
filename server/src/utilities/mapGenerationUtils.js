@@ -1,4 +1,3 @@
-
 /**
  * generates a random integer
  *
@@ -29,9 +28,9 @@ export function generateRoom() {
   const height = 10;
   const width = 10;
 
-  for (var x= 0; x< width; x++) {
+  for (var x = 0; x < width; x++) {
     map.push([]);
-    for (var y=0; y<height; y++) {
+    for (var y = 0; y < height; y++) {
       map[x][y] = generateTile();
     }
   }

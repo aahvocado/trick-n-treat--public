@@ -1,10 +1,13 @@
+import "@babel/polyfill";
+
 import dotenv from 'dotenv-flow';
 dotenv.config({
   node_env: process.env.NODE_ENV || 'development',
   cwd: '../',
 });
 
-import "@babel/polyfill";
+import seedrandom from 'seedrandom';
+seedrandom('TRICKNTREAT', { global: true }); // set seed globally for testing
 
 import * as serverInstance from 'managers/serverInstance';
 import * as gamestateManager from 'managers/gamestateManager';
