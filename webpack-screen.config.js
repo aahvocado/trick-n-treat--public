@@ -2,7 +2,7 @@ var path = require('path');
 var nodeExternals = require('webpack-node-externals');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
-var { BUILD_PATH, APP_PATH, SHARED_PATH } = require('./app-paths.js');
+var { BUILD_PATH, SCREEN_PATH, SHARED_PATH } = require('./app-paths.js');
 
 module.exports = {
   mode: 'development',
@@ -14,13 +14,15 @@ module.exports = {
   },
   resolve: {
     alias: {
-      constants: path.resolve(SHARED_PATH, 'constants'),
+      constants: path.resolve(SCREEN_PATH, 'src/constants'),
+      debug: path.resolve(SCREEN_PATH, 'src/debug'),
+      input: path.resolve(SCREEN_PATH, 'src/input'),
 
-      common: path.resolve(APP_PATH, 'js/common'),
-      components: path.resolve(APP_PATH, 'js/components'),
-      data: path.resolve(APP_PATH, 'js/data'),
-      helpers: path.resolve(APP_PATH, 'js/helpers'),
-      managers: path.resolve(APP_PATH, 'js/managers'),
+      common: path.resolve(SCREEN_PATH, 'src/common'),
+      components: path.resolve(SCREEN_PATH, 'src/components'),
+      data: path.resolve(SCREEN_PATH, 'src/data'),
+      helpers: path.resolve(SCREEN_PATH, 'src/helpers'),
+      managers: path.resolve(SCREEN_PATH, 'src/managers'),
     }
   },
   devtool: 'source-map',

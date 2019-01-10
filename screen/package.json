@@ -29,7 +29,7 @@
     "socket.io-client": "^2.1.1",
     "socketio": "^1.0.0",
     "style-loader": "^0.23.1",
-    "three.js": "^0.77.1",
+    "three": "^0.100.0",
     "underscore": "^1.9.1",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",

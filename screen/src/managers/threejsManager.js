@@ -15,7 +15,7 @@ import {
   ANIMATION
 
 } from 'constants/three.js';
-import consoleLog from 'debug/degug';
+import consoleLog from 'debug/debug';
 import { initInput } from 'input/input';
 import { add } from '../helpers/utilities';
 
@@ -24,6 +24,8 @@ const scene = initScene();
 
 let players;
 let tiles;
+let camera;
+let lights;
 
 let currentFocus;
 var currentPlayer;
@@ -34,7 +36,6 @@ let moves;
 let stepStartTimestamp;
 
 // Init Game
-initaliseValues();
 
 // Functions
 function initScreen() {
@@ -46,22 +47,23 @@ function initScreen() {
 function initScene() {
   const sceneThree = new THREE.Scene();
 
+  camera = new THREE.Camera();
   configureCamera();
   const renderer = initRenderer();
-  const lights = initLights();
-  
+  lights = initLights();
+
   sceneThree.add(lights.hemiLight)
   sceneThree.add(lights.dirLight);
   sceneThree.add(lights.backLight);
-  sceneThree.add(player);
+  // sceneThree.add(player);
 
   const scene = {
     scene: sceneThree,
     camera: camera,
     renderer: renderer,
-    hemiLight: hemiLight,
-    dirLight: dirLight,
-    backLight: backLight
+    hemiLight: lights.hemiLight,
+    dirLight: lights.dirLight,
+    backLight: lights.backLight
 
   }
 
@@ -81,7 +83,7 @@ function initRenderer() {
     alpha: RENDERER.APLHA,
     antialias: RENDERER.ANTIALIAS
   });
-  
+
   renderer.shadowMap.enabled = RENDERER;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.setSize( RENDERER.SIZE_X, RENDERER.SIZE_Y );
@@ -89,24 +91,24 @@ function initRenderer() {
   return renderer;
 }
 function initLights() {
-  hemiLight = new THREE.HemisphereLight(HEMI_LIGHT.SKY_COLOR, HEMI_LIGHT.GROUND_COLOR, HEMI_LIGHT.INTESITY);
-  
-  dirLight = new THREE.DirectionalLight(DIR_LIGHT.COLOR, DIR_LIGHT.INTESITY);
+  const hemiLight = new THREE.HemisphereLight(HEMI_LIGHT.SKY_COLOR, HEMI_LIGHT.GROUND_COLOR, HEMI_LIGHT.INTESITY);
+
+  const dirLight = new THREE.DirectionalLight(DIR_LIGHT.COLOR, DIR_LIGHT.INTESITY);
   dirLight.position.set(DIR_LIGHT.POSITION);
   dirLight.castShadow = DIR_LIGHT.CAST_SHADOW;
-  
+
   dirLight.shadow.mapSize.width = DIR_LIGHT.SHADOW_MAP_SIZE_WIDTH;
   dirLight.shadow.mapSize.height = DIR_LIGHT.SHADOW_MAP_SIZE_HEIGHT;
-  dirLight.shadow.camera.left = - SHADOW_CAMERA_VALUE;
-  dirLight.shadow.camera.right = SHADOW_CAMERA_VALUE;
-  dirLight.shadow.camera.top = SHADOW_CAMERA_VALUE;
-  dirLight.shadow.camera.bottom = - SHADOW_CAMERA_VALUE;
-  
-  backLight = new THREE.DirectionalLight(BACK_LIGHT.COLOR, BACK_LIGHT.INTESITY);
+  dirLight.shadow.camera.left = - DIR_LIGHT.SHADOW_CAMERA_VALUE;
+  dirLight.shadow.camera.right = DIR_LIGHT.SHADOW_CAMERA_VALUE;
+  dirLight.shadow.camera.top = DIR_LIGHT.SHADOW_CAMERA_VALUE;
+  dirLight.shadow.camera.bottom = - DIR_LIGHT.SHADOW_CAMERA_VALUE;
+
+  const backLight = new THREE.DirectionalLight(BACK_LIGHT.COLOR, BACK_LIGHT.INTESITY);
   backLight.position.set(BACK_LIGHT.POSITION);
   backLight.castShadow = BACK_LIGHT.CAST_SHADOW;
 
-  const lights = {
+  lights = {
     hemiLight: hemiLight,
     dirLight: dirLight,
     backLight: backLight,
@@ -115,42 +117,42 @@ function initLights() {
 }
 function initGame() {
   tiles = generateTiles();
-  players = initPlayers();
+  // players = initPlayers();
 
   previousTimestamp = null;
 
   startMoving = false;
   stepStartTimestamp;
 
-  player.position.x = 0;
-  player.position.y = 0;
+  // player.position.x = 0;
+  // player.position.y = 0;
 
   camera.position.y = initialCameraPositionY;
   camera.position.x = initialCameraPositionX;
 
   initInput();
 }
-function initPlayers(playerIds = [1]) {
-  let players = [];
-  _.each(playerIds, function(playerId) {
-    players.push(new player(playerId));
-  });
-  currentFocus = players[0];
-  currentPlayer = players[0];
-  return players;
-}
-function player(playerId) {
-  const player = new THREE.Group();
-  player.id =playerId;
-  player.pos = { x: 0 , y: 0 };
-  player.moves = [];
-  const playerMesh = createPlayerMesh();
-  player.add(playerMesh);
-  return player;  
-}
+// function initPlayers(playerIds = [1]) {
+//   let players = [];
+//   _.each(playerIds, function(playerId) {
+//     players.push(new player(playerId));
+//   });
+//   currentFocus = players[0];
+//   currentPlayer = players[0];
+//   return players;
+// }
+// function player(playerId) {
+//   const player = new THREE.Group();
+  // player.id = playerId;
+  // player.pos = { x: 0 , y: 0 };
+  // player.moves = [];
+  // const playerMesh = createPlayerMesh();
+  // player.add(playerMesh);
+//   return player;
+// }
 function createPlayerMesh() {
   const playerMesh = new THREE.Mesh(
-    new THREE.BoxBufferGeometry( PLAYER.SIZE*SCENE.ZOOM, PLAYER.SIZE*SCENE.ZOOM, 20*SCENE.ZOOM ), 
+    new THREE.BoxBufferGeometry( PLAYER.SIZE*SCENE.ZOOM, PLAYER.SIZE*SCENE.ZOOM, 20*SCENE.ZOOM ),
     new THREE.MeshPhongMaterial( { color: PLAYER.COLOR, flatShading: PLAYER.FLAT_SHADING } )
   );
   playerMesh.position.z = PLAYER.POSITION_HEIGHT;
@@ -182,7 +184,7 @@ function Tile(pos, dir, type) {
 }
 function createTileMesh() {
   const tileMesh = new THREE.Mesh(
-    new THREE.BoxBufferGeometry( TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_HEIGHT*SCENE.ZOOM ), 
+    new THREE.BoxBufferGeometry( TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_HEIGHT*SCENE.ZOOM ),
     new THREE.MeshPhongMaterial( { color: TILES.COLOR, flatShading: TILES.FLAT_SHADING } )
   );
   tileMesh.position.z = TILES.POSITION_HEIGHT;
@@ -201,7 +203,7 @@ export function move(direction) {
   }, { x: currentPlayer.pos.x, y: currentPlayer.pos.y});
   let targetTile = tiles['x' + finalPosition.x + 'y' + finalPosition.y];
   // consoleLog(false, ['adjacent tiles: ', forward, right, backward, left, 'x' + (finalPosition.x-1) + 'y' + finalPosition.y]);
-  consoleLog(false, ["finalPosition: ", finalPosition]);    
+  consoleLog(false, ["finalPosition: ", finalPosition]);
   // consoleLog(false, ["playerPos: ", currentPlayer.pos]);
   // consoleLog(false, ["moves: ", moves]);
 
@@ -223,7 +225,7 @@ export function move(direction) {
 }
 function animate(timestamp) {
   requestAnimationFrame( animate );
-  
+
   if(!previousTimestamp) previousTimestamp = timestamp;
   const delta = timestamp - previousTimestamp;
   previousTimestamp = timestamp;
@@ -241,7 +243,7 @@ function animate(timestamp) {
           case TILE_DIRECTIONS.FORWARD: {
               currentPlayer.position.y = currentPlayer.pos.y*positionWidth*SCENE.ZOOM + moveDeltaDistance; // initial player position is 0
               currentPlayer.position.z = jumpDeltaDistance;
-              camera.position.y = CAMERA.INITIAL_CAMERA_POSITION_Y + currentFocus.pos.y*positionWidth*SCENE.ZOOM + moveDeltaDistance;        
+              camera.position.y = CAMERA.INITIAL_CAMERA_POSITION_Y + currentFocus.pos.y*positionWidth*SCENE.ZOOM + moveDeltaDistance;
               break;
           }
           case TILE_DIRECTIONS.Backward: {
@@ -253,13 +255,13 @@ function animate(timestamp) {
           case TILE_DIRECTIONS.LEFT: {
               currentPlayer.position.x = currentPlayer.pos.x*positionWidth*SCENE.ZOOM - moveDeltaDistance; // initial player position is 0
               currentPlayer.position.z = jumpDeltaDistance;
-              camera.position.x = CAMERA.INITIAL_CAMERA_POSITION_X + currentFocus.pos.x*positionWidth*SCENE.ZOOM - moveDeltaDistance;        
+              camera.position.x = CAMERA.INITIAL_CAMERA_POSITION_X + currentFocus.pos.x*positionWidth*SCENE.ZOOM - moveDeltaDistance;
               break;
           }
           case TILE_DIRECTIONS.RIGHT: {
-              currentPlayer.position.x = currentPlayer.pos.x*positionWidth*SCENE.ZOOM + moveDeltaDistance; 
+              currentPlayer.position.x = currentPlayer.pos.x*positionWidth*SCENE.ZOOM + moveDeltaDistance;
               currentPlayer.position.z = jumpDeltaDistance;
-              camera.position.x = CAMERA.INITIAL_CAMERA_POSITION_X + currentFocus.pos.x*positionWidth*SCENE.ZOOM + moveDeltaDistance;        
+              camera.position.x = CAMERA.INITIAL_CAMERA_POSITION_X + currentFocus.pos.x*positionWidth*SCENE.ZOOM + moveDeltaDistance;
               break;
           }
       }

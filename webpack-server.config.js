@@ -16,8 +16,8 @@ module.exports = {
     alias: {
       constants: path.resolve(SHARED_PATH, 'constants'),
 
-      common: path.resolve(SERVER_PATH, 'js/common'),
-      managers: path.resolve(SERVER_PATH, 'js/managers'),
+      common: path.resolve(SERVER_PATH, 'src/common'),
+      managers: path.resolve(SERVER_PATH, 'src/managers'),
     }
   },
   externals: [nodeExternals()],

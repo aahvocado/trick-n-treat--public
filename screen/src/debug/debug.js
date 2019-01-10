@@ -7,3 +7,5 @@ export function consoleLog(override, ...values) {
     console.log(values);
   }
 }
+
+export default consoleLog;

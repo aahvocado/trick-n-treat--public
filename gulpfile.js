@@ -158,7 +158,7 @@ gulp.task('run-production-server', function(cb) {
 gulp.task('dev-screen', gulp.series('compile-screen', 'screen:watch', 'run-screen-local'));
 gulp.task('dev-remote', gulp.series('compile-remote', 'remote:watch', 'run-remote-local'));
 gulp.task('dev-server', gulp.series('compile-server', 'run-nodemon-server'));
-gulp.task('development', gulp.series('compile-screen','compile-remote', 'compile-server', 'run-nodemon-server'));
+gulp.task('development', gulp.series('compile-screen'));
 gulp.task('production', gulp.series('compile-screen','compile-remote', 'compile-server', 'run-production-server'));
 /**
  * different 'default' task depending on settings

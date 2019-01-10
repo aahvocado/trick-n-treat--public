@@ -7,11 +7,11 @@ module.exports.BUILD_PATH = path.resolve(__dirname, 'build');
 /**
  * location of the screen
  */
-module.exports.APP_PATH = path.resolve(__dirname, 'screen');
+module.exports.SCREEN_PATH = path.resolve(__dirname, 'screen');
 /**
  * location of the remote
  */
-module.exports.APP_PATH = path.resolve(__dirname, 'remote');
+module.exports.REMOTE_PATH = path.resolve(__dirname, 'remote');
 /**
  * location of the server
  */
