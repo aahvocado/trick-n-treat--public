@@ -27,6 +27,12 @@ const gamestateSchema = schema({
 const GAMESTATE = {
   map: [],
 }
+/**
+ * @returns {Object}
+ */
+export function getGamestate() {
+  return GAMESTATE;
+}
 
 /**
  *
@@ -39,6 +45,5 @@ function initMap() {
  */
 export function start() {
   initMap();
-  console.log(GAMESTATE.map);
 }
 
