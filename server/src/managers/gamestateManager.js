@@ -36,7 +36,11 @@ export function getGamestate() {
  * generates a map
  */
 function initMap() {
-  GAMESTATE.map = mapGenerationUtils.generateRoom();
+  GAMESTATE.map = mapGenerationUtils.generateMap({
+    width: 20,
+    height: 20,
+    numSpecials: 10,
+  });
 }
 /**
  * starts everything
