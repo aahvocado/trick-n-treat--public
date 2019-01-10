@@ -15,6 +15,8 @@ module.exports = {
   resolve: {
     alias: {
       managers: path.resolve(serverPath, 'managers'),
+      models: path.resolve(serverPath, 'models'),
+      utilities: path.resolve(serverPath, 'utilities'),
     }
   },
   externals: [nodeExternals()],
