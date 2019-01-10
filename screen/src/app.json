@@ -1,0 +1,8 @@
+{
+  "name": "Screen",
+  "description": "Screen",
+  "repository": "https://github.com/aahvocado/trick-n-treat.git",
+  "logo": "https://cdn.rawgit.com/heroku/node-js-getting-started/master/public/node.svg",
+  "keywords": ["node", "express", "heroku"],
+  "image": "heroku/nodejs"
+}
