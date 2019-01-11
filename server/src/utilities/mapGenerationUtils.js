@@ -63,7 +63,7 @@ export function generateRoom({width, height}) {
  */
 function executeRandomWalk(mapModel, {start, steps}) {
   // set our starting point as a path
-  mapModel.setTileAt(start, 1);
+  mapModel.setTileAt(start, '*');
 
   randomWalkStep(mapModel, {
     currentPoint: start,
@@ -94,7 +94,11 @@ function randomWalkStep(mapModel, stepOptions) {
   let _currentPoint = currentPoint;
   for (var i = 0; i < stepSize; i++) {
     _currentPoint = mapModel.getAvailablePoint(_currentPoint.add(nextDirectionPoint));
-    mapModel.setTileAt(_currentPoint, 1);
+
+    // only update if the tile is empty
+    if (mapModel.getTileAt(_currentPoint) === 0) {
+      mapModel.setTileAt(_currentPoint, 1);
+    }
   }
 
   if (remainingSteps > 0) {
