@@ -38,9 +38,14 @@ export function getGamestate() {
  * generates a map
  */
 function initMap() {
+  const WIDTH = 21;
+  const HEIGHT = 21;
+
   GAMESTATE.mapModel = mapGenerationUtils.generateNewMapModel({
-    width: 21,
-    height: 21,
+    width: WIDTH,
+    height: HEIGHT,
+    numSpecials: 5,
+    startCoordinates: [Math.floor(WIDTH/2), Math.floor(HEIGHT/2)],
   })
 }
 /**

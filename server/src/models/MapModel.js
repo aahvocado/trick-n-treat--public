@@ -18,6 +18,7 @@ export class MapModel extends Model {
 
     this.set(Object.assign({
       map: [[]],
+      start: new Point(),
     }, newAttributes));
   }
   /**

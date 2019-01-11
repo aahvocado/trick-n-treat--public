@@ -15,6 +15,7 @@ import { getRandomIntInclusive } from 'utilities/mathUtils';
  * @property {Number} MapConfig.width - number of horizontal tiles
  * @property {Number} MapConfig.height - number of vertical tiles
  * @property {Number} MapConfig.numSpecials - number of special tiles
+ * @property {Array} MapConfig.startCoordinates - [x, y] - where the starting point is
  */
 
 /**
@@ -24,33 +25,46 @@ import { getRandomIntInclusive } from 'utilities/mathUtils';
  * @returns {MapModel}
  */
 export function generateNewMapModel(mapConfig) {
-  const emptyMap = generateRoom(mapConfig);
+  const {
+    width,
+    height,
+    numSpecials,
+    startCoordinates,
+  } = mapConfig;
+
+  const emptyMap = generateRoom(width, height);
 
   // initiate the Model
+  const startPoint = new Point(startCoordinates[0], startCoordinates[1]);
   const mapModel = new MapModel({
     map: emptyMap,
+    start: startPoint,
   });
 
-  // // create paths on the Map
-  // executeRandomWalk(mapModel, {
-  //   start: mapModel.getCenter(),
-  //   steps: 200,
-  // });
+  // set our starting point Tile
+  mapModel.setTileAt(startPoint, '*');
 
   // create special tiles on the Map
   generateSpecialTiles(mapModel, {
-    count: 5,
+    count: numSpecials,
   })
+
+  // create paths on the Map
+  executeRandomWalk(mapModel, {
+    start: startPoint,
+    steps: 100,
+  });
 
   return mapModel;
 }
 /**
- * creates a 2D array representing a rectangular room (map)
+ * creates a 2D array of empty tiles
  *
- * @param {MapConfig} mapConfig
+ * @param {Number} width
+ * @param {Number} height
  * @returns {Map}
  */
-export function generateRoom({width, height}) {
+export function generateRoom(width, height) {
   let map = [];
 
   for (var x = 0; x < width; x++) {
@@ -67,14 +81,11 @@ export function generateRoom({width, height}) {
  *  https://en.wikipedia.org/wiki/Random_walk
  *
  * @param {MapModel} mapModel
- * @param {Object} options
- * @property {Point} options.start - point to start
- * @property {Number} options.steps - how many steps to walk
+ * @param {Object} config
+ * @property {Point} config.start - point to start
+ * @property {Number} config.steps - how many steps to walk
  */
 function executeRandomWalk(mapModel, {start, steps}) {
-  // set our starting point
-  mapModel.setTileAt(start, '*');
-
   // use recursion to create paths on our MapModel
   randomWalkStep(mapModel, steps, {
     currentPoint: start,
@@ -164,8 +175,8 @@ function generateSpecialTiles(mapModel, specialOptions) {
     // find paths from the Special Tile's location to the center
     const startX = placementPoint.x;
     const startY = placementPoint.y;
-    const endX = mapModel.getCenter().x;
-    const endY = mapModel.getCenter().y;
+    const endX = mapModel.get('start').x;
+    const endY = mapModel.get('start').y;
 
     // create grid for the Finder, setting the specific tiles as walkable (since non-0 is typically unwalkable)
     const grid = new Pathfinding.Grid(mapModel.get('map'));
