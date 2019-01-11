@@ -2,6 +2,8 @@ import schema from 'js-schema';
 
 import MapModel from 'models/MapModel';
 
+import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
+
 // define how our GameState should look like
 const gamestateSchema = schema({
   // id of the game
@@ -36,7 +38,10 @@ export function getGamestate() {
  * generates a map
  */
 function initMap() {
-  GAMESTATE.mapModel = new MapModel();
+  GAMESTATE.mapModel = mapGenerationUtils.generateNewMapModel({
+    width: 21,
+    height: 21,
+  })
 }
 /**
  * initializes gamestate, effectively regenerating everything

@@ -1,7 +1,5 @@
 import Model from 'models/Model';
 
-import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
-
 /*
   SUPER WARNING: `map` is an array function,
     it could potentially be confusing when used together so it might warrant a rename
@@ -24,22 +22,9 @@ export class MapModel extends Model {
   constructor(newAttributes = {}) {
     super(newAttributes);
 
-    // create a map
-    const generatedMap = mapGenerationUtils.generateMap({
-      width: 21,
-      height: 21,
-    });
-
-    // save map
     this.set(Object.assign({
-      map: generatedMap,
+      map: [[]],
     }, newAttributes));
-
-    // create paths
-    this.executeRandomWalk({
-      start: this.getCenterPoint(),
-      steps: 200,
-    });
   }
   /**
    * @returns {Number}
@@ -54,20 +39,30 @@ export class MapModel extends Model {
     return this.get('map')[0].length;
   }
   /**
-   * returns the tile located at a coordinate,
-   *  will try to handle Points that are out of bounds by looping around
+   * returns the Tile located at a given Point
    *
-   * @param {Point} coordinate
+   * @param {Point} point
    * @returns {Tile}
    */
-  getTileAt(coordinate) {
-    const {x, y} = this.getAvailablePoint(coordinate);
+  getTileAt(point) {
+    const {x, y} = this.getAvailablePoint(point);
     return this.get('map')[x][y];
   }
   /**
-   * gets the center of this map
+   * replaces the data of a Tile at a given Point
    *
-   * @param {Point} x, y
+   * @param {Point} point
+   * @param {*} tileData - what to update tile with
+   */
+  setTileAt(point, tileData) {
+    const map = this.get('map');
+    map[point.x][point.y] = tileData;
+  }
+  /**
+   * checks if given Point is a valid point
+   *  and loops around if it was out of bounds
+   *
+   * @param {Point} point
    * @returns {Point}
    */
   getAvailablePoint({x, y}) {
@@ -86,7 +81,7 @@ export class MapModel extends Model {
     return { x, y };
   }
   /**
-   * gets the center of this map
+   * gets the center of this Map
    *
    * @returns {Point}
    */
@@ -95,41 +90,6 @@ export class MapModel extends Model {
       x: Math.floor(this.getWidth() / 2),
       y: Math.floor(this.getHeight() / 2),
     }
-  }
-  /**
-   * uses the Random Walk process to create a map
-   *  https://en.wikipedia.org/wiki/Random_walk
-   *
-   * @param {Object} options
-   * @property {Point} options.start - coordinates to start
-   * @property {Number} options.steps - how many steps to walk
-   */
-  executeRandomWalk({start, steps}) {
-    const map = this.get('map');
-
-    const height = map.length;
-    const width = map[0].length;
-
-    let currentPoint = start;
-    for (var i = 0; i < steps; i++) {
-      map[currentPoint.y][currentPoint.x] = 1;
-
-      // pick a new random direction to go
-      const directionalPoint = mapGenerationUtils.getRandomDirection();
-      currentPoint = this.getAvailablePoint({
-        x: currentPoint.x + directionalPoint.x,
-        y: currentPoint.y + directionalPoint.y,
-      });
-
-      // test going in the same direction twice
-      map[currentPoint.y][currentPoint.x] = 1;
-      currentPoint = this.getAvailablePoint({
-        x: currentPoint.x + directionalPoint.x,
-        y: currentPoint.y + directionalPoint.y,
-      });
-    }
-
-    return map;
   }
 }
 

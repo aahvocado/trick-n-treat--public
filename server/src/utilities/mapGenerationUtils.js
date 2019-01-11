@@ -1,7 +1,9 @@
+import MapModel from 'models/MapModel';
+
 import { getRandomIntInclusive } from 'utilities/mathUtils';
 
 /**
- * documentation for the types
+ * documentation for types
  *
  * @typedef {Array<Array>} Map
  *
@@ -15,10 +17,21 @@ import { getRandomIntInclusive } from 'utilities/mathUtils';
  * goes through the entire generation process
  *
  * @param {MapConfig} mapConfig
- * @returns {Map}
+ * @returns {MapModel}
  */
-export function generateMap(mapConfig) {
-  return generateRoom(mapConfig);
+export function generateNewMapModel(mapConfig) {
+  const room = generateRoom(mapConfig);
+
+  const mapModel = new MapModel({
+    map: room,
+  });
+
+  const pathedMap = executeRandomWalk(mapModel, {
+    start: mapModel.getCenterPoint(),
+    steps: 200,
+  });
+
+  return mapModel;
 }
 /**
  * creates a 2D array representing a room (map)
@@ -26,7 +39,7 @@ export function generateMap(mapConfig) {
  * @param {MapConfig} mapConfig
  * @returns {Map}
  */
-function generateRoom({width, height}) {
+export function generateRoom({width, height}) {
   let map = [];
 
   for (var x = 0; x < width; x++) {
@@ -34,6 +47,39 @@ function generateRoom({width, height}) {
     for (var y = 0; y < height; y++) {
       map[x][y] = 0;
     }
+  }
+
+  return map;
+}
+/**
+ * uses the Random Walk process to create a map
+ *  https://en.wikipedia.org/wiki/Random_walk
+ *
+ * @param {Object} options
+ * @property {Point} options.start - coordinates to start
+ * @property {Number} options.steps - how many steps to walk
+ * @returns {Map}
+ */
+function executeRandomWalk(mapModel, {start, steps}) {
+  const map = mapModel.get('map').slice();
+
+  let currentPoint = start;
+  for (var i = 0; i < steps; i++) {
+    map[currentPoint.y][currentPoint.x] = 1;
+
+    // pick a new random direction to go
+    const directionalPoint = getRandomDirection();
+    currentPoint = mapModel.getAvailablePoint({
+      x: currentPoint.x + directionalPoint.x,
+      y: currentPoint.y + directionalPoint.y,
+    });
+
+    // test going in the same direction twice
+    map[currentPoint.y][currentPoint.x] = 1;
+    currentPoint = mapModel.getAvailablePoint({
+      x: currentPoint.x + directionalPoint.x,
+      y: currentPoint.y + directionalPoint.y,
+    });
   }
 
   return map;
