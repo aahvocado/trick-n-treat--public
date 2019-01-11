@@ -25,9 +25,7 @@ const TILE_TYPE = {
  */
 export function generateMap(mapConfig) {
   const emptyMap = generateRoom(mapConfig);
-  const specialMap = generateSpecialTiles(emptyMap, mapConfig.numSpecials);
-
-  return specialMap;
+  return generateSpecialTiles(emptyMap, mapConfig.numSpecials);
 }
 /**
  * creates a 2D array representing a room
