@@ -38,7 +38,7 @@ export class MapModel extends Model {
     // create paths
     this.executeRandomWalk({
       start: this.getCenterPoint(),
-      steps: 100,
+      steps: 200,
     });
   }
   /**
@@ -114,7 +114,15 @@ export class MapModel extends Model {
     for (var i = 0; i < steps; i++) {
       map[currentPoint.y][currentPoint.x] = 1;
 
+      // pick a new random direction to go
       const directionalPoint = mapGenerationUtils.getRandomDirection();
+      currentPoint = this.getAvailablePoint({
+        x: currentPoint.x + directionalPoint.x,
+        y: currentPoint.y + directionalPoint.y,
+      });
+
+      // test going in the same direction twice
+      map[currentPoint.y][currentPoint.x] = 1;
       currentPoint = this.getAvailablePoint({
         x: currentPoint.x + directionalPoint.x,
         y: currentPoint.y + directionalPoint.y,
