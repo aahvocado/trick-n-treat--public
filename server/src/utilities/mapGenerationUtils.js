@@ -18,8 +18,7 @@ import { getRandomIntInclusive } from 'utilities/mathUtils';
  * @returns {Map}
  */
 export function generateMap(mapConfig) {
-  const emptyMap = generateRoom(mapConfig);
-  return generateSpecialTiles(emptyMap, mapConfig.numSpecials);
+  return generateRoom(mapConfig);
 }
 /**
  * creates a 2D array representing a room (map)
@@ -49,14 +48,14 @@ function getRandomTileType() {
 }
 /**
  * places special rooms
- *  picks a location based on the currentMap
+ *  picks a location based on the mapArray
  *
- * @param {Map} currentMap
+ * @param {Map} mapArray
  * @param {Number} numSpecials
  * @returns {Map}
  */
-function generateSpecialTiles(currentMap, numSpecials) {
-  const map = currentMap.slice();
+function generateSpecialTiles(mapArray, numSpecials) {
+  const map = mapArray.slice();
 
   const height = map.length;
   const width = map[0].length;
@@ -71,4 +70,27 @@ function generateSpecialTiles(currentMap, numSpecials) {
   }
 
   return map;
+}
+/**
+ * creates a Point that indicates a direction to go
+ *
+ * @returns {Point}
+ */
+export function getRandomDirection() {
+  const direction = getRandomIntInclusive(0, 3);
+
+  switch (direction) {
+    // left
+    case 0:
+      return {x: -1, y: 0};
+    // right
+    case 1:
+      return {x: 1, y: 0};
+    // up
+    case 2:
+      return {x: 0, y: 1};
+    // down
+    case 3:
+      return {x: 0, y: -1};
+  }
 }
