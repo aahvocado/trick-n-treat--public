@@ -1,3 +1,4 @@
+import Point from '@studiomoniker/point';
 import Model from 'models/Model';
 
 /*
@@ -78,7 +79,7 @@ export class MapModel extends Model {
       y = this.getHeight() - 1;
     }
 
-    return { x, y };
+    return new Point(x, y);
   }
   /**
    * gets the center of this Map
@@ -86,10 +87,10 @@ export class MapModel extends Model {
    * @returns {Point}
    */
   getCenterPoint() {
-    return {
-      x: Math.floor(this.getWidth() / 2),
-      y: Math.floor(this.getHeight() / 2),
-    }
+    return new Point(
+      Math.floor(this.getWidth() / 2),
+      Math.floor(this.getHeight() / 2),
+    )
   }
 }
 

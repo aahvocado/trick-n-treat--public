@@ -1,3 +1,4 @@
+import Point from '@studiomoniker/point';
 import MapModel from 'models/MapModel';
 
 import { getRandomIntInclusive } from 'utilities/mathUtils';
@@ -20,13 +21,13 @@ import { getRandomIntInclusive } from 'utilities/mathUtils';
  * @returns {MapModel}
  */
 export function generateNewMapModel(mapConfig) {
-  const room = generateRoom(mapConfig);
+  const emptyMap = generateRoom(mapConfig);
 
   const mapModel = new MapModel({
-    map: room,
+    map: emptyMap,
   });
 
-  const pathedMap = executeRandomWalk(mapModel, {
+  executeRandomWalk(mapModel, {
     start: mapModel.getCenterPoint(),
     steps: 200,
   });
@@ -52,37 +53,57 @@ export function generateRoom({width, height}) {
   return map;
 }
 /**
- * uses the Random Walk process to create a map
+ * uses the Random Walk process to apply paths to a Map
  *  https://en.wikipedia.org/wiki/Random_walk
  *
+ * @param {MapModel} mapModel
  * @param {Object} options
- * @property {Point} options.start - coordinates to start
+ * @property {Point} options.start - point to start
  * @property {Number} options.steps - how many steps to walk
- * @returns {Map}
  */
 function executeRandomWalk(mapModel, {start, steps}) {
-  const map = mapModel.get('map').slice();
+  // set our starting point as a path
+  mapModel.setTileAt(start, 1);
 
-  let currentPoint = start;
-  for (var i = 0; i < steps; i++) {
-    map[currentPoint.y][currentPoint.x] = 1;
+  randomWalkStep(mapModel, {
+    currentPoint: start,
+    remainingSteps: steps,
+    stepSize: 2,
+  })
+}
+/**
+ * recursively updates a point on the map and takes a step
+ *
+ * @param {MapModel} mapModel
+ * @param {Object} stepOptions
+ * @property {Point} stepOptions.currentPoint - point where the step is at
+ * @property {Number} stepOptions.remainingSteps - steps left to make
+ * @property {Number} stepOptions.stepSize - how many tiles to create per step
+ */
+function randomWalkStep(mapModel, stepOptions) {
+  const {
+    currentPoint,
+    remainingSteps,
+    stepSize = 1,
+  } = stepOptions;
 
-    // pick a new random direction to go
-    const directionalPoint = getRandomDirection();
-    currentPoint = mapModel.getAvailablePoint({
-      x: currentPoint.x + directionalPoint.x,
-      y: currentPoint.y + directionalPoint.y,
-    });
+  // pick a direction for the next step
+  const nextDirectionPoint = getRandomDirection();
 
-    // test going in the same direction twice
-    map[currentPoint.y][currentPoint.x] = 1;
-    currentPoint = mapModel.getAvailablePoint({
-      x: currentPoint.x + directionalPoint.x,
-      y: currentPoint.y + directionalPoint.y,
-    });
+  // loop to handle each step covering more than one Tile
+  let _currentPoint = currentPoint;
+  for (var i = 0; i < stepSize; i++) {
+    _currentPoint = mapModel.getAvailablePoint(_currentPoint.add(nextDirectionPoint));
+    mapModel.setTileAt(_currentPoint, 1);
   }
 
-  return map;
+  if (remainingSteps > 0) {
+    randomWalkStep(mapModel, {
+      currentPoint: _currentPoint,
+      remainingSteps: remainingSteps - 1,
+      stepSize: stepSize,
+    })
+  }
 }
 /**
  * creates a random tile type
@@ -124,19 +145,18 @@ function generateSpecialTiles(mapArray, numSpecials) {
  */
 export function getRandomDirection() {
   const direction = getRandomIntInclusive(0, 3);
-
   switch (direction) {
     // left
     case 0:
-      return {x: -1, y: 0};
+      return new Point(-1, 0);
     // right
     case 1:
-      return {x: 1, y: 0};
+      return new Point(-1, 0);
     // up
     case 2:
-      return {x: 0, y: 1};
+      return new Point(0, -1);
     // down
     case 3:
-      return {x: 0, y: -1};
+      return new Point(0, 1);
   }
 }
