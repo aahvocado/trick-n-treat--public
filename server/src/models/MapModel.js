@@ -53,6 +53,17 @@ export class MapModel extends Model {
     map[point.x][point.y] = tileData;
   }
   /**
+   * updates the data of Tiles from an Array of Points
+   *
+   * @param {Array<Point>} pointList
+   * @param {*} tileData - what to update tile with
+   */
+  setTileGroup(pointList, tileData) {
+    pointList.forEach((point) => {
+      this.setTileAt(point, tileData);
+    })
+  }
+  /**
    * checks if given Point is a valid point
    *  and loops around if it was out of bounds
    *
@@ -79,7 +90,7 @@ export class MapModel extends Model {
    *
    * @returns {Point}
    */
-  getCenterPoint() {
+  getCenter() {
     return new Point(
       Math.floor(this.getWidth() / 2),
       Math.floor(this.getHeight() / 2),

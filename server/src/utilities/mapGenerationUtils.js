@@ -1,4 +1,5 @@
 import Point from '@studiomoniker/point';
+import Pathfinding from 'pathfinding';
 import MapModel from 'models/MapModel';
 
 import TILE_TYPES from 'constants/tileTypes';
@@ -30,11 +31,11 @@ export function generateNewMapModel(mapConfig) {
     map: emptyMap,
   });
 
-  // create paths on the Map
-  executeRandomWalk(mapModel, {
-    start: mapModel.getCenterPoint(),
-    steps: 200,
-  });
+  // // create paths on the Map
+  // executeRandomWalk(mapModel, {
+  //   start: mapModel.getCenter(),
+  //   steps: 200,
+  // });
 
   // create special tiles on the Map
   generateSpecialTiles(mapModel, {
@@ -106,7 +107,7 @@ function randomWalkStep(mapModel, remainingSteps, stepOptions) {
     _currentPoint = mapModel.getAvailablePoint(nextPoint);
 
     // only update if the tile is empty
-    if (mapModel.getTileAt(_currentPoint) === 0) {
+    if (mapModel.getTileAt(_currentPoint) === TILE_TYPES.EMPTY) {
       mapModel.setTileAt(_currentPoint, TILE_TYPES.PATH);
     }
   }
@@ -117,26 +118,6 @@ function randomWalkStep(mapModel, remainingSteps, stepOptions) {
       currentPoint: _currentPoint,
       stepSize: stepSize,
     })
-  }
-}
-/**
- * places special Tiles onto the Map
- *
- * @param {MapModel} mapModel
- * @param {Object} specialOptions
- * @property {Point} specialOptions.count - count of special Tiles to generate
- */
-function generateSpecialTiles(mapModel, specialOptions) {
-  const { count } = specialOptions;
-
-  for (var i = 0; i < count; i ++) {
-    // we want to pick a location that's not at the extremes
-    const placementPoint = new Point(
-      getRandomIntInclusive(1, mapModel.getHeight() - 2),
-      getRandomIntInclusive(1, mapModel.getWidth() - 2)
-    )
-
-    mapModel.setTileAt(placementPoint, TILE_TYPES.SPECIAL);
   }
 }
 /**
@@ -159,5 +140,47 @@ export function getRandomDirection() {
     // down
     case 3:
       return new Point(0, 1);
+  }
+}
+/**
+ * places special Tiles onto the Map
+ *
+ * @param {MapModel} mapModel
+ * @param {Object} specialOptions
+ * @property {Point} specialOptions.count - number of special Tiles to generate
+ */
+function generateSpecialTiles(mapModel, specialOptions) {
+  const { count } = specialOptions;
+  for (var i = 0; i < count; i ++) {
+    // we want to pick a location that's not at the extremes
+    const placementPoint = new Point(
+      getRandomIntInclusive(1, mapModel.getHeight() - 2),
+      getRandomIntInclusive(1, mapModel.getWidth() - 2)
+    )
+
+    // note that the chosen path is special
+    mapModel.setTileAt(placementPoint, TILE_TYPES.SPECIAL + i);
+
+    // find paths from the Special Tile's location to the center
+    const startX = placementPoint.x;
+    const startY = placementPoint.y;
+    const endX = mapModel.getCenter().x;
+    const endY = mapModel.getCenter().y;
+
+    // create grid for the Finder, setting the specific tiles as walkable (since non-0 is typically unwalkable)
+    const grid = new Pathfinding.Grid(mapModel.get('map'));
+    grid.setWalkableAt(startX, startY, true);
+    grid.setWalkableAt(endX, endY, true);
+
+    const finder = new Pathfinding.AStarFinder();
+    const path = finder.findPath(startX, startY, endX, endY, grid);
+
+    // update the Map with the coordinates gotten from the path
+    path.forEach((coordinate) => {
+      const convertedCoordinate = new Point(coordinate[0], coordinate[1]);
+      if (mapModel.getTileAt(convertedCoordinate) === TILE_TYPES.EMPTY) {
+        mapModel.setTileAt(convertedCoordinate, TILE_TYPES.PATH);
+      }
+    })
   }
 }
