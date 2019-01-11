@@ -44,7 +44,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'public/screen-index.html',
+      template: 'public/remote-index.html',
     })
   ],
 };

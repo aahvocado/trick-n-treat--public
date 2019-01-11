@@ -122,7 +122,6 @@ function initGame() {
   previousTimestamp = null;
 
   startMoving = false;
-  stepStartTimestamp;
 
   // player.position.x = 0;
   // player.position.y = 0;
