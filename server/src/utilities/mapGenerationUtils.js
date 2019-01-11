@@ -30,11 +30,16 @@ export function generateNewMapModel(mapConfig) {
     map: emptyMap,
   });
 
-  // update the Map
+  // create paths on the Map
   executeRandomWalk(mapModel, {
     start: mapModel.getCenterPoint(),
     steps: 200,
   });
+
+  // create special tiles on the Map
+  generateSpecialTiles(mapModel, {
+    count: 5,
+  })
 
   return mapModel;
 }
@@ -70,9 +75,8 @@ function executeRandomWalk(mapModel, {start, steps}) {
   mapModel.setTileAt(start, '*');
 
   // use recursion to create paths on our MapModel
-  randomWalkStep(mapModel, {
+  randomWalkStep(mapModel, steps, {
     currentPoint: start,
-    remainingSteps: steps,
     stepSize: 2,
   })
 }
@@ -116,37 +120,24 @@ function randomWalkStep(mapModel, remainingSteps, stepOptions) {
   }
 }
 /**
- * creates a random tile type
+ * places special Tiles onto the Map
  *
- * @returns {Number}
+ * @param {MapModel} mapModel
+ * @param {Object} specialOptions
+ * @property {Point} specialOptions.count - count of special Tiles to generate
  */
-function getRandomTileType() {
-  return getRandomIntInclusive(2, 5);
-}
-/**
- * places special rooms
- *  picks a location based on the mapArray
- *
- * @param {Map} mapArray
- * @param {Number} numSpecials
- * @returns {Map}
- */
-function generateSpecialTiles(mapArray, numSpecials) {
-  const map = mapArray.slice();
+function generateSpecialTiles(mapModel, specialOptions) {
+  const { count } = specialOptions;
 
-  const height = map.length;
-  const width = map[0].length;
-
-  for (var i = 0; i < numSpecials; i ++) {
+  for (var i = 0; i < count; i ++) {
     // we want to pick a location that's not at the extremes
-    const randomRow = getRandomIntInclusive(1, height - 2);
-    const randomCol = getRandomIntInclusive(1, width - 2);
+    const placementPoint = new Point(
+      getRandomIntInclusive(1, mapModel.getHeight() - 2),
+      getRandomIntInclusive(1, mapModel.getWidth() - 2)
+    )
 
-    // set the index of the chosen coordinates to a random tile type
-    map[randomRow][randomCol] = getRandomTileType();
+    mapModel.setTileAt(placementPoint, TILE_TYPES.SPECIAL);
   }
-
-  return map;
 }
 /**
  * creates a Point that indicates a direction to go
