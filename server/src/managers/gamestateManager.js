@@ -39,10 +39,16 @@ function initMap() {
   GAMESTATE.mapModel = new MapModel();
 }
 /**
+ * initializes gamestate, effectively regenerating everything
+ */
+function initGamestate() {
+  initMap();
+}
+/**
  * starts everything
  */
 export function start() {
-  initMap();
+  initGamestate();
   console.log(getGamestate().mapModel.get('map'));
 }
 

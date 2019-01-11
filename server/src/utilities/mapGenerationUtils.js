@@ -1,11 +1,5 @@
 import { getRandomIntInclusive } from 'utilities/mathUtils';
 
-// temporary constants just for reference
-const TILE_TYPE = {
-  0: 'empty',
-  1: 'path',
-  2: 'stuff',
-};
 /**
  * documentation for the types
  *
@@ -28,7 +22,7 @@ export function generateMap(mapConfig) {
   return generateSpecialTiles(emptyMap, mapConfig.numSpecials);
 }
 /**
- * creates a 2D array representing a room
+ * creates a 2D array representing a room (map)
  *
  * @param {MapConfig} mapConfig
  * @returns {Map}
@@ -62,8 +56,10 @@ function getRandomTileType() {
  * @returns {Map}
  */
 function generateSpecialTiles(currentMap, numSpecials) {
-  const height = currentMap.length;
-  const width = currentMap[0].length;
+  const map = currentMap.slice();
+
+  const height = map.length;
+  const width = map[0].length;
 
   for (var i = 0; i < numSpecials; i ++) {
     // we want to pick a location that's not at the extremes
@@ -71,8 +67,8 @@ function generateSpecialTiles(currentMap, numSpecials) {
     const randomCol = getRandomIntInclusive(1, width - 2);
 
     // set the index of the chosen coordinates to a random tile type
-    currentMap[randomRow][randomCol] = getRandomTileType();
+    map[randomRow][randomCol] = getRandomTileType();
   }
 
-  return currentMap;
+  return map;
 }

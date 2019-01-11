@@ -7,8 +7,15 @@ import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
     it could potentially be confusing when used together so it might warrant a rename
 */
 
+// temporary constants just for reference
+const TILE_TYPE = {
+  0: 'empty',
+  1: 'path',
+  2: 'stuff',
+};
+
 /**
- * Map class
+ * class that handles the World Map
  *
  * @typedef {Model} MapModel
  */
