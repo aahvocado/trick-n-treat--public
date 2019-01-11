@@ -6,13 +6,6 @@ import Model from 'models/Model';
     it could potentially be confusing when used together so it might warrant a rename
 */
 
-// temporary constants just for reference
-const TILE_TYPE = {
-  0: 'empty',
-  1: 'path',
-  2: 'stuff',
-};
-
 /**
  * class that handles the World Map
  *

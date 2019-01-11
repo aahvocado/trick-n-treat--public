@@ -1,6 +1,8 @@
 import Point from '@studiomoniker/point';
 import MapModel from 'models/MapModel';
 
+import TILE_TYPES from 'constants/tileTypes';
+
 import { getRandomIntInclusive } from 'utilities/mathUtils';
 
 /**
@@ -15,7 +17,7 @@ import { getRandomIntInclusive } from 'utilities/mathUtils';
  */
 
 /**
- * goes through the entire generation process
+ * handles through the entire generation process
  *
  * @param {MapConfig} mapConfig
  * @returns {MapModel}
@@ -23,10 +25,12 @@ import { getRandomIntInclusive } from 'utilities/mathUtils';
 export function generateNewMapModel(mapConfig) {
   const emptyMap = generateRoom(mapConfig);
 
+  // initiate the Model
   const mapModel = new MapModel({
     map: emptyMap,
   });
 
+  // update the Map
   executeRandomWalk(mapModel, {
     start: mapModel.getCenterPoint(),
     steps: 200,
@@ -35,7 +39,7 @@ export function generateNewMapModel(mapConfig) {
   return mapModel;
 }
 /**
- * creates a 2D array representing a room (map)
+ * creates a 2D array representing a rectangular room (map)
  *
  * @param {MapConfig} mapConfig
  * @returns {Map}
@@ -46,7 +50,7 @@ export function generateRoom({width, height}) {
   for (var x = 0; x < width; x++) {
     map.push([]);
     for (var y = 0; y < height; y++) {
-      map[x][y] = 0;
+      map[x][y] = TILE_TYPES.EMPTY;
     }
   }
 
@@ -62,9 +66,10 @@ export function generateRoom({width, height}) {
  * @property {Number} options.steps - how many steps to walk
  */
 function executeRandomWalk(mapModel, {start, steps}) {
-  // set our starting point as a path
+  // set our starting point
   mapModel.setTileAt(start, '*');
 
+  // use recursion to create paths on our MapModel
   randomWalkStep(mapModel, {
     currentPoint: start,
     remainingSteps: steps,
@@ -75,15 +80,14 @@ function executeRandomWalk(mapModel, {start, steps}) {
  * recursively updates a point on the map and takes a step
  *
  * @param {MapModel} mapModel
+ * @param {Number} remainingSteps - steps left to make
  * @param {Object} stepOptions
  * @property {Point} stepOptions.currentPoint - point where the step is at
- * @property {Number} stepOptions.remainingSteps - steps left to make
  * @property {Number} stepOptions.stepSize - how many tiles to create per step
  */
-function randomWalkStep(mapModel, stepOptions) {
+function randomWalkStep(mapModel, remainingSteps, stepOptions) {
   const {
     currentPoint,
-    remainingSteps,
     stepSize = 1,
   } = stepOptions;
 
@@ -93,18 +97,20 @@ function randomWalkStep(mapModel, stepOptions) {
   // loop to handle each step covering more than one Tile
   let _currentPoint = currentPoint;
   for (var i = 0; i < stepSize; i++) {
-    _currentPoint = mapModel.getAvailablePoint(_currentPoint.add(nextDirectionPoint));
+    // get the next Point on the map, and check if it is a valid point on the map
+    const nextPoint = _currentPoint.add(nextDirectionPoint);
+    _currentPoint = mapModel.getAvailablePoint(nextPoint);
 
     // only update if the tile is empty
     if (mapModel.getTileAt(_currentPoint) === 0) {
-      mapModel.setTileAt(_currentPoint, 1);
+      mapModel.setTileAt(_currentPoint, TILE_TYPES.PATH);
     }
   }
 
+  // continue recursion if there are remaining steps
   if (remainingSteps > 0) {
-    randomWalkStep(mapModel, {
+    randomWalkStep(mapModel, (remainingSteps - 1), {
       currentPoint: _currentPoint,
-      remainingSteps: remainingSteps - 1,
       stepSize: stepSize,
     })
   }
