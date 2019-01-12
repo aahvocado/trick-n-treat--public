@@ -4,7 +4,7 @@ import MapModel from 'models/MapModel';
 
 import TILE_TYPES from 'constants/tileTypes';
 
-import { getRandomIntInclusive } from 'utilities/mathUtils';
+import * as mathUtils from 'utilities/mathUtils';
 
 /**
  * documentation for types
@@ -147,19 +147,30 @@ function randomWalkStep(mapModel, remainingSteps, stepOptions) {
  * @returns {Point}
  */
 export function getRandomDirection() {
-  const direction = getRandomIntInclusive(0, 3);
-  switch (direction) {
-    // left
-    case 0:
+  const direction = mathUtils.getRandomWeightedChoice([
+    {
+      name: 'left',
+      chance: 25,
+    }, {
+      name: 'right',
+      chance: 25,
+    }, {
+      name: 'up',
+      chance: 25,
+    }, {
+      name: 'down',
+      chance: 25,
+    },
+  ]);
+
+  switch (direction.name) {
+    case 'left':
       return new Point(-1, 0);
-    // right
-    case 1:
+    case 'right':
       return new Point(-1, 0);
-    // up
-    case 2:
+    case 'up':
       return new Point(0, -1);
-    // down
-    case 3:
+    case 'down':
       return new Point(0, 1);
   }
 }
@@ -175,8 +186,8 @@ function generateSpecialTiles(mapModel, specialOptions) {
   for (var i = 0; i < count; i ++) {
     // we want to pick a location that's not at the extremes
     const placementPoint = new Point(
-      getRandomIntInclusive(1, mapModel.getWidth() - 2),
-      getRandomIntInclusive(1, mapModel.getHeight() - 2)
+      mathUtils.getRandomIntInclusive(1, mapModel.getWidth() - 2),
+      mathUtils.getRandomIntInclusive(1, mapModel.getHeight() - 2)
     )
 
     // note that the chosen path is special

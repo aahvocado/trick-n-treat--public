@@ -10,3 +10,28 @@ export function getRandomIntInclusive(min, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+/**
+ * picks a choice out of a list by adding up all the odds and picking one of them
+ *
+ * @typedef {Object} Choice
+ * @property {Number} Choice.chance - weight of this choice
+ *
+ * @param {Array<Choice>} choiceList
+ * @returns {Choice}
+ */
+export function getRandomWeightedChoice(choiceList) {
+  // sum up the chances
+  const totalChance = choiceList.reduce((accumulator, choice) => {
+    // range of values that could indicate this was picked
+    choice.range = [accumulator, accumulator + choice.chance];
+    return accumulator + choice.chance;
+  }, 0);
+
+  // randomly pick a value between 0 and total chance
+  const roll = Math.random() * totalChance;
+
+  // find the choice that has the roll in between the range values
+  return choiceList.find((choice) => {
+    return roll >= choice.range[0] && roll < choice.range[1];
+  });
+}
