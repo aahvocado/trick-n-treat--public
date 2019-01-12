@@ -59200,19 +59200,6 @@ function consoleLog(override) {
 
 /***/ }),
 
-/***/ "./src/helpers/utilities.js":
-/*!**********************************!*\
-  !*** ./src/helpers/utilities.js ***!
-  \**********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function add(a, b) {
-  return a + b;
-}
-
-/***/ }),
-
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -59243,14 +59230,8 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/three.js");
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(three__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var constants_three_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! constants/three.js */ "./src/constants/three.js");
-/* harmony import */ var debug_debug__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! debug/debug */ "./src/debug/debug.js");
-/* harmony import */ var _helpers_utilities__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../helpers/utilities */ "./src/helpers/utilities.js");
-/* harmony import */ var _helpers_utilities__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_helpers_utilities__WEBPACK_IMPORTED_MODULE_4__);
-
-
+/* harmony import */ var constants_three_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! constants/three.js */ "./src/constants/three.js");
+/* harmony import */ var debug_debug__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! debug/debug */ "./src/debug/debug.js");
 
 
  // Variable declaration
@@ -59304,49 +59285,47 @@ function initScene() {
 
 function render() {
   renderer.render(sceneThree, camera);
-  requestAnimationFrame(function () {
-    return render();
-  });
+  requestAnimationFrame(render);
 }
 
 function initCamera() {
   camera = new three__WEBPACK_IMPORTED_MODULE_0__["OrthographicCamera"](width / -2, width / 2, height / 2, height / -2, 0.1, 10000);
-  camera.rotation.x = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["CAMERA"].CAMERA_ROTATION_X;
-  camera.rotation.y = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["CAMERA"].CAMERA_ROTATION_Y;
-  camera.rotation.z = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["CAMERA"].CAMERA_ROTATION_Z;
-  camera.position.y = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["CAMERA"].INITIAL_CAMERA_POSITION_Y;
-  camera.position.x = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["CAMERA"].INITIAL_CAMERA_POSITION_X;
-  camera.position.z = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["CAMERA"].DISTANCE;
+  camera.rotation.x = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["CAMERA"].CAMERA_ROTATION_X;
+  camera.rotation.y = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["CAMERA"].CAMERA_ROTATION_Y;
+  camera.rotation.z = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["CAMERA"].CAMERA_ROTATION_Z;
+  camera.position.y = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["CAMERA"].INITIAL_CAMERA_POSITION_Y;
+  camera.position.x = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["CAMERA"].INITIAL_CAMERA_POSITION_X;
+  camera.position.z = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["CAMERA"].DISTANCE;
   return camera;
 }
 
 function initRenderer() {
   renderer = new three__WEBPACK_IMPORTED_MODULE_0__["WebGLRenderer"]({
-    alpha: constants_three_js__WEBPACK_IMPORTED_MODULE_2__["RENDERER"].APLHA,
-    antialias: constants_three_js__WEBPACK_IMPORTED_MODULE_2__["RENDERER"].ANTIALIAS
+    alpha: constants_three_js__WEBPACK_IMPORTED_MODULE_1__["RENDERER"].APLHA,
+    antialias: constants_three_js__WEBPACK_IMPORTED_MODULE_1__["RENDERER"].ANTIALIAS
   });
-  renderer.shadowMap.enabled = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["RENDERER"].SHADOW_MAP_ENABLED;
-  renderer.shadowMap.type = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["RENDERER"].SHADOW_MAP_TYPE;
-  renderer.setSize(constants_three_js__WEBPACK_IMPORTED_MODULE_2__["RENDERER"].SIZE_X, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["RENDERER"].SIZE_Y);
-  renderer.setClearColor(constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].BACKGROUND_COLOR);
+  renderer.shadowMap.enabled = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["RENDERER"].SHADOW_MAP_ENABLED;
+  renderer.shadowMap.type = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["RENDERER"].SHADOW_MAP_TYPE;
+  renderer.setSize(constants_three_js__WEBPACK_IMPORTED_MODULE_1__["RENDERER"].SIZE_X, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["RENDERER"].SIZE_Y);
+  renderer.setClearColor(constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].BACKGROUND_COLOR);
   document.body.appendChild(renderer.domElement);
   return renderer;
 }
 
 function initLights() {
-  var hemiLight = new three__WEBPACK_IMPORTED_MODULE_0__["HemisphereLight"](constants_three_js__WEBPACK_IMPORTED_MODULE_2__["HEMI_LIGHT"].SKY_COLOR, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["HEMI_LIGHT"].GROUND_COLOR, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["HEMI_LIGHT"].INTESITY);
-  var dirLight = new three__WEBPACK_IMPORTED_MODULE_0__["DirectionalLight"](constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].COLOR, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].INTESITY);
-  dirLight.position.copy(constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].POSITION);
-  dirLight.castShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].CAST_SHADOW;
-  dirLight.shadow.mapSize.width = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].SHADOW_MAP_SIZE_WIDTH;
-  dirLight.shadow.mapSize.height = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].SHADOW_MAP_SIZE_HEIGHT;
-  dirLight.shadow.camera.left = -constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].SHADOW_CAMERA_VALUE;
-  dirLight.shadow.camera.right = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].SHADOW_CAMERA_VALUE;
-  dirLight.shadow.camera.top = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].SHADOW_CAMERA_VALUE;
-  dirLight.shadow.camera.bottom = -constants_three_js__WEBPACK_IMPORTED_MODULE_2__["DIR_LIGHT"].SHADOW_CAMERA_VALUE;
-  var backLight = new three__WEBPACK_IMPORTED_MODULE_0__["DirectionalLight"](constants_three_js__WEBPACK_IMPORTED_MODULE_2__["BACK_LIGHT"].COLOR, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["BACK_LIGHT"].INTESITY);
-  backLight.position.copy(constants_three_js__WEBPACK_IMPORTED_MODULE_2__["BACK_LIGHT"].POSITION);
-  backLight.castShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["BACK_LIGHT"].CAST_SHADOW;
+  var hemiLight = new three__WEBPACK_IMPORTED_MODULE_0__["HemisphereLight"](constants_three_js__WEBPACK_IMPORTED_MODULE_1__["HEMI_LIGHT"].SKY_COLOR, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["HEMI_LIGHT"].GROUND_COLOR, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["HEMI_LIGHT"].INTESITY);
+  var dirLight = new three__WEBPACK_IMPORTED_MODULE_0__["DirectionalLight"](constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].COLOR, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].INTESITY);
+  dirLight.position.copy(constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].POSITION);
+  dirLight.castShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].CAST_SHADOW;
+  dirLight.shadow.mapSize.width = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].SHADOW_MAP_SIZE_WIDTH;
+  dirLight.shadow.mapSize.height = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].SHADOW_MAP_SIZE_HEIGHT;
+  dirLight.shadow.camera.left = -constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].SHADOW_CAMERA_VALUE;
+  dirLight.shadow.camera.right = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].SHADOW_CAMERA_VALUE;
+  dirLight.shadow.camera.top = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].SHADOW_CAMERA_VALUE;
+  dirLight.shadow.camera.bottom = -constants_three_js__WEBPACK_IMPORTED_MODULE_1__["DIR_LIGHT"].SHADOW_CAMERA_VALUE;
+  var backLight = new three__WEBPACK_IMPORTED_MODULE_0__["DirectionalLight"](constants_three_js__WEBPACK_IMPORTED_MODULE_1__["BACK_LIGHT"].COLOR, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["BACK_LIGHT"].INTESITY);
+  backLight.position.copy(constants_three_js__WEBPACK_IMPORTED_MODULE_1__["BACK_LIGHT"].POSITION);
+  backLight.castShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["BACK_LIGHT"].CAST_SHADOW;
   lights = {
     hemiLight: hemiLight,
     dirLight: dirLight,
@@ -59358,24 +59337,20 @@ function initLights() {
 function initGame() {
   tiles = generateTiles();
   players = initPlayers();
-
-  lodash__WEBPACK_IMPORTED_MODULE_1__["each"](players, function (player) {
+  players.forEach(function (player) {
     sceneThree.add(player);
   });
-
   previousTimestamp = null;
   startMoving = false;
-  currentPlayer.position.set(constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ORIGIN_POS.x, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ORIGIN_POS.y, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["PLAYER"].POSITION_HEIGHT);
+  currentPlayer.position.set(constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ORIGIN_POS.x, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ORIGIN_POS.y, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["PLAYER"].POSITION_HEIGHT);
 }
 
 function initPlayers() {
   var playerIds = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [1];
   var players = [];
-
-  lodash__WEBPACK_IMPORTED_MODULE_1__["each"](playerIds, function (playerId) {
+  playerIds.forEach(function (playerId) {
     players.push(new player(playerId));
   });
-
   currentFocus = players[0];
   currentPlayer = players[0];
   return players;
@@ -59395,26 +59370,26 @@ function player(playerId) {
 }
 
 function createPlayerMesh() {
-  var playerMesh = new three__WEBPACK_IMPORTED_MODULE_0__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_0__["BoxBufferGeometry"](constants_three_js__WEBPACK_IMPORTED_MODULE_2__["PLAYER"].SIZE * constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ZOOM, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["PLAYER"].SIZE * constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ZOOM, 20 * constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ZOOM), new three__WEBPACK_IMPORTED_MODULE_0__["MeshPhongMaterial"]({
-    color: constants_three_js__WEBPACK_IMPORTED_MODULE_2__["PLAYER"].COLOR
+  var playerMesh = new three__WEBPACK_IMPORTED_MODULE_0__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_0__["BoxBufferGeometry"](constants_three_js__WEBPACK_IMPORTED_MODULE_1__["PLAYER"].SIZE * constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ZOOM, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["PLAYER"].SIZE * constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ZOOM, 20 * constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ZOOM), new three__WEBPACK_IMPORTED_MODULE_0__["MeshPhongMaterial"]({
+    color: constants_three_js__WEBPACK_IMPORTED_MODULE_1__["PLAYER"].COLOR
   }));
-  playerMesh.position.z = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["PLAYER"].POSITION_HEIGHT;
-  playerMesh.castShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["PLAYER"].CAST_SHADOW;
-  playerMesh.receiveShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["PLAYER"].RECEIVE_SHADOW;
+  playerMesh.position.z = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["PLAYER"].POSITION_HEIGHT;
+  playerMesh.castShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["PLAYER"].CAST_SHADOW;
+  playerMesh.receiveShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["PLAYER"].RECEIVE_SHADOW;
   return playerMesh;
 }
 
 function generateTiles() {
   tiles = {};
-  addTile(constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ORIGIN_POS);
+  addTile(constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ORIGIN_POS);
   return tiles;
 }
 
 function addTile(pos) {
   var tile = new Tile(pos);
-  tile.position.z = 1.5 * constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ZOOM;
-  tile.position.x = pos.x * (constants_three_js__WEBPACK_IMPORTED_MODULE_2__["TILES"].TILE_SIZE * 2);
-  tile.position.y = pos.y * (constants_three_js__WEBPACK_IMPORTED_MODULE_2__["TILES"].TILE_SIZE * 2);
+  tile.position.z = 1.5 * constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ZOOM;
+  tile.position.x = pos.x * (constants_three_js__WEBPACK_IMPORTED_MODULE_1__["TILES"].TILE_SIZE * 2);
+  tile.position.y = pos.y * (constants_three_js__WEBPACK_IMPORTED_MODULE_1__["TILES"].TILE_SIZE * 2);
   sceneThree.add(tile);
   tiles['x' + pos.x + 'y' + pos.y] = tile;
   sceneThree.add(tile);
@@ -59430,12 +59405,12 @@ function Tile(pos, dir, type) {
 }
 
 function createTileMesh() {
-  var tileMesh = new three__WEBPACK_IMPORTED_MODULE_0__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_0__["BoxBufferGeometry"](constants_three_js__WEBPACK_IMPORTED_MODULE_2__["TILES"].TILE_SIZE * constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ZOOM, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["TILES"].TILE_SIZE * constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ZOOM, constants_three_js__WEBPACK_IMPORTED_MODULE_2__["TILES"].TILE_HEIGHT * constants_three_js__WEBPACK_IMPORTED_MODULE_2__["SCENE"].ZOOM), new three__WEBPACK_IMPORTED_MODULE_0__["MeshPhongMaterial"]({
-    color: constants_three_js__WEBPACK_IMPORTED_MODULE_2__["TILES"].COLOR
+  var tileMesh = new three__WEBPACK_IMPORTED_MODULE_0__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_0__["BoxBufferGeometry"](constants_three_js__WEBPACK_IMPORTED_MODULE_1__["TILES"].TILE_SIZE * constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ZOOM, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["TILES"].TILE_SIZE * constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ZOOM, constants_three_js__WEBPACK_IMPORTED_MODULE_1__["TILES"].TILE_HEIGHT * constants_three_js__WEBPACK_IMPORTED_MODULE_1__["SCENE"].ZOOM), new three__WEBPACK_IMPORTED_MODULE_0__["MeshPhongMaterial"]({
+    color: constants_three_js__WEBPACK_IMPORTED_MODULE_1__["TILES"].COLOR
   }));
-  tileMesh.position.z = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["TILES"].POSITION_HEIGHT;
-  tileMesh.castShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["TILES"].CAST_SHADOW;
-  tileMesh.receiveShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_2__["TILES"].RECEIVE_SHADOW;
+  tileMesh.position.z = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["TILES"].POSITION_HEIGHT;
+  tileMesh.castShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["TILES"].CAST_SHADOW;
+  tileMesh.receiveShadow = constants_three_js__WEBPACK_IMPORTED_MODULE_1__["TILES"].RECEIVE_SHADOW;
   return tileMesh;
 }
 

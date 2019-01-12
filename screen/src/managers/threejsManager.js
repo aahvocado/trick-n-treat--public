@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import * as _ from 'lodash';
 import {
   CAMERA,
   SCENE,
@@ -14,12 +13,10 @@ import {
 
 } from 'constants/three.js';
 import consoleLog from 'debug/debug';
-import { add } from '../helpers/utilities';
 
 // Variable declaration
 
 // Browser
-
 let width = window.innerWidth;
 let height = window.innerHeight;
 
@@ -70,13 +67,12 @@ function initScene() {
     hemiLight: lights.hemiLight,
     dirLight: lights.dirLight,
     backLight: lights.backLight
-
   }
   return scene;
 }
 function render() {
   renderer.render(sceneThree, camera);
-  requestAnimationFrame(() => render());
+  requestAnimationFrame(render);
 }
 
 function initCamera() {
@@ -132,7 +128,7 @@ function initGame() {
   tiles = generateTiles();
   players = initPlayers();
 
-  _.each(players, function(player) {
+  players.forEach(function(player) {
     sceneThree.add(player);
   });
 
@@ -143,7 +139,7 @@ function initGame() {
 }
 function initPlayers(playerIds = [1]) {
   let players = [];
-  _.each(playerIds, function(playerId) {
+  playerIds.forEach(function(playerId) {
     players.push(new player(playerId));
   });
   currentFocus = players[0];
