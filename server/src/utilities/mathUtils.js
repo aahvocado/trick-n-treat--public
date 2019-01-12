@@ -23,7 +23,14 @@ export function getRandomWeightedChoice(choiceList) {
   // sum up the chances
   const totalChance = choiceList.reduce((accumulator, choice) => {
     // range of values that could indicate this was picked
-    choice.range = [accumulator, accumulator + choice.weight];
+    if (choice.weight > 0) {
+      choice.range = [accumulator, accumulator + choice.weight];
+
+    // if weight is zero, don't create a range
+    } else {
+      choice.range = [-1, -1];
+    }
+
     return accumulator + choice.weight;
   }, 0);
 

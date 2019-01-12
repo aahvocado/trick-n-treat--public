@@ -44,7 +44,7 @@ function initMap() {
   GAMESTATE.mapModel = mapGenerationUtils.generateNewMapModel({
     width: WIDTH,
     height: HEIGHT,
-    numSpecials: 10,
+    numSpecials: 0,
     startCoordinates: [Math.floor(WIDTH/2), Math.floor(HEIGHT/2)],
   })
 }

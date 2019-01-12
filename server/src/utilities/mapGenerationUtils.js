@@ -47,7 +47,7 @@ export function generateNewMapModel(mapConfig) {
   // create special tiles on the Map
   generateSpecialTiles(mapModel, {
     count: numSpecials,
-    specialDistance: 4,
+    specialDistance: 10,
   })
 
   // create paths on the Map
@@ -161,30 +161,37 @@ export function getRandomDirection() {
  * @returns {Point}
  */
 function getRandomWeightedDirection(mapModel, currentPoint) {
+  // anonymous function to calculate adjust weight
+  const calculateWeight = (val) => {
+    return Math.pow((val * 100), 2);
+  }
+
+  // wip set up some variables
+  const xMaxIdx = mapModel.getWidth() - 1;
+  const yMaxIdx = mapModel.getHeight() - 1;
+
   const distanceFromLeft = currentPoint.x;
-  const distanceFromRight = (mapModel.getWidth() - 1) - currentPoint.x;
+  const distanceFromRight = xMaxIdx - currentPoint.x;
   const distanceFromTop = currentPoint.y;
-  const distanceFromBottom = (mapModel.getHeight() - 1) - currentPoint.y;
+  const distanceFromBottom = yMaxIdx - currentPoint.y;
 
-  const influence = 0.5;
-
-  const choiceList = [
+  // pick a direction based on its weight
+  const direction = mathUtils.getRandomWeightedChoice([
     {
       name: 'left',
-      weight: distanceFromLeft * influence,
+      weight: calculateWeight(distanceFromLeft / xMaxIdx),
     }, {
       name: 'right',
-      weight: distanceFromRight * influence,
+      weight: calculateWeight(distanceFromRight / xMaxIdx),
     }, {
       name: 'up',
-      weight: distanceFromTop * influence,
+      weight: calculateWeight(distanceFromTop / yMaxIdx),
     }, {
       name: 'down',
-      weight: distanceFromBottom * influence,
+      weight: calculateWeight(distanceFromBottom / yMaxIdx),
     },
-  ];
+  ]);
 
-  const direction = mathUtils.getRandomWeightedChoice(choiceList);
   switch (direction.name) {
     case 'left':
       return new Point(-1, 0);
@@ -210,7 +217,7 @@ function generateSpecialTiles(mapModel, specialOptions) {
   for (var i = 0; i < count; i ++) {
     // pick a location for a special tile
     const placementPoint = getRandomSpecialTileLocation(mapModel, specialOptions);
-    mapModel.attributes.poiPoints.push(placementPoint);
+    mapModel.attributes.specialPoints.push(placementPoint);
 
     // update the Tile
     mapModel.setTileAt(placementPoint, TILE_TYPES.SPECIAL);
@@ -259,8 +266,8 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
   )
 
   // find if any existing points are too close to this one
-  const poiPoints = mapModel.get('poiPoints');
-  const tooClose = poiPoints.some((point) => {
+  const specialPoints = mapModel.get('specialPoints');
+  const tooClose = specialPoints.some((point) => {
     return placementPoint.getDistance(point) < specialDistance;
   });
 

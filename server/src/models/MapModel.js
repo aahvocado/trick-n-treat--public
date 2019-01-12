@@ -20,8 +20,8 @@ export class MapModel extends Model {
       map: [[]],
 
       start: new Point(),
-      // list of Points where POIs are located
-      poiPoints: [],
+      // list of Points where "special" tiles are located - maybe starting spots?
+      specialPoints: [],
     }, newAttributes));
   }
   /**
