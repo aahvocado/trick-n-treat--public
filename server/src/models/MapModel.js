@@ -18,7 +18,10 @@ export class MapModel extends Model {
 
     this.set(Object.assign({
       map: [[]],
+
       start: new Point(),
+      // list of Points where POIs are located
+      poiPoints: [],
     }, newAttributes));
   }
   /**

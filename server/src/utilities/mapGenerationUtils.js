@@ -47,6 +47,7 @@ export function generateNewMapModel(mapConfig) {
   // create special tiles on the Map
   generateSpecialTiles(mapModel, {
     count: numSpecials,
+    specialDistance: 4,
   })
 
   // create paths on the Map
@@ -207,13 +208,11 @@ function generateSpecialTiles(mapModel, specialOptions) {
 
   const pathsToSpecial = [];
   for (var i = 0; i < count; i ++) {
-    // we want to pick a location that's not at the extremes
-    const placementPoint = new Point(
-      mathUtils.getRandomIntInclusive(1, mapModel.getWidth() - 2),
-      mathUtils.getRandomIntInclusive(1, mapModel.getHeight() - 2)
-    )
+    // pick a location for a special tile
+    const placementPoint = getRandomSpecialTileLocation(mapModel, specialOptions);
+    mapModel.attributes.poiPoints.push(placementPoint);
 
-    // note that the chosen path is special
+    // update the Tile
     mapModel.setTileAt(placementPoint, TILE_TYPES.SPECIAL);
 
     // find paths from the Special Tile's location to the center
@@ -227,9 +226,9 @@ function generateSpecialTiles(mapModel, specialOptions) {
     grid.setWalkableAt(startX, startY, true);
     grid.setWalkableAt(endX, endY, true);
 
+    // find the shortest path to the starting location
     const finder = new Pathfinding.AStarFinder();
     const path = finder.findPath(startX, startY, endX, endY, grid);
-
     pathsToSpecial.push(path);
   }
 
@@ -242,4 +241,33 @@ function generateSpecialTiles(mapModel, specialOptions) {
       }
     })
   })
+}
+/**
+ * we want to pick a location that's not at the extremes
+ *
+ * @param {MapModel} mapModel
+ * @param {Object} specialOptions
+ * @property {Point} specialOptions.count - number of special Tiles to generate
+ */
+function getRandomSpecialTileLocation(mapModel, specialOptions) {
+  const { specialDistance } = specialOptions;
+
+  // we want to pick a location that's not at the extremes
+  const placementPoint = new Point(
+    mathUtils.getRandomIntInclusive(1, mapModel.getWidth() - 2),
+    mathUtils.getRandomIntInclusive(1, mapModel.getHeight() - 2)
+  )
+
+  // find if any existing points are too close to this one
+  const poiPoints = mapModel.get('poiPoints');
+  const tooClose = poiPoints.some((point) => {
+    return placementPoint.getDistance(point) < specialDistance;
+  });
+
+  // if any points are too close, try again
+  if (tooClose) {
+    return getRandomSpecialTileLocation(mapModel, specialOptions);
+  }
+
+  return placementPoint;
 }
