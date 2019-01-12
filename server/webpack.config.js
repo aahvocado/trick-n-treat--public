@@ -9,7 +9,7 @@ module.exports = {
   target: 'node',
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, 'compiled'),
+    path: path.resolve(__dirname, 'build'),
     filename: 'server.js'
   },
   resolve: {

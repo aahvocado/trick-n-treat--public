@@ -13,6 +13,8 @@ const characterSchema = schema({
   health: StatModel,
   // spaces character and explore
   movement: StatModel,
+  // where the player is on the world
+  position: { x: Number, y: Number },
 })
 
 /**

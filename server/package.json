@@ -5,14 +5,16 @@
   "main": "index.js",
   "scripts": {
     "compile": "webpack",
-    "start": "npm run compile; node ./compiled/server.js"
+    "start": "npm run compile; node ./build/server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
+    "dotenv-flow": "^0.2.0",
     "express": "^4.16.4",
     "http": "0.0.0",
+    "js-schema": "^1.0.1",
     "lodash": "^4.17.11",
     "nodemon": "^1.18.6",
     "socket.io": "^2.1.1",
