@@ -52,7 +52,17 @@ export function generateNewMapModel(mapConfig) {
   // create paths on the Map
   executeRandomWalk(mapModel, {
     start: startPoint,
-    steps: 100,
+    steps: 40,
+  });
+
+  executeRandomWalk(mapModel, {
+    start: startPoint,
+    steps: 40,
+  });
+
+  executeRandomWalk(mapModel, {
+    start: startPoint,
+    steps: 40,
   });
 
   return mapModel;
@@ -65,16 +75,16 @@ export function generateNewMapModel(mapConfig) {
  * @returns {Map}
  */
 export function generateRoom(width, height) {
-  let map = [];
+  let matrix = [];
 
-  for (var x = 0; x < width; x++) {
-    map.push([]);
-    for (var y = 0; y < height; y++) {
-      map[x][y] = TILE_TYPES.EMPTY;
+  for (var y = 0; y < height; y++) {
+    matrix.push([]);
+    for (var x = 0; x < width; x++) {
+      matrix[y][x] = TILE_TYPES.EMPTY;
     }
   }
 
-  return map;
+  return matrix;
 }
 /**
  * uses the Random Walk process to apply paths to a Map
@@ -165,12 +175,12 @@ function generateSpecialTiles(mapModel, specialOptions) {
   for (var i = 0; i < count; i ++) {
     // we want to pick a location that's not at the extremes
     const placementPoint = new Point(
-      getRandomIntInclusive(1, mapModel.getHeight() - 2),
-      getRandomIntInclusive(1, mapModel.getWidth() - 2)
+      getRandomIntInclusive(1, mapModel.getWidth() - 2),
+      getRandomIntInclusive(1, mapModel.getHeight() - 2)
     )
 
     // note that the chosen path is special
-    mapModel.setTileAt(placementPoint, TILE_TYPES.SPECIAL + i);
+    mapModel.setTileAt(placementPoint, TILE_TYPES.SPECIAL);
 
     // find paths from the Special Tile's location to the center
     const startX = placementPoint.x;

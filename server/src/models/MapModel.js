@@ -37,11 +37,16 @@ export class MapModel extends Model {
    * returns the Tile located at a given Point
    *
    * @param {Point} point
-   * @returns {Tile}
+   * @returns {Tile | null}
    */
   getTileAt(point) {
-    const {x, y} = this.getAvailablePoint(point);
-    return this.get('map')[x][y];
+    const {x, y} = point;
+
+    try {
+      return this.get('map')[y][x];
+    } catch (e) {
+      return null;
+    }
   }
   /**
    * replaces the data of a Tile at a given Point
@@ -51,7 +56,7 @@ export class MapModel extends Model {
    */
   setTileAt(point, tileData) {
     const map = this.get('map');
-    map[point.x][point.y] = tileData;
+    map[point.y][point.x] = tileData;
   }
   /**
    * updates the data of Tiles from an Array of Points
@@ -71,17 +76,42 @@ export class MapModel extends Model {
    * @param {Point} point
    * @returns {Point}
    */
-  getAvailablePoint({x, y}) {
-    if (x > this.getWidth() - 1) {
-      x = 0;
-    } else if (x < 0) {
-      x = this.getWidth() - 1;
+  getAvailablePoint(point) {
+    let { x, y } = point;
+
+    const leftBounds = 0;
+    const rightBounds = this.getWidth() - 1;
+    const topBounds = 0;
+    const bottomBounds = this.getHeight() - 1;
+
+    // handle loopable pathing
+    if (this.get('isLoopable')) {
+      if (x > rightBounds) {
+        x = leftBounds;
+      } else if (x < leftBounds) {
+        x = rightBounds;
+      }
+
+      if (y > bottomBounds) {
+        y = topBounds;
+      } else if (y < topBounds) {
+        y = bottomBounds;
+      }
+
+      return new Point(x, y);
     }
 
-    if (y > this.getHeight() - 1) {
-      y = 0;
-    } else if (y < 0) {
-      y = this.getHeight() - 1;
+    // constrained pathing - return the boundary if the point is beyond it
+    if (x > rightBounds) {
+      x = rightBounds;
+    } else if (x < leftBounds) {
+      x = leftBounds;
+    }
+
+    if (y > bottomBounds) {
+      y = bottomBounds;
+    } else if (y < topBounds) {
+      y = topBounds;
     }
 
     return new Point(x, y);
