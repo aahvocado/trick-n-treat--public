@@ -227,7 +227,9 @@ export function move(direction) {
 }
 function animate(timestamp) {
   requestAnimationFrame(animate);
-  if(!previousTimestamp) previousTimestamp = timestamp;
+  if(!previousTimestamp) {
+    previousTimestamp = timestamp;
+  } 
   const delta = timestamp - previousTimestamp;
   previousTimestamp = timestamp;
 
