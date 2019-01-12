@@ -14,7 +14,6 @@ import {
 
 } from 'constants/three.js';
 import consoleLog from 'debug/debug';
-import { initInput } from 'input/input';
 import { add } from '../helpers/utilities';
 
 // Variable declaration
@@ -141,8 +140,6 @@ function initGame() {
   startMoving = false;
 
   currentPlayer.position.set(SCENE.ORIGIN_POS.x, SCENE.ORIGIN_POS.y, PLAYER.POSITION_HEIGHT);
-
-  initInput();
 }
 function initPlayers(playerIds = [1]) {
   let players = [];
