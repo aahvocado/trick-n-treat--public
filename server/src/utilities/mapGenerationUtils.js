@@ -204,6 +204,8 @@ function getRandomWeightedDirection(mapModel, currentPoint) {
  */
 function generateSpecialTiles(mapModel, specialOptions) {
   const { count } = specialOptions;
+
+  const pathsToSpecial = [];
   for (var i = 0; i < count; i ++) {
     // we want to pick a location that's not at the extremes
     const placementPoint = new Point(
@@ -228,6 +230,10 @@ function generateSpecialTiles(mapModel, specialOptions) {
     const finder = new Pathfinding.AStarFinder();
     const path = finder.findPath(startX, startY, endX, endY, grid);
 
+    pathsToSpecial.push(path);
+  }
+
+  pathsToSpecial.forEach((path) => {
     // update the Map with the coordinates gotten from the path
     path.forEach((coordinate) => {
       const convertedCoordinate = new Point(coordinate[0], coordinate[1]);
@@ -235,5 +241,5 @@ function generateSpecialTiles(mapModel, specialOptions) {
         mapModel.setTileAt(convertedCoordinate, TILE_TYPES.PATH);
       }
     })
-  }
+  })
 }
