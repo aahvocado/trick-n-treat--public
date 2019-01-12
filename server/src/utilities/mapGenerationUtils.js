@@ -52,17 +52,7 @@ export function generateNewMapModel(mapConfig) {
   // create paths on the Map
   executeRandomWalk(mapModel, {
     start: startPoint,
-    steps: 40,
-  });
-
-  executeRandomWalk(mapModel, {
-    start: startPoint,
-    steps: 40,
-  });
-
-  executeRandomWalk(mapModel, {
-    start: startPoint,
-    steps: 40,
+    steps: 200,
   });
 
   return mapModel;
@@ -99,7 +89,7 @@ function executeRandomWalk(mapModel, {start, steps}) {
   // use recursion to create paths on our MapModel
   randomWalkStep(mapModel, steps, {
     currentPoint: start,
-    stepSize: 2,
+    stepSize: 3,
   })
 }
 /**
@@ -118,7 +108,7 @@ function randomWalkStep(mapModel, remainingSteps, stepOptions) {
   } = stepOptions;
 
   // pick a direction for the next step
-  const nextDirectionPoint = getRandomDirection();
+  const nextDirectionPoint = getRandomWeightedDirection(mapModel, currentPoint);
 
   // loop to handle each step covering more than one Tile
   let _currentPoint = currentPoint;
@@ -147,27 +137,58 @@ function randomWalkStep(mapModel, remainingSteps, stepOptions) {
  * @returns {Point}
  */
 export function getRandomDirection() {
-  const direction = mathUtils.getRandomWeightedChoice([
+  const direction = mathUtils.getRandomIntInclusive(0, 3);
+  switch (direction) {
+    // left
+    case 0:
+      return new Point(-1, 0);
+    // right
+    case 1:
+      return new Point(1, 0);
+    // up
+    case 2:
+      return new Point(0, -1);
+    // down
+    case 3:
+      return new Point(0, 1);
+  }
+}
+/**
+ * creates a Point that indicates a direction to go
+ *  but weighted based on how close they are to the edge
+ *
+ * @returns {Point}
+ */
+function getRandomWeightedDirection(mapModel, currentPoint) {
+  const distanceFromLeft = currentPoint.x;
+  const distanceFromRight = (mapModel.getWidth() - 1) - currentPoint.x;
+  const distanceFromTop = currentPoint.y;
+  const distanceFromBottom = (mapModel.getHeight() - 1) - currentPoint.y;
+
+  const influence = 0.5;
+
+  const choiceList = [
     {
       name: 'left',
-      chance: 25,
+      weight: distanceFromLeft * influence,
     }, {
       name: 'right',
-      chance: 25,
+      weight: distanceFromRight * influence,
     }, {
       name: 'up',
-      chance: 25,
+      weight: distanceFromTop * influence,
     }, {
       name: 'down',
-      chance: 25,
+      weight: distanceFromBottom * influence,
     },
-  ]);
+  ];
 
+  const direction = mathUtils.getRandomWeightedChoice(choiceList);
   switch (direction.name) {
     case 'left':
       return new Point(-1, 0);
     case 'right':
-      return new Point(-1, 0);
+      return new Point(1, 0);
     case 'up':
       return new Point(0, -1);
     case 'down':
