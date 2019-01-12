@@ -10,7 +10,7 @@ const CAMERA_ROTATION_X = 50*Math.PI/180;
 const CAMERA_ROTATION_Y = 20*Math.PI/180;
 const CAMERA_ROTATION_Z = 10*Math.PI/180;
 const INITIAL_CAMERA_POSITION_Y = -Math.tan(CAMERA_ROTATION_X)*DISTANCE;
-const INITIAL_CAMERA_POSITION_X = -Math.tan(CAMERA_ROTATION_Y)*Math.sqrt(DISTANCE**2 + INITIAL_CAMERA_POSITION_Y**2);
+const INITIAL_CAMERA_POSITION_X = Math.tan(CAMERA_ROTATION_Y)*Math.sqrt(DISTANCE**2 + INITIAL_CAMERA_POSITION_Y**2);
 export const CAMERA = {
   DISTANCE: DISTANCE,
   CAMERA_ROTATION_X: CAMERA_ROTATION_X,
@@ -21,8 +21,8 @@ export const CAMERA = {
 };
 export const SCENE = {
   ZOOM: 2,
-  ORIGIN_POS: { x: 0, y: 0 }
-
+  ORIGIN_POS: { x: 0, y: 0 },
+  BACKGROUND_COLOR: 0xffffff
 }
 export const RENDERER = {
   ALPHA: WEB_GL_RENDERER.ALPHA,
@@ -33,18 +33,18 @@ export const RENDERER = {
   SIZE_Y: window.innerHeight,
 }
 export const HEMI_LIGHT = {
-  SKY_COLOR: '0xffffff',
-  GROUND_COLOR: '0xffffff',
+  SKY_COLOR: 0xffffff,
+  GROUND_COLOR: 0xffffff,
   INTESITY: 0.6,
 }
 const SHADOW_CAMERA_VALUE = 500;
 export const DIR_LIGHT = {
-  COLOR: '0xffffff',
-  INTESITY: 0.4,
+  COLOR: 0xffffff,
+  INTESITY: 0.6,
   POSITION: new THREE.Vector3(-100, -100, 200),
   CAST_SHADOW: true,
-  SHADOW_MAP_SIZE_WIDTH: 20148,
-  SHADOW_MAP_SIZE_HEIGHT: 20148,
+  SHADOW_MAP_SIZE_WIDTH: 2048,
+  SHADOW_MAP_SIZE_HEIGHT: 2048,
   SHADOW_CAMERA_VALUE: SHADOW_CAMERA_VALUE,
   SHADOW_CAMERA_LEFT: - SHADOW_CAMERA_VALUE,
   SHADOW_CAMERA_RIGHT: SHADOW_CAMERA_VALUE,
@@ -52,7 +52,7 @@ export const DIR_LIGHT = {
   SHADOW_CAMERA_BOTTOM: - SHADOW_CAMERA_VALUE,
 }
 export const BACK_LIGHT = {
-  COLOR: '0x000000',
+  COLOR: 0x000000,
   INTESITY: 0.4,
   POSITION: new THREE.Vector3(200, 200, 50),
   CAST_SHADOW: true,
@@ -64,7 +64,7 @@ export const TILES = {
   TILE_HEIGHT: 3,
   TILE_TYPES: [4], //[1, 2, 3, 4];
   POSITION_WIDTH: 42,
-  COLOR: '0xdddddd',
+  COLOR: 0xdddddd,
   FLAT_SHADING: true,
   CAST_SHADOW: true,
   RECEIVE_SHADOW: true,
@@ -90,11 +90,11 @@ export const TILE_REVERSE_DIRECTIONS = {
 }
 export const PLAYER = {
   SIZE: 15,
-  COLOR: '0xeeeeee',
+  COLOR: 0xeeeeee,
   FLAT_SHADING: true,
   CAST_SHADOW: true,
   RECEIVE_SHADOW: true,
-  POSITION_HEIGHT: 10*SCENE.ZOOM
+  POSITION_HEIGHT: 6*SCENE.ZOOM
 }
 export const ANIMATION = {
   STEP_TIME: 200,

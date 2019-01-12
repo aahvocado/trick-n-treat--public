@@ -2,12 +2,6 @@ import { move } from 'managers/threejsManager';
 import { TILE_DIRECTIONS } from 'constants/three.js';
 
 export function initInput() {
-  document.querySelector("#retry").addEventListener("click", () => {
-    lanes.forEach(lane => scene.remove( lane.mesh ));
-    initaliseValues();
-    endDOM.style.visibility = 'hidden';
-  });
-
   window.addEventListener("keydown", event => {
     if (event.keyCode == '38') {
         // up arrow
