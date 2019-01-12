@@ -14,7 +14,7 @@ import * as mathUtils from 'utilities/mathUtils';
  * @typedef {Object} MapConfig
  * @property {Number} MapConfig.width - number of horizontal tiles
  * @property {Number} MapConfig.height - number of vertical tiles
- * @property {Number} MapConfig.numSpecials - number of special tiles
+ * @property {Number} MapConfig.numSpecialTiles - number of special tiles
  * @property {Array} MapConfig.startCoordinates - [x, y] - where the starting point is
  */
 
@@ -28,7 +28,7 @@ export function generateNewMapModel(mapConfig) {
   const {
     width,
     height,
-    numSpecials,
+    numSpecialTiles,
     startCoordinates,
   } = mapConfig;
 
@@ -46,14 +46,15 @@ export function generateNewMapModel(mapConfig) {
 
   // create special tiles on the Map
   generateSpecialTiles(mapModel, {
-    count: numSpecials,
-    specialDistance: 10,
+    count: numSpecialTiles,
+    specialDistance: mapConfig.specialMinDistance,
   })
 
   // create paths on the Map
   executeRandomWalk(mapModel, {
     start: startPoint,
-    steps: 200,
+    steps: mapConfig.numSteps,
+    stepSize: mapConfig.stepSize,
   });
 
   return mapModel;
@@ -86,11 +87,11 @@ export function generateRoom(width, height) {
  * @property {Point} config.start - point to start
  * @property {Number} config.steps - how many steps to walk
  */
-function executeRandomWalk(mapModel, {start, steps}) {
+function executeRandomWalk(mapModel, {start, steps, stepSize}) {
   // use recursion to create paths on our MapModel
   randomWalkStep(mapModel, steps, {
     currentPoint: start,
-    stepSize: 3,
+    stepSize: stepSize,
   })
 }
 /**

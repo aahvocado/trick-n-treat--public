@@ -1,5 +1,7 @@
 import schema from 'js-schema';
 
+import MAP_SETTINGS from 'constants/mapSettings';
+
 import MapModel from 'models/MapModel';
 
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
@@ -38,15 +40,7 @@ export function getGamestate() {
  * generates a map
  */
 function initMap() {
-  const WIDTH = 21;
-  const HEIGHT = 35;
-
-  GAMESTATE.mapModel = mapGenerationUtils.generateNewMapModel({
-    width: WIDTH,
-    height: HEIGHT,
-    numSpecials: 0,
-    startCoordinates: [Math.floor(WIDTH/2), Math.floor(HEIGHT/2)],
-  })
+  GAMESTATE.mapModel = mapGenerationUtils.generateNewMapModel(MAP_SETTINGS)
 }
 /**
  * initializes gamestate, effectively regenerating everything
