@@ -60,9 +60,6 @@ export function generateNewMapModel(mapConfig) {
     houseMinDistance: mapConfig.houseMinDistance,
   })
 
-  console.log('-- generated map')
-  console.log(mapModel.get('map'));
-
   return mapModel;
 }
 /**

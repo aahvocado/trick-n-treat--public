@@ -1,10 +1,15 @@
+import uuid from 'uuid/v4';
 import schema from 'js-schema';
+import seedrandom from 'seedrandom';
 
 import MAP_SETTINGS from 'constants/mapSettings';
 
 import MapModel from 'models/MapModel';
 
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
+
+const seed = uuid();
+seedrandom(seed, { global: true });
 
 // define how our GameState should look like
 const gamestateSchema = schema({
@@ -53,5 +58,8 @@ function initGamestate() {
  */
 export function start() {
   initGamestate();
+
+  console.log('-- generated map with seed', seed);
+  console.log(GAMESTATE.mapModel.get('map'));
 }
 

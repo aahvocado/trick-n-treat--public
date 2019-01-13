@@ -6,9 +6,6 @@ dotenv.config({
   cwd: '../',
 });
 
-import seedrandom from 'seedrandom';
-// seedrandom('TRICKNTREAT', { global: true }); // set seed globally for testing
-
 import * as serverInstance from 'managers/serverInstance';
 import * as gamestateManager from 'managers/gamestateManager';
 

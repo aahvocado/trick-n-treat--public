@@ -14,9 +14,9 @@ export const MAP_SETTINGS = {
   numSpecialTiles: 4,
   specialMinDistance: 9,
 
-  numSectors: 4,
-  sectorSize: 15,
-  numHousePerSector: 8,
+  numSectors: 12,
+  sectorSize: 5,
+  numHousePerSector: 12,
   houseMinDistance: 2,
 };
 
