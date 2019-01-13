@@ -77,9 +77,9 @@ export const TILES_SIDES = {
   LEFT: 3
 }
 export const TILE_DIRECTIONS = {
-  FORWARD: 'BACKWARD',
+  FORWARD: 'FORWARD',
   RIGHT: 'LEFT',
-  BACKWARD: 'FORWARD',
+  BACKWARD: 'BACKWARD',
   LEFT: 'RIGHT'
 }
 export const TILE_REVERSE_DIRECTIONS = {
