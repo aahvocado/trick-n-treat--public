@@ -338,23 +338,28 @@ function getRandomHouseTileLocation(mapModel, options) {
     }
   }
 
+  // randomize order
+  matrixUtils.shuffleArray(emptyTilePoints);
+
   // try and see if any of the found empty tiles follow our rules
   const map = mapModel.get('map');
   const appropriatePoint = emptyTilePoints.find((emptyPoint) => {
-    const isAdjacentToPath = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.PATH, 1);
-    const isAdjacentToHouse = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.HOUSE, houseMinDistance);
-    return isAdjacentToPath && !isAdjacentToHouse;
+    const isAdjacentToPath = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.PATH);
+    const isNearbyToHouse = matrixUtils.hasNearbyTileType(map, emptyPoint, TILE_TYPES.HOUSE, houseMinDistance);
+    return isAdjacentToPath && !isNearbyToHouse;
   })
 
   // if none of them were good, try again
   if (!appropriatePoint) {
     // todo - potentially causes infinite looop
     // return getRandomHouseTileLocation(mapModel, houseOptions);
+    return null;
   }
 
   // we found a good point!
   return appropriatePoint;
 }
+
 /**
  * creates a bunch of houses in different sectors
  *
