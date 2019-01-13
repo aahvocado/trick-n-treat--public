@@ -5,6 +5,7 @@ import MapModel from 'models/MapModel';
 import TILE_TYPES from 'constants/tileTypes';
 
 import * as mathUtils from 'utilities/mathUtils';
+import * as matrixUtils from 'utilities/matrixUtils';
 
 /**
  * documentation for types
@@ -297,17 +298,36 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
  */
 function generateHouseTiles(mapModel, houseOptions) {
   for (var i = 0; i < houseOptions.count; i++) {
-    getHouseTileLocation(mapModel, houseOptions);
+    getRandomHouseTileLocation(mapModel, houseOptions);
   }
 }
 /**
  * get
  */
-function getHouseTileLocation(mapModel, houseOptions) {
+function getRandomHouseTileLocation(mapModel, houseOptions) {
   // start from the center, since we're guaranteed to at least have a path near by
   const start = mapModel.get('start');
 
-  // find a path within a 5x5 square
+  // find a 6x6 square
   const boxSize = 6;
   const searchBox = mapModel.getTileGroup(start.x, start.y, start.x + boxSize, start.y + boxSize);
+  console.log('searchbox', searchBox);
+
+  // look for empty spaces
+  const emptyTilePoints = [];
+  for (var y = 0; y < searchBox.length; y++) {
+    const searchRow = searchBox[y];
+    for (var x = 0; x < searchRow.length; x++) {
+      // create a point for checking relative to the Map
+      const pointToCheck = new Point(start.x + x, start.y + y);
+      if (mapModel.getTileAt(pointToCheck) === 0) {
+        emptyTilePoints.push(pointToCheck);
+      }
+    }
+  }
+
+  //
+  console.log('emptyTilePoints', emptyTilePoints);
+  // const hasAdjacent = matrixUtils.hasAdjacentTileType(mapModel.get('map'), start, TILE_TYPES.PATH, 4);
+
 }
