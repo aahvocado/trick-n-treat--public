@@ -13,6 +13,10 @@ export const MAP_SETTINGS = {
 
   numSpecialTiles: 4,
   specialMinDistance: 9,
+
+  numHouseTiles: 20,
+  houseBlockSize: 5,
+  houseMinDistance: 2,
 };
 
 export default MAP_SETTINGS;

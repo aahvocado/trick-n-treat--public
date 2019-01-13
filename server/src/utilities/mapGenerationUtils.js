@@ -26,19 +26,13 @@ import * as matrixUtils from 'utilities/matrixUtils';
  * @returns {MapModel}
  */
 export function generateNewMapModel(mapConfig) {
-  const {
-    width,
-    height,
-    numSpecialTiles,
-    startCoordinates,
-  } = mapConfig;
-
-  const emptyMap = generateRoom(width, height);
+  // create an empty Matrix
+  const emptyMatrix = generateRoom(mapConfig.width, mapConfig.height);
 
   // initiate the Model
-  const startPoint = new Point(startCoordinates[0], startCoordinates[1]);
+  const startPoint = new Point(mapConfig.startCoordinates[0], mapConfig.startCoordinates[1]);
   const mapModel = new MapModel({
-    map: emptyMap,
+    map: emptyMatrix,
     start: startPoint,
   });
 
@@ -47,8 +41,8 @@ export function generateNewMapModel(mapConfig) {
 
   // create special tiles on the Map
   generateSpecialTiles(mapModel, {
-    count: numSpecialTiles,
-    specialDistance: mapConfig.specialMinDistance,
+    count: mapConfig.numSpecialTiles,
+    specialMinDistance: mapConfig.specialMinDistance,
   })
 
   // create paths on the Map
@@ -60,7 +54,9 @@ export function generateNewMapModel(mapConfig) {
 
   // add houses
   generateHouseTiles(mapModel, {
-    count: mapConfig.numHouseTiles || 3,
+    count: mapConfig.numHouseTiles,
+    houseBlockSize: mapConfig.houseBlockSize,
+    houseMinDistance: mapConfig.houseMinDistance,
   })
 
   console.log('-- generated map')
@@ -267,7 +263,7 @@ function generateSpecialTiles(mapModel, specialOptions) {
  * @property {Point} specialOptions.count - number of special Tiles to generate
  */
 function getRandomSpecialTileLocation(mapModel, specialOptions) {
-  const { specialDistance } = specialOptions;
+  const { specialMinDistance } = specialOptions;
 
   // we want to pick a location that's not at the extremes
   const placementPoint = new Point(
@@ -278,7 +274,7 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
   // find if any existing points are too close to this one
   const specialPoints = mapModel.get('specialPoints');
   const tooClose = specialPoints.some((point) => {
-    return placementPoint.getDistance(point) < specialDistance;
+    return placementPoint.getDistance(point) < specialMinDistance;
   });
 
   // if any points are too close, try again
@@ -299,7 +295,10 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
 function generateHouseTiles(mapModel, houseOptions) {
   for (var i = 0; i < houseOptions.count; i++) {
     const placementPoint = getRandomHouseTileLocation(mapModel, houseOptions);
-    mapModel.setTileAt(placementPoint, TILE_TYPES.HOUSE);
+
+    if (placementPoint) {
+      mapModel.setTileAt(placementPoint, TILE_TYPES.HOUSE);
+    }
   }
 }
 /**
@@ -312,23 +311,27 @@ function generateHouseTiles(mapModel, houseOptions) {
  * @returns {Point}
  */
 function getRandomHouseTileLocation(mapModel, houseOptions) {
+  const {
+    houseBlockSize,
+    houseMinDistance,
+   } = houseOptions;
+
   // start from the center, since we're guaranteed to at least have a path near by
   const map = mapModel.get('map');
   const start = mapModel.get('start');
 
-  // find a 6x6 square
-  const boxSize = 6;
-  const searchBox = mapModel.getTileGroup(start.x, start.y, start.x + boxSize, start.y + boxSize);
+  // find a District
+  const districtMatrix = mapModel.getTileGroup(start.x, start.y, start.x + houseBlockSize, start.y + houseBlockSize);
 
-  // look for empty spaces
+  // look for empty spaces in the District
   const emptyTilePoints = [];
-  for (var y = 0; y < searchBox.length; y++) {
-    const searchRow = searchBox[y];
+  for (var y = 0; y < districtMatrix.length; y++) {
+    const searchRow = districtMatrix[y];
     for (var x = 0; x < searchRow.length; x++) {
-      // create a point for checking relative to the Map
+      // adjust the point relative to the Map
       const pointToCheck = new Point(start.x + x, start.y + y);
 
-      // if it is empty we can add it to the list
+      // check if it is empty we can add it to the list
       if (mapModel.getTileAt(pointToCheck) === 0) {
         emptyTilePoints.push(pointToCheck);
       }
@@ -338,7 +341,7 @@ function getRandomHouseTileLocation(mapModel, houseOptions) {
   // try and see if any of the found empty tiles follow our rules
   const appropriatePoint = emptyTilePoints.find((emptyPoint) => {
     const isAdjacentToPath = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.PATH, 1);
-    const isAdjacentToHouse = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.HOUSE, 2);
+    const isAdjacentToHouse = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.HOUSE, houseMinDistance);
     return isAdjacentToPath && !isAdjacentToHouse;
   })
 
