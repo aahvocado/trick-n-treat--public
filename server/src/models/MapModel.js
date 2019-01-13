@@ -52,6 +52,26 @@ export class MapModel extends Model {
     }
   }
   /**
+   * gets matrix of the tiles in given box boundary
+   *
+   * @param {Number} topLeftX
+   * @param {Number} topLeftY
+   * @param {Number} bottomRightX
+   * @param {Number} bottomRightY
+   * @returns {Matrix}
+   */
+  getTileGroup(topLeftX, topLeftY, bottomRightX, bottomRightY) {
+    const map = this.get('map');
+    const matrix = [];
+
+    for (var y = topLeftY; y < bottomRightY; y++) {
+      const row = map[y];
+      matrix.push(row.slice(topLeftX, bottomRightX));
+    }
+
+    return matrix;
+  }
+  /**
    * replaces the data of a Tile at a given Point
    *
    * @param {Point} point
@@ -67,7 +87,7 @@ export class MapModel extends Model {
    * @param {Array<Point>} pointList
    * @param {*} tileData - what to update tile with
    */
-  setTileGroup(pointList, tileData) {
+  setTileList(pointList, tileData) {
     pointList.forEach((point) => {
       this.setTileAt(point, tileData);
     })

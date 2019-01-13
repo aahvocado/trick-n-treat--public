@@ -9,7 +9,7 @@ import * as mathUtils from 'utilities/mathUtils';
 /**
  * documentation for types
  *
- * @typedef {Array<Array>} Map
+ * @typedef {Array<Array>} Matrix
  *
  * @typedef {Object} MapConfig
  * @property {Number} MapConfig.width - number of horizontal tiles
@@ -57,6 +57,11 @@ export function generateNewMapModel(mapConfig) {
     stepSize: mapConfig.stepSize,
   });
 
+  // add houses
+  generateHouseTiles(mapModel, {
+    count: mapConfig.numHouseTiles || 1,
+  })
+
   return mapModel;
 }
 /**
@@ -64,7 +69,7 @@ export function generateNewMapModel(mapConfig) {
  *
  * @param {Number} width
  * @param {Number} height
- * @returns {Map}
+ * @returns {Matrix}
  */
 export function generateRoom(width, height) {
   let matrix = [];
@@ -209,7 +214,7 @@ function getRandomWeightedDirection(mapModel, currentPoint) {
  *
  * @param {MapModel} mapModel
  * @param {Object} specialOptions
- * @property {Point} specialOptions.count - number of special Tiles to generate
+ * @property {Number} specialOptions.count - number of special Tiles to generate
  */
 function generateSpecialTiles(mapModel, specialOptions) {
   const { count } = specialOptions;
@@ -278,4 +283,31 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
   }
 
   return placementPoint;
+}
+/**
+ * places House Tiles onto the Map
+ *
+ * @param {MapModel} mapModel
+ * @param {Object} houseOptions
+ * @property {Number} houseOptions.count - number of House Tiles to generate
+ */
+function generateHouseTiles(mapModel, houseOptions) {
+  // for (var i = 0; i < houseOptions.count; i++) {
+
+  // }
+  getHouseTileLocation(mapModel, houseOptions);
+}
+/**
+ * get
+ */
+function getHouseTileLocation(mapModel, houseOptions) {
+  // start from the center, since we're guaranteed to at least have a path near by
+  const start = mapModel.get('start');
+
+  // find a path within a 5x5 square
+  // const placementPoint = new Point(
+  //   mathUtils.getRandomIntInclusive(1, mapModel.getWidth() - 2),
+  //   mathUtils.getRandomIntInclusive(1, mapModel.getHeight() - 2)
+  // )
+  console.log('test box', mapModel.getTileGroup(10, 10, 15, 15));
 }
