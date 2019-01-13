@@ -41,7 +41,7 @@ export function generateNewMapModel(mapConfig) {
 
   // create special tiles on the Map
   generateSpecialTiles(mapModel, {
-    count: mapConfig.numSpecialTiles,
+    numSpecialTiles: mapConfig.numSpecialTiles,
     specialMinDistance: mapConfig.specialMinDistance,
   })
 
@@ -52,10 +52,11 @@ export function generateNewMapModel(mapConfig) {
     stepSize: mapConfig.stepSize,
   });
 
-  // add houses
-  generateHouseTiles(mapModel, {
-    count: mapConfig.numHouseTiles,
-    houseBlockSize: mapConfig.houseBlockSize,
+  // generate sectors of houses
+  generateSectors(mapModel, {
+    numSectors: mapConfig.numSectors,
+    numHousePerSector: mapConfig.numHousePerSector,
+    sectorSize: mapConfig.sectorSize,
     houseMinDistance: mapConfig.houseMinDistance,
   })
 
@@ -213,16 +214,16 @@ function getRandomWeightedDirection(mapModel, currentPoint) {
  * places special Tiles onto the Map
  *
  * @param {MapModel} mapModel
- * @param {Object} specialOptions
- * @property {Number} specialOptions.count - number of special Tiles to generate
+ * @param {Object} options
+ * @property {Number} options.numSpecialTiles
  */
-function generateSpecialTiles(mapModel, specialOptions) {
-  const { count } = specialOptions;
+function generateSpecialTiles(mapModel, options) {
+  const { numSpecialTiles } = options;
 
   const pathsToSpecial = [];
-  for (var i = 0; i < count; i ++) {
+  for (var i = 0; i < numSpecialTiles; i ++) {
     // pick a location for a special tile
-    const placementPoint = getRandomSpecialTileLocation(mapModel, specialOptions);
+    const placementPoint = getRandomSpecialTileLocation(mapModel, options);
     mapModel.attributes.specialPoints.push(placementPoint);
 
     // update the Tile
@@ -259,11 +260,11 @@ function generateSpecialTiles(mapModel, specialOptions) {
  * we want to pick a location that's not at the extremes
  *
  * @param {MapModel} mapModel
- * @param {Object} specialOptions
- * @property {Point} specialOptions.count - number of special Tiles to generate
+ * @param {Object} options
+ * @property {Point} options.specialMinDistance
  */
-function getRandomSpecialTileLocation(mapModel, specialOptions) {
-  const { specialMinDistance } = specialOptions;
+function getRandomSpecialTileLocation(mapModel, options) {
+  const { specialMinDistance } = options;
 
   // we want to pick a location that's not at the extremes
   const placementPoint = new Point(
@@ -279,7 +280,7 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
 
   // if any points are too close, try again
   if (tooClose) {
-    return getRandomSpecialTileLocation(mapModel, specialOptions);
+    return getRandomSpecialTileLocation(mapModel, options);
   }
 
   // otherwise we found a valid location for ya
@@ -289,13 +290,14 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
  * places House Tiles onto the Map
  *
  * @param {MapModel} mapModel
- * @param {Object} houseOptions
- * @property {Number} houseOptions.count - number of House Tiles to generate
+ * @param {Object} options
+ * @property {Number} options.numHousePerSector - number of House Tiles to generate
  */
-function generateHouseTiles(mapModel, houseOptions) {
-  for (var i = 0; i < houseOptions.count; i++) {
-    const placementPoint = getRandomHouseTileLocation(mapModel, houseOptions);
+function generateHouseTiles(mapModel, options) {
+  const { numHousePerSector } = options;
 
+  for (var i = 0; i < numHousePerSector; i++) {
+    const placementPoint = getRandomHouseTileLocation(mapModel, options);
     if (placementPoint) {
       mapModel.setTileAt(placementPoint, TILE_TYPES.HOUSE);
     }
@@ -307,29 +309,27 @@ function generateHouseTiles(mapModel, houseOptions) {
  * - far enough away from another house
  *
  * @param {MapModel} mapModel
- * @param {Object} houseOptions
+ * @param {Object} options
+ * @property {Number} options.houseMinDistance - number of House Tiles to generate
+ * @property {Number} options.sectorSize - number of House Tiles to generate
+ * @property {Point} options.sectorStart - where the sector starts
  * @returns {Point}
  */
-function getRandomHouseTileLocation(mapModel, houseOptions) {
+function getRandomHouseTileLocation(mapModel, options) {
   const {
-    houseBlockSize,
     houseMinDistance,
-   } = houseOptions;
+    sectorSize,
+    sectorStart,
+   } = options;
 
-  // start from the center, since we're guaranteed to at least have a path near by
-  const map = mapModel.get('map');
-  const start = mapModel.get('start');
-
-  // find a District
-  const districtMatrix = mapModel.getTileGroup(start.x, start.y, start.x + houseBlockSize, start.y + houseBlockSize);
-
-  // look for empty spaces in the District
+  // create a Matrix of the sector so we can look for empty tiles in there
   const emptyTilePoints = [];
-  for (var y = 0; y < districtMatrix.length; y++) {
-    const searchRow = districtMatrix[y];
+  const sectorMatrix = mapModel.getTileGroup(sectorStart.x, sectorStart.y, sectorStart.x + sectorSize, sectorStart.y + sectorSize);
+  for (var y = 0; y < sectorMatrix.length; y++) {
+    const searchRow = sectorMatrix[y];
     for (var x = 0; x < searchRow.length; x++) {
       // adjust the point relative to the Map
-      const pointToCheck = new Point(start.x + x, start.y + y);
+      const pointToCheck = new Point(sectorStart.x + x, sectorStart.y + y);
 
       // check if it is empty we can add it to the list
       if (mapModel.getTileAt(pointToCheck) === 0) {
@@ -339,6 +339,7 @@ function getRandomHouseTileLocation(mapModel, houseOptions) {
   }
 
   // try and see if any of the found empty tiles follow our rules
+  const map = mapModel.get('map');
   const appropriatePoint = emptyTilePoints.find((emptyPoint) => {
     const isAdjacentToPath = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.PATH, 1);
     const isAdjacentToHouse = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.HOUSE, houseMinDistance);
@@ -347,10 +348,46 @@ function getRandomHouseTileLocation(mapModel, houseOptions) {
 
   // if none of them were good, try again
   if (!appropriatePoint) {
-    // todo
+    // todo - potentially causes infinite looop
     // return getRandomHouseTileLocation(mapModel, houseOptions);
   }
 
   // we found a good point!
   return appropriatePoint;
+}
+/**
+ * creates a bunch of houses in different sectors
+ *
+ * @param {MapModel} mapModel
+ * @param {Object} options
+ * @property {Number} options.numSectors - number of House Tiles to generate
+ */
+function generateSectors(mapModel, options) {
+  const { numSectors } = options;
+
+  for (var i = 0; i < numSectors; i++) {
+    const sectorStart = getRandomSectorLocation(mapModel, options);
+
+    generateHouseTiles(mapModel, Object.assign({}, options, {
+      sectorStart: sectorStart,
+    }));
+  }
+}
+/**
+ * generates a Sector starting point where a bunch of houses are placed in
+ *
+ * @param {MapModel} mapModel
+ * @param {Object} options
+ * @returns {Point}
+ */
+function getRandomSectorLocation(mapModel, options) {
+  const { sectorSize } = options;
+
+  // we want to pick a location that's not at the extremes
+  const placementPoint = new Point(
+    mathUtils.getRandomIntInclusive(1, mapModel.getWidth() - sectorSize - 2),
+    mathUtils.getRandomIntInclusive(1, mapModel.getHeight() - sectorSize - 2)
+  )
+
+  return placementPoint;
 }
