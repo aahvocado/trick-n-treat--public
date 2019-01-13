@@ -53,6 +53,5 @@ function initGamestate() {
  */
 export function start() {
   initGamestate();
-  console.log(getGamestate().mapModel.get('map'));
 }
 

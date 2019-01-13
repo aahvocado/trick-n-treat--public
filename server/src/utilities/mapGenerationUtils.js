@@ -62,6 +62,9 @@ export function generateNewMapModel(mapConfig) {
     count: mapConfig.numHouseTiles || 1,
   })
 
+  console.log('-- generated map')
+  console.log(mapModel.get('map'));
+
   return mapModel;
 }
 /**
@@ -95,7 +98,7 @@ export function generateRoom(width, height) {
 function executeRandomWalk(mapModel, {start, steps, stepSize}) {
   // use recursion to create paths on our MapModel
   randomWalkStep(mapModel, steps, {
-    currentPoint: start,
+    currentPoint: start.clone(),
     stepSize: stepSize,
   })
 }
@@ -282,6 +285,7 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
     return getRandomSpecialTileLocation(mapModel, specialOptions);
   }
 
+  // otherwise we found a valid location for ya
   return placementPoint;
 }
 /**
@@ -292,10 +296,9 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
  * @property {Number} houseOptions.count - number of House Tiles to generate
  */
 function generateHouseTiles(mapModel, houseOptions) {
-  // for (var i = 0; i < houseOptions.count; i++) {
-
-  // }
-  getHouseTileLocation(mapModel, houseOptions);
+  for (var i = 0; i < houseOptions.count; i++) {
+    getHouseTileLocation(mapModel, houseOptions);
+  }
 }
 /**
  * get
@@ -305,9 +308,6 @@ function getHouseTileLocation(mapModel, houseOptions) {
   const start = mapModel.get('start');
 
   // find a path within a 5x5 square
-  // const placementPoint = new Point(
-  //   mathUtils.getRandomIntInclusive(1, mapModel.getWidth() - 2),
-  //   mathUtils.getRandomIntInclusive(1, mapModel.getHeight() - 2)
-  // )
-  console.log('test box', mapModel.getTileGroup(10, 10, 15, 15));
+  const boxSize = 6;
+  const searchBox = mapModel.getTileGroup(start.x, start.y, start.x + boxSize, start.y + boxSize);
 }

@@ -1,6 +1,8 @@
 import Point from '@studiomoniker/point';
 import Model from 'models/Model';
 
+import * as matrixUtils from 'utilities/matrixUtils';
+
 /*
   SUPER WARNING: `map` is an array function,
     it could potentially be confusing when used together so it might warrant a rename
@@ -62,14 +64,7 @@ export class MapModel extends Model {
    */
   getTileGroup(topLeftX, topLeftY, bottomRightX, bottomRightY) {
     const map = this.get('map');
-    const matrix = [];
-
-    for (var y = topLeftY; y < bottomRightY; y++) {
-      const row = map[y];
-      matrix.push(row.slice(topLeftX, bottomRightX));
-    }
-
-    return matrix;
+    return matrixUtils.getInnerMatrixData(map, topLeftX, topLeftY, bottomRightX, bottomRightY);
   }
   /**
    * replaces the data of a Tile at a given Point
