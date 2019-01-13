@@ -60,7 +60,7 @@ export function generateNewMapModel(mapConfig) {
 
   // add houses
   generateHouseTiles(mapModel, {
-    count: mapConfig.numHouseTiles || 1,
+    count: mapConfig.numHouseTiles || 3,
   })
 
   console.log('-- generated map')
@@ -298,20 +298,27 @@ function getRandomSpecialTileLocation(mapModel, specialOptions) {
  */
 function generateHouseTiles(mapModel, houseOptions) {
   for (var i = 0; i < houseOptions.count; i++) {
-    getRandomHouseTileLocation(mapModel, houseOptions);
+    const placementPoint = getRandomHouseTileLocation(mapModel, houseOptions);
+    mapModel.setTileAt(placementPoint, TILE_TYPES.HOUSE);
   }
 }
 /**
- * get
+ * look for a place to place a house with given rules
+ * - adjacent to a path
+ * - far enough away from another house
+ *
+ * @param {MapModel} mapModel
+ * @param {Object} houseOptions
+ * @returns {Point}
  */
 function getRandomHouseTileLocation(mapModel, houseOptions) {
   // start from the center, since we're guaranteed to at least have a path near by
+  const map = mapModel.get('map');
   const start = mapModel.get('start');
 
   // find a 6x6 square
   const boxSize = 6;
   const searchBox = mapModel.getTileGroup(start.x, start.y, start.x + boxSize, start.y + boxSize);
-  console.log('searchbox', searchBox);
 
   // look for empty spaces
   const emptyTilePoints = [];
@@ -320,14 +327,27 @@ function getRandomHouseTileLocation(mapModel, houseOptions) {
     for (var x = 0; x < searchRow.length; x++) {
       // create a point for checking relative to the Map
       const pointToCheck = new Point(start.x + x, start.y + y);
+
+      // if it is empty we can add it to the list
       if (mapModel.getTileAt(pointToCheck) === 0) {
         emptyTilePoints.push(pointToCheck);
       }
     }
   }
 
-  //
-  console.log('emptyTilePoints', emptyTilePoints);
-  // const hasAdjacent = matrixUtils.hasAdjacentTileType(mapModel.get('map'), start, TILE_TYPES.PATH, 4);
+  // try and see if any of the found empty tiles follow our rules
+  const appropriatePoint = emptyTilePoints.find((emptyPoint) => {
+    const isAdjacentToPath = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.PATH, 1);
+    const isAdjacentToHouse = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.HOUSE, 2);
+    return isAdjacentToPath && !isAdjacentToHouse;
+  })
 
+  // if none of them were good, try again
+  if (!appropriatePoint) {
+    // todo
+    // return getRandomHouseTileLocation(mapModel, houseOptions);
+  }
+
+  // we found a good point!
+  return appropriatePoint;
 }
