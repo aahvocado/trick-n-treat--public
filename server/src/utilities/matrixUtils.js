@@ -5,24 +5,30 @@
  */
 
 /**
- * gets an inner box from a larger Matrix
+ * gets Submatrix of a larger Matrix
  *
  * @param {Matrix} matrix
  * @param {Number} topLeftX
  * @param {Number} topLeftY
  * @param {Number} bottomRightX
  * @param {Number} bottomRightY
- * @returns {Matrix}
+ * @returns {Matrix | null}
  */
-export function getInnerMatrixData(matrix, topLeftX, topLeftY, bottomRightX, bottomRightY) {
-  const foundMatrix = [];
-
-  for (var y = topLeftY; y < bottomRightY; y++) {
-    const row = matrix[y];
-    foundMatrix.push(row.slice(topLeftX, bottomRightX));
+export function getSubmatrix(matrix, topLeftX, topLeftY, bottomRightX, bottomRightY) {
+  // if the range is 0 then there's no submatrix to get
+  const width = bottomRightX - topLeftX;
+  if (width <= 0) {
+    return null;
   }
 
-  return foundMatrix;
+  // iterate to get a section of larger matrix
+  const submatrix = [];
+  for (var y = topLeftY; y < bottomRightY; y++) {
+    const row = matrix[y];
+    submatrix.push(row.slice(topLeftX, bottomRightX + 1)); // offset by 1 to be inclusive
+  }
+
+  return submatrix;
 }
 /**
  * finds if there are any tiles around a Point of given Type
@@ -34,8 +40,13 @@ export function getInnerMatrixData(matrix, topLeftX, topLeftY, bottomRightX, bot
  * @returns {Boolean}
  */
 export function hasNearbyTileType(matrix, point, type, distance) {
-  const halfDistance = Math.ceil(distance / 2);
-  const submatrix = getInnerMatrixData(matrix, point.x - halfDistance, point.y - halfDistance, point.x + halfDistance + 1, point.y + halfDistance + 1);
+  // with a distance of zero there will never be anything nearby
+  if (distance <= 0) {
+    return false;
+  }
+
+  // find get the submatrix and look within it
+  const submatrix = getSubmatrix(matrix, point.x - distance, point.y - distance, point.x + distance, point.y + distance);
   return containsTileType(submatrix, type);
 }
 /**

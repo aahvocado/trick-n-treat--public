@@ -321,7 +321,7 @@ function getRandomHouseTileLocation(mapModel, options) {
 
   // create a Matrix of the sector so we can look for empty tiles in there
   const emptyTilePoints = [];
-  const sectorMatrix = mapModel.getTileGroup(sectorStart.x, sectorStart.y, sectorStart.x + sectorSize, sectorStart.y + sectorSize);
+  const sectorMatrix = mapModel.getMapSubmatrix(sectorStart.x, sectorStart.y, sectorStart.x + sectorSize, sectorStart.y + sectorSize);
   for (var y = 0; y < sectorMatrix.length; y++) {
     const searchRow = sectorMatrix[y];
     for (var x = 0; x < searchRow.length; x++) {

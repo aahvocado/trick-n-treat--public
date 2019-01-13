@@ -62,9 +62,9 @@ export class MapModel extends Model {
    * @param {Number} bottomRightY
    * @returns {Matrix}
    */
-  getTileGroup(topLeftX, topLeftY, bottomRightX, bottomRightY) {
+  getMapSubmatrix(topLeftX, topLeftY, bottomRightX, bottomRightY) {
     const map = this.get('map');
-    return matrixUtils.getInnerMatrixData(map, topLeftX, topLeftY, bottomRightX, bottomRightY);
+    return matrixUtils.getSubmatrix(map, topLeftX, topLeftY, bottomRightX, bottomRightY);
   }
   /**
    * replaces the data of a Tile at a given Point

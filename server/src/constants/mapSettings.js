@@ -14,10 +14,10 @@ export const MAP_SETTINGS = {
   numSpecialTiles: 4,
   specialMinDistance: 9,
 
-  numSectors: 12,
-  sectorSize: 5,
-  numHousePerSector: 12,
-  houseMinDistance: 2,
+  numSectors: 10,
+  sectorSize: 4,
+  numHousePerSector: 4,
+  houseMinDistance: 1,
 };
 
 export default MAP_SETTINGS;
