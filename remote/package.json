@@ -1,20 +1,14 @@
 {
-  "name": "trick-n-treat",
-  "version": "0.1.0",
-  "author": "Aidan Arrowood + Daniel Xiao",
-  "license": "ISC",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com:aahvocado/trick-n-treat.git"
+  "name": "@tnt/remote",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "compile:styles": "lessc src/styles/app.less src/build/app.css",
+    "compile": "npm run compile:styles",
+    "start": "npm run compile:styles; react-scripts start",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
-  "keywords": [
-    "party",
-    "game",
-    "javascript",
-    "digital",
-    "boardgame"
-  ],
   "dependencies": {
     "aah-util-css": "git+ssh://git@github.com/aahvocado/aah-util-css.git",
     "js-schema": "^1.0.1",
@@ -24,13 +18,7 @@
     "react-scripts": "2.1.2",
     "socket.io-client": "^2.2.0"
   },
-  "scripts": {
-    "compile:styles": "lessc src/styles/app.less src/compiled/app.css",
-    "start": "npm run compile:styles; react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+  "devDependencies": {},
   "eslintConfig": {
     "extends": "react-app"
   },
@@ -39,5 +27,12 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "author": "Aidan Arrowood & Daniel Xiao",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:aahvocado/trick-n-treat.git"
+  }
 }

@@ -1,14 +1,11 @@
 {
-  "name": "server",
+  "name": "@tnt/server",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "compile": "webpack",
     "start": "npm run compile; node ./build/server.js"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
     "dotenv-flow": "^0.2.0",
@@ -27,5 +24,12 @@
     "babel-loader": "^8.0.4",
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2"
+  },
+  "author": "Aidan Arrowood & Daniel Xiao",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:aahvocado/trick-n-treat.git"
   }
 }

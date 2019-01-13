@@ -7,7 +7,7 @@ import * as connectionManager from 'managers/connectionManager';
 
 // css
 import './styles/css-reset.css';
-import './compiled/app.css';
+import './build/app.css';
 
 // pages
 import App from './App';

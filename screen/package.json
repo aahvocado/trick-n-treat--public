@@ -1,13 +1,10 @@
 {
-  "name": "screen",
+  "name": "@tnt/screen",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "gulp"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@babel/cli": "^7.1.2",
     "@babel/core": "^7.1.2",
@@ -36,5 +33,12 @@
     "webpack-node-externals": "^1.7.2",
     "webpack-stream": "^5.1.1",
     "yarn": "^1.10.1"
+  },
+  "author": "Aidan Arrowood & Daniel Xiao",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:aahvocado/trick-n-treat.git"
   }
 }
