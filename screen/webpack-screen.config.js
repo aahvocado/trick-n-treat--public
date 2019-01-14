@@ -15,10 +15,9 @@ module.exports = {
   resolve: {
     alias: {
       constants: path.resolve('src/constants'),
-      debug: path.resolve('src/debug'),
-      input: path.resolve('src/input'),
-
+      geometry: path.resolve('src/geometry'),
       common: path.resolve('src/common'),
+      data: path.resolve('src/data'),
       components: path.resolve('src/components'),
       data: path.resolve('src/data'),
       helpers: path.resolve('src/helpers'),

@@ -12,8 +12,15 @@ import {
   ANIMATION
 
 } from 'constants/three.js';
+import {
+  createPlayerMesh,
+  createTileMesh,
+  createHouseMesh,
+  createSpecialMesh
+} from 'geometry/threeGeometry.js';
 import { initInput } from 'helpers/input';
 import consoleLog from 'helpers/debug';
+import map from 'data/map.json';
 
 // Variable declaration
 
@@ -24,7 +31,6 @@ let height = window.innerHeight;
 // Three
 let screen;
 let sceneThree;
-let tiles;
 let camera;
 let renderer;
 let lights;
@@ -33,6 +39,9 @@ let lights;
 let currentFocus;
 var currentPlayer;
 let players;
+let tiles;
+let houses;
+let specials;
 
 // Animation
 let previousTimestamp;
@@ -156,19 +165,30 @@ function player(playerId) {
   player.add(playerMesh);
   return player;
 }
-function createPlayerMesh() {
-  const playerMesh = new THREE.Mesh(
-    new THREE.BoxBufferGeometry( PLAYER.SIZE*SCENE.ZOOM, PLAYER.SIZE*SCENE.ZOOM, 20*SCENE.ZOOM ),
-    new THREE.MeshPhongMaterial( { color: PLAYER.COLOR } )
-  );
-  playerMesh.position.z = PLAYER.POSITION_HEIGHT;
-  playerMesh.castShadow = PLAYER.CAST_SHADOW;
-  playerMesh.receiveShadow = PLAYER.RECEIVE_SHADOW;
-  return playerMesh;
-}
 function generateTiles() {
   tiles = {};
-  addTile(SCENE.ORIGIN_POS);
+  houses = {};
+  specials = {};
+  consoleLog(false, ['map: ', map]);
+  map.mapData.forEach(function(row, y) {
+    row.forEach(function(col, x) {
+      if (col > 0) {
+        let xVal = x - Math.ceil(row.length/2);
+        let yVal = Math.ceil(map.mapData.length/2) - y;
+        console.log(x, Math.ceil(row.length/2), y,  Math.ceil(map.mapData.length/2));
+        console.log({ x: xVal, y: yVal }, map.mapData.length, row.length);
+        addTile({ x: xVal, y: yVal });
+
+        if (col == 2) {
+          addHouse({ x: xVal, y: yVal });
+        }
+        if (col == 3) {
+          addSpecial({ x: xVal, y: yVal });
+        }
+      }
+    });
+  });
+  // addTile(SCENE.ORIGIN_POS);
   return tiles;
 }
 function addTile(pos) {
@@ -188,15 +208,39 @@ function Tile(pos, dir, type) {
   tile.add(tileMesh);
   return tile;
 }
-function createTileMesh() {
-  const tileMesh = new THREE.Mesh(
-    new THREE.BoxBufferGeometry( TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_HEIGHT*SCENE.ZOOM ),
-    new THREE.MeshPhongMaterial( { color: TILES.COLOR } )
-  );
-  tileMesh.position.z = TILES.POSITION_HEIGHT;
-  tileMesh.castShadow = TILES.CAST_SHADOW;
-  tileMesh.receiveShadow = TILES.RECEIVE_SHADOW;
-  return tileMesh;
+function addHouse(pos) {
+  let house = new House(pos);
+  house.position.z = 1.5*SCENE.ZOOM;
+  house.position.x = pos.x*(TILES.TILE_SIZE*2);
+  house.position.y = pos.y*(TILES.TILE_SIZE*2);
+  sceneThree.add(house);
+  houses['x' + pos.x + 'y' + pos.y] = house;
+  sceneThree.add(house);
+  return house;
+}
+function House(pos, dir, type) {
+  const house = new THREE.Group();
+  house.pos = pos;
+  const houseMesh = createHouseMesh();
+  house.add(houseMesh);
+  return house;
+}
+function addSpecial(pos) {
+  let special = new Special(pos);
+  special.position.z = 3*SCENE.ZOOM;
+  special.position.x = pos.x*(TILES.TILE_SIZE*2);
+  special.position.y = pos.y*(TILES.TILE_SIZE*2);
+  sceneThree.add(special);
+  specials['x' + pos.x + 'y' + pos.y] = special;
+  sceneThree.add(special);
+  return special;
+}
+function Special(pos, dir, type) {
+  const special = new THREE.Group();
+  special.pos = pos;
+  const specialMesh = createSpecialMesh();
+  special.add(specialMesh);
+  return special;
 }
 export function move(direction) {
   currentPlayer.moves.push(direction);
