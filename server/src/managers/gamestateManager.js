@@ -1,4 +1,15 @@
+import uuid from 'uuid/v4';
 import schema from 'js-schema';
+import seedrandom from 'seedrandom';
+
+import MAP_SETTINGS from 'constants/mapSettings';
+
+import MapModel from 'models/MapModel';
+
+import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
+
+const seed = uuid();
+seedrandom(seed, { global: true });
 
 // define how our GameState should look like
 const gamestateSchema = schema({
@@ -10,8 +21,8 @@ const gamestateSchema = schema({
   players: Array, // Array<PlayerModel>
   // characters that the players are controlling
   characters: Array, // Array<CharacterModel>
-  // tiles that make up the world - 2D Array???
-  world: Array, // Array<Tiles> ???
+  // tiles that make up the world
+  mapModel: MapModel,
   // objects/items that are in the world
   entities: Array, // Array<EntityModel> ???
   // characters that are in the world (similar to entities)
@@ -20,3 +31,35 @@ const gamestateSchema = schema({
   // id of the character whose turn it is (consider how it could be an npc/entity?)
   activeCharacterId: String,
 })
+// It's the BRAIN!
+const GAMESTATE = {
+  mapModel: undefined,
+}
+/**
+ * @returns {Object}
+ */
+export function getGamestate() {
+  return GAMESTATE;
+}
+/**
+ * generates a map
+ */
+function initMap() {
+  GAMESTATE.mapModel = mapGenerationUtils.generateNewMapModel(MAP_SETTINGS)
+}
+/**
+ * initializes gamestate, effectively regenerating everything
+ */
+function initGamestate() {
+  initMap();
+}
+/**
+ * starts everything
+ */
+export function start() {
+  initGamestate();
+
+  console.log('-- generated map with seed', seed);
+  console.log(GAMESTATE.mapModel.get('map'));
+}
+
