@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 
 import * as websocketInstance from 'managers/websocketInstance';
+import { getGamestate } from 'managers/gamestateManager';
 
 let app;
 let server;
@@ -19,9 +20,12 @@ export function start() {
     resp.send('Server is Up');
   });
 
+  app.get('/gamestate-raw', function(req, resp) {
+    resp.send(getGamestate());
+  });
+
   server = http.createServer(app);
   websocketInstance.start(server);
-
 
   // START!
   const SERVER_PORT = process.env.SERVER_PORT;
