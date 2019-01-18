@@ -1,6 +1,6 @@
 import Point from '@studiomoniker/point';
 import Pathfinding from 'pathfinding';
-import MapModel from 'models/MapModel';
+import MatrixModel from 'models/MatrixModel';
 
 import TILE_TYPES from 'constants/tileTypes';
 
@@ -23,16 +23,16 @@ import * as matrixUtils from 'utilities/matrixUtils';
  * handles through the entire generation process
  *
  * @param {MapConfig} mapConfig
- * @returns {MapModel}
+ * @returns {MatrixModel}
  */
-export function generateNewMapModel(mapConfig) {
+export function generateNewMatrixModel(mapConfig) {
   // create an empty Matrix
-  const emptyMatrix = generateRoom(mapConfig.width, mapConfig.height);
+  const emptyMatrix = generateMatrix(mapConfig.width, mapConfig.height, TILE_TYPES.EMPTY);
 
   // initiate the Model
   const startPoint = new Point(mapConfig.startCoordinates[0], mapConfig.startCoordinates[1]);
-  const mapModel = new MapModel({
-    map: emptyMatrix,
+  const mapModel = new MatrixModel({
+    matrix: emptyMatrix,
     start: startPoint,
   });
 
@@ -67,15 +67,16 @@ export function generateNewMapModel(mapConfig) {
  *
  * @param {Number} width
  * @param {Number} height
+ * @param {*} [defaultValue]
  * @returns {Matrix}
  */
-export function generateRoom(width, height) {
+export function generateMatrix(width, height, defaultValue = TILE_TYPES.EMPTY) {
   let matrix = [];
 
   for (var y = 0; y < height; y++) {
     matrix.push([]);
     for (var x = 0; x < width; x++) {
-      matrix[y][x] = TILE_TYPES.EMPTY;
+      matrix[y][x] = defaultValue;
     }
   }
 
@@ -85,13 +86,13 @@ export function generateRoom(width, height) {
  * uses the Random Walk process to apply paths to a Map
  *  https://en.wikipedia.org/wiki/Random_walk
  *
- * @param {MapModel} mapModel
+ * @param {MatrixModel} mapModel
  * @param {Object} config
  * @property {Point} config.start - point to start
  * @property {Number} config.steps - how many steps to walk
  */
 function executeRandomWalk(mapModel, {start, steps, stepSize}) {
-  // use recursion to create paths on our MapModel
+  // use recursion to create paths on our MatrixModel
   randomWalkStep(mapModel, steps, {
     currentPoint: start.clone(),
     stepSize: stepSize,
@@ -100,7 +101,7 @@ function executeRandomWalk(mapModel, {start, steps, stepSize}) {
 /**
  * recursively updates a point on the map and takes a step
  *
- * @param {MapModel} mapModel
+ * @param {MatrixModel} mapModel
  * @param {Number} remainingSteps - steps left to make
  * @param {Object} stepOptions
  * @property {Point} stepOptions.currentPoint - point where the step is at
@@ -210,7 +211,7 @@ function getRandomWeightedDirection(mapModel, currentPoint) {
 /**
  * places special Tiles onto the Map
  *
- * @param {MapModel} mapModel
+ * @param {MatrixModel} mapModel
  * @param {Object} options
  * @property {Number} options.numSpecialTiles
  */
@@ -233,7 +234,7 @@ function generateSpecialTiles(mapModel, options) {
     const endY = mapModel.get('start').y;
 
     // create grid for the Finder, setting the specific tiles as walkable (since non-0 is typically unwalkable)
-    const grid = new Pathfinding.Grid(mapModel.get('map'));
+    const grid = new Pathfinding.Grid(mapModel.getMatrix());
     grid.setWalkableAt(startX, startY, true);
     grid.setWalkableAt(endX, endY, true);
 
@@ -256,7 +257,7 @@ function generateSpecialTiles(mapModel, options) {
 /**
  * we want to pick a location that's not at the extremes
  *
- * @param {MapModel} mapModel
+ * @param {MatrixModel} mapModel
  * @param {Object} options
  * @property {Point} options.specialMinDistance
  */
@@ -286,7 +287,7 @@ function getRandomSpecialTileLocation(mapModel, options) {
 /**
  * places House Tiles onto the Map
  *
- * @param {MapModel} mapModel
+ * @param {MatrixModel} mapModel
  * @param {Object} options
  * @property {Number} options.numHousePerSector - number of House Tiles to generate
  */
@@ -305,7 +306,7 @@ function generateHouseTiles(mapModel, options) {
  * - adjacent to a path
  * - far enough away from another house
  *
- * @param {MapModel} mapModel
+ * @param {MatrixModel} mapModel
  * @param {Object} options
  * @property {Number} options.houseMinDistance - number of House Tiles to generate
  * @property {Number} options.sectorSize - number of House Tiles to generate
@@ -321,7 +322,7 @@ function getRandomHouseTileLocation(mapModel, options) {
 
   // create a Matrix of the sector so we can look for empty tiles in there
   const emptyTilePoints = [];
-  const sectorMatrix = mapModel.getMapSubmatrix(sectorStart.x, sectorStart.y, sectorStart.x + sectorSize, sectorStart.y + sectorSize);
+  const sectorMatrix = mapModel.getTileSubmatrix(sectorStart.x, sectorStart.y, sectorStart.x + sectorSize, sectorStart.y + sectorSize);
   for (var y = 0; y < sectorMatrix.length; y++) {
     const searchRow = sectorMatrix[y];
     for (var x = 0; x < searchRow.length; x++) {
@@ -339,10 +340,10 @@ function getRandomHouseTileLocation(mapModel, options) {
   matrixUtils.shuffleArray(emptyTilePoints);
 
   // try and see if any of the found empty tiles follow our rules
-  const map = mapModel.get('map');
+  const mapMatrix = mapModel.getMatrix();
   const appropriatePoint = emptyTilePoints.find((emptyPoint) => {
-    const isAdjacentToPath = matrixUtils.hasAdjacentTileType(map, emptyPoint, TILE_TYPES.PATH);
-    const isNearbyToHouse = matrixUtils.hasNearbyTileType(map, emptyPoint, TILE_TYPES.HOUSE, houseMinDistance);
+    const isAdjacentToPath = matrixUtils.hasAdjacentTileType(mapMatrix, emptyPoint, TILE_TYPES.PATH);
+    const isNearbyToHouse = matrixUtils.hasNearbyTileType(mapMatrix, emptyPoint, TILE_TYPES.HOUSE, houseMinDistance);
     return isAdjacentToPath && !isNearbyToHouse;
   })
 
@@ -360,7 +361,7 @@ function getRandomHouseTileLocation(mapModel, options) {
 /**
  * creates a bunch of houses in different sectors
  *
- * @param {MapModel} mapModel
+ * @param {MatrixModel} mapModel
  * @param {Object} options
  * @property {Number} options.numSectors - number of House Tiles to generate
  */
@@ -378,7 +379,7 @@ function generateSectors(mapModel, options) {
 /**
  * generates a Sector starting point where a bunch of houses are placed in
  *
- * @param {MapModel} mapModel
+ * @param {MatrixModel} mapModel
  * @param {Object} options
  * @returns {Point}
  */

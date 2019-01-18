@@ -1,5 +1,6 @@
 import schema from 'js-schema';
 
+import Point from '@studiomoniker/point';
 import Model from 'models/Model';
 import StatModel, { HealthModel, MovementModel } from 'models/StatModel';
 
@@ -7,14 +8,16 @@ import StatModel, { HealthModel, MovementModel } from 'models/StatModel';
 const characterSchema = schema({
   // character's name
   name: String,
-  // id of character
+  //
+  characterId: String,
+  // id of character type
   typeId: String,
   // health
   health: StatModel,
   // spaces character and explore
   movement: StatModel,
   // where the player is on the world
-  position: { x: Number, y: Number },
+  position: Point,
 })
 
 /**

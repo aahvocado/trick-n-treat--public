@@ -10,4 +10,3 @@ import * as serverInstance from 'managers/serverInstance';
 import * as gamestateManager from 'managers/gamestateManager';
 
 serverInstance.start();
-gamestateManager.start();

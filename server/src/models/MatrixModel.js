@@ -3,40 +3,44 @@ import Model from 'models/Model';
 
 import * as matrixUtils from 'utilities/matrixUtils';
 
-/*
-  SUPER WARNING: `map` is an array function,
-    it could potentially be confusing when used together so it might warrant a rename
-*/
-
 /**
- * class that handles the World Map
+ * abstract helper for managing a 2D Array
  *
- * @typedef {Model} MapModel
+ * @typedef {Model} MatrixModel
  */
-export class MapModel extends Model {
+export class MatrixModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super(newAttributes);
 
     this.set(Object.assign({
-      map: [[]],
-
+      // 2D array of data in the tiles
+      matrix: [[]],
+      // where the starting location of the map is made
       start: new Point(),
       // list of Points where "special" tiles are located - maybe starting spots?
       specialPoints: [],
     }, newAttributes));
   }
   /**
+   * returns the 2D array of tiles
+   *
+   * @returns {Matrix}
+   */
+  getMatrix() {
+    return this.get('matrix');
+  }
+  /**
    * @returns {Number}
    */
   getHeight() {
-    return this.get('map').length;
+    return this.getMatrix().length;
   }
   /**
    * @returns {Number}
    */
   getWidth() {
-    return this.get('map')[0].length;
+    return this.getMatrix()[0].length;
   }
   /**
    * returns the Tile located at a given Point
@@ -48,13 +52,13 @@ export class MapModel extends Model {
     const {x, y} = point;
 
     try {
-      return this.get('map')[y][x];
+      return this.getMatrix()[y][x];
     } catch (e) {
       return null;
     }
   }
   /**
-   * gets matrix of the tiles in given box boundary
+   * gets matrix of the matrix in given box boundary
    *
    * @param {Number} topLeftX
    * @param {Number} topLeftY
@@ -62,8 +66,8 @@ export class MapModel extends Model {
    * @param {Number} bottomRightY
    * @returns {Matrix}
    */
-  getMapSubmatrix(topLeftX, topLeftY, bottomRightX, bottomRightY) {
-    const map = this.get('map');
+  getTileSubmatrix(topLeftX, topLeftY, bottomRightX, bottomRightY) {
+    const map = this.getMatrix();
     return matrixUtils.getSubmatrix(map, topLeftX, topLeftY, bottomRightX, bottomRightY);
   }
   /**
@@ -73,8 +77,8 @@ export class MapModel extends Model {
    * @param {*} tileData - what to update tile with
    */
   setTileAt(point, tileData) {
-    const map = this.get('map');
-    map[point.y][point.x] = tileData;
+    const matrix = this.get('matrix');
+    matrix[point.y][point.x] = tileData;
   }
   /**
    * updates the data of Tiles from an Array of Points
@@ -147,4 +151,4 @@ export class MapModel extends Model {
   }
 }
 
-export default MapModel;
+export default MatrixModel;

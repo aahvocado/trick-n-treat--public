@@ -18,8 +18,8 @@ export const STAT_TYPE_ID = {
 }
 
 const STAT_NAME = {
-  STAT_TYPE_ID[HEALTH]: 'Health',
-  STAT_TYPE_ID[MOVEMENT]: 'Movement',
+  [STAT_TYPE_ID.HEALTH]: 'Health',
+  [STAT_TYPE_ID.MOVEMENT]: 'Movement',
 }
 
 /**
