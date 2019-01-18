@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "compile": "webpack",
-    "start": "npm run compile; node ./build/server.js"
+    "start": "npm run compile; node ./build/main.compiled.js",
+    "test": "npm run compile && ava --v"
   },
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
@@ -25,9 +26,16 @@
     "@babel/cli": "^7.1.5",
     "@babel/core": "^7.1.5",
     "@babel/preset-env": "^7.1.5",
+    "ava": "^1.1.0",
     "babel-loader": "^8.0.4",
+    "babel-plugin-webpack-alias-7": "^0.1.1",
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2"
+  },
+  "ava": {
+    "files": [
+      "build/tests.compiled.js"
+    ]
   },
   "author": "Aidan Arrowood & Daniel Xiao",
   "license": "UNLICENSED",

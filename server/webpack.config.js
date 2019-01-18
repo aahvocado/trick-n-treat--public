@@ -7,16 +7,20 @@ const serverPath = path.resolve(__dirname, './src/');
 module.exports = {
   mode: 'development',
   target: 'node',
-  entry: './src/index.js',
+  entry: {
+    main: './src/index.js',
+    tests: './src/tests/tests.index.js',
+  },
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'server.js'
+    filename: '[name].compiled.js'
   },
   resolve: {
     alias: {
       constants: path.resolve(serverPath, 'constants'),
       managers: path.resolve(serverPath, 'managers'),
       models: path.resolve(serverPath, 'models'),
+      tests: path.resolve(serverPath, 'tests'),
       utilities: path.resolve(serverPath, 'utilities'),
     }
   },
