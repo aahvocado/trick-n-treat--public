@@ -3,21 +3,17 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "compile:remote" : "echo \"compiling the Remote project is not available\"",
-    "compile:screen" : "npm install --prefix ./screen; npm run compile --prefix ./screen",
-    "compile:server" : "npm install --prefix ./server; npm run compile --prefix ./server",
-    "compile" : "npm run compile:remote; npm run compile:screen; npm run compile:server;",
-
-    "start:remote" : "npm run start --prefix ./remote",
-    "start:screen" : "echo \"starting the Screen project is not available\"",
-    "start:server" : "npm run start --prefix ./server",
-
+    "compile:remote": "echo \"compiling the Remote project is not available\"",
+    "compile:screen": "npm install --prefix ./screen; npm run compile --prefix ./screen",
+    "compile:server": "npm install --prefix ./server; npm run compile --prefix ./server",
+    "compile": "npm run compile:remote; npm run compile:screen; npm run compile:server;",
+    "start:remote": "npm run start --prefix ./remote",
+    "start:screen": "echo \"starting the Screen project is not available\"",
+    "start:server": "npm run start --prefix ./server",
     "test": "echo \"TODO: Run tests on all projects\""
   },
-  "dependencies": {
-  },
-  "devDependencies": {
-  },
+  "dependencies": {},
+  "devDependencies": {},
   "author": "Aidan Arrowood & Daniel Xiao",
   "description": "This is a social digital board game inspired by Betrayal at House on the Hill where a group of friends explore a neighborhood looking for treats!",
   "homepage": "https://github.com/aahvocado/trick-n-treat#readme",

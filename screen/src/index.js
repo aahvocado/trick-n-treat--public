@@ -1,8 +1,7 @@
-/**
- * entry for the web app used by the client
- *
- * start by initializing all our managers
- */
-import 'managers/threejsManager';
+import * as connectionManager from 'managers/connectionManager';
+import * as eventManager from 'managers/eventManager';
 
-// import './styles/main.css';
+import app from './app.js';
+
+connectionManager.connect();
+eventManager.start();
