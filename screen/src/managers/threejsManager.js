@@ -12,7 +12,15 @@ import {
   ANIMATION
 
 } from 'constants/three.js';
-import consoleLog from 'debug/debug';
+import {
+  createPlayerMesh,
+  createTileMesh,
+  createHouseMesh,
+  createSpecialMesh
+} from 'geometry/threeGeometry.js';
+import { initInput } from 'helpers/input';
+import { gamestate } from 'managers/eventManager';
+import consoleLog from 'helpers/debug';
 
 // Variable declaration
 
@@ -23,7 +31,6 @@ let height = window.innerHeight;
 // Three
 let screen;
 let sceneThree;
-let tiles;
 let camera;
 let renderer;
 let lights;
@@ -32,6 +39,9 @@ let lights;
 let currentFocus;
 var currentPlayer;
 let players;
+let tiles;
+let houses;
+let specials;
 
 // Animation
 let previousTimestamp;
@@ -71,8 +81,7 @@ function initScene() {
   return scene;
 }
 function render() {
-  renderer.render(sceneThree, camera);
-  requestAnimationFrame(render);
+  requestAnimationFrame(animate);
 }
 
 function initCamera() {
@@ -125,7 +134,6 @@ function initLights() {
   return lights;
 }
 function initGame() {
-  tiles = generateTiles();
   players = initPlayers();
 
   players.forEach(function(player) {
@@ -136,6 +144,7 @@ function initGame() {
   startMoving = false;
 
   currentPlayer.position.set(SCENE.ORIGIN_POS.x, SCENE.ORIGIN_POS.y, PLAYER.POSITION_HEIGHT);
+  initInput();
 }
 function initPlayers(playerIds = [1]) {
   let players = [];
@@ -155,19 +164,30 @@ function player(playerId) {
   player.add(playerMesh);
   return player;
 }
-function createPlayerMesh() {
-  const playerMesh = new THREE.Mesh(
-    new THREE.BoxBufferGeometry( PLAYER.SIZE*SCENE.ZOOM, PLAYER.SIZE*SCENE.ZOOM, 20*SCENE.ZOOM ),
-    new THREE.MeshPhongMaterial( { color: PLAYER.COLOR } )
-  );
-  playerMesh.position.z = PLAYER.POSITION_HEIGHT;
-  playerMesh.castShadow = PLAYER.CAST_SHADOW;
-  playerMesh.receiveShadow = PLAYER.RECEIVE_SHADOW;
-  return playerMesh;
-}
 function generateTiles() {
   tiles = {};
-  addTile(SCENE.ORIGIN_POS);
+  houses = {};
+  specials = {};
+  consoleLog(false, ['map: ', map]);
+  map.mapData.forEach(function(row, y) {
+    row.forEach(function(col, x) {
+      if (col > 0) {
+        let xVal = x - Math.ceil(row.length/2);
+        let yVal = Math.ceil(map.mapData.length/2) - y;
+        console.log(x, Math.ceil(row.length/2), y,  Math.ceil(map.mapData.length/2));
+        console.log({ x: xVal, y: yVal }, map.mapData.length, row.length);
+        addTile({ x: xVal, y: yVal });
+
+        if (col == 2) {
+          addHouse({ x: xVal, y: yVal });
+        }
+        if (col == 3) {
+          addSpecial({ x: xVal, y: yVal });
+        }
+      }
+    });
+  });
+  // addTile(SCENE.ORIGIN_POS);
   return tiles;
 }
 function addTile(pos) {
@@ -187,13 +207,134 @@ function Tile(pos, dir, type) {
   tile.add(tileMesh);
   return tile;
 }
-function createTileMesh() {
-  const tileMesh = new THREE.Mesh(
-    new THREE.BoxBufferGeometry( TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_HEIGHT*SCENE.ZOOM ),
-    new THREE.MeshPhongMaterial( { color: TILES.COLOR } )
-  );
-  tileMesh.position.z = TILES.POSITION_HEIGHT;
-  tileMesh.castShadow = TILES.CAST_SHADOW;
-  tileMesh.receiveShadow = TILES.RECEIVE_SHADOW;
-  return tileMesh;
+function addHouse(pos) {
+  let house = new House(pos);
+  house.position.z = 1.5*SCENE.ZOOM;
+  house.position.x = pos.x*(TILES.TILE_SIZE*2);
+  house.position.y = pos.y*(TILES.TILE_SIZE*2);
+  sceneThree.add(house);
+  houses['x' + pos.x + 'y' + pos.y] = house;
+  sceneThree.add(house);
+  return house;
+}
+function House(pos, dir, type) {
+  const house = new THREE.Group();
+  house.pos = pos;
+  const houseMesh = createHouseMesh();
+  house.add(houseMesh);
+  return house;
+}
+function addSpecial(pos) {
+  let special = new Special(pos);
+  special.position.z = 3*SCENE.ZOOM;
+  special.position.x = pos.x*(TILES.TILE_SIZE*2);
+  special.position.y = pos.y*(TILES.TILE_SIZE*2);
+  sceneThree.add(special);
+  specials['x' + pos.x + 'y' + pos.y] = special;
+  sceneThree.add(special);
+  return special;
+}
+function Special(pos, dir, type) {
+  const special = new THREE.Group();
+  special.pos = pos;
+  const specialMesh = createSpecialMesh();
+  special.add(specialMesh);
+  return special;
+}
+export function move(direction) {
+  currentPlayer.moves.push(direction);
+  const finalPosition = currentPlayer.moves.reduce((position, move) => {
+      if(move === TILE_DIRECTIONS.FORWARD) return {x: position.x, y: position.y+1};
+      if(move === TILE_DIRECTIONS.BACKWARD) return { x: position.x, y: position.y-1};
+      if(move === TILE_DIRECTIONS.LEFT) return {x: position.x-1, y: position.y};
+      if(move === TILE_DIRECTIONS.RIGHT) return { x: position.x+1, y: position.y};
+  }, { x: currentPlayer.pos.x, y: currentPlayer.pos.y});
+  let targetTile = tiles['x' + finalPosition.x + 'y' + finalPosition.y];
+  consoleLog(false, ["finalPosition: ", finalPosition]);
+
+  if (direction === TILE_DIRECTIONS.FORWARD) {
+    if (!stepStartTimestamp) startMoving = true;
+  }
+  else if (direction === TILE_DIRECTIONS.BACKWARD) {
+    if (!stepStartTimestamp) startMoving = true;
+  }
+  else if (direction === TILE_DIRECTIONS.LEFT) {
+    if (!stepStartTimestamp) startMoving = true;
+  }
+  else if (direction === TILE_DIRECTIONS.RIGHT) {
+    if(!stepStartTimestamp) startMoving = true;
+  }
+  if (!targetTile) {
+    // addTile(finalPosition, direction);
+  }
+}
+function animate(timestamp) {
+  requestAnimationFrame(animate);
+  if(!previousTimestamp) {
+    previousTimestamp = timestamp;
+  } 
+  const delta = timestamp - previousTimestamp;
+  previousTimestamp = timestamp;
+
+  if(startMoving) {
+      stepStartTimestamp = timestamp;
+      startMoving = false;
+  }
+
+  if(stepStartTimestamp) {
+      const moveDeltaTime = timestamp - stepStartTimestamp;
+      const moveDeltaDistance = Math.min(moveDeltaTime/ANIMATION.STEP_TIME,1)*TILES.TILE_SIZE*SCENE.ZOOM;
+      const jumpDeltaDistance = Math.sin(Math.min(moveDeltaTime/ANIMATION.STEP_TIME,1)*Math.PI)*12*SCENE.ZOOM+PLAYER.POSITION_HEIGHT;
+      switch(currentPlayer.moves[0]) {
+          case TILE_DIRECTIONS.FORWARD: {
+              currentPlayer.position.y = currentPlayer.pos.y*TILES.TILE_SIZE*SCENE.ZOOM + moveDeltaDistance; // initial player position is 0
+              currentPlayer.position.z = jumpDeltaDistance;
+              camera.position.y = CAMERA.INITIAL_CAMERA_POSITION_Y + currentFocus.pos.y*TILES.TILE_SIZE*SCENE.ZOOM + moveDeltaDistance;
+              break;
+          }
+          case TILE_DIRECTIONS.BACKWARD: {
+              currentPlayer.position.y = currentPlayer.pos.y*TILES.TILE_SIZE*SCENE.ZOOM - moveDeltaDistance;
+              currentPlayer.position.z = jumpDeltaDistance;
+              camera.position.y = CAMERA.INITIAL_CAMERA_POSITION_Y + currentFocus.pos.y*TILES.TILE_SIZE*SCENE.ZOOM - moveDeltaDistance;
+              break;
+          }
+          case TILE_DIRECTIONS.LEFT: {
+              currentPlayer.position.x = currentPlayer.pos.x*TILES.TILE_SIZE*SCENE.ZOOM - moveDeltaDistance; // initial player position is 0
+              currentPlayer.position.z = jumpDeltaDistance;
+              camera.position.x = CAMERA.INITIAL_CAMERA_POSITION_X + currentFocus.pos.x*TILES.TILE_SIZE*SCENE.ZOOM - moveDeltaDistance;
+              break;
+          }
+          case TILE_DIRECTIONS.RIGHT: {
+              currentPlayer.position.x = currentPlayer.pos.x*TILES.TILE_SIZE*SCENE.ZOOM + moveDeltaDistance;
+              currentPlayer.position.z = jumpDeltaDistance;
+              camera.position.x = CAMERA.INITIAL_CAMERA_POSITION_X + currentFocus.pos.x*TILES.TILE_SIZE*SCENE.ZOOM + moveDeltaDistance;
+              break;
+          }
+      }
+      // Once a step has ended
+      if(moveDeltaTime > ANIMATION.STEP_TIME) {
+          switch(currentPlayer.moves[0]) {
+              case TILE_DIRECTIONS.FORWARD: {
+                  currentPlayer.pos.y++;
+                  break;
+              }
+              case TILE_DIRECTIONS.BACKWARD: {
+                  currentPlayer.pos.y--;
+                  break;
+              }
+              case TILE_DIRECTIONS.LEFT: {
+                  currentPlayer.pos.x--;
+                  break;
+              }
+              case TILE_DIRECTIONS.RIGHT: {
+                  currentPlayer.pos.x++;
+                  break;
+              }
+          }
+          currentPlayer.moves.shift();
+          // If more steps are to be taken then restart counter otherwise stop stepping
+          stepStartTimestamp = currentPlayer.moves.length === 0 ? null : timestamp;
+      }
+  }
+  renderer.render(sceneThree, camera);
 }

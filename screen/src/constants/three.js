@@ -77,9 +77,9 @@ export const TILES_SIDES = {
   LEFT: 3
 }
 export const TILE_DIRECTIONS = {
-  FORWARD: 'BACKWARD',
+  FORWARD: 'FORWARD',
   RIGHT: 'LEFT',
-  BACKWARD: 'FORWARD',
+  BACKWARD: 'BACKWARD',
   LEFT: 'RIGHT'
 }
 export const TILE_REVERSE_DIRECTIONS = {
@@ -87,6 +87,26 @@ export const TILE_REVERSE_DIRECTIONS = {
   RIGHT: 'LEFT',
   BACKWARD: 'FORWARD',
   LEFT: 'RIGHT'
+}
+export const TILE_TYPES = {
+  START: '*',
+  EMPTY: 0,
+  PATH: 1,
+  HOUSE: 2,
+  SPECIAL: 3,
+}
+export const HOUSE = {
+  HOUSE_SIZE: 30,
+  COLOR: 0xfff7bc,
+  POSITION_HEIGHT: 16*SCENE.ZOOM,
+  CAST_SHADOW: true,
+  RECEIVE_SHADOW: true,
+}
+export const SPECIAL = {
+  POSITION_HEIGHT: 3,
+  COLOR: 0xffdddd,
+  CAST_SHADOW: true,
+  RECEIVE_SHADOW: true
 }
 export const PLAYER = {
   SIZE: 15,
