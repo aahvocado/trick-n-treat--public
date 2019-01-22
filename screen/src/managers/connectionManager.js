@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { Sockets } from 'constants/server.js';
+import { SocketConfig } from 'constants/server.js';
 
 /**
  * Singleton for handling Websocket Server
@@ -14,7 +14,7 @@ export let socket;
  * @returns {socket.io-client} - gives back the socket that made the connection attempt
  */
 export function connect() {
-  socket = io.connect(Sockets.server_url, {
+  socket = io.connect(SocketConfig.server_url, {
     reconnect: false,
     reconnectionAttempts: 1,
   });

@@ -21,7 +21,6 @@ import {
 import { initInput } from 'helpers/input';
 import { gamestate } from 'managers/eventManager';
 import consoleLog from 'helpers/debug';
-import map from 'data/map.json';
 
 // Variable declaration
 

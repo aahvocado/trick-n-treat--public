@@ -17,7 +17,6 @@ module.exports = {
       constants: path.resolve('src/constants'),
       geometry: path.resolve('src/geometry'),
       common: path.resolve('src/common'),
-      data: path.resolve('src/data'),
       components: path.resolve('src/components'),
       data: path.resolve('src/data'),
       helpers: path.resolve('src/helpers'),
