@@ -5,7 +5,7 @@ This is a social digital board game inspired by Betrayal at House on the Hill wh
 This game is separated into multiple projects. Each project has their own package and scripts which compiles and runs the individual application. However, from the root folder you can now call `npm run compile:${project-name}` and `npm run start:${project-name}` respectively.
 
 ### "remote" Project
-Represents the screen that each player will be viewing from.
+Represents the screen that each user will be viewing from.
 
 ### "screen" Project
 Represents the "board" that the game is being played on.

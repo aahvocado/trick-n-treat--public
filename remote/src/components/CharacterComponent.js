@@ -1,15 +1,6 @@
 import React, { PureComponent } from 'react';
 
-import { WeaponModel } from '../models/ItemModel';
-const demoInventory = [
-  new WeaponModel({name: 'weapon 1'}),
-  new WeaponModel({name: 'weapon 2'}),
-  new WeaponModel({name: 'weapon 3'}),
-  new WeaponModel({name: 'weapon 4'}),
-  new WeaponModel({name: 'weapon 5'}),
-  new WeaponModel({name: 'weapon 6'}),
-  new WeaponModel({name: 'weapon 7'}),
-]
+const demoInventory = ['item 1', 'item 2', 'item 3', 'item 4'];
 
 /**
  * displays character data
@@ -21,7 +12,7 @@ export class CharacterComponent extends PureComponent {
   /** @override */
   render() {
     return (
-      <div className='position-relative width-full mar-ver-2'>
+      <div className='position-relative width-full mar-v-2'>
         <CharacterMenuComponent />
         <CharacterInventoryComponent list={demoInventory} />
       </div>
@@ -127,14 +118,8 @@ export class CharacterInventoryComponent extends PureComponent {
  *
  */
 export class InventoryItemComponent extends PureComponent {
-  static defaultProps = {
-    /** @type {ItemModel} */
-    model: undefined,
-  }
   /** @override */
   render() {
-    const { model } = this.props;
-
     return (
       <div
         className='mar-1 borradius-2 bg-secondary-lighter boxshadow-b-1-primary cursor-pointer flex-row-centered'
@@ -144,7 +129,7 @@ export class InventoryItemComponent extends PureComponent {
           margin: '5px auto',
         }}
       >
-        { model.get('name') }
+        { this.props.model }
       </div>
     )
   }

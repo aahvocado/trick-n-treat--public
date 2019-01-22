@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 // services
 import * as serviceWorker from './serviceWorker';
 import * as connectionManager from 'managers/connectionManager';
+import * as gamestateInterpreter from 'managers/gamestateInterpreter';
 
 // css
 import './styles/css-reset.css';
@@ -19,6 +20,7 @@ serviceWorker.unregister();
 
 // connect to websocket
 connectionManager.connect();
+gamestateInterpreter.start();
 
 // render after everything
 ReactDOM.render(<App />, document.getElementById('root'));

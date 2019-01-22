@@ -2,6 +2,7 @@ import Point from '@studiomoniker/point';
 import Pathfinding from 'pathfinding';
 import MatrixModel from 'models/MatrixModel';
 
+import POINTS from 'constants/points';
 import TILE_TYPES from 'constants/tileTypes';
 
 import * as mathUtils from 'utilities/mathUtils';
@@ -16,7 +17,7 @@ import * as matrixUtils from 'utilities/matrixUtils';
  * @property {Number} MapConfig.width - number of horizontal tiles
  * @property {Number} MapConfig.height - number of vertical tiles
  * @property {Number} MapConfig.numSpecialTiles - number of special tiles
- * @property {Array} MapConfig.startCoordinates - [x, y] - where the starting point is
+ * @property {Array} MapConfig.startPoint - [x, y] - where the starting point is
  */
 
 /**
@@ -30,14 +31,13 @@ export function generateNewMatrixModel(mapConfig) {
   const emptyMatrix = generateMatrix(mapConfig.width, mapConfig.height, TILE_TYPES.EMPTY);
 
   // initiate the Model
-  const startPoint = new Point(mapConfig.startCoordinates[0], mapConfig.startCoordinates[1]);
   const mapModel = new MatrixModel({
     matrix: emptyMatrix,
-    start: startPoint,
+    start: mapConfig.startPoint,
   });
 
   // set our starting point Tile
-  mapModel.setTileAt(startPoint, '*');
+  mapModel.setTileAt(mapConfig.startPoint, '*');
 
   // create special tiles on the Map
   generateSpecialTiles(mapModel, {
@@ -47,7 +47,7 @@ export function generateNewMatrixModel(mapConfig) {
 
   // create paths on the Map
   executeRandomWalk(mapModel, {
-    start: startPoint,
+    start: mapConfig.startPoint,
     steps: mapConfig.numSteps,
     stepSize: mapConfig.stepSize,
   });
@@ -147,16 +147,16 @@ export function getRandomDirection() {
   switch (direction) {
     // left
     case 0:
-      return new Point(-1, 0);
+      return POINTS.LEFT;
     // right
     case 1:
-      return new Point(1, 0);
+      return POINTS.RIGHT;
     // up
     case 2:
-      return new Point(0, -1);
+      return POINTS.UP;
     // down
     case 3:
-      return new Point(0, 1);
+      return POINTS.DOWN;
   }
 }
 /**
@@ -199,13 +199,13 @@ function getRandomWeightedDirection(mapModel, currentPoint) {
 
   switch (direction.name) {
     case 'left':
-      return new Point(-1, 0);
+      return POINTS.LEFT;
     case 'right':
-      return new Point(1, 0);
+      return POINTS.RIGHT;
     case 'up':
-      return new Point(0, -1);
+      return POINTS.UP;
     case 'down':
-      return new Point(0, 1);
+      return POINTS.DOWN;
   }
 }
 /**

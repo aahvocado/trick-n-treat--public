@@ -7,8 +7,10 @@ const statSchema = schema({
   // id of stat
   typeId: String,
   // base value
+  base: Number,
+  // current value
   value: Number,
-  // number that changes the value
+  // temporary change of values
   modifier: Number,
 })
 
@@ -33,6 +35,7 @@ export class StatModel extends Model {
 
     // apply default attributes and then override with given ones
     this.set(Object.assign({
+      base: 0,
       value: 0,
       modifier: 0,
     }, newAttributes));

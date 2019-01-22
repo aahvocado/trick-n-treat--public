@@ -12,9 +12,9 @@ const gamestateSchema = schema({
   id: String,
   // id of the current game state (such as paused, waiting, etc)
   state: String,
-  // connected players
-  players: Array, // Array<PlayerModel>
-  // characters that the players are controlling
+  // connected users
+  users: Array, // Array<UserModel>
+  // characters that the users are controlling
   characters: Array, // Array<CharacterModel>
   // tiles that make up the world
   tileMapModel: MatrixModel,
@@ -79,25 +79,41 @@ export class GamestateModel extends Model {
     // get characters
     const characters = this.get('characters');
     characters.forEach((characterModel) => {
-      // update the Map with the players at their positions
+      // update the Map with the users at their positions
       const position = characterModel.get('position');
       const existingTileData = newMapDataModel.getTileAt(position);
       existingTileData.characters.push(characterModel.id);
-      // newMapDataModel.setTileAt(position, characterModel.id);
     })
 
     // done - set attribute
     this.set({mapDataModel: newMapDataModel});
   }
   /**
-   * @param {String} characterId
+   * @param {String} id - `characterId`
    * @returns {CharacterModel}
    */
-  findCharacter(characterId) {
-    const characters = this.get('characters');
-    return characters.find((characterModel) => {
-      return characterModel.get('characterId') === characterId;
+  findCharacter(id) {
+    return this.get('characters').find((characterModel) => {
+      return characterModel.get('characterId') === id;
     })
+  }
+  /**
+   * @param {String} id - `userId`
+   * @returns {UserModel}
+   */
+  findUser(id) {
+    return this.get('users').find((userModel) => {
+      return userModel.get('userId') === id;
+    })
+  }
+  /**
+   * @param {String} id - `userId`
+   * @returns {CharacterModel}
+   */
+  findUsersCharacter(id) {
+    const userModel = this.findUser(id);
+    const characterId = userModel.get('characterId');
+    return this.findCharacter(characterId);
   }
 }
 

@@ -12,6 +12,7 @@ export const TILE_TYPES = {
 export default TILE_TYPES;
 
 export const WALKABLE_TILE_TYPES = [
+  TILE_TYPES.START,
   TILE_TYPES.PATH,
   TILE_TYPES.HOUSE,
   TILE_TYPES.SPECIAL,

@@ -1,15 +1,17 @@
 import uuid from 'uuid/v4';
 import seedrandom from 'seedrandom';
 
-import MAP_SETTINGS from 'constants/mapSettings';
+import { MAP_START } from 'constants/mapSettings';
+import POINTS from 'constants/points';
 import TILE_TYPES, { isWalkableTile } from 'constants/tileTypes';
 
 import Point from '@studiomoniker/point';
 import GamestateModel from 'models/GamestateModel';
-import CharacterModel from 'models/CharacterModel';
-import PlayerModel from 'models/PlayerModel';
+import CharacterModel, { CPUCharacterModel } from 'models/CharacterModel';
+import UserModel from 'models/UserModel';
 
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
+import * as mathUtils from 'utilities/mathUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
 
 // replace seed if we find something we like or want to debug with
@@ -18,9 +20,10 @@ seedrandom(seed, { global: true });
 
 // instantiate Gamestate when this Module is called
 export const gamestateModel = new GamestateModel({
-  players: [
-    new PlayerModel({
-      name: 'Player Daidan',
+  users: [
+    new UserModel({
+      name: 'User Daidan',
+      userId: 'TEST_USER_ID',
       characterId: 'WOW_CHARACTER_ID_SO_UNIQUE',
     })
   ],
@@ -30,94 +33,137 @@ export const gamestateModel = new GamestateModel({
       name: 'Elmo',
       characterId: 'WOW_CHARACTER_ID_SO_UNIQUE',
       typeId: 'ELMO_CHARACTER',
-      position: new Point(MAP_SETTINGS.startCoordinates[0], MAP_SETTINGS.startCoordinates[1]),
-    })
+      position: MAP_START,
+    }),
+    new CPUCharacterModel({
+      name: 'Big Bird',
+      characterId: 'BIG_BIRD_TOTALLY_UNIQUE_ID',
+      typeId: 'BIRD_CHARACTER',
+      position: MAP_START,
+      isCPU: true,
+    }),
+    new CPUCharacterModel({
+      name: 'Cookie Monster',
+      characterId: 'COOKIE_MONSTER_TOTALLY_UNIQUE_ID',
+      typeId: 'COOKIE_CHARACTER',
+      position: MAP_START,
+      isCPU: true,
+    }),
   ],
 });
-
 /**
- * @param {Point} point
+ * checks if a given point on the tilemap is walkable
+ *
+ * @param {Point} characterModel
  * @returns {Boolean}
  */
-export function isEmptyTile(point) {
+export function isPointWalkable(point) {
   const tileMapModel = gamestateModel.get('tileMapModel');
-  return tileMapModel.getTileAt(point, TILE_TYPES.EMPTY);
+  const foundTile = tileMapModel.getTileAt(point);
+  return isWalkableTile(foundTile);
 }
 /**
+ * picks a random adjacent point that a given character can be on
+ *
  * @param {CharacterModel} characterModel
- * @returns {point}
+ * @returns {Point}
  */
-export function getRandomCharacterPosition(characterModel) {
-  const currentPosition = characterModel.get('position');
-  const directionPoint = mapGenerationUtils.getRandomDirection();
-  const possiblePoint = currentPosition.add(directionPoint);
+export function getRandomCharacterDirection(characterModel) {
+  const potentialLeftPoint = characterModel.getPotentialPosition(POINTS.LEFT);
+  const potentialRightPoint = characterModel.getPotentialPosition(POINTS.RIGHT);
+  const potentialUpPoint = characterModel.getPotentialPosition(POINTS.UP);
+  const potentialDownPoint = characterModel.getPotentialPosition(POINTS.DOWN);
 
-  // if tile is not empty, try again
-  if (!isEmptyTile(possiblePoint)) {
-    return getRandomCharacterPosition(characterModel);
-  }
+  const choice = mathUtils.getRandomWeightedChoice([
+    {
+      chosenPoint: POINTS.LEFT,
+      weight: isPointWalkable(potentialLeftPoint) ? 1 : 0,
+    }, {
+      chosenPoint: POINTS.RIGHT,
+      weight: isPointWalkable(potentialRightPoint) ? 1 : 0,
+    }, {
+      chosenPoint: POINTS.UP,
+      weight: isPointWalkable(potentialUpPoint) ? 1 : 0,
+    }, {
+      chosenPoint: POINTS.DOWN,
+      weight: isPointWalkable(potentialDownPoint) ? 1 : 0,
+    },
+  ]);
 
-  // otherwise, that works
-  return possiblePoint;
+  return choice.chosenPoint;
 }
 /**
- * updates all `canMove` attributes in each player
+ * updates all `canMove` attributes in each user
  */
-export function updatePlayerMovementActions() {
-  const tileMapModel = gamestateModel.get('tileMapModel');
-  const players = gamestateModel.get('players');
+export function updateUserMovementActions() {
+  const users = gamestateModel.get('users');
 
-  players.forEach((playerModel) => {
-    const characterId = playerModel.get('characterId');
+  users.forEach((userModel) => {
+    const characterId = userModel.get('characterId');
     const characterModel = gamestateModel.findCharacter(characterId);
-    const position = characterModel.get('position');
 
-    playerModel.set({
-      canMoveLeft: isWalkableTile(tileMapModel.getTileAt(position.clone().subtractX(1))),
-      canMoveRight: isWalkableTile(tileMapModel.getTileAt(position.clone().addX(1))),
-      canMoveUp: isWalkableTile(tileMapModel.getTileAt(position.clone().addY(1))),
-      canMoveDown: isWalkableTile(tileMapModel.getTileAt(position.clone().subtractY(1))),
+    userModel.set({
+      canMoveLeft: isPointWalkable(characterModel.getPotentialPosition(POINTS.LEFT)),
+      canMoveRight: isPointWalkable(characterModel.getPotentialPosition(POINTS.RIGHT)),
+      canMoveUp: isPointWalkable(characterModel.getPotentialPosition(POINTS.UP)),
+      canMoveDown: isPointWalkable(characterModel.getPotentialPosition(POINTS.DOWN)),
     })
   });
 }
 /**
- * updates `canTrick` and `canTreat` attributes in each player
+ * updates `canTrick` and `canTreat` attributes in each user
  *  todo - flesh this out later
  */
-export function updatePlayerLocationActions() {
+export function updateUserLocationActions() {
   const tileMapModel = gamestateModel.get('tileMapModel');
-  const players = gamestateModel.get('players');
+  const users = gamestateModel.get('users');
 
-  players.forEach((playerModel) => {
-    const characterId = playerModel.get('characterId');
+  users.forEach((userModel) => {
+    const characterId = userModel.get('characterId');
     const characterModel = gamestateModel.findCharacter(characterId);
-    const position = characterModel.get('position');
 
-    const positionTile = tileMapModel.getTileAt(position);
-    const isHouseTile = positionTile === TILE_TYPES.HOUSE;
-
-    playerModel.set({
+    const isHouseTile = tileMapModel.isTileEqualTo(characterModel.get('position'), TILE_TYPES.HOUSE);
+    userModel.set({
       canTrick: isHouseTile,
       canTreat: isHouseTile,
     })
   });
 }
 /**
- * debugging
+ * moves a Character a single direction
+ *
+ * @param {String} characterId
+ * @param {Point} directionPoint
  */
-function debug_randomlyMoveCharacter(characterModel) {
-  const nextPosition = getRandomCharacterPosition(characterModel);
-  characterModel.set({position: nextPosition});
+export function updateCharacterPosition(characterId, directionPoint) {
+  const characterModel = gamestateModel.findCharacter(characterId);
 
-  updatePlayerMovementActions();
-  console.log(gamestateModel.get('players')[0].attributes);
+  // nothing to do if given direction is not walkable
+  if (!isPointWalkable(characterModel.getPotentialPosition(directionPoint))) {
+    return;
+  }
 
-  // for debugging, make them do it again
-  setTimeout(() => {
-    debug_randomlyMoveCharacter(characterModel);
-  }, 1000);
+  characterModel.addToPosition(directionPoint);
+
+  updateUserMovementActions();
+  updateUserLocationActions();
 }
+/**
+ * moves a Character a single direction
+ *
+ * @param {Object} config
+ * @returns {UserModel} - the UserModel that was created
+ */
+export function createNewUser(config) {
+  const newUserModel = new UserModel({
+    name: config.name,
+    userId: config.id,
+    characterId: 'WOW_CHARACTER_ID_SO_UNIQUE', // todo
+  });
 
+  gamestateModel.attributes.users.push(newUserModel);
+
+  return newUserModel;
+}
 //
-console.log('Gamestate Instanciated with seed', seed);
-debug_randomlyMoveCharacter(gamestateModel.get('characters')[0]);
+console.log('\x1b[35m', 'Gamestate Instantiated with Seed', seed); // magenta

@@ -149,6 +149,16 @@ export class MatrixModel extends Model {
       Math.floor(this.getHeight() / 2),
     )
   }
+  /**
+   * compares a tile at a given point the same as a value
+   *
+   * @param {Point} point
+   * @param {*} comparison - value to compare to
+   * @returns {Boolean}
+   */
+  isTileEqualTo(point, comparison) {
+    return this.getTileAt(point) === comparison;
+  }
 }
 
 export default MatrixModel;

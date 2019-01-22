@@ -5,7 +5,7 @@ import CharacterComponent from '../components/CharacterComponent';
 /**
  * page to select the pieces
  */
-export class PlayerGamePage extends PureComponent {
+export class UserGamePage extends PureComponent {
   render() {
     return (
       <div className='bg-secondary flex-grow pad-v-2 flex-centered flex-col width-full text-center'>
@@ -16,4 +16,4 @@ export class PlayerGamePage extends PureComponent {
 }
 
 
-export default PlayerGamePage;
+export default UserGamePage;

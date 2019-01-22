@@ -3,13 +3,15 @@ import schema from 'js-schema';
 import Model from 'models/Model';
 
 // define attribute types
-const playerSchema = schema({
-  // player's name
+const userSchema = schema({
+  // user's name
   name: String,
-  // id of player's chosen character
+  // defined id of this user
+  userId: String,
+  // id of user's chosen character
   '?characterId': String,
   //
-  isPlayerTurn: Boolean,
+  isUserTurn: Boolean,
   //
   canMoveLeft: Boolean,
   //
@@ -25,18 +27,18 @@ const playerSchema = schema({
 })
 
 /**
- * player class
+ * user class
  *
- * @typedef {Model} PlayerModel
+ * @typedef {Model} UserModel
  */
-export class PlayerModel extends Model {
+export class UserModel extends Model {
   constructor(newAttributes = {}) {
     super(newAttributes);
 
     // apply default attributes and then override with given ones
     this.set(Object.assign({
       name: '',
-      isPlayerTurn: false,
+      isUserTurn: false,
       canMoveLeft: false,
       canMoveRight: false,
       canMoveUp: false,
@@ -46,7 +48,7 @@ export class PlayerModel extends Model {
     }, newAttributes));
 
     // set schema and then validate
-    this.schema = playerSchema;
+    this.schema = userSchema;
     this.validate();
   }
   /**
@@ -57,4 +59,4 @@ export class PlayerModel extends Model {
   }
 }
 
-export default PlayerModel;
+export default UserModel;

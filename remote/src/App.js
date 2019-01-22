@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-import PlayerGamePage from './pages/PlayerGamePage';
-import {WebsocketConnectionIndicator} from 'components/WebsocketConnectionIndicator';
+import DebugPage from 'pages/DebugPage';
+import WebsocketConnectionIndicator from 'components/WebsocketConnectionIndicator';
 
 class App extends Component {
   render() {
@@ -10,8 +10,8 @@ class App extends Component {
         <WebsocketConnectionIndicator />
 
         <div className='flex-centered flex-col color-white'>
-          <h1 className='flex-none fsize-8 olor-white mar-ver-2 f-bold width-full text-center'>Trick & Treat</h1>
-          <PlayerGamePage />
+          <h1 className='flex-none fsize-8 olor-white mar-v-2 f-bold width-full text-center'>Trick & Treat</h1>
+          <DebugPage />
         </div>
       </div>
     );

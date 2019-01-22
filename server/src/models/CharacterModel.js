@@ -16,8 +16,10 @@ const characterSchema = schema({
   health: StatModel,
   // spaces character and explore
   movement: StatModel,
-  // where the player is on the world
+  // where the character is on the world
   position: Point,
+  // if this is computer controlled
+  '?isCPU': Boolean,
 })
 
 /**
@@ -26,6 +28,7 @@ const characterSchema = schema({
  * @typedef {Model} CharacterModel
  */
 export class CharacterModel extends Model {
+  /** @override */
   constructor(newAttributes = {}) {
     super(newAttributes);
 
@@ -38,6 +41,34 @@ export class CharacterModel extends Model {
     // set schema and then validate
     this.schema = characterSchema;
     this.validate();
+  }
+  /**
+   * moves this character's position by an amount
+   *
+   * @param {Point}
+   */
+  addToPosition(directionPoint) {
+    const nextPosition = this.get('position').clone().add(directionPoint);
+    this.set({ position: nextPosition });
+  }
+  /**
+   * gets the point that this character could potentially when moved a given direction
+   */
+  getPotentialPosition(directionPoint) {
+    const currentPoint = this.get('position').clone();
+    return currentPoint.add(directionPoint);
+  }
+}
+/**
+ * model for a computer controlled character
+ */
+export class CPUCharacterModel extends CharacterModel {
+  /** @override */
+  constructor(newAttributes = {}) {
+    super(newAttributes);
+    this.set(Object.assign({
+      isCPU: true,
+    }, newAttributes));
   }
 }
 
