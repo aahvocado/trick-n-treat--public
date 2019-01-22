@@ -26,7 +26,7 @@ import * as matrixUtils from 'utilities/matrixUtils';
  * @param {MapConfig} mapConfig
  * @returns {MatrixModel}
  */
-export function generateNewMatrixModel(mapConfig) {
+export function generateNewMapModel(mapConfig) {
   // create an empty Matrix
   const emptyMatrix = generateMatrix(mapConfig.width, mapConfig.height, TILE_TYPES.EMPTY);
 
@@ -52,8 +52,13 @@ export function generateNewMatrixModel(mapConfig) {
     stepSize: mapConfig.stepSize,
   });
 
+  generateEventTiles(mapModel, {
+    eventMinDistance: mapConfig.eventMinDistance,
+    eventRangeDistance: mapConfig.eventRangeDistance,
+  })
+
   // generate sectors of houses
-  generateSectors(mapModel, {
+  generateHouseSectors(mapModel, {
     numSectors: mapConfig.numSectors,
     numHousePerSector: mapConfig.numHousePerSector,
     sectorSize: mapConfig.sectorSize,
@@ -322,7 +327,7 @@ function getRandomHouseTileLocation(mapModel, options) {
 
   // create a Matrix of the sector so we can look for empty tiles in there
   const emptyTilePoints = [];
-  const sectorMatrix = mapModel.getTileSubmatrix(sectorStart.x, sectorStart.y, sectorStart.x + sectorSize, sectorStart.y + sectorSize);
+  const sectorMatrix = mapModel.getSubmatrixSquare(sectorStart.x, sectorStart.y, sectorStart.x + sectorSize, sectorStart.y + sectorSize);
   for (var y = 0; y < sectorMatrix.length; y++) {
     const searchRow = sectorMatrix[y];
     for (var x = 0; x < searchRow.length; x++) {
@@ -357,7 +362,6 @@ function getRandomHouseTileLocation(mapModel, options) {
   // we found a good point!
   return appropriatePoint;
 }
-
 /**
  * creates a bunch of houses in different sectors
  *
@@ -365,7 +369,7 @@ function getRandomHouseTileLocation(mapModel, options) {
  * @param {Object} options
  * @property {Number} options.numSectors - number of House Tiles to generate
  */
-function generateSectors(mapModel, options) {
+function generateHouseSectors(mapModel, options) {
   const { numSectors } = options;
 
   for (var i = 0; i < numSectors; i++) {
@@ -393,4 +397,46 @@ function getRandomSectorLocation(mapModel, options) {
   )
 
   return placementPoint;
+}
+/**
+ * generates potential event tiles
+ *
+ * @param {MatrixModel} mapModel
+ * @param {Object} options
+ * @returns {Point}
+ */
+function generateEventTiles(mapModel, options) {
+  const { eventRangeDistance } = options;
+
+  // go through every single point on the map
+  // (at some point we can do better than this)
+  mapModel.forEach((tile, x, y) => {
+    const location = new Point(x, y);
+
+    // if tile is not a path, don't do anything
+    if (tile !== TILE_TYPES.PATH) {
+      return;
+    }
+
+    // grab a chunk of the map to ease calculations
+    const localizedSubmatrix = mapModel.getSubmatrixByDistance(location, 1);
+    localizedSubmatrix[1][1] = 'center';
+
+    // see if we are surrounded by many paths
+    //  if so, lets put an event here
+    const typeCounts = matrixUtils.getTypeCounts(localizedSubmatrix);
+    if (typeCounts[TILE_TYPES.PATH] >= 3 && typeCounts[TILE_TYPES.EVENT] === undefined) {
+      mapModel.setTileAt(location, TILE_TYPES.EVENT);
+      return;
+    }
+
+    // if too close to another event, don't use this tile
+    const minDistance = mathUtils.getRandomIntInclusive(eventRangeDistance[0], eventRangeDistance[1]);
+    if (mapModel.hasNearbyTileType(location, TILE_TYPES.EVENT, minDistance)) {
+      return;
+    }
+
+    // otherwise we can make this an Event tile
+    mapModel.setTileAt(location, TILE_TYPES.EVENT);
+  })
 }

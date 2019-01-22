@@ -128,12 +128,24 @@ class DebugActionButton extends React.PureComponent {
 }
 
 const TILE_SIZE = '15px';
-const TILE_TYPE_BG_COLOR = {
-  '*': 'yellow', //'start',
-  0: '#313131', //'empty',
-  1: 'lightgreen', //'path',
-  2: '#33c3ff', //'house',
-  3: '#da5cff', //'special',
+const TILE_TYPE_STYLES = {
+  //'start',
+  '*': { backgroundColor: 'yellow' },
+  //'empty',
+  0: { backgroundColor: '#313131' },
+  //'path',
+  1: { backgroundColor: 'lightgreen' },
+  //'house',
+  2: {
+    backgroundColor: '#33c3ff',
+    border: '1px solid #299fd0',
+  },
+  //'event',
+  4: {
+    backgroundColor: '#d0ffd0',
+  },
+  //'special',
+  9: { backgroundColor: '#da5cff' },
 }
 class World extends Component {
   render() {
@@ -182,8 +194,7 @@ class Tile extends Component {
     const characterDisplay = charactersHere.length > 1 ? `[${charactersHere.length}]` : (charactersHere[0] && charactersHere[0].name[0]);
 
     const modifierStyles = {
-      backgroundColor: TILE_TYPE_BG_COLOR[tileType],
-      borderColor: charactersHere.length ? '3px solid white' : '',
+      ...TILE_TYPE_STYLES[tileType],
     }
 
     return (

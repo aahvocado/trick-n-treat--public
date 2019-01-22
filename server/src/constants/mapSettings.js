@@ -24,6 +24,9 @@ export const MAP_SETTINGS = {
   sectorSize: 10,
   numHousePerSector: 10,
   houseMinDistance: 1,
+
+  eventMinDistance: 1,
+  eventRangeDistance: [1, 2],
 };
 
 export default MAP_SETTINGS;

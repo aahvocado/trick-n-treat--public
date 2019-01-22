@@ -54,7 +54,7 @@ export class GamestateModel extends Model {
    * generates a map
    */
   initTilemapModel() {
-    this.set({tileMapModel: mapGenerationUtils.generateNewMatrixModel(MAP_SETTINGS)});
+    this.set({tileMapModel: mapGenerationUtils.generateNewMapModel(MAP_SETTINGS)});
   }
   /**
    * updates the `mapDataModel` with data from everything else

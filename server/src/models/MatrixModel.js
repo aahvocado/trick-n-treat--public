@@ -43,6 +43,17 @@ export class MatrixModel extends Model {
     return this.getMatrix()[0].length;
   }
   /**
+   * gets the center of this Map
+   *
+   * @returns {Point}
+   */
+  getCenter() {
+    return new Point(
+      Math.floor(this.getWidth() / 2),
+      Math.floor(this.getHeight() / 2),
+    )
+  }
+  /**
    * returns the Tile located at a given Point
    *
    * @param {Point} point
@@ -56,19 +67,6 @@ export class MatrixModel extends Model {
     } catch (e) {
       return null;
     }
-  }
-  /**
-   * gets matrix of the matrix in given box boundary
-   *
-   * @param {Number} topLeftX
-   * @param {Number} topLeftY
-   * @param {Number} bottomRightX
-   * @param {Number} bottomRightY
-   * @returns {Matrix}
-   */
-  getTileSubmatrix(topLeftX, topLeftY, bottomRightX, bottomRightY) {
-    const map = this.getMatrix();
-    return matrixUtils.getSubmatrix(map, topLeftX, topLeftY, bottomRightX, bottomRightY);
   }
   /**
    * replaces the data of a Tile at a given Point
@@ -139,17 +137,6 @@ export class MatrixModel extends Model {
     return new Point(x, y);
   }
   /**
-   * gets the center of this Map
-   *
-   * @returns {Point}
-   */
-  getCenter() {
-    return new Point(
-      Math.floor(this.getWidth() / 2),
-      Math.floor(this.getHeight() / 2),
-    )
-  }
-  /**
    * compares a tile at a given point the same as a value
    *
    * @param {Point} point
@@ -158,6 +145,71 @@ export class MatrixModel extends Model {
    */
   isTileEqualTo(point, comparison) {
     return this.getTileAt(point) === comparison;
+  }
+  // ---- matrix utilities
+  /**
+   * gets matrix of the matrix in given box boundary
+   *
+   * @param {Function} callback
+   */
+  forEach(callback) {
+    matrixUtils.forEach(this.getMatrix(), callback);
+  }
+  /**
+   * gets matrix of the matrix in given box boundary
+   *
+   * @param {Number} topLeftX
+   * @param {Number} topLeftY
+   * @param {Number} bottomRightX
+   * @param {Number} bottomRightY
+   * @returns {Matrix}
+   */
+  getSubmatrixSquare(topLeftX, topLeftY, bottomRightX, bottomRightY) {
+    return matrixUtils.getSubmatrixSquare(this.getMatrix(), topLeftX, topLeftY, bottomRightX, bottomRightY);
+  }
+  /**
+   * finds if there are any tiles around a Point of given Type
+   *
+   * @param {Point} point - where to look from
+   * @param {Tile} type - what you're looking for
+   * @param {Number} distance - how many tiles further to check
+   * @returns {Boolean}
+   */
+  hasNearbyTileType(point, type, distance) {
+    return matrixUtils.hasNearbyTileType(this.getMatrix(), point, type, distance);
+  }
+  /**
+   * finds if there are any tiles directly adjacent to a Point of given Type
+   *  meaning the immediate four cardinal directions from it
+   *
+   * @param {Point} point - where to look from
+   * @param {Tile} type - what you're looking for
+   * @returns {Boolean}
+   */
+  hasAdjacentTileType(point, type) {
+    return matrixUtils.hasAdjacentTileType(this.getMatrix(), point, type);
+  }
+  /**
+   * calculates the appropriate coordinates given a point and distance
+   *
+   * @param {Matrix} matrix
+   * @param {Point} point - where to look from
+   * @param {Number} distance - how many tiles further to check
+   * @returns {Submatrix}
+   */
+  getSubmatrixSquareByDistance(point, distance) {
+    return matrixUtils.getSubmatrixSquareByDistance(this.getMatrix(), point, distance);
+  }
+  /**
+   * calculates the appropriate coordinates given a point and distance
+   *  but only by adjacent tiles (so diagonals are 2 spaces away)
+   *
+   * @param {Point} point - where to look from
+   * @param {Number} distance - how many tiles further to check
+   * @returns {Submatrix}
+   */
+  getSubmatrixByDistance(point, distance) {
+    return matrixUtils.getSubmatrixByDistance(this.getMatrix(), point, distance);
   }
 }
 
