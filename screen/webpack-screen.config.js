@@ -7,10 +7,10 @@ var { BUILD_PATH } = require('./app-paths.js');
 module.exports = {
   mode: 'development',
   target: 'web',
-  entry: './src/app.js',
+  entry: './src/index.js',
   output: {
     path: BUILD_PATH,
-    filename: 'main.js'
+    filename: 'screen.js'
   },
   resolve: {
     alias: {
@@ -45,7 +45,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'public/index.html',
+      template: 'public/screen.html',
     })
   ],
 };

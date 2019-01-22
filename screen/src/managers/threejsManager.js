@@ -19,6 +19,7 @@ import {
   createSpecialMesh
 } from 'geometry/threeGeometry.js';
 import { initInput } from 'helpers/input';
+import { gamestate } from 'managers/eventManager';
 import consoleLog from 'helpers/debug';
 import map from 'data/map.json';
 
@@ -134,7 +135,6 @@ function initLights() {
   return lights;
 }
 function initGame() {
-  tiles = generateTiles();
   players = initPlayers();
 
   players.forEach(function(player) {
@@ -266,7 +266,7 @@ export function move(direction) {
     if(!stepStartTimestamp) startMoving = true;
   }
   if (!targetTile) {
-    addTile(finalPosition, direction);
+    // addTile(finalPosition, direction);
   }
 }
 function animate(timestamp) {
