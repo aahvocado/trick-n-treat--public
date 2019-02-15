@@ -1,122 +1,36 @@
 import Point from '@studiomoniker/point';
 import Pathfinding from 'pathfinding';
-import MatrixModel from 'models/MatrixModel';
 
 import POINTS from 'constants/points';
 import TILE_TYPES from 'constants/tileTypes';
 
 import * as mathUtils from 'utilities/mathUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
+import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
 
-/**
- * documentation for types
- *
- * @typedef {Array<Array>} Matrix
- *
- * @typedef {Object} MapConfig
- * @property {Number} MapConfig.width - number of horizontal tiles
- * @property {Number} MapConfig.height - number of vertical tiles
- * @property {Number} MapConfig.numSpecialTiles - number of special tiles
- * @property {Array} MapConfig.startPoint - [x, y] - where the starting point is
- */
-
-/**
- * handles through the entire generation process
- *
- * @param {MapConfig} mapConfig
- * @returns {MatrixModel}
- */
-export function generateNewMapModel(mapConfig) {
-  // create an empty Matrix
-  const emptyMatrix = generateMatrix(mapConfig.width, mapConfig.height, TILE_TYPES.EMPTY);
-
-  // initiate the Model
-  const mapModel = new MatrixModel({
-    matrix: emptyMatrix,
-    start: mapConfig.startPoint,
-  });
-
-  // set our starting point Tile
-  mapModel.setTileAt(mapConfig.startPoint, '*');
-
-  // create special tiles on the Map
-  generateSpecialTiles(mapModel, {
-    numSpecialTiles: mapConfig.numSpecialTiles,
-    specialMinDistance: mapConfig.specialMinDistance,
-  })
-
-  // create paths on the Map
-  executeRandomWalk(mapModel, {
-    start: mapConfig.startPoint,
-    steps: mapConfig.numSteps,
-    stepSize: mapConfig.stepSize,
-  });
-
-  generateEventTiles(mapModel, {
-    eventMinDistance: mapConfig.eventMinDistance,
-    eventRangeDistance: mapConfig.eventRangeDistance,
-  })
-
-  // generate sectors of houses
-  generateHouseSectors(mapModel, {
-    numSectors: mapConfig.numSectors,
-    numHousePerSector: mapConfig.numHousePerSector,
-    sectorSize: mapConfig.sectorSize,
-    houseMinDistance: mapConfig.houseMinDistance,
-  })
-
-  return mapModel;
-}
-/**
- * creates a 2D array of empty tiles
- *
- * @param {Number} width
- * @param {Number} height
- * @param {*} [defaultValue]
- * @returns {Matrix}
- */
-export function generateMatrix(width, height, defaultValue = TILE_TYPES.EMPTY) {
-  let matrix = [];
-
-  for (var y = 0; y < height; y++) {
-    matrix.push([]);
-    for (var x = 0; x < width; x++) {
-      matrix[y][x] = defaultValue;
-    }
-  }
-
-  return matrix;
-}
 /**
  * uses the Random Walk process to apply paths to a Map
  *  https://en.wikipedia.org/wiki/Random_walk
  *
- * @param {MatrixModel} mapModel
- * @param {Object} config
- * @property {Point} config.start - point to start
- * @property {Number} config.steps - how many steps to walk
+ * @param {MapModel} mapModel
+ * @param {Object} mapConfig
  */
-function executeRandomWalk(mapModel, {start, steps, stepSize}) {
+export function executeRandomWalk(mapModel, mapConfig) {
   // use recursion to create paths on our MatrixModel
-  randomWalkStep(mapModel, steps, {
-    currentPoint: start.clone(),
-    stepSize: stepSize,
-  })
+  randomWalkStep(mapModel, mapConfig.numSteps, mapModel.get('start'), mapConfig);
 }
 /**
  * recursively updates a point on the map and takes a step
  *
- * @param {MatrixModel} mapModel
+ * @param {MapModel} mapModel
  * @param {Number} remainingSteps - steps left to make
- * @param {Object} stepOptions
- * @property {Point} stepOptions.currentPoint - point where the step is at
- * @property {Number} stepOptions.stepSize - how many tiles to create per step
+ * @param {Point} currentPoint - current point on the matrix
+ * @param {Object} mapConfig
  */
-function randomWalkStep(mapModel, remainingSteps, stepOptions) {
+function randomWalkStep(mapModel, remainingSteps, currentPoint, mapConfig) {
   const {
-    currentPoint,
     stepSize = 1,
-  } = stepOptions;
+  } = mapConfig;
 
   // pick a direction for the next step
   const nextDirectionPoint = getRandomWeightedDirection(mapModel, currentPoint);
@@ -136,32 +50,7 @@ function randomWalkStep(mapModel, remainingSteps, stepOptions) {
 
   // continue recursion if there are remaining steps
   if (remainingSteps > 0) {
-    randomWalkStep(mapModel, (remainingSteps - 1), {
-      currentPoint: _currentPoint,
-      stepSize: stepSize,
-    })
-  }
-}
-/**
- * creates a Point that indicates a direction to go
- *
- * @returns {Point}
- */
-export function getRandomDirection() {
-  const direction = mathUtils.getRandomIntInclusive(0, 3);
-  switch (direction) {
-    // left
-    case 0:
-      return POINTS.LEFT;
-    // right
-    case 1:
-      return POINTS.RIGHT;
-    // up
-    case 2:
-      return POINTS.UP;
-    // down
-    case 3:
-      return POINTS.DOWN;
+    randomWalkStep(mapModel, (remainingSteps - 1), _currentPoint, mapConfig);
   }
 }
 /**
@@ -170,7 +59,7 @@ export function getRandomDirection() {
  *
  * @returns {Point}
  */
-function getRandomWeightedDirection(mapModel, currentPoint) {
+export function getRandomWeightedDirection(mapModel, currentPoint) {
   // anonymous function to calculate adjust weight
   const calculateWeight = (val) => {
     return Math.pow((val * 100), 2);
@@ -216,11 +105,11 @@ function getRandomWeightedDirection(mapModel, currentPoint) {
 /**
  * places special Tiles onto the Map
  *
- * @param {MatrixModel} mapModel
+ * @param {MapModel} mapModel
  * @param {Object} options
  * @property {Number} options.numSpecialTiles
  */
-function generateSpecialTiles(mapModel, options) {
+export function generateSpecialTiles(mapModel, options) {
   const { numSpecialTiles } = options;
 
   const pathsToSpecial = [];
@@ -262,11 +151,11 @@ function generateSpecialTiles(mapModel, options) {
 /**
  * we want to pick a location that's not at the extremes
  *
- * @param {MatrixModel} mapModel
+ * @param {MapModel} mapModel
  * @param {Object} options
  * @property {Point} options.specialMinDistance
  */
-function getRandomSpecialTileLocation(mapModel, options) {
+export function getRandomSpecialTileLocation(mapModel, options) {
   const { specialMinDistance } = options;
 
   // we want to pick a location that's not at the extremes
@@ -290,35 +179,18 @@ function getRandomSpecialTileLocation(mapModel, options) {
   return placementPoint;
 }
 /**
- * places House Tiles onto the Map
- *
- * @param {MatrixModel} mapModel
- * @param {Object} options
- * @property {Number} options.numHousePerSector - number of House Tiles to generate
- */
-function generateHouseTiles(mapModel, options) {
-  const { numHousePerSector } = options;
-
-  for (var i = 0; i < numHousePerSector; i++) {
-    const placementPoint = getRandomHouseTileLocation(mapModel, options);
-    if (placementPoint) {
-      mapModel.setTileAt(placementPoint, TILE_TYPES.HOUSE);
-    }
-  }
-}
-/**
  * look for a place to place a house with given rules
  * - adjacent to a path
  * - far enough away from another house
  *
- * @param {MatrixModel} mapModel
+ * @param {MapModel} mapModel
  * @param {Object} options
  * @property {Number} options.houseMinDistance - number of House Tiles to generate
  * @property {Number} options.sectorSize - number of House Tiles to generate
  * @property {Point} options.sectorStart - where the sector starts
  * @returns {Point}
  */
-function getRandomHouseTileLocation(mapModel, options) {
+export function getRandomHouseTileLocation(mapModel, options) {
   const {
     houseMinDistance,
     sectorSize,
@@ -365,11 +237,11 @@ function getRandomHouseTileLocation(mapModel, options) {
 /**
  * creates a bunch of houses in different sectors
  *
- * @param {MatrixModel} mapModel
+ * @param {MapModel} mapModel
  * @param {Object} options
  * @property {Number} options.numSectors - number of House Tiles to generate
  */
-function generateHouseSectors(mapModel, options) {
+export function generateHouseSectors(mapModel, options) {
   const { numSectors } = options;
 
   for (var i = 0; i < numSectors; i++) {
@@ -381,13 +253,30 @@ function generateHouseSectors(mapModel, options) {
   }
 }
 /**
+ * places House Tiles onto the Map
+ *
+ * @param {MapModel} mapModel
+ * @param {Object} options
+ * @property {Number} options.numHousePerSector - number of House Tiles to generate
+ */
+function generateHouseTiles(mapModel, options) {
+  const { numHousePerSector } = options;
+
+  for (var i = 0; i < numHousePerSector; i++) {
+    const placementPoint = getRandomHouseTileLocation(mapModel, options);
+    if (placementPoint) {
+      mapModel.setTileAt(placementPoint, TILE_TYPES.HOUSE);
+    }
+  }
+}
+/**
  * generates a Sector starting point where a bunch of houses are placed in
  *
- * @param {MatrixModel} mapModel
+ * @param {MapModel} mapModel
  * @param {Object} options
  * @returns {Point}
  */
-function getRandomSectorLocation(mapModel, options) {
+export function getRandomSectorLocation(mapModel, options) {
   const { sectorSize } = options;
 
   // we want to pick a location that's not at the extremes
@@ -399,14 +288,14 @@ function getRandomSectorLocation(mapModel, options) {
   return placementPoint;
 }
 /**
- * generates potential event tiles
+ * generates potential encounter tiles
  *
- * @param {MatrixModel} mapModel
+ * @param {MapModel} mapModel
  * @param {Object} options
  * @returns {Point}
  */
-function generateEventTiles(mapModel, options) {
-  const { eventRangeDistance } = options;
+export function generateEncounterTiles(mapModel, options) {
+  const { encounterRangeDistance } = options;
 
   // go through every single point on the map
   // (at some point we can do better than this)
@@ -423,20 +312,20 @@ function generateEventTiles(mapModel, options) {
     localizedSubmatrix[1][1] = 'center';
 
     // see if we are surrounded by many paths
-    //  if so, lets put an event here
+    //  if so, lets put an encounter here
     const typeCounts = matrixUtils.getTypeCounts(localizedSubmatrix);
-    if (typeCounts[TILE_TYPES.PATH] >= 3 && typeCounts[TILE_TYPES.EVENT] === undefined) {
-      mapModel.setTileAt(location, TILE_TYPES.EVENT);
+    if (typeCounts[TILE_TYPES.PATH] >= 3 && typeCounts[TILE_TYPES.ENCOUNTER] === undefined) {
+      mapModel.setTileAt(location, TILE_TYPES.ENCOUNTER);
       return;
     }
 
-    // if too close to another event, don't use this tile
-    const minDistance = mathUtils.getRandomIntInclusive(eventRangeDistance[0], eventRangeDistance[1]);
-    if (mapModel.hasNearbyTileType(location, TILE_TYPES.EVENT, minDistance)) {
+    // if too close to another encounter, don't use this tile
+    const minDistance = mathUtils.getRandomIntInclusive(encounterRangeDistance[0], encounterRangeDistance[1]);
+    if (mapModel.hasNearbyTileType(location, TILE_TYPES.ENCOUNTER, minDistance)) {
       return;
     }
 
-    // otherwise we can make this an Event tile
-    mapModel.setTileAt(location, TILE_TYPES.EVENT);
+    // otherwise we can make this an Encounter tile
+    mapModel.setTileAt(location, TILE_TYPES.ENCOUNTER);
   })
 }

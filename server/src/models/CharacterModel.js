@@ -45,7 +45,7 @@ export class CharacterModel extends Model {
   /**
    * moves this character's position by an amount
    *
-   * @param {Point}
+   * @param {Point} directionPoint
    */
   addToPosition(directionPoint) {
     const nextPosition = this.get('position').clone().add(directionPoint);
@@ -53,6 +53,8 @@ export class CharacterModel extends Model {
   }
   /**
    * gets the point that this character could potentially when moved a given direction
+   *
+   * @param {Point} directionPoint
    */
   getPotentialPosition(directionPoint) {
     const currentPoint = this.get('position').clone();

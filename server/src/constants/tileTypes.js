@@ -7,7 +7,7 @@ export const TILE_TYPES = {
   EMPTY: 0,
   PATH: 1,
   HOUSE: 2,
-  EVENT: 4,
+  ENCOUNTER: 4,
   SPECIAL: 9,
 }
 export default TILE_TYPES;
@@ -16,7 +16,7 @@ export const WALKABLE_TILE_TYPES = [
   TILE_TYPES.START,
   TILE_TYPES.PATH,
   TILE_TYPES.HOUSE,
-  TILE_TYPES.EVENT,
+  TILE_TYPES.ENCOUNTER,
   TILE_TYPES.SPECIAL,
 ]
 /**

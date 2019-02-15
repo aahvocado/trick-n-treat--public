@@ -19,6 +19,45 @@ test('forEach() - properly executes callback for each tile', (t) => {
   t.is(tileCount, 9);
 })
 
+test('createMatrix() - creates a perfect square matrix', (t) => {
+  const expectedMatrix = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ];
+
+  const createdMatrix = matrixUtils.createMatrix(3, 3, 0);
+
+  t.is(Array.toString(createdMatrix), Array.toString(expectedMatrix));
+})
+
+test('createMatrix() - creates taller matrix', (t) => {
+  const expectedMatrix = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ];
+
+  const createdMatrix = matrixUtils.createMatrix(3, 6, 0);
+
+  t.is(Array.toString(createdMatrix), Array.toString(expectedMatrix));
+})
+
+test('createMatrix() - creates wider matrix', (t) => {
+  const expectedMatrix = [
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+  ];
+
+  const createdMatrix = matrixUtils.createMatrix(6, 3, 0);
+
+  t.is(Array.toString(createdMatrix), Array.toString(expectedMatrix));
+})
+
 test('getSubmatrixSquare() - returns a submatrix with two locations creating a 2x2 square', (t) => {
   const testMatrix = [
     [0, 0, 0, 0, 0],
@@ -301,4 +340,22 @@ test('getSubmatrixByDistance() - gets appropriate submatrix but with null at emp
 
   const submatrix = matrixUtils.getSubmatrixByDistance(testMatrix, point, 2);
   t.is(Array.toString(submatrix), Array.toString(expectedMatrix));
+})
+
+test('getTypeCountsAdjacentTo() - gets the counts of adjacent values', (t) => {
+  const testMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 1, 2, 1, 0],
+    [0, 2, '*', 3, 0],
+    [0, 1, 3, 1, 0],
+    [0, 0, 0, 0, 0],
+  ];
+
+  const expectedCounts = {
+    2: 2,
+    3: 2,
+  }
+
+  const typeCountMap = matrixUtils.getTypeCountsAdjacentTo(testMatrix, new Point(2, 2));
+  t.deepEqual(typeCountMap, expectedCounts);
 })

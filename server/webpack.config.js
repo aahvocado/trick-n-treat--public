@@ -17,6 +17,7 @@ module.exports = {
   },
   resolve: {
     alias: {
+      collections: path.resolve(serverPath, 'collections'),
       constants: path.resolve(serverPath, 'constants'),
       managers: path.resolve(serverPath, 'managers'),
       models: path.resolve(serverPath, 'models'),

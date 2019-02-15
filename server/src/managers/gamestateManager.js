@@ -30,27 +30,34 @@ export const gamestateModel = new GamestateModel({
 
   characters: [
     new CharacterModel({
-      name: 'Elmo',
+      name: 'Almo',
       characterId: 'WOW_CHARACTER_ID_SO_UNIQUE',
-      typeId: 'ELMO_CHARACTER',
-      position: MAP_START,
+      typeId: 'ALMO_CHARACTER',
+      position: MAP_START.clone(),
     }),
-    new CPUCharacterModel({
-      name: 'Big Bird',
-      characterId: 'BIG_BIRD_TOTALLY_UNIQUE_ID',
-      typeId: 'BIRD_CHARACTER',
-      position: MAP_START,
-      isCPU: true,
-    }),
-    new CPUCharacterModel({
-      name: 'Cookie Monster',
-      characterId: 'COOKIE_MONSTER_TOTALLY_UNIQUE_ID',
-      typeId: 'COOKIE_CHARACTER',
-      position: MAP_START,
-      isCPU: true,
-    }),
+    // new CPUCharacterModel({
+    //   name: 'Big Bird',
+    //   characterId: 'BIG_BIRD_TOTALLY_UNIQUE_ID',
+    //   typeId: 'BIRD_CHARACTER',
+    //   position: MAP_START.clone(),
+    //   isCPU: true,
+    // }),
+    // new CPUCharacterModel({
+    //   name: 'Cookie Monster',
+    //   characterId: 'COOKIE_MONSTER_TOTALLY_UNIQUE_ID',
+    //   typeId: 'COOKIE_CHARACTER',
+    //   position: MAP_START.clone(),
+    //   isCPU: true,
+    // }),
   ],
 });
+/**
+ * properly set values once the model is set up
+ */
+function init() {
+  updateUserMovementActions();
+  updateUserLocationActions();
+}
 /**
  * checks if a given point on the tilemap is walkable
  *
@@ -139,12 +146,21 @@ export function updateCharacterPosition(characterId, directionPoint) {
   const characterModel = gamestateModel.findCharacter(characterId);
 
   // nothing to do if given direction is not walkable
-  if (!isPointWalkable(characterModel.getPotentialPosition(directionPoint))) {
+  const nextPosition = characterModel.getPotentialPosition(directionPoint);
+  if (!isPointWalkable(nextPosition)) {
     return;
   }
 
-  characterModel.addToPosition(directionPoint);
+  // if there is an Encounter here, we should trigger it
+  const encounterModelHere = getEncounterAt(nextPosition);
+  if (encounterModelHere) {
+    encounterModelHere.trigger(characterModel);
+  }
 
+  // finally update the character's position
+  characterModel.set({ position: nextPosition });
+
+  // ! - update other state attributes
   updateUserMovementActions();
   updateUserLocationActions();
 }
@@ -165,5 +181,18 @@ export function createNewUser(config) {
 
   return newUserModel;
 }
+/**
+ * gets the Encounter if there is one at given point
+ *
+ * @param {Point} point
+ * @returns {EncounterModel | undefined}
+ */
+export function getEncounterAt(point) {
+  const encounters = gamestateModel.get('encounters');
+  return encounters.find((encounterModel) => {
+    return point.equals(encounterModel.get('position'));
+  })
+}
 //
+init();
 console.log('\x1b[35m', 'Gamestate Instantiated with Seed', seed); // magenta

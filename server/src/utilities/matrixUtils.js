@@ -2,6 +2,8 @@
  * Matrix represents 2D array
  *
  * @typedef {Array<Array>} Matrix
+ *
+ * @typedef {Object} TypeCounts
  */
 
 // --- matrix
@@ -21,6 +23,26 @@ export function forEach(matrix, callback) {
       callback(tile, x, y);
     })
   })
+}
+/**
+ * creates a 2D array of empty tiles
+ *
+ * @param {Number} width
+ * @param {Number} height
+ * @param {*} [defaultValue]
+ * @returns {Matrix}
+ */
+export function createMatrix(width, height, defaultValue = TILE_TYPES.EMPTY) {
+  let matrix = [];
+
+  for (var y = 0; y < height; y++) {
+    matrix.push([]);
+    for (var x = 0; x < width; x++) {
+      matrix[y][x] = defaultValue;
+    }
+  }
+
+  return matrix;
 }
 /**
  * gets Submatrix of a larger Matrix
@@ -193,7 +215,7 @@ export function getCount(matrix, type) {
  * finds if there are any tiles around a Point of given Type
  *
  * @param {Matrix} matrix - 3x3
- * @returns {Number}
+ * @returns {TypeCounts}
  */
 export function getTypeCounts(matrix) {
   // will be returned
@@ -222,4 +244,19 @@ export function getTypeCounts(matrix) {
   })
 
   return typeMap;
+}
+/**
+ * finds if there are any tiles around a Point of given Type
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @returns {TypeCounts}
+ */
+export function getTypeCountsAdjacentTo(matrix, point) {
+  // get submatrix, ignoring the center
+  const submatrix = getSubmatrixByDistance(matrix, point, 1);
+  submatrix[1][1] = null;
+
+  // use that submatrix to get the counts
+  return getTypeCounts(submatrix);
 }

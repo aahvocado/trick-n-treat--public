@@ -77,6 +77,15 @@ export class Model {
 
     return exportObject;
   }
+  /**
+   * return a copy of this class
+   * (this needs some R&D, what if we want to maintain references?)
+   *
+   * @returns {Object}
+   */
+  clone() {
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+  }
 }
 
 export default Model;

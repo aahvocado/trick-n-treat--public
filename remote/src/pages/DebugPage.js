@@ -52,9 +52,18 @@ export class DebugPage extends Component {
       canTreat,
     } = currentUser;
 
+    const currentCharacter = characters[0];
+    const {
+      health = {},
+    } = currentCharacter;
+
     return (
       <div className='bg-secondary flex-grow flex-centered flex-col width-full text-center'>
         <h2 className='pad-v-2 flex-none'>Debug Page</h2>
+
+        <div className='pad-v-2 flex-none'>
+          {`Health: ${health.value || 0}`}
+        </div>
 
         <div className='pad-v-2 flex-none'>
           <DebugActionButton
@@ -140,7 +149,7 @@ const TILE_TYPE_STYLES = {
     backgroundColor: '#33c3ff',
     border: '1px solid #299fd0',
   },
-  //'event',
+  //'encounter',
   4: {
     backgroundColor: '#d0ffd0',
   },
@@ -214,7 +223,7 @@ class Tile extends Component {
               position: 'absolute',
               top: '10px',
               left: '10px',
-              pointerEvents: 'none',
+              pointerEncounters: 'none',
               backgroundColor: 'rgba(0, 0, 0, 0.5)',
               padding: '4px',
               color: 'white',

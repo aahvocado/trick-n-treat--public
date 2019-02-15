@@ -16,10 +16,6 @@ export class MatrixModel extends Model {
     this.set(Object.assign({
       // 2D array of data in the tiles
       matrix: [[]],
-      // where the starting location of the map is made
-      start: new Point(),
-      // list of Points where "special" tiles are located - maybe starting spots?
-      specialPoints: [],
     }, newAttributes));
   }
   /**
@@ -210,6 +206,16 @@ export class MatrixModel extends Model {
    */
   getSubmatrixByDistance(point, distance) {
     return matrixUtils.getSubmatrixByDistance(this.getMatrix(), point, distance);
+  }
+  /**
+   * finds if there are any tiles around a Point of given Type
+   *
+   * @param {Matrix} matrix
+   * @param {Point} point
+   * @returns {TypeCounts}
+   */
+  getTypeCountsAdjacentTo(point) {
+    return matrixUtils.getTypeCountsAdjacentTo(this.getMatrix(), point);
   }
 }
 

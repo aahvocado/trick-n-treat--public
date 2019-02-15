@@ -12,4 +12,27 @@ export const POINTS = {
   DOWN: DOWN_POINT,
 };
 
+/**
+ * picks a random Adjacent directional Point
+ *
+ * @returns {Point}
+ */
+export function getRandomDirection() {
+  const direction = mathUtils.getRandomIntInclusive(0, 3);
+  switch (direction) {
+    // left
+    case 0:
+      return POINTS.LEFT;
+    // right
+    case 1:
+      return POINTS.RIGHT;
+    // up
+    case 2:
+      return POINTS.UP;
+    // down
+    case 3:
+      return POINTS.DOWN;
+  }
+}
+
 export default POINTS;

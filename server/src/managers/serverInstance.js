@@ -23,13 +23,15 @@ export function start() {
 
   server = http.createServer(app);
   websocketInstance.start(server);
-  debug_execute();
 
   // START!
   const SERVER_PORT = process.env.SERVER_PORT;
   server.listen(SERVER_PORT, async () => {
     console.log('\x1b[36m', `Trick & Treat Server Started - localhost:${SERVER_PORT}`); // cyan
   });
+
+  // start debugging update
+  debug_execute();
 }
 
 /**
