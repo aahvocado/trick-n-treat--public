@@ -5,7 +5,7 @@
   "scripts": {
     "compile:styles": "lessc src/styles/app.less src/build/app.css",
     "compile": "npm run compile:styles",
-    "start": "npm run compile:styles; react-scripts start",
+    "start": "npm run compile:styles && react-scripts start",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "webpack",
-    "start": "npm run compile; node ./build/main.compiled.js",
+    "start": "npm run compile && node ./build/main.compiled.js",
     "test": "npm run compile && ava --v"
   },
   "dependencies": {

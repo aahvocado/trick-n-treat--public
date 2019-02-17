@@ -12,6 +12,8 @@ const characterSchema = schema({
   characterId: String,
   // id of character type
   typeId: String,
+  //
+  candies: Number,
   // health
   health: StatModel,
   // spaces character and explore
@@ -34,6 +36,7 @@ export class CharacterModel extends Model {
 
     // apply default attributes and then override with given ones
     this.set(Object.assign({
+      candies: 0,
       health: new HealthModel({ value: 5 }),
       movement: new MovementModel({ value: 2 }),
     }, newAttributes));

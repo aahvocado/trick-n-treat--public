@@ -33,12 +33,43 @@ const bigLoseHealthEncounter = new EncounterModel({
     healthModel.set({ value: healthModel.get('value') - 2 });
   }
 });
+
+const addCandyEncounter = new EncounterModel({
+  typeId: ENCOUNTER_TYPES.LAWN,
+  onTrigger: (characterModel) => {
+    characterModel.set({ candies: characterModel.get('candies') + 1 });
+  }
+});
+const bigAddCandyEncounter = new EncounterModel({
+  typeId: ENCOUNTER_TYPES.LAWN,
+  onTrigger: (characterModel) => {
+    characterModel.set({ candies: characterModel.get('candies') + 2 });
+  }
+});
+const loseCandyEncounter = new EncounterModel({
+  typeId: ENCOUNTER_TYPES.LAWN,
+  onTrigger: (characterModel) => {
+    characterModel.set({ candies: characterModel.get('candies') - 1 });
+  }
+});
+const bigLoseCandyEncounter = new EncounterModel({
+  typeId: ENCOUNTER_TYPES.LAWN,
+  onTrigger: (characterModel) => {
+    characterModel.set({ candies: characterModel.get('candies') - 2 });
+  }
+});
+
 /** @type {Array<EventModel>} */
 const lawnEncountersCollection = [
   addHealthEncounter,
   bigAddHealthEncounter,
   loseHealthEncounter,
   bigLoseHealthEncounter,
+
+  addCandyEncounter,
+  bigAddCandyEncounter,
+  loseCandyEncounter,
+  bigLoseCandyEncounter,
 ];
 /**
  * this should be a list of every possible Encounter

@@ -54,6 +54,7 @@ export class DebugPage extends Component {
 
     const currentCharacter = characters[0];
     const {
+      candies,
       health = {},
     } = currentCharacter;
 
@@ -63,6 +64,9 @@ export class DebugPage extends Component {
 
         <div className='pad-v-2 flex-none'>
           {`Health: ${health.value || 0}`}
+        </div>
+        <div className='pad-v-2 flex-none'>
+          {`Candies: ${candies || 0}`}
         </div>
 
         <div className='pad-v-2 flex-none'>
