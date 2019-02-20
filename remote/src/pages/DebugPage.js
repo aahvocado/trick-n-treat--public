@@ -15,7 +15,7 @@ export class DebugPage extends Component {
         tileMapModel: {
           matrix: [[]]
         },
-        mapDataModel: {
+        fogMapModel: {
           matrix: [[]]
         },
         users: [{}],
@@ -37,7 +37,7 @@ export class DebugPage extends Component {
     const { debug_gamestate } = this.state;
     const {
       tileMapModel,
-      mapDataModel,
+      fogMapModel,
       users,
       characters,
     } = debug_gamestate;
@@ -111,7 +111,7 @@ export class DebugPage extends Component {
 
         <World
           mapMatrix={tileMapModel.matrix}
-          dataMatrix={mapDataModel.matrix}
+          fogMatrix={fogMapModel.matrix}
           characters={characters}
         />
       </div>
@@ -140,6 +140,43 @@ class DebugActionButton extends React.PureComponent {
   }
 }
 
+class World extends Component {
+  render() {
+    const { 
+      mapMatrix,
+      fogMatrix,
+      characters,
+    } = this.props;
+
+    const isEmpty = mapMatrix.length <= 0 || mapMatrix[0].length <= 0;
+    if (isEmpty) {
+      return <div className='pad-2'>(waiting for map data)</div>
+    }
+
+    return (
+      <div className='flex-col-centered position-relative mar-v-2 mar-h-auto bor-4-primary'>
+        { mapMatrix.map((innerMatrix, row) => {
+          return (
+            <div className='flex-row' key={`row-${row}-key`} >
+              { innerMatrix.map((tileType, col) => {
+                return (
+                  <Tile
+                    key={`tile-${col}-${row}-key`}
+                    tileType={tileType}
+                    fogType={fogMatrix[row][col]}
+                    characters={characters}
+                    pos={{row, col}}
+                  />
+                )
+              })}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+}
+
 const TILE_SIZE = '15px';
 const TILE_TYPE_STYLES = {
   //'start',
@@ -160,37 +197,17 @@ const TILE_TYPE_STYLES = {
   //'special',
   9: { backgroundColor: '#da5cff' },
 }
-class World extends Component {
-  render() {
-    const { mapMatrix, dataMatrix, characters } = this.props;
-
-    const isEmpty = mapMatrix.length <= 0 || mapMatrix[0].length <= 0;
-    if (isEmpty) {
-      return <div className='pad-2'>(waiting for map data)</div>
-    }
-
-    return (
-      <div className='flex-col-centered position-relative mar-v-2 mar-h-auto bor-4-primary'>
-        { mapMatrix.map((innerMatrix, row) => {
-          return (
-            <div className='flex-row' key={`row-${row}-key`} >
-              { innerMatrix.map((tileType, col) => {
-                return (
-                  <Tile
-                    key={`tile-${col}-${row}-key`}
-                    tileType={tileType}
-                    tileData={dataMatrix[row][col]}
-                    characters={characters}
-                    pos={{row, col}}
-                  />
-                )
-              })}
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
+const FOG_STYLES = {
+  //'hidden',
+  0: {
+    opacity: 0,
+  },
+  //'visible',
+  1: {},
+  //'partial',
+  2: {
+    opacity: 0.5,
+  },
 }
 class Tile extends Component {
   constructor(props) {
@@ -200,14 +217,16 @@ class Tile extends Component {
     }
   }
   render() {
-    const { tileType, pos } = this.props;
+    const { fogType, tileType, pos } = this.props;
     const { isFocused } = this.state;
-    // const isEmpty = tileType === 0;
     const charactersHere = this.getCharactersHere();
     const characterDisplay = charactersHere.length > 1 ? `[${charactersHere.length}]` : (charactersHere[0] && charactersHere[0].name[0]);
 
-    const modifierStyles = {
+    // make hidden tiles just look like empty tiles
+    const isHidden = fogType === 0;
+    const modifierStyles = isHidden ? TILE_TYPE_STYLES[0] : {
       ...TILE_TYPE_STYLES[tileType],
+      ...FOG_STYLES[fogType],
     }
 
     return (

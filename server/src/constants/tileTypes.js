@@ -27,4 +27,11 @@ export const WALKABLE_TILE_TYPES = [
 export function isWalkableTile(tileType) {
   return WALKABLE_TILE_TYPES.includes(tileType);
 }
-
+/**
+ * @typedef {String | Number} FOG_TYPES
+ */
+export const FOG_TYPES = {
+  HIDDEN: 0,
+  VISIBLE: 1,
+  PARTIAL: 2,
+}

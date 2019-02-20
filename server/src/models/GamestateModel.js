@@ -1,5 +1,6 @@
 import schema from 'js-schema';
 import MAP_SETTINGS from 'constants/mapSettings';
+import {FOG_TYPES} from 'constants/tileTypes';
 
 import Model from 'models/Model';
 import MatrixModel from 'models/MatrixModel';
@@ -21,8 +22,8 @@ const gamestateSchema = schema({
   tileMapModel: MapModel,
   // list of all encounters
   encounters: Array, // Array<String>
-  // data in each tile -- NOTE: this might be overkill, let's experiment with it later
-  mapDataModel: MatrixModel,
+  // fog of war
+  fogMapModel: MapModel,
   // objects/items that are in the world
   '?entities': Array, // Array<EntityModel> ???
   // characters that are in the world (similar to entities)
@@ -46,7 +47,7 @@ export class GamestateModel extends Model {
     // init everything
     this.initTileMapModel();
     this.initEncounterList();
-    this.refreshMapData();
+    this.initFogOfWarModel();
 
     // set schema and then validate
     this.schema = gamestateSchema;
@@ -72,36 +73,14 @@ export class GamestateModel extends Model {
     });
   }
   /**
-   * updates the `mapDataModel` with data from everything else
+   * inits fog of war model
    */
-  refreshMapData() {
-    // what data each tile can hold
-    const defaultTileData = {
-      characters: [],
-    };
-
-    // create a blank matrix with tilemap dimensions
-    const tileMapModel = this.get('tileMapModel');
-    const width = tileMapModel.getWidth();
-    const height = tileMapModel.getHeight();
-    const emptyMapMatrix = matrixUtils.createMatrix(width, height, defaultTileData);
-
-    // build model
-    const newMapDataModel = new MatrixModel({
-      matrix: emptyMapMatrix,
+  initFogOfWarModel() {
+    const fogMapModel = new MapModel({
+      start: MAP_SETTINGS.startPoint.clone(),
+      matrix: matrixUtils.createMatrix(MAP_SETTINGS.width, MAP_SETTINGS.height, FOG_TYPES.HIDDEN),
     });
-
-    // get characters
-    const characters = this.get('characters');
-    characters.forEach((characterModel) => {
-      // update the Map with the users at their positions
-      const position = characterModel.get('position').clone();
-      const existingTileData = newMapDataModel.getTileAt(position);
-      existingTileData.characters.push(characterModel.id);
-    })
-
-    // done - set attribute
-    this.set({mapDataModel: newMapDataModel});
+    this.set({ fogMapModel: fogMapModel });
   }
   /**
    * @param {String} id - `characterId`
