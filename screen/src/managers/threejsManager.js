@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import {
+  GAME_HEIGHT,
+  GAME_WIDTH,
   CAMERA,
   SCENE,
   RENDERER,
@@ -10,26 +12,16 @@ import {
   TILE_DIRECTIONS,
   PLAYER,
   ANIMATION
-
 } from 'constants/three.js';
-import {
-  createPlayerMesh,
-  createTileMesh,
-  createHouseMesh,
-  createSpecialMesh
-} from 'geometry/threeGeometry.js';
+import * as threeGeometry from 'geometry/threeGeometry.js';
+import { FOG_TYPES, TILE_TYPES, isWalkableTile } from 'constants/tileTypes';
 import { initInput } from 'helpers/input';
-import { gamestate } from 'managers/eventManager';
-import consoleLog from 'helpers/debug';
+import * as connectionManager from 'managers/connectionManager';
 
 // Variable declaration
-
-// Browser
-let width = window.innerWidth;
-let height = window.innerHeight;
+let htmlContainer;
 
 // Three
-let screen;
 let sceneThree;
 let camera;
 let renderer;
@@ -37,11 +29,11 @@ let lights;
 
 // Game
 let currentFocus;
-var currentPlayer;
+var currentPlayer; // TODO rename to character?
 let players;
-let tiles;
-let houses;
-let specials;
+let tiles = {};
+let houses = {};
+let specials = {};
 
 // Animation
 let previousTimestamp;
@@ -49,14 +41,22 @@ let startMoving;
 let moves;
 let stepStartTimestamp;
 
-// Init Game
-screen = initScreen();
-
 // Functions
-function initScreen() {
-  initScene();
-  initGame();
-  render();
+export function initScreen() {
+  htmlContainer = document.getElementById('canvas-container');
+
+  // temporary implementation
+  const socket = connectionManager.socket;
+  socket.on('GAMESTATE_UPDATE', (gamestate) => {
+    // if first time, create a new game
+    if (sceneThree === undefined) {
+      initGame(gamestate);
+      return;
+    }
+
+    // update tiles
+    generateTiles(gamestate.tileMapModel.matrix, gamestate.fogMapModel.matrix);
+  });
 }
 
 function initScene() {
@@ -85,7 +85,7 @@ function render() {
 }
 
 function initCamera() {
-  camera = new THREE.OrthographicCamera( width/-2, width/2, height / 2, height / -2, 0.1, 10000 );
+  camera = new THREE.OrthographicCamera( GAME_WIDTH/-2, GAME_WIDTH/2, GAME_HEIGHT / 2, GAME_HEIGHT / -2, 0.1, 10000 );
   camera.rotation.x = CAMERA.CAMERA_ROTATION_X;
   camera.rotation.y = CAMERA.CAMERA_ROTATION_Y;
   camera.rotation.z = CAMERA.CAMERA_ROTATION_Z;
@@ -98,14 +98,16 @@ function initCamera() {
 function initRenderer() {
   renderer = new THREE.WebGLRenderer({
     alpha: RENDERER.APLHA,
-    antialias: RENDERER.ANTIALIAS
+    antialias: RENDERER.ANTIALIAS,
   });
 
   renderer.shadowMap.enabled = RENDERER.SHADOW_MAP_ENABLED;
   renderer.shadowMap.type = RENDERER.SHADOW_MAP_TYPE;
   renderer.setSize( RENDERER.SIZE_X, RENDERER.SIZE_Y );
   renderer.setClearColor(SCENE.BACKGROUND_COLOR);
-  document.body.appendChild( renderer.domElement );
+  renderer.domElement.style = 'border: 5px solid gray;';
+
+  htmlContainer.appendChild(renderer.domElement);
   return renderer;
 }
 function initLights() {
@@ -133,78 +135,162 @@ function initLights() {
   }
   return lights;
 }
-function initGame() {
-  players = initPlayers();
+/**
+ * start up game for the first time (?)
+ */
+function initGame(gamestate) {
+  const {
+    characters,
+    fogMapModel,
+    tileMapModel,
+  } = gamestate;
 
-  players.forEach(function(player) {
-    sceneThree.add(player);
-  });
-
-  previousTimestamp = null;
-  startMoving = false;
-
-  currentPlayer.position.set(SCENE.ORIGIN_POS.x, SCENE.ORIGIN_POS.y, PLAYER.POSITION_HEIGHT);
   initInput();
-}
-function initPlayers(playerIds = [1]) {
-  let players = [];
-  playerIds.forEach(function(playerId) {
-    players.push(new player(playerId));
+  initScene();
+
+  // create tiles
+  generateTiles(tileMapModel.matrix, fogMapModel.matrix);
+
+  players = characters.map(function(character) {
+    const newPlayer = new Player(character.id, character.position);
+    sceneThree.add(newPlayer);
+    return newPlayer;
   });
   currentFocus = players[0];
   currentPlayer = players[0];
-  return players;
-}
-function player(playerId) {
-  const player = new THREE.Group();
-  player.playerId = playerId;
-  player.pos = { x: 0 , y: 0 };
-  player.moves = [];
-  const playerMesh = createPlayerMesh();
-  player.add(playerMesh);
-  return player;
-}
-export function generateTiles(map) {
-  tiles = {};
-  houses = {};
-  specials = {};
-  consoleLog(false, ['map: ', map]);
-  map.mapData.forEach(function(row, y) {
-    row.forEach(function(col, x) {
-      if (col > 0) {
-        let xVal = x - Math.ceil(row.length/2);
-        let yVal = Math.ceil(map.mapData.length/2) - y;
-        console.log(x, Math.ceil(row.length/2), y,  Math.ceil(map.mapData.length/2));
-        console.log({ x: xVal, y: yVal }, map.mapData.length, row.length);
-        addTile({ x: xVal, y: yVal });
 
-        if (col == 2) {
-          addHouse({ x: xVal, y: yVal });
-        }
-        if (col == 3) {
-          addSpecial({ x: xVal, y: yVal });
-        }
+  startMoving = false;
+  previousTimestamp = null;
+
+  moveCameraTo(currentFocus.position);
+  render();
+}
+function Player(playerId, position) {
+  const playerObject = new THREE.Group();
+  playerObject.playerId = playerId;
+  playerObject.pos = position;
+  const worldPos = convertMapPositionToWorldPosition(position);
+  playerObject.position.set(worldPos.x, worldPos.y * -1, PLAYER.POSITION_HEIGHT);
+  playerObject.moves = [];
+  const playerMesh = threeGeometry.createPlayerMesh();
+  playerObject.add(playerMesh);
+  return playerObject;
+}
+/**
+ *
+ * @param {Matrix} mapMatrix
+ * @param {Matrix} fogMatrix
+ */
+function generateTiles(mapMatrix, fogMatrix) {
+  mapMatrix.forEach(function(row, y) {
+    row.forEach(function(mapTile, x) {
+      const mapPos = { x, y };
+      const fogType = fogMatrix[y][x];
+      const isHidden = fogType === FOG_TYPES.HIDDEN;
+
+      // add a "blank" tile if hidden,
+      // but don't add additional entities if hidden
+      if (isHidden) {
+        handleAddTile({
+          fogType: fogType,
+          mapPos: mapPos,
+          tileType: mapTile,
+        });
+        return;
+      }
+
+      // add a tile if it is walkable
+      if (isWalkableTile(mapTile)) {
+        handleAddTile({
+          fogType: fogType,
+          mapPos: mapPos,
+          tileType: mapTile,
+        });
+      }
+
+      // add things on top of the tiles
+      if (mapTile === TILE_TYPES.HOUSE) {
+        addHouse(mapPos);
+      }
+      if (mapTile === TILE_TYPES.SPECIAL) {
+        addSpecial(mapPos);
       }
     });
   });
-  // addTile(SCENE.ORIGIN_POS);
-  return tiles;
 }
-function addTile(pos) {
-  let tile = new Tile(pos);
-  tile.position.z = 1.5*SCENE.ZOOM;
-  tile.position.x = pos.x*(TILES.TILE_SIZE*2);
-  tile.position.y = pos.y*(TILES.TILE_SIZE*2);
-  sceneThree.add(tile);
-  tiles['x' + pos.x + 'y' + pos.y] = tile;
+/**
+ * TODO - this can be its own class in its own file
+ * @typedef Tile
+ *
+ * @param {Object} options
+ * @returns Tile
+ */
+function handleAddTile(options) {
+  const {
+    fogType,
+    mapPos,
+    tileType,
+  } = options;
+
+  // if a Tile is already at this Point
+  const existingTile = getTileObjectAtMapPos(mapPos);
+  if (existingTile) {
+    // and it is of the exact same tileType and visibility,
+    // we don't have to add a tile or anything
+    if (existingTile.tileType === tileType && existingTile.fogType === fogType) {
+      return;
+    }
+
+    // otherwise, we need to remove it from the cache and scene
+    handleRemoveTile(existingTile);
+  }
+
+  // create a new tile
+  const tile = new Tile(options);
+  tiles[tile._id] = tile;
   sceneThree.add(tile);
   return tile;
 }
-function Tile(pos, dir, type) {
+/**
+ * TODO - this can be its own class in its own file
+ * @typedef Tile
+ *
+ * @param {Object} options
+ * @returns Tile
+ */
+function Tile(options) {
+  const {
+    fogType,
+    mapPos,
+    tileType,
+  } = options;
+
   const tile = new THREE.Group();
-  tile.pos = pos;
-  const tileMesh = createTileMesh();
-  tile.add(tileMesh);
+  tile.fogType = fogType;
+  tile.tileType = tileType;
+
+  // positioning
+  tile.mapPos = mapPos;
+  const worldPos = convertMapPositionToWorldPosition(mapPos);
+  tile.position.z = 1.5*SCENE.ZOOM;
+  tile.position.x = worldPos.x;
+  tile.position.y = worldPos.y * -1; // invert because Positive is Up for ThreeJS
+
+  // determine mesh color based on type
+  switch(fogType) {
+    case FOG_TYPES.PARTIAL:
+      tile.add(threeGeometry.createPartialTileMesh());
+      break;
+    case FOG_TYPES.HIDDEN:
+      tile.add(threeGeometry.createHiddenTileMesh());
+      break;
+    case FOG_TYPES.VISIBLE:
+    default:
+      tile.add(threeGeometry.createTileMesh());
+      break;
+  }
+
+  tile._id = makePointId(mapPos);
   return tile;
 }
 function addHouse(pos) {
@@ -213,15 +299,16 @@ function addHouse(pos) {
   house.position.x = pos.x*(TILES.TILE_SIZE*2);
   house.position.y = pos.y*(TILES.TILE_SIZE*2);
   sceneThree.add(house);
-  houses['x' + pos.x + 'y' + pos.y] = house;
+  houses[house._id] = house;
   sceneThree.add(house);
   return house;
 }
-function House(pos, dir, type) {
+function House(mapPos, dir, type) {
   const house = new THREE.Group();
-  house.pos = pos;
-  const houseMesh = createHouseMesh();
+  house.mapPos = mapPos;
+  const houseMesh = threeGeometry.createHouseMesh();
   house.add(houseMesh);
+  house._id = makePointId(mapPos); // todo change, its not good
   return house;
 }
 function addSpecial(pos) {
@@ -230,15 +317,16 @@ function addSpecial(pos) {
   special.position.x = pos.x*(TILES.TILE_SIZE*2);
   special.position.y = pos.y*(TILES.TILE_SIZE*2);
   sceneThree.add(special);
-  specials['x' + pos.x + 'y' + pos.y] = special;
+  specials[special._id] = special;
   sceneThree.add(special);
   return special;
 }
-function Special(pos, dir, type) {
+function Special(mapPos, dir, type) {
   const special = new THREE.Group();
-  special.pos = pos;
-  const specialMesh = createSpecialMesh();
+  special.mapPos = mapPos;
+  const specialMesh = threeGeometry.createSpecialMesh();
   special.add(specialMesh);
+  special._id = makePointId(mapPos); // todo change, its not good
   return special;
 }
 export function move(direction) {
@@ -250,7 +338,6 @@ export function move(direction) {
       if(move === TILE_DIRECTIONS.RIGHT) return { x: position.x+1, y: position.y};
   }, { x: currentPlayer.pos.x, y: currentPlayer.pos.y});
   let targetTile = tiles['x' + finalPosition.x + 'y' + finalPosition.y];
-  consoleLog(false, ["finalPosition: ", finalPosition]);
 
   if (direction === TILE_DIRECTIONS.FORWARD) {
     if (!stepStartTimestamp) startMoving = true;
@@ -282,32 +369,36 @@ function animate(timestamp) {
   }
 
   if(stepStartTimestamp) {
+      const playerWorldPos = convertMapPositionToWorldPosition({
+        x: currentPlayer.pos.x,
+        y: currentPlayer.pos.y * -1,
+      });
       const moveDeltaTime = timestamp - stepStartTimestamp;
       const moveDeltaDistance = Math.min(moveDeltaTime/ANIMATION.STEP_TIME,1)*TILES.TILE_SIZE*SCENE.ZOOM;
       const jumpDeltaDistance = Math.sin(Math.min(moveDeltaTime/ANIMATION.STEP_TIME,1)*Math.PI)*12*SCENE.ZOOM+PLAYER.POSITION_HEIGHT;
       switch(currentPlayer.moves[0]) {
           case TILE_DIRECTIONS.FORWARD: {
-              currentPlayer.position.y = currentPlayer.pos.y*TILES.TILE_SIZE*SCENE.ZOOM + moveDeltaDistance; // initial player position is 0
+              currentPlayer.position.y = playerWorldPos.y + moveDeltaDistance; // initial player position is 0
               currentPlayer.position.z = jumpDeltaDistance;
-              camera.position.y = CAMERA.INITIAL_CAMERA_POSITION_Y + currentFocus.pos.y*TILES.TILE_SIZE*SCENE.ZOOM + moveDeltaDistance;
+              moveCameraTo(currentFocus.position);
               break;
           }
           case TILE_DIRECTIONS.BACKWARD: {
-              currentPlayer.position.y = currentPlayer.pos.y*TILES.TILE_SIZE*SCENE.ZOOM - moveDeltaDistance;
+              currentPlayer.position.y = playerWorldPos.y - moveDeltaDistance;
               currentPlayer.position.z = jumpDeltaDistance;
-              camera.position.y = CAMERA.INITIAL_CAMERA_POSITION_Y + currentFocus.pos.y*TILES.TILE_SIZE*SCENE.ZOOM - moveDeltaDistance;
+              moveCameraTo(currentFocus.position);
               break;
           }
           case TILE_DIRECTIONS.LEFT: {
-              currentPlayer.position.x = currentPlayer.pos.x*TILES.TILE_SIZE*SCENE.ZOOM - moveDeltaDistance; // initial player position is 0
+              currentPlayer.position.x = playerWorldPos.x - moveDeltaDistance; // initial player position is 0
               currentPlayer.position.z = jumpDeltaDistance;
-              camera.position.x = CAMERA.INITIAL_CAMERA_POSITION_X + currentFocus.pos.x*TILES.TILE_SIZE*SCENE.ZOOM - moveDeltaDistance;
+              moveCameraTo(currentFocus.position);
               break;
           }
           case TILE_DIRECTIONS.RIGHT: {
-              currentPlayer.position.x = currentPlayer.pos.x*TILES.TILE_SIZE*SCENE.ZOOM + moveDeltaDistance;
+              currentPlayer.position.x = playerWorldPos.x + moveDeltaDistance;
               currentPlayer.position.z = jumpDeltaDistance;
-              camera.position.x = CAMERA.INITIAL_CAMERA_POSITION_X + currentFocus.pos.x*TILES.TILE_SIZE*SCENE.ZOOM + moveDeltaDistance;
+              moveCameraTo(currentFocus.position);
               break;
           }
       }
@@ -315,11 +406,11 @@ function animate(timestamp) {
       if(moveDeltaTime > ANIMATION.STEP_TIME) {
           switch(currentPlayer.moves[0]) {
               case TILE_DIRECTIONS.FORWARD: {
-                  currentPlayer.pos.y++;
+                  currentPlayer.pos.y--; // invert because Positive is Up for ThreeJS
                   break;
               }
               case TILE_DIRECTIONS.BACKWARD: {
-                  currentPlayer.pos.y--;
+                  currentPlayer.pos.y++; // invert because Positive is Up for ThreeJS
                   break;
               }
               case TILE_DIRECTIONS.LEFT: {
@@ -337,4 +428,73 @@ function animate(timestamp) {
       }
   }
   renderer.render(sceneThree, camera);
+}
+/**
+ * @param {Point} point
+ * @returns {Point}
+ */
+function convertMapPositionToWorldPosition(point) {
+  return {
+    x: point.x * (TILES.TILE_SIZE * SCENE.ZOOM),
+    y: point.y * (TILES.TILE_SIZE * SCENE.ZOOM),
+  }
+}
+/**
+ * I have no idea what the actual calculation should be so I just made it whatever looked right
+ * todo: z axis?
+ *
+ * @param {Point} position
+ * @returns {Point}
+ */
+function moveCameraTo(position) {
+  camera.position.x = position.x + (TILES.TILE_SIZE * SCENE.ZOOM * 3);
+  camera.position.y = position.y - (TILES.TILE_SIZE * SCENE.ZOOM * 6);
+}
+/**
+ * I have no idea what the actual calculation should be so I just made it whatever looked right
+ * todo: z axis?
+ *
+ * @param {Tile} tile
+ * @returns {String}
+ */
+function makePointId(point) {
+  return `point-${point.x}-${point.y}-id`;
+}
+/**
+ * @param {Point} point
+ * @returns {Tile | undefined}
+ */
+function getTileObjectAtMapPos(point) {
+  const pointId = makePointId(point);
+  return tiles[pointId];
+  // const tileKeys = Object.keys(tiles);
+  // tileKeys.forEach((tileKey) => {
+  //   const tile = tiles[tileKey];
+  //   if (tile.mapPos.x === point.x && tile.mapPos.y === point.y) {
+  //     console.log('getTileObjectAtMapPos match!', tile.mapPos, point);
+  //     return tile;
+  //   }
+  // });
+}
+/**
+ * TODO this is overloaded and can be improved for removing the other entities
+ *
+ * @param {Tile} tile
+ */
+function handleRemoveTile(tile) {
+  const pointId = tile._id;
+  sceneThree.remove(tile);
+  tiles[pointId] = null;
+
+  const houseObj = houses[pointId];
+  if (houseObj) {
+    sceneThree.remove(tile);
+    houses[pointId] = null;
+  }
+
+  const specialObj = specials[pointId];
+  if (specialObj) {
+    sceneThree.remove(tile);
+    specials[pointId] = null;
+  }
 }

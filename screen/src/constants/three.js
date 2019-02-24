@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 
+export const GAME_HEIGHT = (window.innerHeight * 0.9);
+export const GAME_WIDTH = (window.innerWidth * 0.9);
+
 export const WEB_GL_RENDERER = {
   ALPHA: true,
   ANTIALIAS: true
@@ -11,6 +14,7 @@ const CAMERA_ROTATION_Y = 20*Math.PI/180;
 const CAMERA_ROTATION_Z = 10*Math.PI/180;
 const INITIAL_CAMERA_POSITION_Y = -Math.tan(CAMERA_ROTATION_X)*DISTANCE;
 const INITIAL_CAMERA_POSITION_X = Math.tan(CAMERA_ROTATION_Y)*Math.sqrt(DISTANCE**2 + INITIAL_CAMERA_POSITION_Y**2);
+
 export const CAMERA = {
   DISTANCE: DISTANCE,
   CAMERA_ROTATION_X: CAMERA_ROTATION_X,
@@ -29,8 +33,8 @@ export const RENDERER = {
   ANTIALIAS: WEB_GL_RENDERER.ANTIALIAS,
   SHADOW_MAP_ENABLED: true,
   SHADOW_MAP_TYPE: THREE.PCFSoftShadowMap,
-  SIZE_X: window.innerWidth,
-  SIZE_Y: window.innerHeight,
+  SIZE_X: GAME_WIDTH,
+  SIZE_Y: GAME_HEIGHT,
 }
 export const HEMI_LIGHT = {
   SKY_COLOR: 0xffffff,

@@ -53,11 +53,11 @@ function debug_sendUpdate() {
  * execute debug
  */
 function debug_execute(n = 0) {
-  if (n < 250) {
+  if (n < 150) {
     console.log('debug_execute', n);
     debug_randomlyMoveCPU();
     debug_sendUpdate();
-    setTimeout(debug_execute, 700, n + 1);
+    setTimeout(debug_execute, 1500, n + 1);
   } else {
     console.log('debug_done');
   }

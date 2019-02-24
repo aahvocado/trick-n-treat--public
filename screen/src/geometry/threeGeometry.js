@@ -27,6 +27,26 @@ export function createTileMesh() {
   tileMesh.receiveShadow = TILES.RECEIVE_SHADOW;
   return tileMesh;
 }
+export function createPartialTileMesh() {
+  const tileMesh = new THREE.Mesh(
+    new THREE.BoxBufferGeometry( TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_HEIGHT*SCENE.ZOOM ),
+    new THREE.MeshPhongMaterial( { color: 0xbcc1d0 } )
+  );
+  tileMesh.position.z = TILES.POSITION_HEIGHT;
+  tileMesh.castShadow = false;
+  tileMesh.receiveShadow = false;
+  return tileMesh;
+}
+export function createHiddenTileMesh() {
+  const tileMesh = new THREE.Mesh(
+    new THREE.BoxBufferGeometry( TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_SIZE*SCENE.ZOOM, TILES.TILE_HEIGHT*SCENE.ZOOM ),
+    new THREE.MeshPhongMaterial( { color: 0x475156 } )
+  );
+  tileMesh.position.z = TILES.POSITION_HEIGHT;
+  tileMesh.castShadow = false;
+  tileMesh.receiveShadow = false;
+  return tileMesh;
+}
 export function createHouseMesh() {
   const tileMesh = new THREE.Mesh(
     new THREE.BoxBufferGeometry( HOUSE.HOUSE_SIZE*SCENE.ZOOM, HOUSE.HOUSE_SIZE*SCENE.ZOOM, HOUSE.HOUSE_SIZE*SCENE.ZOOM ),
