@@ -1,5 +1,3 @@
-import * as _ from 'lodash';
-
 export const enableLogging = true;
 
 export function consoleLog(override, ...values) {

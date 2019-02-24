@@ -1,41 +1,26 @@
-var os = require('os');
-var exec = require('child_process').exec;
-var nodemon = require('gulp-nodemon');
-var gulp = require('gulp');
-var opn = require('opn');
-var webpack = require('webpack-stream');
-
-var screenWebpackConfig = require('./webpack-screen.config.js');
+const os = require('os');
+const gulp = require('gulp');
+const open = require('gulp-open');
+const webpack = require('webpack-stream');
+const screenWebpackConfig = require('./webpack.config.js');
 
 const isDevEnv = process.env.NODE_ENV === 'development' || process.env.NODE_ENV !== 'production'; // todo: not 'production' is kinda hacky
-var browser = os.platform() === 'darwin' ? '/Applications/Google\ Chrome.app' : 'google-chrome';
-switch(os.platform())
-{
-  case 'aix':
-
-    break;
-  case 'darwin':
-    browser = '/Applications/Google\ Chrome.app';
-    break;
-  case 'freebsd':
-
-    break;
-  case 'linux':
-
-    break;
-  case 'openbsd':
-
-    break;
-  case 'sunos':
-
-    break;
-  case 'win32':
-    browser = "Chrome";
-    break;
-  default:
-    browser = 'google-chrome';
-    break;
-}
+const browser = (function() {
+  switch (os.platform()) {
+    case 'aix':
+    case 'freebsd':
+    case 'linux':
+    case 'openbsd':
+    case 'sunos':
+      return null;
+    case 'darwin':
+      return '/Applications/Google\ Chrome.app';
+    case 'win32':
+      return "Chrome";
+    default:
+      return 'google-chrome';
+  }
+})();
 // files to watch for in the screen
 const SCREEN_CHANGE_WATCH = [
   '!**/{' + [
@@ -52,13 +37,13 @@ const SCREEN_CHANGE_WATCH = [
   '*.css',
   './public/*.js',
   './public/**/*.js',
-  './shared/*.js',
-  './shared/**/*.js',
+  './src/*.js',
+  './src/**/*.js',
 ];
 
 // compile screen
 gulp.task('compile-screen', function(done) {
-  return gulp.src('./src/app.js')
+  return gulp.src('./src/index.js')
     .pipe(webpack(screenWebpackConfig))
     .pipe(gulp.dest('build'));
 });
@@ -70,12 +55,12 @@ gulp.task('screen:watch', function() {
 
 // run webapp page
 gulp.task("run-screen-local", function() {
-  return opn('./build/screen-index.html', {app: browser});
+  return gulp.src('./build/index.html')
+    .pipe(open({ app: browser }))
 });
 
 // default
-gulp.task('dev-screen', gulp.series('compile-screen', 'screen:watch', 'run-screen-local'));
-gulp.task('development', gulp.series('compile-screen'));
+gulp.task('development', gulp.series('compile-screen', 'run-screen-local', 'screen:watch'));
 gulp.task('production', gulp.series('compile-screen'));
 /**
  * different 'default' task depending on settings

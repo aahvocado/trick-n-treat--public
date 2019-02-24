@@ -6,11 +6,12 @@
     "compile:remote": "echo \"compiling the Remote project is not available\"",
     "compile:screen": "npm install --prefix ./screen; npm run compile --prefix ./screen",
     "compile:server": "npm install --prefix ./server; npm run compile --prefix ./server",
-    "compile": "npm run compile:remote; npm run compile:screen; npm run compile:server;",
+    "compile:all": "npm run compile:remote && npm run compile:screen && npm run compile:server",
     "start:remote": "npm run start --prefix ./remote",
-    "start:screen": "echo \"starting the Screen project is not available\"",
+    "start:screen": "npm run start --prefix ./screen",
     "start:server": "npm run start --prefix ./server",
-    "test": "echo \"TODO: Run tests on all projects\""
+    "start:all": "npm run compile:all && npm run start:remote && npm run start:screen && npm run start:server",
+    "start": "echo \"Starting all projects is still a WIP\" && npm run start:all"
   },
   "dependencies": {},
   "devDependencies": {},

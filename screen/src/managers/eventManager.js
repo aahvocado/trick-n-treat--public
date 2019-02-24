@@ -7,9 +7,9 @@ export function start() {
   console.log('eventManager start(): ', connectionManager.socket);
   if (connectionManager.socket) {
     connectionManager.socket.on('GAMESTATE_UPDATE', (data) => {
-      // console.log('GAMESTATE_UPDATE', e);
+      console.log('GAMESTATE_UPDATE', data);
       gamestate = data;
-      generateTiles();
+      // generateTiles();
     })
   }
 }

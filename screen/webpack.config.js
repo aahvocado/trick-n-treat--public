@@ -1,5 +1,4 @@
 var path = require('path');
-var nodeExternals = require('webpack-node-externals');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 var { BUILD_PATH } = require('./app-paths.js');

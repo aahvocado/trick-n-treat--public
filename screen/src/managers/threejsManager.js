@@ -164,7 +164,7 @@ function player(playerId) {
   player.add(playerMesh);
   return player;
 }
-function generateTiles() {
+export function generateTiles(map) {
   tiles = {};
   houses = {};
   specials = {};
@@ -272,7 +272,7 @@ function animate(timestamp) {
   requestAnimationFrame(animate);
   if(!previousTimestamp) {
     previousTimestamp = timestamp;
-  } 
+  }
   const delta = timestamp - previousTimestamp;
   previousTimestamp = timestamp;
 
