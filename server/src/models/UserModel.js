@@ -5,26 +5,26 @@ import Model from 'models/Model';
 // define attribute types
 const userSchema = schema({
   // user's name
-  name: String,
+  'name': String,
   // defined id of this user
-  userId: String,
+  'userId': String,
   // id of user's chosen character
   '?characterId': String,
   //
-  isUserTurn: Boolean,
+  'isUserTurn': Boolean,
   //
-  canMoveLeft: Boolean,
+  'canMoveLeft': Boolean,
   //
-  canMoveRight: Boolean,
+  'canMoveRight': Boolean,
   //
-  canMoveUp: Boolean,
+  'canMoveUp': Boolean,
   //
-  canMoveDown: Boolean,
+  'canMoveDown': Boolean,
   //
-  canTrick: Boolean,
+  'canTrick': Boolean,
   //
-  canTreat: Boolean,
-})
+  'canTreat': Boolean,
+});
 
 /**
  * user class
@@ -32,6 +32,7 @@ const userSchema = schema({
  * @typedef {Model} UserModel
  */
 export class UserModel extends Model {
+  /** @override */
   constructor(newAttributes = {}) {
     super(newAttributes);
 

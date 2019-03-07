@@ -12,17 +12,17 @@ const statSchema = schema({
   value: Number,
   // temporary change of values
   modifier: Number,
-})
+});
 
 export const STAT_TYPE_ID = {
   HEALTH: 'HEALTH-STAT-TYPE',
   MOVEMENT: 'MOVEMENT-STAT-TYPE',
-}
+};
 
 const STAT_NAME = {
   [STAT_TYPE_ID.HEALTH]: 'Health',
   [STAT_TYPE_ID.MOVEMENT]: 'Movement',
-}
+};
 
 /**
  * stat class
@@ -30,6 +30,7 @@ const STAT_NAME = {
  * @typedef {Model} StatModel
  */
 export class StatModel extends Model {
+  /** @override */
   constructor(newAttributes = {}) {
     super(newAttributes);
 
@@ -57,6 +58,7 @@ export class StatModel extends Model {
  *
  */
 export class HealthModel extends StatModel {
+  /** @override */
   constructor(newAttributes = {}) {
     super(Object.assign({
       typeId: STAT_TYPE_ID.HEALTH,
@@ -67,6 +69,7 @@ export class HealthModel extends StatModel {
  *
  */
 export class MovementModel extends StatModel {
+  /** @override */
   constructor(newAttributes = {}) {
     super(Object.assign({
       typeId: STAT_TYPE_ID.MOVEMENT,

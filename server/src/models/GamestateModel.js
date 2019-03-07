@@ -3,7 +3,6 @@ import MAP_SETTINGS from 'constants/mapSettings';
 import {FOG_TYPES} from 'constants/tileTypes';
 
 import Model from 'models/Model';
-import MatrixModel from 'models/MatrixModel';
 import MapModel from 'models/MapModel';
 
 import * as matrixUtils from 'utilities/matrixUtils';
@@ -13,17 +12,17 @@ import * as encounterManager from 'managers/encounterManager';
 // define how our GameState should look like
 const gamestateSchema = schema({
   // id of the current game state (such as paused, waiting, etc)
-  state: String,
+  'state': String,
   // connected users
-  users: Array, // Array<UserModel>
+  'users': Array, // Array<UserModel>
   // characters that the users are controlling
-  characters: Array, // Array<CharacterModel>
+  'characters': Array, // Array<CharacterModel>
   // tiles that make up the world
-  tileMapModel: MapModel,
+  'tileMapModel': MapModel,
   // list of all encounters
-  encounters: Array, // Array<String>
+  'encounters': Array, // Array<String>
   // fog of war
-  fogMapModel: MapModel,
+  'fogMapModel': MapModel,
   // objects/items that are in the world
   '?entities': Array, // Array<EntityModel> ???
   // characters that are in the world (similar to entities)
@@ -31,11 +30,12 @@ const gamestateSchema = schema({
 
   // id of the character whose turn it is (consider how it could be an npc/entity?)
   '?activeCharacterId': String,
-})
+});
 /**
  * our Gamestate is a Model
  */
 export class GamestateModel extends Model {
+  /** @override */
   constructor(newAttributes = {}) {
     super(newAttributes);
 
@@ -57,7 +57,7 @@ export class GamestateModel extends Model {
    * generates a map
    */
   initTileMapModel() {
-    const mapModel = new MapModel({ mapConfig: MAP_SETTINGS });
+    const mapModel = new MapModel({mapConfig: MAP_SETTINGS});
     mapModel.generateMap();
 
     this.set({
@@ -80,7 +80,7 @@ export class GamestateModel extends Model {
       start: MAP_SETTINGS.startPoint.clone(),
       matrix: matrixUtils.createMatrix(MAP_SETTINGS.width, MAP_SETTINGS.height, FOG_TYPES.HIDDEN),
     });
-    this.set({ fogMapModel: fogMapModel });
+    this.set({fogMapModel: fogMapModel});
   }
   /**
    * @param {String} id - `characterId`
@@ -89,7 +89,7 @@ export class GamestateModel extends Model {
   findCharacter(id) {
     return this.get('characters').find((characterModel) => {
       return characterModel.get('characterId') === id;
-    })
+    });
   }
   /**
    * @param {String} id - `userId`
@@ -98,7 +98,7 @@ export class GamestateModel extends Model {
   findUser(id) {
     return this.get('users').find((userModel) => {
       return userModel.get('userId') === id;
-    })
+    });
   }
   /**
    * @param {String} id - `userId`

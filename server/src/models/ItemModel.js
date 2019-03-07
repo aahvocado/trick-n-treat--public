@@ -5,22 +5,23 @@ import Model from '../models/Model';
 // define attribute types
 const itemSchema = schema({
   // id
-  typeId: String,
+  'typeId': String,
   // name
-  name: String,
+  'name': String,
   // what this item does when used (not certain how this works yet)
   '?actionId': String,
-})
+});
 
 export const ITEM_TYPE_ID = {
   WEAPON: 'WEAPON-ITEM-TYPE',
   CONSUMABLE: 'CONSUMABLE-ITEM-TYPE',
-}
+};
 
 /**
  * @typedef {Model} ItemModel
  */
 export class ItemModel extends Model {
+  /** @override */
   constructor(newAttributes = {}) {
     super(newAttributes);
 
@@ -38,6 +39,7 @@ export class ItemModel extends Model {
  * @typedef {ItemModel} WeaponModel
  */
 export class WeaponModel extends ItemModel {
+  /** @override */
   constructor(newAttributes = {}) {
     super(Object.assign({
       typeId: ITEM_TYPE_ID.WEAPON,
@@ -48,6 +50,7 @@ export class WeaponModel extends ItemModel {
  * @typedef {ItemModel} ConsumableModel
  */
 export class ConsumableModel extends ItemModel {
+  /** @override */
   constructor(newAttributes = {}) {
     super(Object.assign({
       typeId: ITEM_TYPE_ID.CONSUMABLE,

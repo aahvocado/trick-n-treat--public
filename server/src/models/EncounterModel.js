@@ -13,7 +13,7 @@ const encounterSchema = schema({
   onTrigger: Function,
   // how many times this encounter has triggered
   triggerCount: Number,
-})
+});
 
 /**
  * @typedef {Model} EncounterModel
@@ -38,14 +38,14 @@ export class EncounterModel extends Model {
    * base function that will be called when a character gets on this
    *
    * @abstract
-   * @params {CharacterModel} characterModel
+   * @param {CharacterModel} characterModel
    */
   trigger(characterModel) {
     console.log('encounter trigger');
     const onTrigger = this.get('onTrigger');
     onTrigger(characterModel);
 
-    this.set({ triggerCount: this.attributes.triggerCount + 1 });
+    this.set({triggerCount: this.attributes.triggerCount + 1});
   }
 }
 export default EncounterModel;

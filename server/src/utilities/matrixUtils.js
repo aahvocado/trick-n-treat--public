@@ -12,7 +12,6 @@
  *
  * @param {Matrix} matrix
  * @param {Function} callback
- * @returns {Matrix | null}
  */
 export function forEach(matrix, callback) {
   matrix.forEach((row, y) => {
@@ -21,8 +20,8 @@ export function forEach(matrix, callback) {
        * each callback will be given the tile and their position
        */
       callback(tile, x, y);
-    })
-  })
+    });
+  });
 }
 /**
  * creates a 2D array of empty tiles
@@ -33,11 +32,11 @@ export function forEach(matrix, callback) {
  * @returns {Matrix}
  */
 export function createMatrix(width, height, defaultValue = TILE_TYPES.EMPTY) {
-  let matrix = [];
+  const matrix = [];
 
-  for (var y = 0; y < height; y++) {
+  for (let y = 0; y < height; y++) {
     matrix.push([]);
-    for (var x = 0; x < width; x++) {
+    for (let x = 0; x < width; x++) {
       matrix[y][x] = defaultValue;
     }
   }
@@ -64,7 +63,7 @@ export function getSubmatrixSquare(matrix, topLeftX, topLeftY, bottomRightX, bot
 
   // iterate to get a section of larger matrix
   const submatrix = [];
-  for (var y = topLeftY; y < (bottomRightY + 1); y++) {
+  for (let y = topLeftY; y < (bottomRightY + 1); y++) {
     const row = matrix[y];
     submatrix.push(row.slice(topLeftX, bottomRightX + 1)); // offset by 1 to be inclusive
   }
@@ -117,7 +116,7 @@ export function getSubmatrixByDistance(matrix, point, distance) {
     if (distanceFromCenterX + distanceFromCenterY > distance) {
       submatrix[y][x] = null;
     }
-  })
+  });
 
   return submatrix;
 }
@@ -144,7 +143,7 @@ export function hasNearbyTileType(matrix, point, type, distance) {
  * @returns {Boolean}
  */
 export function hasAdjacentTileType(matrix, point, type) {
-  const { x, y } = point;
+  const {x, y} = point;
   // above
   if (matrix[y - 1][x] === type) {
     return true;
@@ -179,7 +178,7 @@ export function hasAdjacentTileType(matrix, point, type) {
 export function containsTileType(matrix, type) {
   return matrix.some((row) => {
     return row.includes(type);
-  })
+  });
 }
 /**
  * Durstenfeld shuffle
@@ -191,7 +190,7 @@ export function containsTileType(matrix, type) {
 export function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+    [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
 }
@@ -199,8 +198,7 @@ export function shuffleArray(array) {
  * finds if there are any tiles of given Type in a Matrix
  *
  * @param {Matrix} matrix
- * @param {Point} point - where to look from
- * @param {Tile} type - what you're looking for
+ * @param {Tile} type - what type to count
  * @param {Number} distance - how many tiles further to check
  * @returns {Number}
  */
@@ -208,8 +206,8 @@ export function getCount(matrix, type) {
   return matrix.reduce((count, row) => {
     return count + row.reduce((rowCount, tile) => {
       return rowCount + (tile === type ? 1 : 0);
-    }, 0)
-  }, 0)
+    }, 0);
+  }, 0);
 }
 /**
  * finds if there are any tiles around a Point of given Type
@@ -240,8 +238,8 @@ export function getTypeCounts(matrix) {
 
       // otherwise add to the count
       typeMap[tile] += 1;
-    })
-  })
+    });
+  });
 
   return typeMap;
 }

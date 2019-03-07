@@ -1,22 +1,19 @@
 import uuid from 'uuid/v4';
 import seedrandom from 'seedrandom';
 
-import { MAP_START } from 'constants/mapSettings';
+import {MAP_START} from 'constants/mapSettings';
 import POINTS from 'constants/points';
-import TILE_TYPES, { isWalkableTile, FOG_TYPES } from 'constants/tileTypes';
+import TILE_TYPES, {isWalkableTile, FOG_TYPES} from 'constants/tileTypes';
 
-import Point from '@studiomoniker/point';
 import GamestateModel from 'models/GamestateModel';
-import CharacterModel, { CPUCharacterModel } from 'models/CharacterModel';
+import CharacterModel/* , {CPUCharacterModel} */ from 'models/CharacterModel';
 import UserModel from 'models/UserModel';
 
-import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
 import * as mathUtils from 'utilities/mathUtils';
-import * as matrixUtils from 'utilities/matrixUtils';
 
 // replace seed if we find something we like or want to debug with
 const seed = uuid();
-seedrandom(seed, { global: true });
+seedrandom(seed, {global: true});
 
 // instantiate Gamestate when this Module is called
 export const gamestateModel = new GamestateModel({
@@ -25,7 +22,7 @@ export const gamestateModel = new GamestateModel({
       name: 'User Daidan',
       userId: 'TEST_USER_ID',
       characterId: 'WOW_CHARACTER_ID_SO_UNIQUE',
-    })
+    }),
   ],
 
   characters: [
@@ -54,15 +51,16 @@ export const gamestateModel = new GamestateModel({
 /**
  * properly set values once the model is set up
  */
-function init() {
-  updateFogOfWarToVisible(MAP_START, FOG_TYPES.VISIBLE);
+export function start() {
+  updateFogOfWarToVisibleAt(MAP_START);
   updateUserMovementActions();
   updateUserLocationActions();
+  console.log('\x1b[35m', 'Gamestate Instantiated with Seed', seed);
 }
 /**
  * checks if a given point on the tilemap is walkable
  *
- * @param {Point} characterModel
+ * @param {Point} point
  * @returns {Boolean}
  */
 export function isPointWalkable(point) {
@@ -115,7 +113,7 @@ export function updateUserMovementActions() {
       canMoveRight: isPointWalkable(characterModel.getPotentialPosition(POINTS.RIGHT)),
       canMoveUp: isPointWalkable(characterModel.getPotentialPosition(POINTS.UP)),
       canMoveDown: isPointWalkable(characterModel.getPotentialPosition(POINTS.DOWN)),
-    })
+    });
   });
 }
 /**
@@ -134,7 +132,7 @@ export function updateUserLocationActions() {
     userModel.set({
       canTrick: isHouseTile,
       canTreat: isHouseTile,
-    })
+    });
   });
 }
 /**
@@ -159,10 +157,10 @@ export function updateCharacterPosition(characterId, directionPoint) {
   }
 
   // finally update the character's position
-  characterModel.set({ position: nextPosition });
+  characterModel.set({position: nextPosition});
 
   // ! - update other state attributes
-  updateFogOfWarToVisible(nextPosition);
+  updateFogOfWarToVisibleAt(nextPosition);
   updateUserMovementActions();
   updateUserLocationActions();
 }
@@ -193,47 +191,44 @@ export function getEncounterAt(point) {
   const encounters = gamestateModel.get('encounters');
   return encounters.find((encounterModel) => {
     return point.equals(encounterModel.get('position'));
-  })
+  });
 }
 /**
  * changes fog of war visibility
  *
- * @param {Point} directionPoint
+ * @param {Point} point
  */
-export function updateFogOfWarToVisible(position) {
+export function updateFogOfWarToVisibleAt(point) {
   const fogMapModel = gamestateModel.get('fogMapModel');
   const tileMapModel = gamestateModel.get('tileMapModel');
 
   // given tile is now visible
-  fogMapModel.setTileAt(position, FOG_TYPES.VISIBLE);
+  fogMapModel.setTileAt(point, FOG_TYPES.VISIBLE);
 
   /**
    * handle updating an adjacent point
    *
-   * @param {Point} adjPos
+   * @param {Point} adjPoint
    */
-  const updatePartialVisibility = (adjPos) => {
+  const updatePartialVisibility = (adjPoint) => {
     // if already fully visibile, do nothing
-    if (fogMapModel.isTileEqualTo(adjPos, FOG_TYPES.VISIBLE)) {
+    if (fogMapModel.isTileEqualTo(adjPoint, FOG_TYPES.VISIBLE)) {
       return;
     }
 
     // if adjacent tile is just an empty tile, let it be fully visible
-    if (tileMapModel.isTileEqualTo(adjPos, TILE_TYPES.EMPTY)) {
-      fogMapModel.setTileAt(adjPos, FOG_TYPES.VISIBLE);
+    if (tileMapModel.isTileEqualTo(adjPoint, TILE_TYPES.EMPTY)) {
+      fogMapModel.setTileAt(adjPoint, FOG_TYPES.VISIBLE);
       return;
     }
 
     // otherwise make it partially visible
-    fogMapModel.setTileAt(adjPos, FOG_TYPES.PARTIAL);
-  }
+    fogMapModel.setTileAt(adjPoint, FOG_TYPES.PARTIAL);
+  };
 
   // update adjacent points
-  updatePartialVisibility(position.clone().add(POINTS.LEFT));
-  updatePartialVisibility(position.clone().add(POINTS.RIGHT));
-  updatePartialVisibility(position.clone().add(POINTS.UP));
-  updatePartialVisibility(position.clone().add(POINTS.DOWN));
+  updatePartialVisibility(point.clone().add(POINTS.LEFT));
+  updatePartialVisibility(point.clone().add(POINTS.RIGHT));
+  updatePartialVisibility(point.clone().add(POINTS.UP));
+  updatePartialVisibility(point.clone().add(POINTS.DOWN));
 }
-//
-init();
-console.log('\x1b[35m', 'Gamestate Instantiated with Seed', seed); // magenta

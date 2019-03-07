@@ -1,13 +1,6 @@
 // import encounterCollections from 'collections/encounterCollections';
 
-// import * as gamestateManager from 'managers/gamestateManager';
 import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
-
-/**
- *
- *
- *
- */
 
 /**
  * list of ids for the current session's list of encounters
@@ -30,7 +23,7 @@ export function getEncountersList() {
 export function getEncounterModel(id) {
   return encountersList.find((encounterModel) => {
     return encounterModel.id === id;
-  })
+  });
 }
 /**
  * generates encounters for each of the encounter tiles in the map

@@ -6,6 +6,7 @@ import uuid from 'uuid/v4';
  * @typedef {Object} Model
  */
 export class Model {
+  /** @constructor */
   constructor() {
     /** @type {String} */
     this.id = uuid();
@@ -17,7 +18,7 @@ export class Model {
    * @returns {* | undefined} - returns given attribute
    */
   get(attributeName) {
-    return this.attributes[attributeName]
+    return this.attributes[attributeName];
   }
   /**
    * assigns and updates these attributes
@@ -73,7 +74,7 @@ export class Model {
 
       // assign the value
       exportObject[attributeName] = attributeValue;
-    })
+    });
 
     return exportObject;
   }
@@ -84,7 +85,7 @@ export class Model {
    * @returns {Object}
    */
   clone() {
-    return Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
   }
 }
 

@@ -47,7 +47,7 @@ export class MatrixModel extends Model {
     return new Point(
       Math.floor(this.getWidth() / 2),
       Math.floor(this.getHeight() / 2),
-    )
+    );
   }
   /**
    * returns the Tile located at a given Point
@@ -83,7 +83,7 @@ export class MatrixModel extends Model {
   setTileList(pointList, tileData) {
     pointList.forEach((point) => {
       this.setTileAt(point, tileData);
-    })
+    });
   }
   /**
    * checks if given Point is a valid point
@@ -93,7 +93,7 @@ export class MatrixModel extends Model {
    * @returns {Point}
    */
   getAvailablePoint(point) {
-    let { x, y } = point;
+    let {x, y} = point;
 
     const leftBounds = 0;
     const rightBounds = this.getWidth() - 1;
@@ -188,7 +188,6 @@ export class MatrixModel extends Model {
   /**
    * calculates the appropriate coordinates given a point and distance
    *
-   * @param {Matrix} matrix
    * @param {Point} point - where to look from
    * @param {Number} distance - how many tiles further to check
    * @returns {Submatrix}
@@ -210,7 +209,6 @@ export class MatrixModel extends Model {
   /**
    * finds if there are any tiles around a Point of given Type
    *
-   * @param {Matrix} matrix
    * @param {Point} point
    * @returns {TypeCounts}
    */

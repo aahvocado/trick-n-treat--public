@@ -9,54 +9,54 @@ const addHealthEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
     const healthModel = characterModel.get('health');
-    healthModel.set({ value: healthModel.get('value') + 1 });
-  }
+    healthModel.set({value: healthModel.get('value') + 1});
+  },
 });
 const bigAddHealthEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
     const healthModel = characterModel.get('health');
-    healthModel.set({ value: healthModel.get('value') + 2 });
-  }
+    healthModel.set({value: healthModel.get('value') + 2});
+  },
 });
 const loseHealthEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
     const healthModel = characterModel.get('health');
-    healthModel.set({ value: healthModel.get('value') - 1 });
-  }
+    healthModel.set({value: healthModel.get('value') - 1});
+  },
 });
 const bigLoseHealthEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
     const healthModel = characterModel.get('health');
-    healthModel.set({ value: healthModel.get('value') - 2 });
-  }
+    healthModel.set({value: healthModel.get('value') - 2});
+  },
 });
 
 const addCandyEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
-    characterModel.set({ candies: characterModel.get('candies') + 1 });
-  }
+    characterModel.set({candies: characterModel.get('candies') + 1});
+  },
 });
 const bigAddCandyEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
-    characterModel.set({ candies: characterModel.get('candies') + 2 });
-  }
+    characterModel.set({candies: characterModel.get('candies') + 2});
+  },
 });
 const loseCandyEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
-    characterModel.set({ candies: characterModel.get('candies') - 1 });
-  }
+    characterModel.set({candies: characterModel.get('candies') - 1});
+  },
 });
 const bigLoseCandyEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
-    characterModel.set({ candies: characterModel.get('candies') - 2 });
-  }
+    characterModel.set({candies: characterModel.get('candies') - 2});
+  },
 });
 
 /** @type {Array<EventModel>} */

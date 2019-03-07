@@ -3,7 +3,7 @@ import http from 'http';
 
 import * as gamestateManager from 'managers/gamestateManager';
 import * as websocketInstance from 'managers/websocketInstance';
-import * as remoteCommunicationManager from 'managers/remoteCommunicationManager';
+import * as remoteEventManager from 'managers/remoteEventManager';
 
 let app;
 let server;
@@ -27,13 +27,14 @@ export function start() {
   // START!
   const SERVER_PORT = process.env.SERVER_PORT;
   server.listen(SERVER_PORT, async () => {
-    console.log('\x1b[36m', `Trick & Treat Server Started - localhost:${SERVER_PORT}`); // cyan
+    console.log('\x1b[36m', `Trick & Treat Server Started - localhost:${SERVER_PORT}`);
   });
 
   // start debugging update
   debug_execute();
 }
 
+/* eslint-disable */
 /**
  * debugging
  */
@@ -47,7 +48,7 @@ function debug_randomlyMoveCPU() {
   });
 }
 function debug_sendUpdate() {
-  remoteCommunicationManager.sendGamestate();
+  remoteEventManager.sendGamestate();
 }
 /**
  * execute debug
@@ -62,3 +63,4 @@ function debug_execute(n = 0) {
     console.log('debug_done');
   }
 };
+/* eslint-enable */

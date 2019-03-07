@@ -1,14 +1,12 @@
+import TILE_TYPES from 'constants/tileTypes';
+// import ENCOUNTER_TYPES from 'constants/encounterTypes';
+
 import Point from '@studiomoniker/point';
+// import EncounterModel from 'models/EncounterModel';
 
 import * as encounterCollections from 'collections/encounterCollections';
 
-import TILE_TYPES from 'constants/tileTypes';
-import ENCOUNTER_TYPES from 'constants/encounterTypes';
-
-import EncounterModel from 'models/EncounterModel';
-
 import * as mathUtils from 'utilities/mathUtils';
-// import * as matrixUtils from 'utilities/matrixUtils';
 
 /**
  * generates encounters for each of the encounter tiles in the map

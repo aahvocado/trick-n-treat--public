@@ -36,15 +36,15 @@ export class MapModel extends MatrixModel {
 
     // create an empty Matrix
     const emptyMatrix = matrixUtils.createMatrix(mapConfig.width, mapConfig.height, TILE_TYPES.EMPTY);
-    this.set({ matrix: emptyMatrix });
+    this.set({matrix: emptyMatrix});
 
     // set our starting point Tile
     const startPoint = mapConfig.startPoint.clone();
-    this.set({ start: startPoint });
+    this.set({start: startPoint});
     this.setTileAt(startPoint, TILE_TYPES.START);
 
     // create special tiles on the Map
-    mapGenerationUtils.generateSpecialTiles(this, mapConfig)
+    mapGenerationUtils.generateSpecialTiles(this, mapConfig);
 
     // create paths on the Map
     mapGenerationUtils.executeRandomWalk(this, mapConfig);

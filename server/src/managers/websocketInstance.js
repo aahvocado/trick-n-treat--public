@@ -1,10 +1,10 @@
 import SocketServer from 'socket.io';
 
 import * as gamestateManager from 'managers/gamestateManager';
-import * as remoteCommunicationManager from 'managers/remoteCommunicationManager';
+import * as remoteEventManager from 'managers/remoteEventManager';
 
 /**
- * Singleton for handling the connection
+ * Singleton for handling the Websocket connection
  */
 
 /** @type {socket.io-server} */
@@ -22,7 +22,7 @@ export function start(httpServer) {
   io.use(handshake);
 
   // instantiate the different communication managers
-  remoteCommunicationManager.start(io);
+  remoteEventManager.start(io);
 }
 /**
  * middleware to intercept new connections

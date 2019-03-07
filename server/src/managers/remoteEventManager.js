@@ -1,6 +1,10 @@
+import POINTS from 'constants/points';
+
 import * as gamestateManager from 'managers/gamestateManager';
 
-import POINTS from 'constants/points';
+/**
+ * handles interpreting Event messages from the Remote
+ */
 
 /** @type {socket.io-server} */
 let websocketServer;
@@ -8,7 +12,7 @@ let websocketServer;
 /**
  * should be called from `websocketInstance.js` and given the io server
  *
- * @param {socket.io-server}
+ * @param {socket.io-server} io
  */
 export function start(io) {
   // save the reference
@@ -21,9 +25,9 @@ export function start(io) {
 
     // user is taking an action
     socket.on('USER_ACTION', (actionId) => {
-      handleUserAction('TEST_USER_ID', actionId)
+      handleUserAction('TEST_USER_ID', actionId);
     });
-  })
+  });
 }
 /**
  * sends all connected clients the entirity of the current gamestate
@@ -33,12 +37,14 @@ export function sendGamestate() {
 }
 /**
  * interprets an action from a user
+ * @param {String} userId
+ * @param {String} actionId
  */
 function handleUserAction(userId, actionId) {
   const characterModel = gamestateManager.gamestateModel.findUsersCharacter(userId);
   const characterId = characterModel.get('characterId');
 
-  switch(actionId) {
+  switch (actionId) {
     case 'left':
       gamestateManager.updateCharacterPosition(characterId, POINTS.LEFT);
       break;

@@ -1,4 +1,4 @@
-import "@babel/polyfill";
+import '@babel/polyfill';
 
 import dotenv from 'dotenv-flow';
 dotenv.config({
@@ -10,3 +10,4 @@ import * as serverInstance from 'managers/serverInstance';
 import * as gamestateManager from 'managers/gamestateManager';
 
 serverInstance.start();
+gamestateManager.start();
