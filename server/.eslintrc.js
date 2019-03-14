@@ -29,7 +29,7 @@ module.exports = {
     ],
     'max-len': [
       'warn', {
-        code: 80,
+        code: 150,
         tabWidth: 2,
         ignoreUrls: true,
       }

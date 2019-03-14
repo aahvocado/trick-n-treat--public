@@ -1,4 +1,7 @@
 import React, { PureComponent } from 'react';
+import {observer} from "mobx-react";
+
+import {appStore} from 'data/remoteAppState';
 
 import * as connectionManager from 'managers/connectionManager';
 
@@ -14,37 +17,16 @@ const INDICATOR_STYLES = {
   },
 }
 
-export class WebsocketConnectionIndicator extends PureComponent {
-  /** @default */
+class WebsocketConnectionIndicator extends PureComponent {
+  /** @override */
   constructor(props) {
     super(props);
 
     this.handleStatusOnClick = this.handleStatusOnClick.bind(this);
-
-    this.state = {
-      isConnected: false,
-      isReconnecting: false,
-    }
   }
-  /** @default */
-  componentDidMount() {
-    const socket = connectionManager.socket;
-
-    socket.on('connect', () => {
-      this.setState({isConnected: true, isReconnecting: false});
-    });
-
-    socket.on('disconnect', () => {
-      this.setState({isConnected: false, isReconnecting: false});
-    });
-
-    socket.on('reconnect_failed', () => {
-      this.setState({isConnected: false, isReconnecting: false});
-    });
-  }
-  /** @default */
+  /** @override */
   render() {
-    const { isConnected, isReconnecting } = this.state;
+    const { isConnected, isReconnecting } = this.props;
 
     const indicatorStatusStyles = isConnected ? INDICATOR_STYLES.CONNECTED : INDICATOR_STYLES.DISCONNECTED;
     const modifierStyles = isReconnecting ? INDICATOR_STYLES.LOADING : indicatorStatusStyles;
@@ -63,13 +45,26 @@ export class WebsocketConnectionIndicator extends PureComponent {
    * clicking on this button makes an attempt to reconnect
    */
   handleStatusOnClick() {
-    const { isConnected, isReconnecting } = this.state;
+    const { isConnected, isReconnecting } = this.props;
 
     if (!isConnected && !isReconnecting) {
       connectionManager.reconnect();
-      this.setState({ isReconnecting: true });
     }
   }
 }
 
-export default WebsocketConnectionIndicator;
+export const ObservingWebsocketConnectionIndicator = observer(() => {
+  const {
+    isConnected,
+    isReconnecting,
+  } = appStore;
+
+  return (
+    <WebsocketConnectionIndicator
+      isConnected={isConnected}
+      isReconnecting={isReconnecting}
+    />
+  )
+})
+
+export default ObservingWebsocketConnectionIndicator;

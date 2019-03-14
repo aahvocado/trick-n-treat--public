@@ -2,11 +2,12 @@ import EventEmitter from 'events';
 import uuid from 'uuid/v4';
 import seedrandom from 'seedrandom';
 
+import {FastCharacter} from 'collections/characterCollection';
+
 import {MAP_START} from 'constants/mapSettings';
 import POINTS, {getPointFromString} from 'constants/points';
 
 import GamestateModel from 'models/GamestateModel';
-import CharacterModel from 'models/CharacterModel';
 import UserModel from 'models/UserModel';
 
 import * as gamestateUtils from 'utilities/gamestateUtils';
@@ -16,28 +17,18 @@ import * as mathUtils from 'utilities/mathUtils';
 const seed = uuid();
 seedrandom(seed, {global: true});
 
-// to hopefully decouple events
+// set up to hopefully decouple events
 export const gamestateEmitter = new EventEmitter();
 
-// instantiate Gamestate when this Module is called
-export const gamestateModel = new GamestateModel({
-  users: [
-    new UserModel({
-      name: 'User Daidan',
-      userId: 'TEST_USER_ID',
-      characterId: 'WOW_CHARACTER_ID_SO_UNIQUE',
-    }),
-  ],
-
-  characters: [
-    new CharacterModel({
-      name: 'Almo',
-      characterId: 'WOW_CHARACTER_ID_SO_UNIQUE',
-      typeId: 'ALMO_CHARACTER',
-      position: MAP_START.clone(),
-    }),
-  ],
-});
+// instantiate Gamestate
+const gamestateModel = new GamestateModel();
+/**
+ * gets the basic object version of the Gamestate
+ * @returns {Object}
+ */
+export function getGamestate() {
+  return gamestateModel.export();
+}
 /**
  * properly set values once the model is set up
  */
@@ -45,8 +36,8 @@ export function start() {
   gamestateUtils.initBaseGamestateModel(gamestateModel);
   gamestateModel.updateToVisibleAt(MAP_START);
   gamestateModel.updateActionsForAllUsers();
-  console.log('\x1b[35m', 'Gamestate Instantiated with Seed', seed);
-  gamestateEmitter.emit('COMPLETE_GAME_INIT');
+  console.log('\x1b[35m', `Gamestate Instantiated with Seed "${seed}"`);
+  gamestateEmitter.emit('INIT_COMPLETE');
 }
 /**
  * picks a random adjacent point that a given character can be on
@@ -109,20 +100,49 @@ export function updateCharacterPosition(userId, directionId) {
   gamestateEmitter.emit('UPDATES_COMPLETE');
 }
 /**
- * moves a Character a single direction
+ * creates a new User and Character (for now)
+ * and add them to the Gamestate
  *
- * @param {Object} config
- * @returns {UserModel} - the UserModel that was created
+ * @param {Object} userAttributes
+ * @returns {UserModel}
  */
-export function createNewUser(config) {
-  const newUserModel = new UserModel({
-    name: config.name,
-    userId: config.id,
-    characterId: 'WOW_CHARACTER_ID_SO_UNIQUE', // todo
+export function createAndAddNewUser(userAttributes) {
+  const {name} = userAttributes;
+  const characterId = `${name}-character-id`;
+
+  // create a new Character for this User
+  const newCharPosition = MAP_START.clone();
+  const newCharacterModel = new FastCharacter({
+    position: newCharPosition,
+    name: `character-for-${name}`,
+    characterId: characterId,
   });
 
+  // make the new User, passing in the `characterId` that links it with the character
+  const newUserModel = new UserModel({
+    characterId: characterId,
+    ...userAttributes,
+  });
+
+  // add to gamestate
+  gamestateModel.addCharacter(newCharacterModel);
   gamestateModel.addUser(newUserModel);
 
+  // ! - update everything else
+  gamestateModel.updateToVisibleAt(newCharPosition);
+  gamestateModel.updateActionsForAllUsers();
+  gamestateEmitter.emit('UPDATES_COMPLETE');
   return newUserModel;
 }
+/**
+ * removes a User and its Character (for now)
+ *
+ * @param {String} userId
+ */
+export function removeUserData(userId) {
+  const characterModel = gamestateModel.findCharacterByUserId(userId);
+  const userModel = gamestateModel.findUserById(userId);
 
+  gamestateModel.removeCharacter(characterModel);
+  gamestateModel.removeUser(userModel);
+}

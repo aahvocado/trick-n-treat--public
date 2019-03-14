@@ -1,48 +1,35 @@
 import React, { Component } from 'react';
+import {observer} from 'mobx-react';
+
+import {appStore} from 'data/remoteAppState';
 
 import * as connectionManager from 'managers/connectionManager';
 
 /**
  * page for testing
  */
-export class DebugPage extends Component {
-  /** @default */
+class DebugPage extends Component {
+  /** @override */
   constructor(props) {
     super(props);
 
-    this.state = {
-      debug_gamestate: {
-        tileMapModel: {
-          matrix: [[]]
-        },
-        fogMapModel: {
-          matrix: [[]]
-        },
-        users: [{}],
-        characters: [{}],
-      },
-    }
+    this.handleOnActionClick = this.handleOnActionClick.bind(this);
   }
-  /** @default */
-  componentDidMount() {
-    const socket = connectionManager.socket;
-
-    // this design pattern is not the best, but serves for testing
-    socket.on('GAMESTATE_UPDATE', (data) => {
-      this.setState({debug_gamestate: data});
-    });
-  };
-  /** @default */
+  /** @override */
   render() {
-    const { debug_gamestate } = this.state;
+    const { gamestate, userId } = this.props;
+    if (gamestate === undefined) {
+      return null;
+    }
+
     const {
       tileMapModel,
       fogMapModel,
       users,
       characters,
-    } = debug_gamestate;
+    } = gamestate;
 
-    const currentUser = users[0];
+    const currentUser = users.find(user => (user.userId === userId));
     const {
       canMoveLeft,
       canMoveRight,
@@ -52,7 +39,7 @@ export class DebugPage extends Component {
       canTreat,
     } = currentUser;
 
-    const currentCharacter = characters[0];
+    const currentCharacter = characters.find(character => (character.characterId === currentUser.characterId));
     const {
       candies,
       health = {},
@@ -73,36 +60,42 @@ export class DebugPage extends Component {
           <DebugActionButton
             actionId='left'
             disabled={!canMoveLeft}
+            onActionClick={this.handleOnActionClick}
           >
             left
           </DebugActionButton>
           <DebugActionButton
             actionId='right'
             disabled={!canMoveRight}
+            onActionClick={this.handleOnActionClick}
           >
             Right
           </DebugActionButton>
           <DebugActionButton
             actionId='up'
             disabled={!canMoveUp}
+            onActionClick={this.handleOnActionClick}
           >
             Up
           </DebugActionButton>
           <DebugActionButton
             actionId='down'
             disabled={!canMoveDown}
+            onActionClick={this.handleOnActionClick}
           >
             Down
           </DebugActionButton>
           <DebugActionButton
             actionId='trick'
             disabled={!canTrick}
+            onActionClick={this.handleOnActionClick}
           >
             Can Trick
           </DebugActionButton>
           <DebugActionButton
             actionId='treat'
             disabled={!canTreat}
+            onActionClick={this.handleOnActionClick}
           >
             Can Treat
           </DebugActionButton>
@@ -117,7 +110,23 @@ export class DebugPage extends Component {
       </div>
     )
   }
+  handleOnActionClick(actionId) {
+    connectionManager.socket.emit('USER_ACTION', {
+      actionId: actionId,
+      userId: this.props.userId,
+    });
+  }
 }
+const ObservingDebugPage = observer(() => {
+  return (
+    <DebugPage
+      userId={appStore.userId}
+      gamestate={appStore.gamestate}
+    />
+  )
+});
+
+
 class DebugActionButton extends React.PureComponent {
   render() {
     const {
@@ -128,21 +137,21 @@ class DebugActionButton extends React.PureComponent {
       <button
         className={`pad-2 bg-fourth sibling-mar-l-1 ${!disabled ? 'color-white' : 'color-black'}`}
         disabled={ disabled }
-        onClick={this.handleActionOnClick.bind(this)}
+        onClick={this.onActionDidClick.bind(this)}
       >
         { this.props.children }
       </button>
     )
   }
 
-  handleActionOnClick() {
-    connectionManager.socket.emit('USER_ACTION', this.props.actionId);
+  onActionDidClick() {
+    this.props.onActionClick(this.props.actionId);
   }
 }
 
 class World extends Component {
   render() {
-    const { 
+    const {
       mapMatrix,
       fogMatrix,
       characters,
@@ -284,4 +293,4 @@ class Tile extends Component {
   }
 }
 
-export default DebugPage;
+export default ObservingDebugPage;

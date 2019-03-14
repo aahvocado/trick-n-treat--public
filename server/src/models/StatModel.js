@@ -15,13 +15,17 @@ const statSchema = schema({
 });
 
 export const STAT_TYPE_ID = {
+  UNDEFINED: 'UNDEFINED-STAT-TYPE',
   HEALTH: 'HEALTH-STAT-TYPE',
   MOVEMENT: 'MOVEMENT-STAT-TYPE',
+  SANITY: 'SANITY-STAT-TYPE',
 };
 
 const STAT_NAME = {
+  [STAT_TYPE_ID.UNDEFINED]: 'Stat TBD',
   [STAT_TYPE_ID.HEALTH]: 'Health',
   [STAT_TYPE_ID.MOVEMENT]: 'Movement',
+  [STAT_TYPE_ID.SANITY]: 'Sanity',
 };
 
 /**
@@ -38,6 +42,11 @@ export class StatModel extends Model {
       modifier: 0,
       ...newAttributes,
     });
+
+    //
+    this.set({
+      value: this.get('base'),
+    })
 
     // set schema and then validate
     this.schema = statSchema;
@@ -71,6 +80,17 @@ export class MovementModel extends StatModel {
   constructor(newAttributes = {}) {
     super(Object.assign({
       typeId: STAT_TYPE_ID.MOVEMENT,
+    }, newAttributes));
+  }
+}
+/**
+ *
+ */
+export class SanityModel extends StatModel {
+  /** @override */
+  constructor(newAttributes = {}) {
+    super(Object.assign({
+      typeId: STAT_TYPE_ID.SANITY,
     }, newAttributes));
   }
 }

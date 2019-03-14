@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import * as remoteAppState from 'data/remoteAppState';
+
 // services
 import * as serviceWorker from './serviceWorker';
 import * as connectionManager from 'managers/connectionManager';
-import * as gamestateInterpreter from 'managers/gamestateInterpreter';
 
 // css
 import './styles/css-reset.css';
@@ -19,8 +20,11 @@ import App from './App';
 serviceWorker.unregister();
 
 // connect to websocket
-connectionManager.connect();
-gamestateInterpreter.start();
+const socket = connectionManager.connect();
+
+// after connecting, add some events to our state
+remoteAppState.attachSocketListeners(socket);
+console.log(`Hello, I am "${remoteAppState.appStore.name}"!`)
 
 // render after everything
 ReactDOM.render(<App />, document.getElementById('root'));

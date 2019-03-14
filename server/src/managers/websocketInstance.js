@@ -1,7 +1,8 @@
 import SocketServer from 'socket.io';
 
+import {RemoteSocketClient, ScreenSocketClient} from 'models/SocketClientModel';
+
 import * as gamestateManager from 'managers/gamestateManager';
-import * as remoteEventManager from 'managers/remoteEventManager';
 
 /**
  * Singleton for handling the Websocket connection
@@ -21,23 +22,59 @@ export function start(httpServer) {
 
   io.use(handshake);
 
-  // instantiate the different communication managers
-  remoteEventManager.start(io);
+  io.on('connection', (socket) => {
+    // when any type of client connects, send them the current Gamestate
+    socket.emit('GAMESTATE_UPDATE', gamestateManager.getGamestate());
+  });
 }
 /**
  * middleware to intercept new connections
- *  then determine if its Remote or Screen
  *
  * @param {Socket} socket
  * @param {Function} next
  */
 function handshake(socket, next) {
-  const query = socket.handshake.query;
-
-  gamestateManager.createNewUser({
-    id: socket.id,
-    name: query.name || 'test',
-  });
+  // create a model to manage more easily
+  createNewSocketClient(socket);
 
   next();
+}
+/**
+ * create a `SocketClientModel` based on the socket
+ *
+ * @param {Socket} socket
+ * @returns {SocketClientModel}
+ */
+function createNewSocketClient(socket) {
+  const query = socket.handshake.query;
+  const {
+    name,
+    clientType,
+    userId,
+  } = query;
+
+  const clientAttributes = {
+    name: name,
+    userId: userId,
+    socket: socket,
+    sessionId: socket.id,
+  };
+
+  // connected to a Remote
+  if (clientType === 'REMOTE_SOCKET_CLIENT') {
+    console.log(`+ Remote Client "${userId}" connected`);
+
+    gamestateManager.createAndAddNewUser({
+      name,
+      userId,
+    });
+    return new RemoteSocketClient(clientAttributes);
+  }
+
+  // connected to a Screen
+  if (clientType === 'SCREEN_SOCKET_CLIENT') {
+    console.log(`+ Screen Client "${userId}" connected`);
+
+    return new ScreenSocketClient(clientAttributes);
+  }
 }

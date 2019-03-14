@@ -17,6 +17,10 @@ export function connect() {
   socket = io.connect(SocketConfig.server_url, {
     reconnect: false,
     reconnectionAttempts: 1,
+    query: {
+      clientType: 'SCREEN_SOCKET_CLIENT',
+      userId: `screen-client-${Date.now()}`,
+    },
   });
   return socket;
 }

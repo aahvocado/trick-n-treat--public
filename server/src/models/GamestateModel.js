@@ -36,6 +36,8 @@ export class GamestateModel extends Model {
   constructor(newAttributes = {}) {
     super({
       state: 'DEBUG',
+      users: [],
+      characters: [],
       tileMapModel: new MapModel(),
       encounters: [],
       fogMapModel: new MapModel(),
@@ -109,7 +111,7 @@ export class GamestateModel extends Model {
    */
   removeUser(userModel) {
     const oldUsers = this.get('users');
-    const newUsers = oldUsers.filter((user) => (user.is(userModel)));
+    const newUsers = oldUsers.filter((user) => (user.get('userId') !== userModel.get('userId')));
     this.set({users: newUsers});
   }
   /**
@@ -126,7 +128,7 @@ export class GamestateModel extends Model {
    */
   removeCharacter(characterModel) {
     const oldCharacters = this.get('characters');
-    const newCharacters = oldCharacters.filter((character) => (character.is(characterModel)));
+    const newCharacters = oldCharacters.filter((character) => (character.get('characterId') !== characterModel.get('characterId')));
     this.set({characters: newCharacters});
   }
   // -- isolated update methods

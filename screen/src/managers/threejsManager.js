@@ -48,6 +48,7 @@ export function initScreen() {
   // temporary implementation
   const socket = connectionManager.socket;
   socket.on('GAMESTATE_UPDATE', (gamestate) => {
+    console.log('GAMESTATE_UPDATE');
     // if first time, create a new game
     if (sceneThree === undefined) {
       initGame(gamestate);
@@ -162,7 +163,10 @@ function initGame(gamestate) {
   startMoving = false;
   previousTimestamp = null;
 
-  moveCameraTo(currentFocus.position);
+  if (currentFocus) {
+    moveCameraTo(currentFocus.position);
+  }
+
   render();
 }
 function Player(playerId, position) {
