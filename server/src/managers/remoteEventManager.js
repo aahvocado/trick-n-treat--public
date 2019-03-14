@@ -1,5 +1,3 @@
-import POINTS from 'constants/points';
-
 import * as gamestateManager from 'managers/gamestateManager';
 
 /**
@@ -18,7 +16,7 @@ export function start(io) {
   // save the reference
   websocketServer = io;
 
-  // attach listeners for events
+  // attach Websocket listeners
   websocketServer.on('connection', (socket) => {
     // on connection, send the client the current gamestate
     socket.emit('GAMESTATE_UPDATE', gamestateManager.gamestateModel.export());
@@ -28,11 +26,15 @@ export function start(io) {
       handleUserAction('TEST_USER_ID', actionId);
     });
   });
+
+  // attach Gamestate listeners
+  gamestateManager.gamestateEmitter.on('UPDATES_COMPLETE', sendGamestate);
 }
 /**
  * sends all connected clients the entirity of the current gamestate
  */
 export function sendGamestate() {
+  console.log('sendGamestate()');
   websocketServer.emit('GAMESTATE_UPDATE', gamestateManager.gamestateModel.export());
 }
 /**
@@ -41,21 +43,8 @@ export function sendGamestate() {
  * @param {String} actionId
  */
 function handleUserAction(userId, actionId) {
-  const characterModel = gamestateManager.gamestateModel.findUsersCharacter(userId);
-  const characterId = characterModel.get('characterId');
-
-  switch (actionId) {
-    case 'left':
-      gamestateManager.updateCharacterPosition(characterId, POINTS.LEFT);
-      break;
-    case 'right':
-      gamestateManager.updateCharacterPosition(characterId, POINTS.RIGHT);
-      break;
-    case 'up':
-      gamestateManager.updateCharacterPosition(characterId, POINTS.UP);
-      break;
-    case 'down':
-      gamestateManager.updateCharacterPosition(characterId, POINTS.DOWN);
-      break;
-  }
+  // yuck, todo properly
+  if (actionId === 'left' || actionId === 'right' || actionId === 'up' || actionId === 'down') {
+    gamestateManager.updateCharacterPosition(userId, actionId);
+  };
 }

@@ -32,14 +32,12 @@ const characterSchema = schema({
 export class CharacterModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
-    super(newAttributes);
-
-    // apply default attributes and then override with given ones
-    this.set(Object.assign({
+    super({
       candies: 0,
       health: new HealthModel({value: 5}),
       movement: new MovementModel({value: 2}),
-    }, newAttributes));
+      ...newAttributes,
+    });
 
     // set schema and then validate
     this.schema = characterSchema;

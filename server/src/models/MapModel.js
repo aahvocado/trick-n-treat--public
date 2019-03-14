@@ -14,17 +14,16 @@ import * as matrixUtils from 'utilities/matrixUtils';
 export class MapModel extends MatrixModel {
   /** @override */
   constructor(newAttributes = {}) {
-    super(newAttributes);
-
-    this.set(Object.assign({
+    super({
       matrix: [[]],
       // rules for how this map should be generated
       mapConfig: {},
       // where the starting location of the map is made
       start: new Point(),
-      // list of Points where "special" tiles are located - maybe starting spots?
+      // TODO - mapmodel does not need this, handle it differently - should probably be encounters
       specialPoints: [],
-    }, newAttributes));
+      ...newAttributes,
+    });
   }
   /**
    * handles through the entire generation process

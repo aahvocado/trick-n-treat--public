@@ -6,10 +6,15 @@ import uuid from 'uuid/v4';
  * @typedef {Object} Model
  */
 export class Model {
-  /** @constructor */
-  constructor() {
+  /**
+   * @constructor
+   * @param {Object} newAttributes
+   */
+  constructor(newAttributes = {}) {
     /** @type {String} */
     this.id = uuid();
+
+    this.set(newAttributes);
   }
   /**
    * gets a specific attribute
@@ -27,7 +32,11 @@ export class Model {
    * @returns {Object} - returns all attributes
    */
   set(changes) {
-    this.attributes = Object.assign({}, this.attributes, changes);
+    this.attributes = {
+      ...this.attributes,
+      ...changes,
+    };
+
     return this.attributes;
   }
   /**

@@ -20,7 +20,7 @@ export function getEncountersList() {
  * @param {String} id
  * @returns {EncounterModel | undefined}
  */
-export function getEncounterModel(id) {
+export function findEncounterModel(id) {
   return encountersList.find((encounterModel) => {
     return encounterModel.id === id;
   });

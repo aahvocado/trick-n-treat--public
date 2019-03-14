@@ -6,13 +6,13 @@ import Model from 'models/Model';
 // define attribute types
 const encounterSchema = schema({
   // id
-  typeId: String,
+  'typeId': String,
   // where this is in the world
-  position: Point,
+  'position': Point,
   // callback for when a character steps on this
-  onTrigger: Function,
+  '?onTrigger': Function,
   // how many times this encounter has triggered
-  triggerCount: Number,
+  'triggerCount': Number,
 });
 
 /**
@@ -21,18 +21,16 @@ const encounterSchema = schema({
 export class EncounterModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
-    super(newAttributes);
-
-    // apply default attributes and then override with given ones
-    this.set(Object.assign({
+    super({
       position: new Point(),
       onTrigger: undefined,
       triggerCount: 0,
-    }, newAttributes));
+      ...newAttributes,
+    });
 
     // set schema and then validate
     this.schema = encounterSchema;
-    this.validate();
+    // this.validate();
   }
   /**
    * base function that will be called when a character gets on this

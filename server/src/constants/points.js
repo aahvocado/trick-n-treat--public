@@ -13,6 +13,25 @@ export const POINTS = {
 };
 
 /**
+ * gives a point based on a string direction
+ *
+ * @param {String} directionName
+ * @returns {Point}
+ */
+export function getPointFromString(directionName) {
+  switch (directionName) {
+    case 'left':
+      return POINTS.LEFT;
+    case 'right':
+      return POINTS.RIGHT;
+    case 'up':
+      return POINTS.UP;
+    case 'down':
+      return POINTS.DOWN;
+  }
+}
+
+/**
  * picks a random Adjacent directional Point
  *
  * @returns {Point}

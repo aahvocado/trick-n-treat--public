@@ -23,12 +23,10 @@ export const ITEM_TYPE_ID = {
 export class ItemModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
-    super(newAttributes);
-
-    // apply default attributes and then override with given ones
-    this.set(Object.assign({
+    super({
       name: 'undefined item',
-    }, newAttributes));
+      ...newAttributes,
+    });
 
     // set schema and then validate
     this.schema = itemSchema;

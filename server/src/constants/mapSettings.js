@@ -3,19 +3,21 @@ import Point from '@studiomoniker/point';
 import * as mathUtils from 'utilities/mathUtils';
 
 /**
- * Settings for the generating a Map
- */
-
-/**
  * counting the number of tiles per row and column in a matrix
  */
 export const MAP_WIDTH = 27;
 export const MAP_HEIGHT = 33;
 
+/**
+ * randomly pick a starting Point
+ */
 const startX = mathUtils.getRandomIntInclusive(1, MAP_WIDTH - 1);
 const startY = mathUtils.getRandomIntInclusive(1, MAP_HEIGHT - 1);
 export const MAP_START = new Point(startX, startY);
 
+/**
+ * Base settings for the generating a Map
+ */
 export const MAP_SETTINGS = {
   width: MAP_WIDTH,
   height: MAP_HEIGHT,

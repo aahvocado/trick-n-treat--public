@@ -11,12 +11,10 @@ import * as matrixUtils from 'utilities/matrixUtils';
 export class MatrixModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
-    super(newAttributes);
-
-    this.set(Object.assign({
-      // 2D array of data in the tiles
+    super({
       matrix: [[]],
-    }, newAttributes));
+      ...newAttributes,
+    });
   }
   /**
    * returns the 2D array of tiles

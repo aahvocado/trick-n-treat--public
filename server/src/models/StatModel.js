@@ -32,14 +32,12 @@ const STAT_NAME = {
 export class StatModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
-    super(newAttributes);
-
-    // apply default attributes and then override with given ones
-    this.set(Object.assign({
+    super({
       base: 0,
       value: 0,
       modifier: 0,
-    }, newAttributes));
+      ...newAttributes,
+    });
 
     // set schema and then validate
     this.schema = statSchema;

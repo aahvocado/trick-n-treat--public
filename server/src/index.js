@@ -6,8 +6,8 @@ dotenv.config({
   cwd: '../',
 });
 
-import * as serverInstance from 'managers/serverInstance';
 import * as gamestateManager from 'managers/gamestateManager';
+import * as serverInstance from 'managers/serverInstance';
 
-serverInstance.start();
 gamestateManager.start();
+serverInstance.start();

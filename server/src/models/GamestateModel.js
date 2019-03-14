@@ -1,15 +1,12 @@
 import schema from 'js-schema';
-import MAP_SETTINGS from 'constants/mapSettings';
-import {FOG_TYPES} from 'constants/tileTypes';
+
+import {isWalkableTile} from 'constants/tileTypes';
+import POINTS from 'constants/points';
+import TILE_TYPES, {FOG_TYPES} from 'constants/tileTypes';
 
 import Model from 'models/Model';
 import MapModel from 'models/MapModel';
 
-import * as matrixUtils from 'utilities/matrixUtils';
-
-import * as encounterManager from 'managers/encounterManager';
-
-// define how our GameState should look like
 const gamestateSchema = schema({
   // id of the current game state (such as paused, waiting, etc)
   'state': String,
@@ -20,7 +17,7 @@ const gamestateSchema = schema({
   // tiles that make up the world
   'tileMapModel': MapModel,
   // list of all encounters
-  'encounters': Array, // Array<String>
+  'encounters': Array, // Array<EncounterModel>
   // fog of war
   'fogMapModel': MapModel,
   // objects/items that are in the world
@@ -32,61 +29,28 @@ const gamestateSchema = schema({
   '?activeCharacterId': String,
 });
 /**
- * our Gamestate is a Model
+ * GameState model
  */
 export class GamestateModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
-    super(newAttributes);
-
-    // apply default attributes and then override with given ones
-    this.set(Object.assign({
+    super({
       state: 'DEBUG',
-    }, newAttributes));
-
-    // init everything
-    this.initTileMapModel();
-    this.initEncounterList();
-    this.initFogOfWarModel();
+      tileMapModel: new MapModel(),
+      encounters: [],
+      fogMapModel: new MapModel(),
+      ...newAttributes,
+    });
 
     // set schema and then validate
     this.schema = gamestateSchema;
-    this.validate();
   }
-  /**
-   * generates a map
-   */
-  initTileMapModel() {
-    const mapModel = new MapModel({mapConfig: MAP_SETTINGS});
-    mapModel.generateMap();
-
-    this.set({
-      tileMapModel: mapModel,
-    });
-  }
-  /**
-   * generates the encounters
-   */
-  initEncounterList() {
-    this.set({
-      encounters: encounterManager.generateEncounters(this.get('tileMapModel')),
-    });
-  }
-  /**
-   * inits fog of war model
-   */
-  initFogOfWarModel() {
-    const fogMapModel = new MapModel({
-      start: MAP_SETTINGS.startPoint.clone(),
-      matrix: matrixUtils.createMatrix(MAP_SETTINGS.width, MAP_SETTINGS.height, FOG_TYPES.HIDDEN),
-    });
-    this.set({fogMapModel: fogMapModel});
-  }
+  // -- helper methods
   /**
    * @param {String} id - `characterId`
    * @returns {CharacterModel}
    */
-  findCharacter(id) {
+  findCharacterById(id) {
     return this.get('characters').find((characterModel) => {
       return characterModel.get('characterId') === id;
     });
@@ -95,19 +59,159 @@ export class GamestateModel extends Model {
    * @param {String} id - `userId`
    * @returns {UserModel}
    */
-  findUser(id) {
+  findUserById(id) {
     return this.get('users').find((userModel) => {
       return userModel.get('userId') === id;
     });
   }
   /**
-   * @param {String} id - `userId`
+   * @param {String} userId
    * @returns {CharacterModel}
    */
-  findUsersCharacter(id) {
-    const userModel = this.findUser(id);
+  findCharacterByUserId(userId) {
+    const userModel = this.findUserById(userId);
     const characterId = userModel.get('characterId');
-    return this.findCharacter(characterId);
+    return this.findCharacterById(characterId);
+  }
+  /**
+   * @param {Point} point
+   * @returns {Boolean}
+   */
+  isWalkableAt(point) {
+    const tileMapModel = this.get('tileMapModel');
+    const foundTile = tileMapModel.getTileAt(point);
+    return isWalkableTile(foundTile);
+  }
+  /**
+   * gets the Encounter if there is one at given point
+   *
+   * @param {Point} point
+   * @returns {EncounterModel | undefined}
+   */
+  getEncounterAt(point) {
+    const encounters = this.get('encounters');
+    return encounters.find((encounterModel) => {
+      const encounterPosition = encounterModel.get('position');
+      return point.equals(encounterPosition);
+    });
+  }
+  /**
+   * @param {UserModel} userModel
+   */
+  addUser(userModel) {
+    const oldUsers = this.get('users');
+    const newUsers = [].concat(oldUsers);
+    newUsers.push(userModel);
+    this.set({users: newUsers});
+  }
+  /**
+   * @param {UserModel} userModel
+   */
+  removeUser(userModel) {
+    const oldUsers = this.get('users');
+    const newUsers = oldUsers.filter((user) => (user.is(userModel)));
+    this.set({users: newUsers});
+  }
+  /**
+   * @param {CharacterModel} characterModel
+   */
+  addCharacter(characterModel) {
+    const oldCharacters = this.get('characters');
+    const newCharacters = [].concat(oldCharacters);
+    newCharacters.push(characterModel);
+    this.set({characters: newCharacters});
+  }
+  /**
+   * @param {CharacterModel} characterModel
+   */
+  removeCharacter(characterModel) {
+    const oldCharacters = this.get('characters');
+    const newCharacters = oldCharacters.filter((character) => (character.is(characterModel)));
+    this.set({characters: newCharacters});
+  }
+  // -- isolated update methods
+  /**
+   * updates all `canMove` attributes in a given user
+   *
+   * @param {UserModel} userModel
+   */
+  updateMovementActionsForUser(userModel) {
+    const characterId = userModel.get('characterId');
+    const characterModel = this.findCharacterById(characterId);
+
+    userModel.set({
+      canMoveLeft: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.LEFT)),
+      canMoveRight: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.RIGHT)),
+      canMoveUp: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.UP)),
+      canMoveDown: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.DOWN)),
+    });
+  }
+  /**
+   * updates `canTrick` and `canTreat` attributes in a given user
+   *
+   * @param {UserModel} userModel
+   */
+  updateLocationActionsForUser(userModel) {
+    const characterId = userModel.get('characterId');
+    const characterModel = this.findCharacterById(characterId);
+
+    const tileMapModel = this.get('tileMapModel');
+    const isHouseTile = tileMapModel.isTileEqualTo(characterModel.get('position'), TILE_TYPES.HOUSE);
+
+    userModel.set({
+      canTrick: isHouseTile,
+      canTreat: isHouseTile,
+    });
+  }
+  /**
+   * updates Fog of War visibility to Fully visible at a given point
+   *
+   * @param {Point} point
+   */
+  updateToVisibleAt(point) {
+    const fogMapModel = this.get('fogMapModel');
+
+    // given tile is now visible
+    fogMapModel.setTileAt(point, FOG_TYPES.VISIBLE);
+
+    // update adjacent points
+    this.updateToPartiallyVisibleAt(point.clone().add(POINTS.LEFT));
+    this.updateToPartiallyVisibleAt(point.clone().add(POINTS.RIGHT));
+    this.updateToPartiallyVisibleAt(point.clone().add(POINTS.UP));
+    this.updateToPartiallyVisibleAt(point.clone().add(POINTS.DOWN));
+  }
+  /**
+   * updates Fog of War visibility to Partially visible at a given point
+   *
+   * @param {Point} point
+   */
+  updateToPartiallyVisibleAt(point) {
+    const fogMapModel = this.get('fogMapModel');
+    const tileMapModel = this.get('tileMapModel');
+
+    // if already fully visibile, do nothing
+    if (fogMapModel.isTileEqualTo(point, FOG_TYPES.VISIBLE)) {
+      return;
+    }
+
+    // if adjacent tile is just an empty tile, let it be fully visible
+    if (tileMapModel.isTileEqualTo(point, TILE_TYPES.EMPTY)) {
+      fogMapModel.setTileAt(point, FOG_TYPES.VISIBLE);
+      return;
+    }
+
+    // otherwise make it partially visible
+    fogMapModel.setTileAt(point, FOG_TYPES.PARTIAL);
+  }
+  // -- larger scale update methods
+  /**
+   * updates every User's actions
+   */
+  updateActionsForAllUsers() {
+    this.get('users').forEach((userModel) => {
+      this.updateMovementActionsForUser(userModel);
+      this.updateLocationActionsForUser(userModel);
+    });
   }
 }
 

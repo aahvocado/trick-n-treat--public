@@ -34,10 +34,7 @@ const userSchema = schema({
 export class UserModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
-    super(newAttributes);
-
-    // apply default attributes and then override with given ones
-    this.set(Object.assign({
+    super({
       name: '',
       isUserTurn: false,
       canMoveLeft: false,
@@ -46,7 +43,8 @@ export class UserModel extends Model {
       canMoveDown: false,
       canTrick: false,
       canTreat: false,
-    }, newAttributes));
+      ...newAttributes,
+    });
 
     // set schema and then validate
     this.schema = userSchema;
