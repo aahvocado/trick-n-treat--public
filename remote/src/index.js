@@ -24,7 +24,6 @@ const socket = connectionManager.connect();
 
 // after connecting, add some events to our state
 remoteAppState.attachSocketListeners(socket);
-console.log(`Hello, I am "${remoteAppState.appStore.name}"!`)
 
 // render after everything
 ReactDOM.render(<App />, document.getElementById('root'));

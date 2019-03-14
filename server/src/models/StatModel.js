@@ -46,7 +46,7 @@ export class StatModel extends Model {
     //
     this.set({
       value: this.get('base'),
-    })
+    });
 
     // set schema and then validate
     this.schema = statSchema;
@@ -61,6 +61,7 @@ export class StatModel extends Model {
     return STAT_NAME[this.get('typeId')];
   }
 }
+export default StatModel;
 /**
  *
  */
@@ -94,5 +95,3 @@ export class SanityModel extends StatModel {
     }, newAttributes));
   }
 }
-
-export default StatModel;

@@ -1,4 +1,4 @@
-import {observable} from 'mobx';
+import {observable, toJS} from 'mobx';
 
 // TESTING
 const _name = (() => {
@@ -18,37 +18,76 @@ export const appStore = observable({
   name: _name,
   userId: `${_name}-${Date.now()}`,
 
-  // whoa gamestate
+  // gamestate - from the server
   gamestate: undefined,
+
+  // my client state - from the server
+  isInLobby: false,
+  isInGame: false,
+  lobbyNames: [],
 
   // websocket connection status
   isConnected: false,
   isReconnecting: false,
-
 });
-
+/**
+ * makes changes to the state
+ *
+ * @param {Object} changes
+ */
+export function updateState(changes) {
+  for (const i in changes) {
+    if (Object.prototype.hasOwnProperty.call(changes, i)) {
+      appStore[i] = changes[i];
+    }
+  }
+}
+/**
+ * this gets the non-observable, non-reactable state of the App
+ *
+ * @returns {Object}
+ */
+export function getState() {
+  return toJS(appStore);
+}
 /**
  * add Websocket listeners
  */
 export function attachSocketListeners(socket) {
   // received new Gamestate from Server
   socket.on('GAMESTATE_UPDATE', (data) => {
-    appStore.gamestate = data;
+    updateState({
+      gamestate: data,
+    });
+  });
+  // -- client state
+  socket.on('CLIENT_STATE_UPDATE', (data) => {
+    updateState({
+      isInLobby: data.isInLobby,
+      isInGame: data.isInGame,
+      lobbyNames: data.lobbyNames,
+    });
   });
 
   // -- connection stuff
   socket.on('connect', () => {
-    appStore.isConnected = true;
-    appStore.isReconnecting = false;
+    updateState({
+      isConnected: true,
+      isReconnecting: false,
+    });
   });
 
   socket.on('disconnect', () => {
-    appStore.isConnected = false;
-    appStore.isReconnecting = false;
+    updateState({
+      isConnected: false,
+      isReconnecting: false,
+    });
   });
 
   socket.on('reconnect_failed', () => {
-    appStore.isConnected = false;
-    appStore.isReconnecting = false;
+    updateState({
+      isConnected: false,
+      isReconnecting: false,
+    });
   });
 }

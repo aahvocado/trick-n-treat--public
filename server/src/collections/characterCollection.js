@@ -1,11 +1,13 @@
 import CharacterModel from 'models/CharacterModel';
-import StatModel, {
+import {
   HealthModel,
   MovementModel,
   SanityModel,
   StatModel,
 } from 'models/StatModel';
-
+/**
+ *
+ */
 export class FastCharacter extends CharacterModel {
   /** @override */
   constructor(newAttributes = {}) {
@@ -19,6 +21,9 @@ export class FastCharacter extends CharacterModel {
     });
   }
 }
+/**
+ *
+ */
 export class StrongCharacter extends CharacterModel {
   /** @override */
   constructor(newAttributes = {}) {
@@ -32,6 +37,9 @@ export class StrongCharacter extends CharacterModel {
     });
   }
 }
+/**
+ *
+ */
 export class SmartCharacter extends CharacterModel {
   /** @override */
   constructor(newAttributes = {}) {

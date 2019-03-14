@@ -1,18 +1,25 @@
 import schema from 'js-schema';
 
+import {CLIENT_TYPES} from 'constants/clientTypes';
+
 import Model from 'models/Model';
-
-import * as gamestateManager from 'managers/gamestateManager';
-
 
 // define attribute types
 const socketClientSchema = schema({
+  // name of Client
+  name: String,
+  // Remote or Screen?
+  clientType: undefined,
   // represents the user and should be constant
   userId: String,
   // the websocket connection
   socket: undefined,
   // socket.id - will probably change per session
   sessionId: String,
+  // is the user in Game
+  isInGame: Boolean,
+  // is the user in Lobby
+  isInLobby: Boolean,
 });
 /**
  * class for a Websocket Client
@@ -23,10 +30,10 @@ export class SocketClientModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super({
+      isInGame: false,
+      isInLobby: false,
       ...newAttributes,
     });
-
-    this.sendGamestate = this.sendGamestate.bind(this);
 
     // onConnection
     this.init();
@@ -44,16 +51,8 @@ export class SocketClientModel extends Model {
   init() {
     const socket = this.get('socket');
 
-    // disconnecting
+    // on the way to disconnecting
     socket.on('disconnecting', this.onDisconnecting.bind(this));
-
-    // -- attach Gamestate listeners
-    // when Gamestate says that it finished actions, send the new state to the User
-    gamestateManager.gamestateEmitter.on('UPDATES_COMPLETE', this.sendGamestate);
-    // remove the listeners on disconnect
-    socket.on('disconnect', () => {
-      gamestateManager.gamestateEmitter.removeListener('UPDATES_COMPLETE', this.sendGamestate);
-    });
 
     this.attachListeners();
   }
@@ -68,18 +67,25 @@ export class SocketClientModel extends Model {
    */
   onDisconnecting() {}
   /**
-   * emits the Gamestate object
+   * @param {...*} args
    */
-  sendGamestate() {
-    this.get('socket').emit('GAMESTATE_UPDATE', gamestateManager.getGamestate());
+  emit(...args) {
+    this.get('socket').emit(...args);
   }
 }
 /**
  * Client which is a Remote
  *
- * @typedef {Model} RemoteSocketClient
+ * @typedef {Model} RemoteClientModel
  */
-export class RemoteSocketClient extends SocketClientModel {
+export class RemoteClientModel extends SocketClientModel {
+  /** @override */
+  constructor(newAttributes = {}) {
+    super({
+      clientType: CLIENT_TYPES.REMOTE,
+      ...newAttributes,
+    });
+  }
   /** @override */
   attachListeners() {
     const socket = this.get('socket');
@@ -94,24 +100,29 @@ export class RemoteSocketClient extends SocketClientModel {
    * @param {String} actionOptions.actionId
    */
   handleUserAction({userId, actionId}) {
-   // yuck, todo properly
+    // yuck, todo properly
     if (actionId === 'left' || actionId === 'right' || actionId === 'up' || actionId === 'down') {
-      gamestateManager.updateCharacterPosition(userId, actionId);
+      // gamestateManager.updateCharacterPosition(userId, actionId);
     };
   }
   /** @override */
   onDisconnecting() {
-    gamestateManager.removeUserData(this.get('userId'));
-
     console.log(`- Remote Client "${this.get('userId')}" disconnected`);
   }
 }
 /**
  * Client which is a Screen
  *
- * @typedef {Model} ScreenSocketClient
+ * @typedef {Model} ScreenClientModel
  */
-export class ScreenSocketClient extends SocketClientModel {
+export class ScreenClientModel extends SocketClientModel {
+  /** @override */
+  constructor(newAttributes = {}) {
+    super({
+      clientType: CLIENT_TYPES.SCREEN,
+      ...newAttributes,
+    });
+  }
   /** @override */
   attachListeners() {
   }

@@ -15,6 +15,7 @@
     "http": "0.0.0",
     "js-schema": "^1.0.1",
     "lodash": "^4.17.11",
+    "mobx": "^5.9.0",
     "nodemon": "^1.18.6",
     "pathfinding": "^0.4.18",
     "seedrandom": "^2.4.4",

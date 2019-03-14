@@ -7,20 +7,19 @@ let app;
 let server;
 
 /**
- * Singleton for the Server
+ * instantiates the Express Server
+ *  must be called
  */
-
-/**
- * required to be called to instantiate the Express Server
- */
-export function start() {
+export function init() {
   app = express();
   app.get('/status', function(req, resp) {
     resp.send('Server is Up');
   });
 
   server = http.createServer(app);
-  websocketInstance.start(server);
+
+  // init Socket.IO on this server
+  websocketInstance.init(server);
 
   // START!
   const SERVER_PORT = process.env.SERVER_PORT;

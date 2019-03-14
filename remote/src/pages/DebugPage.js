@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import {observer} from 'mobx-react';
 
 import {appStore} from 'data/remoteAppState';
@@ -17,6 +17,57 @@ class DebugPage extends Component {
   }
   /** @override */
   render() {
+    const {
+      isInLobby,
+      isInGame,
+    } = this.props;
+
+    if (isInGame) {
+      return this.renderGamePage();
+    }
+
+    return (
+      <div className='bg-secondary flex-grow flex-centered flex-col width-full text-center'>
+        <h2 className='pad-v-2 flex-none'>Debug Page</h2>
+
+        { isInLobby &&
+          this.renderLobbyPage()
+        }
+
+        { isInGame &&
+          this.renderGamePage()
+        }
+      </div>
+    );
+  }
+  /** @returns {React.Component} */
+  renderLobbyPage() {
+    const {lobbyNames, name} = this.props;
+    const hasOtherClients = lobbyNames.length > 0;
+
+    return (
+      <span>
+        <h2 className='pad-v-2 flex-none'>Hiya, welcome to the Lobby!</h2>
+
+        { hasOtherClients &&
+          <div className='pad-2 fsize-4'>
+            { lobbyNames.map((lobbyName, idx) => {
+              const isMyName = lobbyName === name;
+              return (
+                <div
+                  key={`lobby-name-${lobbyName}-${idx}-key`}
+                  className={`sibling-mar-t-1 ${isMyName ? 'f-bold' : ''}`}>
+                    {lobbyName}
+                </div>
+              )
+            })}
+          </div>
+        }
+      </span>
+    );
+  }
+  /** @returns {React.Component} */
+  renderGamePage() {
     const { gamestate, userId } = this.props;
     if (gamestate === undefined) {
       return null;
@@ -46,9 +97,7 @@ class DebugPage extends Component {
     } = currentCharacter;
 
     return (
-      <div className='bg-secondary flex-grow flex-centered flex-col width-full text-center'>
-        <h2 className='pad-v-2 flex-none'>Debug Page</h2>
-
+      <Fragment>
         <div className='pad-v-2 flex-none'>
           {`Health: ${health.value || 0}`}
         </div>
@@ -107,7 +156,7 @@ class DebugPage extends Component {
           fogMatrix={fogMapModel.matrix}
           characters={characters}
         />
-      </div>
+      </Fragment>
     )
   }
   handleOnActionClick(actionId) {
@@ -120,8 +169,11 @@ class DebugPage extends Component {
 const ObservingDebugPage = observer(() => {
   return (
     <DebugPage
+      {...appStore}
       userId={appStore.userId}
       gamestate={appStore.gamestate}
+      isInLobby={appStore.isInLobby}
+      isInGame={appStore.isInGame}
     />
   )
 });
