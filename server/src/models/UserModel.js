@@ -5,25 +5,25 @@ import Model from 'models/Model';
 // define attribute types
 const userSchema = schema({
   // user's name
-  'name': String,
+  name: String,
   // defined id of this user
-  'userId': String,
-  // id of user's chosen character
-  '?characterId': String,
+  userId: String,
+  // id of users chosen character
+  characterId: String,
   //
-  'isUserTurn': Boolean,
+  isUserTurn: Boolean,
   //
-  'canMoveLeft': Boolean,
+  canMoveLeft: Boolean,
   //
-  'canMoveRight': Boolean,
+  canMoveRight: Boolean,
   //
-  'canMoveUp': Boolean,
+  canMoveUp: Boolean,
   //
-  'canMoveDown': Boolean,
+  canMoveDown: Boolean,
   //
-  'canTrick': Boolean,
+  canTrick: Boolean,
   //
-  'canTreat': Boolean,
+  canTreat: Boolean,
 });
 
 /**

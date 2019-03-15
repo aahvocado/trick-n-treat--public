@@ -10,22 +10,6 @@ import * as matrixUtils from 'utilities/matrixUtils';
 /**
  * generates a MapModel using the base Map Settings
  *
- * @param {GamestateModel} gamestateModel
- */
-export function initBaseGamestateModel(gamestateModel) {
-  const baseTileMapModel = createBaseTileMapModel();
-  const encounterList = createEncounterList(baseTileMapModel);
-  const fogMapModel = createFogOfWarModel(baseTileMapModel);
-
-  gamestateModel.set({
-    tileMapModel: baseTileMapModel,
-    encounters: encounterList,
-    fogMapModel: fogMapModel,
-  });
-}
-/**
- * generates a MapModel using the base Map Settings
- *
  * @returns {MapModel}
  */
 export function createBaseTileMapModel() {
@@ -62,4 +46,19 @@ export function createFogOfWarModel(mapModel) {
     start: mapModel.get('start').clone(),
     matrix: matrixUtils.createMatrix(mapModel.getWidth(), mapModel.getHeight(), FOG_TYPES.HIDDEN),
   });
+}
+/**
+ * logs the current order of turns
+ *
+ * @param {Object} gamestate
+ */
+export function displayTurnQueue(gamestate) {
+  let displayList = '';
+  const turnQueue = gamestate.users.slice();
+  for (let i = 0; i < turnQueue.length; i++) {
+    const name = `"${turnQueue[i].get('name')}"`;
+    displayList += `\n${i + 1}. ${name}`;
+  }
+
+  console.log('\x1b[93m', 'Turn Order' + displayList);
 }

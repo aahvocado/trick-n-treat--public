@@ -37,6 +37,7 @@ export class StatModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super({
+      typeId: STAT_TYPE_ID.UNDEFINED,
       base: 0,
       value: 0,
       modifier: 0,

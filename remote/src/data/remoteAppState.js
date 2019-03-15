@@ -1,5 +1,7 @@
 import {observable, toJS} from 'mobx';
 
+import {SOCKET_EVENTS} from 'constants/socketEvents';
+
 // TESTING
 const _name = (() => {
   const firsts = ['amazing', 'cool', 'ticklish', 'rainbow', 'cheerful', 'sleepy', 'poopy', 'rectangular', 'transparent', 'plaid', 'laughing'];
@@ -55,13 +57,13 @@ export function getState() {
  */
 export function attachSocketListeners(socket) {
   // received new Gamestate from Server
-  socket.on('GAMESTATE_UPDATE', (data) => {
+  socket.on(SOCKET_EVENTS.GAME.UPDATE, (data) => {
     updateState({
       gamestate: data,
     });
   });
-  // -- client state
-  socket.on('CLIENT_STATE_UPDATE', (data) => {
+  // -- client
+  socket.on(SOCKET_EVENTS.CLIENT.UPDATE, (data) => {
     updateState({
       isInLobby: data.isInLobby,
       isInGame: data.isInGame,

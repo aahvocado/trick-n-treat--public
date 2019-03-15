@@ -1,6 +1,9 @@
 import React, { Component, Fragment } from 'react';
 import {observer} from 'mobx-react';
 
+import {CLIENT_ACTIONS} from 'constants/clientActions';
+import {SOCKET_EVENTS} from 'constants/socketEvents';
+
 import {appStore} from 'data/remoteAppState';
 
 import * as connectionManager from 'managers/connectionManager';
@@ -14,6 +17,7 @@ class DebugPage extends Component {
     super(props);
 
     this.handleOnActionClick = this.handleOnActionClick.bind(this);
+    this.handleOnStartClick = this.handleOnStartClick.bind(this);
   }
   /** @override */
   render() {
@@ -21,10 +25,6 @@ class DebugPage extends Component {
       isInLobby,
       isInGame,
     } = this.props;
-
-    if (isInGame) {
-      return this.renderGamePage();
-    }
 
     return (
       <div className='bg-secondary flex-grow flex-centered flex-col width-full text-center'>
@@ -48,6 +48,10 @@ class DebugPage extends Component {
     return (
       <span>
         <h2 className='pad-v-2 flex-none'>Hiya, welcome to the Lobby!</h2>
+
+        <DebugActionButton onActionClick={this.handleOnStartClick} >
+          Start Game
+        </DebugActionButton>
 
         { hasOtherClients &&
           <div className='pad-2 fsize-4'>
@@ -107,42 +111,42 @@ class DebugPage extends Component {
 
         <div className='pad-v-2 flex-none'>
           <DebugActionButton
-            actionId='left'
+            actionId={CLIENT_ACTIONS.MOVE.LEFT}
             disabled={!canMoveLeft}
             onActionClick={this.handleOnActionClick}
           >
             left
           </DebugActionButton>
           <DebugActionButton
-            actionId='right'
+            actionId={CLIENT_ACTIONS.MOVE.RIGHT}
             disabled={!canMoveRight}
             onActionClick={this.handleOnActionClick}
           >
             Right
           </DebugActionButton>
           <DebugActionButton
-            actionId='up'
+            actionId={CLIENT_ACTIONS.MOVE.UP}
             disabled={!canMoveUp}
             onActionClick={this.handleOnActionClick}
           >
             Up
           </DebugActionButton>
           <DebugActionButton
-            actionId='down'
+            actionId={CLIENT_ACTIONS.MOVE.DOWN}
             disabled={!canMoveDown}
             onActionClick={this.handleOnActionClick}
           >
             Down
           </DebugActionButton>
           <DebugActionButton
-            actionId='trick'
+            actionId={CLIENT_ACTIONS.TRICK}
             disabled={!canTrick}
             onActionClick={this.handleOnActionClick}
           >
             Can Trick
           </DebugActionButton>
           <DebugActionButton
-            actionId='treat'
+            actionId={CLIENT_ACTIONS.TREAT}
             disabled={!canTreat}
             onActionClick={this.handleOnActionClick}
           >
@@ -160,10 +164,10 @@ class DebugPage extends Component {
     )
   }
   handleOnActionClick(actionId) {
-    connectionManager.socket.emit('USER_ACTION', {
-      actionId: actionId,
-      userId: this.props.userId,
-    });
+    connectionManager.socket.emit(SOCKET_EVENTS.GAME.ACTION, actionId);
+  }
+  handleOnStartClick() {
+    connectionManager.socket.emit(SOCKET_EVENTS.LOBBY.START);
   }
 }
 const ObservingDebugPage = observer(() => {

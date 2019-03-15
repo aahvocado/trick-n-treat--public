@@ -49,11 +49,6 @@ export class SocketClientModel extends Model {
    * @param {Socket} socket
    */
   init() {
-    const socket = this.get('socket');
-
-    // on the way to disconnecting
-    socket.on('disconnecting', this.onDisconnecting.bind(this));
-
     this.attachListeners();
   }
   /**
@@ -61,11 +56,6 @@ export class SocketClientModel extends Model {
    * @abstract
    */
   attachListeners() {}
-  /**
-   * `onDisconnecting` event
-   * @abstract
-   */
-  onDisconnecting() {}
   /**
    * @param {...*} args
    */
@@ -87,28 +77,7 @@ export class RemoteClientModel extends SocketClientModel {
     });
   }
   /** @override */
-  attachListeners() {
-    const socket = this.get('socket');
-
-    // User is taking an action
-    socket.on('USER_ACTION', this.handleUserAction.bind(this));
-  }
-  /**
-   * interprets an action from a user
-   * @param {Object} actionOptions
-   * @param {String} actionOptions.userId
-   * @param {String} actionOptions.actionId
-   */
-  handleUserAction({userId, actionId}) {
-    // yuck, todo properly
-    if (actionId === 'left' || actionId === 'right' || actionId === 'up' || actionId === 'down') {
-      // gamestateManager.updateCharacterPosition(userId, actionId);
-    };
-  }
-  /** @override */
-  onDisconnecting() {
-    console.log(`- Remote Client "${this.get('userId')}" disconnected`);
-  }
+  attachListeners() {}
 }
 /**
  * Client which is a Screen
@@ -125,10 +94,6 @@ export class ScreenClientModel extends SocketClientModel {
   }
   /** @override */
   attachListeners() {
-  }
-  /** @override */
-  onDisconnecting() {
-    console.log(`- Screen Client "${this.get('userId')}" disconnected`);
   }
 }
 export default SocketClientModel;

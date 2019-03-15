@@ -7,6 +7,7 @@ dotenv.config({
 });
 
 import 'data/serverAppState';
+import 'data/gameState';
 
 import * as serverInstance from 'managers/serverInstance';
 serverInstance.init();

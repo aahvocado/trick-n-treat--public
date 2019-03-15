@@ -6,28 +6,26 @@ import {
 
 import {CLIENT_TYPES} from 'constants/clientTypes';
 
-import GamestateModel from 'models/GamestateModel';
-
 /**
- * This should hold the state of the Server
+ * @typedef {String} ServerMode
+ */
+export const SERVER_MODES = {
+  LOBBY: 'LOBBY-MODE',
+  GAME: 'GAME-MODE',
+};
+/**
+ * state of the Server
  */
 const clients = observable.array();
 const appStore = observable({
-  // -- app session data
-  /** @type {Date} */
-  createDate: Date.now(),
-  /** @type {Date} */
-  lastUpdateDate: Date.now(),
-
-  /** @type {GamestateModel} */
-  gamestate: null,
+  /** @type {ServerMode} */
+  mode: SERVER_MODES.LOBBY,
 
   // -- client data
   /** @type {Array<SocketClientModel>} */
   clients: clients,
   /** @type {ScreenClientModel} */
-  screenClient: undefined,
-
+  screenClient: null,
   /** @type {Array<RemoteClientModel>} */
   get lobbyClients() {
     return this.clients.filter((client) => (client.get('isInLobby')));
@@ -36,7 +34,115 @@ const appStore = observable({
   get gameClients() {
     return this.clients.filter((client) => (client.get('isInGame')));
   },
+
+  // -- app session data
+  /** @type {Date} */
+  createDate: Date.now(),
+  /** @type {Date} */
+  lastUpdateDate: Date.now(),
 });
+// -- Actions for the Server state
+/**
+ * Its time to Start the Game!
+ *  First, let's make sure the conditions are actually correct.
+ *  Then we need to generate a world.
+ *  then we can switch modes and start.
+ */
+export async function handleStartGame() {
+  console.log('\x1b[93m', 'Attempting to Start a Game...');
+  const canStart = canStartGame();
+  if (!canStart) {
+    return;
+  }
+
+  // move everyone from the Lobby to the Game
+  const clientsCopy = appStore.clients.slice();
+  clientsCopy.map((client) => {
+    client.set({
+      isInLobby: false,
+      isInGame: true,
+    });
+  });
+
+  update({
+    clients: appStore.clients.replace(clientsCopy),
+    mode: SERVER_MODES.GAME,
+  });
+}
+/**
+ * check if everything is valid to create a game
+ *
+ * @returns {Boolean}
+ */
+function canStartGame() {
+  if (appStore.mode === SERVER_MODES.GAME) {
+    console.error('\x1b[91m', '. There is already a game in progress!');
+    return false;
+  }
+
+  if (appStore.clients.length <= 0) {
+    console.error('\x1b[91m', '. There is no one here!');
+    return false;
+  }
+
+  if (appStore.lobbyClients.length <= 0) {
+    console.error('\x1b[91m', '. There are no players!');
+    return false;
+  }
+
+  if (appStore.screenClient === null) {
+    console.error('\x1b[91m', '. There is no Screen!');
+    // return false;
+  }
+
+  return true;
+}
+/**
+ * @param {SocketClientModel} clientModel
+ */
+export function addClient(clientModel) {
+  const updatedClients = [].concat(appStore.clients);
+  updatedClients.push(clientModel);
+
+  // additional steps for the Screen
+  if (clientModel.get('clientType') === CLIENT_TYPES.SCREEN) {
+    addScreenClient(clientModel);
+  }
+
+  update({clients: updatedClients});
+}
+/**
+ * @param {RemoteClientModel} clientModel
+ */
+export function addScreenClient(clientModel) {
+  if (appStore.screenClient !== null) {
+    console.warn('\x1b[91m', 'Another Screen Client connected - the old one is being removed');
+  }
+
+  update({screenClient: clientModel});
+}
+/**
+ * @param {SocketClient} clientModel
+ */
+export function removeClient(clientModel) {
+  const filterUser = (user) => (user.get('userId') !== clientModel.get('userId'));
+  const updatedClients = appStore.clients.filter(filterUser);
+
+  update({
+    clients: updatedClients,
+  });
+
+  // if the removed Client was a Screen, we have more to do
+  if (clientModel.get('clientType') === CLIENT_TYPES.SCREEN) {
+    removeScreenClient();
+  }
+}
+/**
+ * @param {RemoteClientModel} clientModel
+ */
+export function removeScreenClient(clientModel) {
+  update({screenClient: null});
+}
 // -- function wrappers for the Store
 /**
  * makes changes to the state
@@ -71,60 +177,4 @@ export function onChange(property, callback) {
  */
 export function getState() {
   return toJS(appStore);
-}
-// -- Actions for the Server state
-/**
- *
- */
-export function startGame() {
-  update({
-    gamestate: new GamestateModel(),
-  });
-}
-/**
- * @param {SocketClientModel} clientModel
- */
-export function addClient(clientModel) {
-  const updatedClients = [].concat(appStore.clients);
-  updatedClients.push(clientModel);
-
-  // additional steps for the Screen
-  if (clientModel.get('clientType') === CLIENT_TYPES.SCREEN) {
-    addScreenClient(clientModel);
-  }
-
-  update({clients: updatedClients});
-}
-/**
- * @param {RemoteClientModel} clientModel
- */
-export function addScreenClient(clientModel) {
-  if (appStore.screenClient !== null) {
-    console.warn('! - a Screen Client already exists - it is getting replaced');
-  }
-
-  update({screenClient: clientModel});
-}
-/**
- * @param {SocketClient} clientModel
- */
-export function removeClient(clientModel) {
-  const filterUser = (user) => (user.get('userId') !== clientModel.get('userId'));
-  const updatedClients = appStore.clients.filter(filterUser);
-
-  update({
-    clients: updatedClients,
-  });
-
-  // if the removed Client was a Screen, we have more to do
-  if (clientModel.get('clientType') === CLIENT_TYPES.SCREEN) {
-    removeScreenClient();
-  }
-}
-/**
- * @param {RemoteClientModel} clientModel
- */
-export function removeScreenClient(clientModel) {
-  console.log(`Screen Client ${clientModel.get('name')} removed`);
-  update({screenClient: null});
 }
