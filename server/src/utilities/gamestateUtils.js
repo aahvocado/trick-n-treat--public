@@ -47,18 +47,3 @@ export function createFogOfWarModel(mapModel) {
     matrix: matrixUtils.createMatrix(mapModel.getWidth(), mapModel.getHeight(), FOG_TYPES.HIDDEN),
   });
 }
-/**
- * logs the current order of turns
- *
- * @param {Object} gamestate
- */
-export function displayTurnQueue(gamestate) {
-  let displayList = '';
-  const turnQueue = gamestate.users.slice();
-  for (let i = 0; i < turnQueue.length; i++) {
-    const name = `"${turnQueue[i].get('name')}"`;
-    displayList += `\n${i + 1}. ${name}`;
-  }
-
-  console.log('\x1b[93m', 'Turn Order' + displayList);
-}

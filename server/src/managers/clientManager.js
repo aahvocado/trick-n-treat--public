@@ -1,7 +1,8 @@
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
-import * as gameState from 'data/gameState';
-import * as serverAppState from 'data/serverAppState';
+import * as serverStateManager from 'managers/serverStateManager';
+
+import * as gamestateManager from 'managers/gamestateManager';
 
 import {RemoteClientModel, ScreenClientModel} from 'models/SocketClientModel';
 
@@ -22,16 +23,16 @@ export function init(io) {
 
     // client pressed "Game Start"
     socket.on(SOCKET_EVENTS.LOBBY.START, () => {
-      serverAppState.handleStartGame();
+      serverStateManager.handleStartGame();
     });
 
     // client took a game action
     socket.on(SOCKET_EVENTS.GAME.ACTION, (actionId) => {
-      gameState.handleUserGameAction(userId, actionId);
+      // gamestateManager.handleUserGameAction(userId, actionId);
     });
 
     // is it this client's turn?!
-    gameState.onChange('activeUser', (activeUser) => {
+    gamestateManager.onChange('activeUser', (activeUser) => {
       if (activeUser.get('userId') === userId) {
         // it is!
       }
@@ -40,27 +41,27 @@ export function init(io) {
     // disconnected
     socket.on('disconnect', () => {
       console.log('\x1b[32m', `- Client "${userId}" disconnected`);
-      serverAppState.removeClient(socketClient);
+      serverStateManager.removeClient(socketClient);
     });
   });
 
   // -- Server state changes
-  serverAppState.onChange('lobbyClients', sendClientStateToAll);
+  serverStateManager.onChange('lobbyClients', sendClientStateToAll);
 
   // -- Game state changes
   /**
    * when Gamestate changes mode
    */
-  gameState.onChange('mode', (newMode) => {
-    if (newMode !== gameState.GAME_MODES.ACTIVE) {
+  gamestateManager.onChange('mode', (newMode) => {
+    if (newMode !== gamestateManager.GAME_MODES.ACTIVE) {
       return;
     }
 
-    io.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.exportState());
+    io.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
   });
   // update everyone when the `activeCharacter` changes
-  gameState.onChange('activeCharacter', () => {
-    io.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.exportState());
+  gamestateManager.onChange('activeCharacter', () => {
+    io.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
   });
 }
 // -- connection events
@@ -102,7 +103,7 @@ function handleCreatingNewSocketClient(socket) {
  */
 function createAndAddNewRemoteClient(attributes) {
   const newClient = new RemoteClientModel(attributes);
-  serverAppState.addClient(newClient);
+  serverStateManager.addClient(newClient);
 
   console.log('\x1b[92m', `+ Remote "${newClient.get('userId')}" connected`);
   return newClient;
@@ -113,7 +114,7 @@ function createAndAddNewRemoteClient(attributes) {
  */
 function createAndAddNewScreenClient(attributes) {
   const newClient = new ScreenClientModel(attributes);
-  serverAppState.addClient(newClient);
+  serverStateManager.addClient(newClient);
 
   console.log('\x1b[92m', `+ Screen "${newClient.get('userId')}" connected`);
   return newClient;
@@ -126,7 +127,7 @@ function createAndAddNewScreenClient(attributes) {
  * @returns {Object} - for the Remote
  */
 function generateRemoteClientState(clientModel) {
-  const serverState = serverAppState.getState();
+  const serverState = serverStateManager.getState();
 
   const lobbyClients = serverState.clients.filter((client) => {
     return client.get('isInLobby');
@@ -144,7 +145,7 @@ function generateRemoteClientState(clientModel) {
  * creates some State data for a Remote Client
  */
 function sendClientStateToAll() {
-  const serverState = serverAppState.getState();
+  const serverState = serverStateManager.getState();
 
   serverState.clients.forEach((client) => {
     client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateRemoteClientState(client));

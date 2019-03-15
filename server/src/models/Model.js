@@ -1,3 +1,10 @@
+import {
+  get,
+  observable,
+  reaction,
+  set,
+  toJS,
+} from 'mobx';
 import uuid from 'uuid/v4';
 
 /**
@@ -14,7 +21,7 @@ export class Model {
     /** @type {String} */
     this.id = uuid();
 
-    this.set(newAttributes);
+    this.attributes = observable(newAttributes);
   }
   /**
    * gets a specific attribute
@@ -23,21 +30,29 @@ export class Model {
    * @returns {* | undefined} - returns given attribute
    */
   get(attributeName) {
-    return this.attributes[attributeName];
+    return get(this.attributes, attributeName);
   }
   /**
    * assigns and updates these attributes
    *
    * @param {Object} changes
-   * @returns {Object} - returns all attributes
    */
   set(changes) {
-    this.attributes = {
-      ...this.attributes,
-      ...changes,
-    };
-
-    return this.attributes;
+    set(this.attributes, changes);
+  }
+  /**
+   * wrapper for watching for a change for a specific property
+   * @link https://mobx.js.org/refguide/reaction.html
+   *
+   * @param {String} property - one of the observeable properties in the `appStore`
+   * @param {Function} callback
+   * @returns {Function} - returns the `disposer` which will remove the observer
+   */
+  onChange(property, callback) {
+    return reaction(
+      () => this.attributes[property],
+      callback,
+    );
   }
   /**
    * makes sure attributes match the schema
@@ -60,10 +75,11 @@ export class Model {
    */
   export() {
     const exportObject = {};
+    const stateObject = toJS(this.attributes);
 
-    const keys = Object.keys(this.attributes);
+    const keys = Object.keys(stateObject);
     keys.forEach((attributeName) => {
-      const attributeValue = this.get(attributeName);
+      const attributeValue = get(this.attributes, attributeName);
 
       // if value is a Model then use that Model's export
       if (attributeValue instanceof Model) {
@@ -73,8 +89,14 @@ export class Model {
 
       // check if we have an array of Models
       if (Array.isArray(attributeValue)) {
-        const isArrayOfModels = attributeValue[0] instanceof Model;
+        // empty arrays don't matter
+        if (attributeValue.length <= 0) {
+          exportObject[attributeName] = attributeValue;
+          return;
+        }
 
+        // export array of models using their own export()
+        const isArrayOfModels = attributeValue[0] instanceof Model;
         if (isArrayOfModels) {
           exportObject[attributeName] = attributeValue.map((model) => (model.export()));
           return;
