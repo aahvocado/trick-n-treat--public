@@ -1,8 +1,8 @@
+import {GAME_MODES} from 'constants/gameModes';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
-import * as serverStateManager from 'managers/serverStateManager';
-
 import * as gamestateManager from 'managers/gamestateManager';
+import * as serverStateManager from 'managers/serverStateManager';
 
 import {RemoteClientModel, ScreenClientModel} from 'models/SocketClientModel';
 
@@ -28,14 +28,7 @@ export function init(io) {
 
     // client took a game action
     socket.on(SOCKET_EVENTS.GAME.ACTION, (actionId) => {
-      // gamestateManager.handleUserGameAction(userId, actionId);
-    });
-
-    // is it this client's turn?!
-    gamestateManager.onChange('activeUser', (activeUser) => {
-      if (activeUser.get('userId') === userId) {
-        // it is!
-      }
+      gamestateManager.handleUserGameAction(userId, actionId);
     });
 
     // disconnected
@@ -46,20 +39,26 @@ export function init(io) {
   });
 
   // -- Server state changes
+  /**
+   * a change to the number of Lobby Clients
+   */
   serverStateManager.onChange('lobbyClients', sendClientStateToAll);
 
   // -- Game state changes
   /**
    * when Gamestate changes mode
+   *  if it's ACTIVE, send data to everyone
    */
   gamestateManager.onChange('mode', (newMode) => {
-    if (newMode !== gamestateManager.GAME_MODES.ACTIVE) {
+    if (newMode !== GAME_MODES.ACTIVE) {
       return;
     }
 
     io.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
   });
-  // update everyone when the `activeCharacter` changes
+  /**
+   * update everyone when the `activeCharacter` changes
+   */
   gamestateManager.onChange('activeCharacter', () => {
     io.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
   });
@@ -145,9 +144,8 @@ function generateRemoteClientState(clientModel) {
  * creates some State data for a Remote Client
  */
 function sendClientStateToAll() {
-  const serverState = serverStateManager.getState();
-
-  serverState.clients.forEach((client) => {
+  const clients = serverStateManager.getState().clients.slice();
+  clients.forEach((client) => {
     client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateRemoteClientState(client));
   });
 }

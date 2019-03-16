@@ -1,21 +1,15 @@
 import seedrandom from 'seedrandom';
 
+import {CLIENT_ACTIONS} from 'constants/clientActions';
+import {GAME_MODES} from 'constants/gameModes';
+
 import * as serverStateManager from 'managers/serverStateManager';
 
 import GamestateModel from 'models/GamestateModel';
 
 import * as gamestateUtils from 'utilities/gamestateUtils';
 
-/**
- * @typedef {String} GameMode
- */
-export const GAME_MODES = {
-  INACTIVE: 'GAME-INACTIVE-MODE',
-  ACTIVE: 'GAME-ACTIVE-MODE',
-  PAUSED: 'GAME-PAUSED-MODE',
-  WORKING: 'GAME-WORKING-MODE',
-};
-//
+// seed it
 const seed = Date.now();
 seedrandom(seed, {global: true});
 /** @type {GamestateModel} */
@@ -56,10 +50,41 @@ function init() {
 
   // create `users` based on connected Clients
   const serverStateObj = serverStateManager.getState();
-  gamestate.createUsers(serverStateObj.clients);
+  gamestate.createUsersFromClients(serverStateObj.clients);
 
   // create `turnQueue` based on `users`
   gamestate.initTurnQueue();
+}
+/**
+ * User did something
+ *
+ * @param {String} userId
+ * @param {String} actionId
+ */
+export function handleUserGameAction(userId, actionId) {
+  // check if it is the Turn of the user who clicked
+  const activeUser = gamestate.get('activeUser');
+  if (activeUser.get('userId') !== userId) {
+    return;
+  }
+
+  if (actionId === CLIENT_ACTIONS.MOVE.LEFT) {
+    gamestate.updateCharacterPosition(userId, 'left');
+  }
+
+  if (actionId === CLIENT_ACTIONS.MOVE.RIGHT) {
+    gamestate.updateCharacterPosition(userId, 'right');
+  }
+
+  if (actionId === CLIENT_ACTIONS.MOVE.UP) {
+    gamestate.updateCharacterPosition(userId, 'up');
+  }
+
+  if (actionId === CLIENT_ACTIONS.MOVE.DOWN) {
+    gamestate.updateCharacterPosition(userId, 'down');
+  }
+
+  gamestate.handleNextTurn();
 }
 /**
  * @param {String} property - one of the observeable properties in the `appStore`

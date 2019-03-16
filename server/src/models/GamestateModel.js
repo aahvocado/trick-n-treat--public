@@ -1,7 +1,7 @@
 import {FastCharacter} from 'collections/characterCollection';
 
-import {CLIENT_ACTIONS} from 'constants/clientActions';
 import {CLIENT_TYPES} from 'constants/clientTypes';
+import {GAME_MODES} from 'constants/gameModes';
 import {MAP_START} from 'constants/mapSettings';
 import POINTS, {getPointFromString} from 'constants/points';
 import TILE_TYPES, {FOG_TYPES, isWalkableTile} from 'constants/tileTypes';
@@ -14,15 +14,7 @@ import UserModel from 'models/UserModel';
 import * as mathUtils from 'utilities/mathUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
 
-/**
- * @typedef {String} GameMode
- */
-export const GAME_MODES = {
-  INACTIVE: 'GAME-INACTIVE-MODE',
-  ACTIVE: 'GAME-ACTIVE-MODE',
-  PAUSED: 'GAME-PAUSED-MODE',
-  WORKING: 'GAME-WORKING-MODE',
-};
+
 /**
  * character class
  *
@@ -58,6 +50,14 @@ export class GamestateModel extends Model {
       fogMapModel: MapModel,
       //
       ...newAttributes,
+    });
+
+    // -- react to my own state changing
+    /**
+     * if `characters` change, update user actions`
+     */
+    this.onChange('characters', () => {
+      this.updateActionsForAllUsers();
     });
   }
   // -- helper methods
@@ -143,6 +143,12 @@ export class GamestateModel extends Model {
     const newCharacters = [].concat(oldCharacters);
     newCharacters.push(characterModel);
     this.set({characters: newCharacters});
+
+    // attach onChange listeners to the character - probably can be set up better elsewhere
+    characterModel.onChange('position', (position) => {
+      this.updateToVisibleAt(position);
+      this.updateActionsForAllUsers();
+    });
   }
   /**
    * @param {CharacterModel} characterModel
@@ -159,46 +165,38 @@ export class GamestateModel extends Model {
     const characters = this.get('characters').slice();
     const newTurnQueue = matrixUtils.shuffleArray(characters);
     this.set({turnQueue: newTurnQueue});
+
+    const activeUser = this.get('activeUser');
+    activeUser.set({isUserTurn: true});
   }
   /**
    * updates the `turnQueue`
    */
   handleNextTurn() {
     const currentTurnQueue = this.get('turnQueue').slice();
-    const oldActiveUser = currentTurnQueue.shift();
+    const oldActiveCharacter = currentTurnQueue.shift();
+    const activeUser = this.get('activeUser');
 
-    // add the previous `activeUser` to the end of the `turnQueue`
+    // if the current `activeCharacter` is a User, say its not their turn
+    if (activeUser !== undefined) {
+      activeUser.set({isUserTurn: false});
+    }
+
+    // move the previous `activeCharacter` to the end of the `turnQueue`
     const newTurnQueue = [].concat(currentTurnQueue);
-    newTurnQueue.push(oldActiveUser);
+    newTurnQueue.push(oldActiveCharacter);
+
+    const newActiveCharacter = newTurnQueue[0];
+    const newActiveUser = this.findUserByCharacterId(newActiveCharacter.get('characterId'));
+
+    // if the new `activeCharacter` would be a User, say its their turn
+    if (newActiveUser !== undefined) {
+      newActiveUser.set({isUserTurn: true});
+    }
 
     this.set({turnQueue: newTurnQueue});
   }
   // -- isolated update methods
-  /**
-   * User did something
-   *
-   * @param {String} userId
-   * @param {String} actionId
-   */
-  handleUserGameAction(userId, actionId) {
-    if (actionId === CLIENT_ACTIONS.MOVE.LEFT) {
-      updateCharacterPosition(userId, 'left');
-    }
-
-    if (actionId === CLIENT_ACTIONS.MOVE.RIGHT) {
-      updateCharacterPosition(userId, 'right');
-    }
-
-    if (actionId === CLIENT_ACTIONS.MOVE.UP) {
-      updateCharacterPosition(userId, 'up');
-    }
-
-    if (actionId === CLIENT_ACTIONS.MOVE.DOWN) {
-      updateCharacterPosition(userId, 'down');
-    }
-
-    this.handleNextTurn();
-  }
   /**
    * updates all `canMove` attributes in a given user
    *
@@ -309,7 +307,7 @@ export class GamestateModel extends Model {
    * @param {String} directionId
    */
   updateCharacterPosition(userId, directionId) {
-    const characterModel = findCharacterByUserId(userId);
+    const characterModel = this.findCharacterByUserId(userId);
     const directionPoint = getPointFromString(directionId);
 
     // nothing to do if given direction is not walkable
@@ -319,17 +317,13 @@ export class GamestateModel extends Model {
     }
 
     // if there is an Encounter here, we should trigger it
-    const encounterModelHere = getEncounterAt(nextPosition);
+    const encounterModelHere = this.getEncounterAt(nextPosition);
     if (encounterModelHere) {
       encounterModelHere.trigger(characterModel);
     }
 
     // finally update the character's position
     characterModel.set({position: nextPosition});
-
-    // ! - update other state attributes
-    this.updateToVisibleAt(nextPosition);
-    this.updateActionsForAllUsers();
   }
   // -- larger scale update methods
   /**
@@ -346,7 +340,7 @@ export class GamestateModel extends Model {
    *
    * @param {Array<SocketClientModels>} clients
    */
-  createUsers(clients) {
+  createUsersFromClients(clients) {
     clients.forEach((clientModel) => {
       // only make users out of those in Game and Remote Clients
       if (!clientModel.get('isInGame') || clientModel.get('clientType') !== CLIENT_TYPES.REMOTE) {
@@ -359,7 +353,7 @@ export class GamestateModel extends Model {
       const newCharPosition = MAP_START.clone();
       const newCharacterModel = new FastCharacter({
         position: newCharPosition,
-        name: `character-for-${name}`,
+        name: `${name}-character`,
         characterId: characterId,
       });
 
@@ -372,10 +366,7 @@ export class GamestateModel extends Model {
       // add
       this.addCharacter(newCharacterModel);
       this.addUser(newUserModel);
-      this.updateToVisibleAt(newCharPosition);
     });
-
-    this.updateActionsForAllUsers();
   }
   /**
    * logs the current order of turns

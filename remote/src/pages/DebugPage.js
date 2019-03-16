@@ -92,6 +92,7 @@ class DebugPage extends Component {
       canMoveDown,
       canTrick,
       canTreat,
+      isUserTurn,
     } = currentUser;
 
     const currentCharacter = characters.find(character => (character.characterId === currentUser.characterId));
@@ -103,10 +104,17 @@ class DebugPage extends Component {
     return (
       <Fragment>
         <div className='pad-v-2 flex-none'>
-          {`Health: ${health.value || 0}`}
+          <span className='sibling-mar-l-1'>
+            {`Health: ${health.value || 0}`}
+          </span>
+
+          <span className='sibling-mar-l-1'>
+            {`Candies: ${candies || 0}`}
+          </span>
         </div>
+
         <div className='pad-v-2 flex-none'>
-          {`Candies: ${candies || 0}`}
+          { isUserTurn ? 'Your turn!' : 'Not your turn.' }
         </div>
 
         <div className='pad-v-2 flex-none'>
