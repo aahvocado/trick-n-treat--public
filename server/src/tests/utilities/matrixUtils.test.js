@@ -359,3 +359,35 @@ test('getTypeCountsAdjacentTo() - gets the counts of adjacent values', (t) => {
   const typeCountMap = matrixUtils.getTypeCountsAdjacentTo(testMatrix, new Point(2, 2));
   t.deepEqual(typeCountMap, expectedCounts);
 });
+
+test('getPointsOfNearbyTiles() - gets correct set of Points of the points X distance away', (t) => {
+  const testMatrix = [
+    [0, 0, 1, 0, 0],
+    [0, 1, 1, 1, 0],
+    [1, 1, '*', 1, 1],
+    [0, 1, 1, 1, 0],
+    [0, 0, 1, 0, 0],
+  ];
+
+  const expectedList = [
+    new Point(0, 2),
+    new Point(1, 1),
+    new Point(1, 2),
+    new Point(1, 3),
+    new Point(2, 0),
+    new Point(2, 1),
+    new Point(2, 2),
+    new Point(2, 3),
+    new Point(2, 4),
+    new Point(3, 1),
+    new Point(3, 2),
+    new Point(3, 3),
+    new Point(4, 2),
+  ];
+
+  const testPoint = new Point(2, 2);
+
+  const testPointsList = matrixUtils.getPointsOfNearbyTiles(testMatrix, testPoint, 2);
+  t.is(Array.toString(testPointsList), Array.toString(expectedList));
+});
+

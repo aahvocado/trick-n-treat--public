@@ -62,6 +62,12 @@ export function init(io) {
   gamestateManager.onChange('activeCharacter', () => {
     io.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
   });
+  /**
+   * keeping track of remaining moves
+   */
+  gamestateManager.onChange('remainingMoves', () => {
+    io.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
+  });
 }
 // -- connection events
 /**

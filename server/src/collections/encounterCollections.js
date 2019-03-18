@@ -8,29 +8,25 @@ import EncounterModel from 'models/EncounterModel';
 const addHealthEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
-    const healthModel = characterModel.get('health');
-    healthModel.set({value: healthModel.get('value') + 1});
+    characterModel.set({health: characterModel.get('health') + 1});
   },
 });
 const bigAddHealthEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
-    const healthModel = characterModel.get('health');
-    healthModel.set({value: healthModel.get('value') + 2});
+    characterModel.set({health: characterModel.get('health') + 2});
   },
 });
 const loseHealthEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
-    const healthModel = characterModel.get('health');
-    healthModel.set({value: healthModel.get('value') - 1});
+    characterModel.set({health: characterModel.get('health') - 1});
   },
 });
 const bigLoseHealthEncounter = new EncounterModel({
   typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
-    const healthModel = characterModel.get('health');
-    healthModel.set({value: healthModel.get('value') - 2});
+    characterModel.set({health: characterModel.get('health') - 2});
   },
 });
 

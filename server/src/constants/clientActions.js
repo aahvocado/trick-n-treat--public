@@ -18,3 +18,23 @@ export const CLIENT_ACTIONS = {
   TRICK: 'ACTIONS.TRICK',
   TREAT: 'ACTIONS.TREAT',
 };
+/**
+ * @param {ClientAction} clientAction
+ * @returns {Boolean}
+ */
+export function isMovementAction(clientAction) {
+  if (clientAction === CLIENT_ACTIONS.MOVE.LEFT) {
+    return true;
+  }
+  if (clientAction === CLIENT_ACTIONS.MOVE.RIGHT) {
+    return true;
+  }
+  if (clientAction === CLIENT_ACTIONS.MOVE.UP) {
+    return true;
+  }
+  if (clientAction === CLIENT_ACTIONS.MOVE.DOWN) {
+    return true;
+  }
+
+  return false;
+}

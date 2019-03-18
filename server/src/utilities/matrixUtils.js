@@ -1,3 +1,4 @@
+import Point from '@studiomoniker/point';
 /**
  * Matrix represents 2D array
  *
@@ -102,23 +103,47 @@ export function getSubmatrixSquareByDistance(matrix, point, distance) {
  * @returns {Submatrix}
  */
 export function getSubmatrixByDistance(matrix, point, distance) {
-  // get the submatrix with all the tiles
-  const submatrix = getSubmatrixSquareByDistance(matrix, point, distance);
+  // make a copy to remove tiles that are too far
+  const nullMatrix = createMatrix(matrix[0].length, matrix.length, null);
+  forEach(nullMatrix, (tile, x, y) => {
+    const distanceFromOriginY = Math.abs(point.clone().y - y);
+    const distanceFromOriginX = Math.abs(point.clone().x - x);
 
-  const centerY = Math.floor(submatrix.length / 2);
-  const centerX = Math.floor(submatrix[0].length / 2);
-
-  forEach(submatrix, (tile, x, y) => {
-    const distanceFromCenterY = Math.abs(centerY - y);
-    const distanceFromCenterX = Math.abs(centerX - x);
-
-    // set tile to null if it is too far off
-    if (distanceFromCenterX + distanceFromCenterY > distance) {
-      submatrix[y][x] = null;
-    }
+    // set tile to available if it's within distance
+    if (distanceFromOriginY + distanceFromOriginX <= distance) {
+      nullMatrix[y][x] = matrix[y][x];
+    };
   });
 
+  // get the submatrix with all the tiles
+  const submatrix = getSubmatrixSquareByDistance(nullMatrix, point, distance);
   return submatrix;
+}
+/**
+ * returns a list of Points within given distance away from a point
+ *  but only by adjacent tiles (so diagonals are 2 spaces away)
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point - where to start looking from
+ * @param {Number} distance - how many tiles further to check
+ * @returns {Array<Point>}
+ */
+export function getPointsOfNearbyTiles(matrix, point, distance) {
+  const submatrixPoints = [];
+
+  // make a copy to remove tiles that are too far
+  const nullMatrix = createMatrix(matrix[0].length, matrix.length, null);
+  forEach(nullMatrix, (tile, x, y) => {
+    const distanceFromOriginY = Math.abs(point.clone().y - y);
+    const distanceFromOriginX = Math.abs(point.clone().x - x);
+
+    // set tile to available if it's within distance
+    if (distanceFromOriginY + distanceFromOriginX <= distance) {
+      submatrixPoints.push(new Point(x, y));
+    };
+  });
+
+  return submatrixPoints;
 }
 /**
  * finds if there are any tiles around a Point of given Type

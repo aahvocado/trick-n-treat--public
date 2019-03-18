@@ -1,39 +1,5 @@
-import schema from 'js-schema';
-
 import Point from '@studiomoniker/point';
 import Model from 'models/Model';
-import StatModel, {HealthModel, MovementModel} from 'models/StatModel';
-
-// define attribute types
-const characterSchema = schema({
-  // character's name
-  'name': String,
-  // unique id of Character, used to match with User
-  'characterId': String,
-  // id of character type
-  'typeId': String,
-
-  // health
-  'health': StatModel,
-  // spaces character can move
-  'movement': StatModel,
-  // mental toughness
-  'sanity': StatModel,
-  // how far character can see
-  'vision': StatModel,
-
-  // currency?
-  'candies': Number,
-  // fun times
-  'luck': StatModel,
-  // take everything
-  'greed': StatModel,
-
-  // where the character is on the world
-  'position': Point,
-  // if this is computer controlled
-  '?isCPU': Boolean,
-});
 
 /**
  * character class
@@ -44,18 +10,43 @@ export class CharacterModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super({
-      candies: 0,
-      health: new HealthModel({value: 5}),
-      movement: new MovementModel({value: 2}),
+      /** @type {String} */
+      name: '',
+      /** @type {String} */
+      characterId: '',
+      /** @type {String} */
+      typeId: '',
+      /** @type {Point} */
+      position: new Point(),
 
-      luck: new StatModel({base: 0}),
-      greed: new StatModel({base: 0}),
+      /** @type {Number} */
+      health: 0,
+      /** @type {Number} */
+      movement: 0,
+      /** @type {Number} */
+      sanity: 0,
+      /** @type {Number} */
+      vision: 3,
+
+      /** @type {Number} */
+      candies: 0,
+      /** @type {Number} */
+      luck: 0,
+      /** @type {Number} */
+      greed: 0,
+      //
       ...newAttributes,
     });
 
-    // set schema and then validate
-    this.schema = characterSchema;
-    // this.validate();
+    // define some base values based on what was given
+    this.set({
+      /** @type {Number} */
+      baseHealth: this.get('health'),
+      /** @type {Number} */
+      baseMovement: this.get('movement'),
+      /** @type {Number} */
+      baseCandies: this.get('candies'),
+    });
   }
   /**
    * moves this character's position by an amount
@@ -76,17 +67,11 @@ export class CharacterModel extends Model {
     const currentPoint = this.get('position').clone();
     return currentPoint.add(directionPoint);
   }
-}
-/**
- * model for a computer controlled character
- */
-export class CPUCharacterModel extends CharacterModel {
-  /** @override */
-  constructor(newAttributes = {}) {
-    super(newAttributes);
-    this.set(Object.assign({
-      isCPU: true,
-    }, newAttributes));
+  /**
+   * @returns {Boolean}
+   */
+  canMove() {
+    return this.get('movement') > 0;
   }
 }
 

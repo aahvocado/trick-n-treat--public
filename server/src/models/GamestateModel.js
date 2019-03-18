@@ -1,5 +1,8 @@
+import Point from '@studiomoniker/point';
+
 import {FastCharacter} from 'collections/characterCollection';
 
+import {CLIENT_ACTIONS} from 'constants/clientActions';
 import {CLIENT_TYPES} from 'constants/clientTypes';
 import {GAME_MODES} from 'constants/gameModes';
 import {MAP_START} from 'constants/mapSettings';
@@ -36,6 +39,15 @@ export class GamestateModel extends Model {
       /** @type {CharacterModel} */
       get activeCharacter() {
         return getActiveCharacter(this);
+      },
+      /** @type {Number} */
+      get remainingMoves() {
+        const activeCharacter = getActiveCharacter(this);
+        if (activeCharacter === null) {
+          return 0;
+        }
+
+        return activeCharacter.get('movement');
       },
 
       /** @type {Array<UserModel>} */
@@ -146,7 +158,7 @@ export class GamestateModel extends Model {
 
     // attach onChange listeners to the character - probably can be set up better elsewhere
     characterModel.onChange('position', (position) => {
-      this.updateToVisibleAt(position);
+      this.updateToVisibleAt(position, characterModel.get('vision'));
       this.updateActionsForAllUsers();
     });
   }
@@ -175,9 +187,10 @@ export class GamestateModel extends Model {
   handleNextTurn() {
     const currentTurnQueue = this.get('turnQueue').slice();
     const oldActiveCharacter = currentTurnQueue.shift();
-    const activeUser = this.get('activeUser');
+    oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
 
     // if the current `activeCharacter` is a User, say its not their turn
+    const activeUser = this.get('activeUser');
     if (activeUser !== undefined) {
       activeUser.set({isUserTurn: false});
     }
@@ -195,6 +208,7 @@ export class GamestateModel extends Model {
     }
 
     this.set({turnQueue: newTurnQueue});
+    console.log('\x1b[93m', `Next Turn: "${newActiveCharacter.get('name')}"`);
   }
   // -- isolated update methods
   /**
@@ -234,18 +248,19 @@ export class GamestateModel extends Model {
    * updates Fog of War visibility to Fully visible at a given point
    *
    * @param {Point} point
+   * @param {Number} distance
    */
-  updateToVisibleAt(point) {
+  updateToVisibleAt(point, distance) {
     const fogMapModel = this.get('fogMapModel');
 
     // given tile is now visible
     fogMapModel.setTileAt(point, FOG_TYPES.VISIBLE);
 
-    // update adjacent points
-    this.updateToPartiallyVisibleAt(point.clone().add(POINTS.LEFT));
-    this.updateToPartiallyVisibleAt(point.clone().add(POINTS.RIGHT));
-    this.updateToPartiallyVisibleAt(point.clone().add(POINTS.UP));
-    this.updateToPartiallyVisibleAt(point.clone().add(POINTS.DOWN));
+    // other tiles that are a given distance away should be partially visible, if not already
+    const nearbyPoints = matrixUtils.getPointsOfNearbyTiles(fogMapModel.get('matrix'), point, distance);
+    nearbyPoints.forEach((point) => {
+      this.updateToPartiallyVisibleAt(point);
+    });
   }
   /**
    * updates Fog of War visibility to Partially visible at a given point
@@ -299,6 +314,43 @@ export class GamestateModel extends Model {
     ]);
 
     return choice.chosenPoint;
+  }
+  /**
+   * user asked to move
+   *
+   * @param {String} userId
+   * @param {String} actionId
+   */
+  handleUserMoveAction(userId, actionId) {
+    // const userModel = this.findUserById(userId);
+    const characterModel = this.findCharacterByUserId(userId);
+    if (!characterModel.canMove()) {
+      return;
+    }
+
+    if (actionId === CLIENT_ACTIONS.MOVE.LEFT) {
+      this.updateCharacterPosition(userId, 'left');
+    }
+
+    if (actionId === CLIENT_ACTIONS.MOVE.RIGHT) {
+      this.updateCharacterPosition(userId, 'right');
+    }
+
+    if (actionId === CLIENT_ACTIONS.MOVE.UP) {
+      this.updateCharacterPosition(userId, 'up');
+    }
+
+    if (actionId === CLIENT_ACTIONS.MOVE.DOWN) {
+      this.updateCharacterPosition(userId, 'down');
+    }
+
+    // after the move, they lose a movement
+    characterModel.set({movement: characterModel.get('movement') - 1});
+
+    // if they're now down to zero, shift the turn
+    if (!characterModel.canMove()) {
+      this.handleNextTurn();
+    }
   }
   /**
    * moves a Character a single direction

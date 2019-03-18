@@ -1,6 +1,6 @@
 import seedrandom from 'seedrandom';
 
-import {CLIENT_ACTIONS} from 'constants/clientActions';
+import {isMovementAction} from 'constants/clientActions';
 import {GAME_MODES} from 'constants/gameModes';
 
 import * as serverStateManager from 'managers/serverStateManager';
@@ -18,8 +18,6 @@ const gamestate = new GamestateModel();
  * listen to when the Server switches to Game Mode
  */
 serverStateManager.onChange('mode', (newMode) => {
-  gamestate.set({mode: GAME_MODES.WORKING});
-
   // if not in Game Mode, do nothing
   if (newMode !== 'GAME-MODE') {
     gamestate.set({mode: GAME_MODES.INACTIVE});
@@ -28,7 +26,6 @@ serverStateManager.onChange('mode', (newMode) => {
 
   // initialize
   init();
-  gamestate.set({mode: GAME_MODES.ACTIVE});
 
   console.log('\x1b[36m', 'Game Started!', `(Seed "${seed}")`);
   gamestate.displayTurnQueue();
@@ -37,6 +34,8 @@ serverStateManager.onChange('mode', (newMode) => {
  *
  */
 function init() {
+  gamestate.set({mode: GAME_MODES.WORKING});
+
   // create the map instance
   const baseTileMapModel = gamestateUtils.createBaseTileMapModel();
   const encounterList = gamestateUtils.createEncounterList(baseTileMapModel);
@@ -54,6 +53,12 @@ function init() {
 
   // create `turnQueue` based on `users`
   gamestate.initTurnQueue();
+
+  // update visibility
+  const activeCharacter = gamestate.get('activeCharacter');
+  gamestate.updateToVisibleAt(activeCharacter.get('position'), activeCharacter.get('vision'));
+
+  gamestate.set({mode: GAME_MODES.ACTIVE});
 }
 /**
  * User did something
@@ -68,23 +73,9 @@ export function handleUserGameAction(userId, actionId) {
     return;
   }
 
-  if (actionId === CLIENT_ACTIONS.MOVE.LEFT) {
-    gamestate.updateCharacterPosition(userId, 'left');
+  if (isMovementAction(actionId)) {
+    gamestate.handleUserMoveAction(userId, actionId);
   }
-
-  if (actionId === CLIENT_ACTIONS.MOVE.RIGHT) {
-    gamestate.updateCharacterPosition(userId, 'right');
-  }
-
-  if (actionId === CLIENT_ACTIONS.MOVE.UP) {
-    gamestate.updateCharacterPosition(userId, 'up');
-  }
-
-  if (actionId === CLIENT_ACTIONS.MOVE.DOWN) {
-    gamestate.updateCharacterPosition(userId, 'down');
-  }
-
-  gamestate.handleNextTurn();
 }
 /**
  * @param {String} property - one of the observeable properties in the `appStore`

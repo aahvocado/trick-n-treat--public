@@ -1,10 +1,4 @@
 import CharacterModel from 'models/CharacterModel';
-import {
-  HealthModel,
-  MovementModel,
-  SanityModel,
-  StatModel,
-} from 'models/StatModel';
 /**
  *
  */
@@ -13,10 +7,10 @@ export class FastCharacter extends CharacterModel {
   constructor(newAttributes = {}) {
     super({
       typeId: 'FAST_CHARACTER_TYPE',
-      health: new HealthModel({base: 4}),
-      movement: new MovementModel({base: 5}),
-      sanity: new SanityModel({base: 4}),
-      vision: new StatModel({base: 4}),
+      health: 4,
+      movement: 5,
+      sanity: 4,
+      vision: 4,
       ...newAttributes,
     });
   }
@@ -29,10 +23,10 @@ export class StrongCharacter extends CharacterModel {
   constructor(newAttributes = {}) {
     super({
       typeId: 'STRONG_CHARACTER_TYPE',
-      health: new HealthModel({base: 5}),
-      movement: new MovementModel({base: 3}),
-      sanity: new SanityModel({base: 5}),
-      vision: new StatModel({base: 3}),
+      health: 5,
+      movement: 3,
+      sanity: 5,
+      vision: 3,
       ...newAttributes,
     });
   }
@@ -45,10 +39,10 @@ export class SmartCharacter extends CharacterModel {
   constructor(newAttributes = {}) {
     super({
       typeId: 'SMART_CHARACTER_TYPE',
-      health: new HealthModel({base: 3}),
-      movement: new MovementModel({base: 3}),
-      sanity: new SanityModel({base: 7}),
-      vision: new StatModel({base: 5}),
+      health: 3,
+      movement: 3,
+      sanity: 7,
+      vision: 5,
       ...newAttributes,
     });
   }
