@@ -1,3 +1,4 @@
+import {extendObservable} from 'mobx';
 import {FastCharacter} from 'collections/characterCollection';
 
 import {CLIENT_ACTIONS} from 'constants/clientActions';
@@ -15,7 +16,6 @@ import UserModel from 'models/UserModel';
 import * as mathUtils from 'utilities/mathUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
 
-
 /**
  * character class
  *
@@ -28,25 +28,10 @@ export class GamestateModel extends Model {
       /** @type {GameMode} */
       mode: GAME_MODES.INACTIVE,
 
+      /** @type {Number} */
+      round: 0,
       /** @type {Array<CharacterModel>} */
       turnQueue: [],
-      /** @type {UserModel} */
-      get activeUser() {
-        return getActiveUser(this);
-      },
-      /** @type {CharacterModel} */
-      get activeCharacter() {
-        return getActiveCharacter(this);
-      },
-      /** @type {Number} */
-      get remainingMoves() {
-        const activeCharacter = getActiveCharacter(this);
-        if (activeCharacter === null) {
-          return 0;
-        }
-
-        return activeCharacter.get('movement');
-      },
 
       /** @type {Array<UserModel>} */
       users: [],
@@ -64,12 +49,49 @@ export class GamestateModel extends Model {
       ...newAttributes,
     });
 
-    // -- react to my own state changing
+    // computed attributes - (have to pass in this model as context because getters have their own context)
+    const stateModel = this;
+    extendObservable(this.attributes, {
+      /** @type {UserModel | null} */
+      get activeUser() {
+        return stateModel.getActiveUser();
+      },
+      /** @type {CharacterModel | null} */
+      get activeCharacter() {
+        return stateModel.getActiveCharacter();
+      },
+      /** @type {Number} */
+      get remainingMoves() {
+        const activeCharacter = stateModel.getActiveCharacter();
+        if (activeCharacter === null) {
+          return -1;
+        }
+
+        return activeCharacter.get('movement');
+      },
+    });
+
+    // -- react to own state changing
     /**
-     * if `characters` change, update user actions`
+     * `activeCharacter` changes
      */
-    this.onChange('characters', () => {
+    this.onChange('activeCharacter', (activeCharacter) => {
+      // null `activeCharacter` means no more users in `turnQueue`
+      if (activeCharacter === null) {
+        return;
+      }
+
+      this.handleStartOfTurn();
       this.updateActionsForAllUsers();
+    });
+    /**
+     * `turnQueue` changes
+     */
+    this.onChange('turnQueue', (turnQueue) => {
+      // empty `turnQueue` means end of round
+      if (turnQueue.length <= 0) {
+        this.handleEndOfRound();
+      }
     });
   }
   // -- helper methods
@@ -102,11 +124,16 @@ export class GamestateModel extends Model {
   }
   /**
    * @param {String} characterId
-   * @returns {CharacterModel}
+   * @returns {CharacterModel | undefined}
    */
   findUserByCharacterId(characterId) {
     const users = this.get('users').slice();
-    return users.find((user) => (user.get('characterId') === characterId));
+    const foundUser = users.find((user) => (user.get('characterId') === characterId));
+    if (foundUser === undefined) {
+      return undefined;
+    }
+
+    return foundUser;
   }
   /**
    * @param {Point} point
@@ -147,27 +174,19 @@ export class GamestateModel extends Model {
    * @param {UserModel} userModel
    */
   addUser(userModel) {
-    const oldUsers = this.get('users').slice();
-    const newUsers = [].concat(oldUsers);
-    newUsers.push(userModel);
-    this.set({users: newUsers});
+    this.addToArray('users', userModel);
   }
   /**
    * @param {UserModel} userModel
    */
   removeUser(userModel) {
-    const oldUsers = this.get('users').slice();
-    const newUsers = oldUsers.filter((user) => (user.get('userId') !== userModel.get('userId')));
-    this.set({users: newUsers});
+    this.removeFromArray('users', userModel);
   }
   /**
    * @param {CharacterModel} characterModel
    */
   addCharacter(characterModel) {
-    const oldCharacters = this.get('characters').slice();
-    const newCharacters = [].concat(oldCharacters);
-    newCharacters.push(characterModel);
-    this.set({characters: newCharacters});
+    this.addToArray('characters', characterModel);
 
     // attach onChange listeners to the character - probably can be set up better elsewhere
     characterModel.onChange('position', (position) => {
@@ -179,10 +198,53 @@ export class GamestateModel extends Model {
    * @param {CharacterModel} characterModel
    */
   removeCharacter(characterModel) {
-    const oldCharacters = this.get('characters').slice();
-    const newCharacters = oldCharacters.filter((character) => (character.get('characterId') !== characterModel.get('characterId')));
-    this.set({characters: newCharacters});
+    this.removeFromArray('characters', characterModel);
   }
+  /**
+   * returns the Character whose is currently acting
+   * (null probably means the game hasn't started)
+   *
+   * @returns {CharacterModel | null}
+   */
+  getActiveCharacter() {
+    const turnQueue = this.get('turnQueue').slice();
+    if (turnQueue.length <= 0) {
+      return null;
+    };
+
+    // activeCharacter is just the first character in the queue
+    const activeCharacter = turnQueue[0];
+    if (activeCharacter === undefined) {
+      return null;
+    }
+
+    // found character
+    return activeCharacter;
+  }
+  /**
+   * returns the User whose character's is Active,
+   * - null if there is no `activeCharacter`
+   * - null if `activeCharacter` is an NPC
+   *
+   * @returns {UserModel | null}
+   */
+  getActiveUser() {
+    // no character is active, means no user is active
+    const activeCharacter = this.get('activeCharacter');
+    if (activeCharacter === null) {
+      return null;
+    }
+
+    // if no matching user, then it belongs to an NPC
+    const activeUser = this.findUserByCharacterId(activeCharacter.get('characterId'));
+    if (activeUser === undefined) {
+      return null;
+    }
+
+    // found User
+    return activeUser;
+  }
+  // -- Round / Turn logic
   /**
    * builds a Turn Queue based on stuff
    */
@@ -190,14 +252,23 @@ export class GamestateModel extends Model {
     const characters = this.get('characters').slice();
     const newTurnQueue = matrixUtils.shuffleArray(characters);
     this.set({turnQueue: newTurnQueue});
-
-    const activeUser = this.get('activeUser');
-    activeUser.set({isUserTurn: true});
   }
   /**
-   * updates the `turnQueue`
+   * handles start of turn
    */
-  handleNextTurn() {
+  handleStartOfTurn() {
+    const activeUser = this.get('activeUser');
+    if (activeUser !== null) {
+      activeUser.set({isUserTurn: true});
+    }
+
+    const activeCharacter = this.get('activeCharacter');
+    console.log('\x1b[93m', `. Turn for: "${activeCharacter.get('name')}"`);
+  }
+  /**
+   * end of turn
+   */
+  handleEndOfTurn() {
     const currentTurnQueue = this.get('turnQueue').slice();
 
     // remove the previous `activeCharacter`
@@ -206,63 +277,21 @@ export class GamestateModel extends Model {
     // reset the old Character's movement
     oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
 
-    // move the previous `activeCharacter` to the end of the `turnQueue`
-    const newTurnQueue = [].concat(currentTurnQueue);
-    newTurnQueue.push(oldActiveCharacter);
-
-    // if the new `activeCharacter` would be a User, say its their turn
-    const newActiveCharacter = newTurnQueue[0];
-    const newActiveUser = this.findUserByCharacterId(newActiveCharacter.get('characterId'));
-    if (newActiveUser !== undefined) {
-      newActiveUser.set({isUserTurn: true});
-    }
-
     // set the new turn queue
-    this.set({turnQueue: newTurnQueue});
-    console.log('\x1b[93m', `Next Turn: "${newActiveCharacter.get('name')}"`);
-  }
-  // -- isolated update methods
-  /**
-   * updates all `canMove` attributes in a given user
-   *
-   * @param {UserModel} userModel
-   */
-  updateMovementActionsForUser(userModel) {
-    const characterId = userModel.get('characterId');
-    const characterModel = this.findCharacterById(characterId);
-
-    userModel.set({
-      canMoveLeft: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.LEFT)),
-      canMoveRight: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.RIGHT)),
-      canMoveUp: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.UP)),
-      canMoveDown: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.DOWN)),
-    });
+    this.set({turnQueue: currentTurnQueue});
   }
   /**
-   * updates `canTrick` and `canTreat` attributes in a given user
-   *
-   * @param {UserModel} userModel
+   * round
    */
-  updateLocationActionsForUser(userModel) {
-    const characterId = userModel.get('characterId');
-    const characterModel = this.findCharacterById(characterId);
-    const characterPosition = characterModel.get('position');
+  handleEndOfRound() {
+    // increment round
+    this.set({round: this.get('round') + 1});
 
-
-    const houseModelHere = this.findHouseAt(characterPosition);
-    if (houseModelHere === undefined) {
-      userModel.set({
-        canTrick: false,
-        canTreat: false,
-      });
-      return;
-    };
-
-    userModel.set({
-      canTrick: houseModelHere.isTrickable(characterModel),
-      canTreat: houseModelHere.isTreatable(characterModel),
-    });
+    // create new turn queue
+    this.initTurnQueue();
+    console.log('\x1b[93m', `Round ${this.get('round')} has started.`);
   }
+  // -- fog of war methods
   /**
    * updates Fog of War visibility to Fully visible at a given point
    *
@@ -303,6 +332,48 @@ export class GamestateModel extends Model {
 
     // otherwise make it partially visible
     fogMapModel.setTileAt(point, FOG_TYPES.PARTIAL);
+  }
+  // -- user actions
+  /**
+   * updates all `canMove` attributes in a given user
+   *
+   * @param {UserModel} userModel
+   */
+  updateMovementActionsForUser(userModel) {
+    const characterId = userModel.get('characterId');
+    const characterModel = this.findCharacterById(characterId);
+
+    userModel.set({
+      canMoveLeft: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.LEFT)),
+      canMoveRight: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.RIGHT)),
+      canMoveUp: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.UP)),
+      canMoveDown: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.DOWN)),
+    });
+  }
+  /**
+   * updates `canTrick` and `canTreat` attributes in a given user
+   *
+   * @param {UserModel} userModel
+   */
+  updateLocationActionsForUser(userModel) {
+    const characterId = userModel.get('characterId');
+    const characterModel = this.findCharacterById(characterId);
+    const characterPosition = characterModel.get('position');
+
+
+    const houseModelHere = this.findHouseAt(characterPosition);
+    if (houseModelHere === undefined) {
+      userModel.set({
+        canTrick: false,
+        canTreat: false,
+      });
+      return;
+    };
+
+    userModel.set({
+      canTrick: houseModelHere.isTrickable(characterModel),
+      canTreat: houseModelHere.isTreatable(characterModel),
+    });
   }
   /**
    * picks a random adjacent point that a given character can be on
@@ -460,9 +531,9 @@ export class GamestateModel extends Model {
     });
 
     // next turn
-    this.handleNextTurn();
+    this.handleEndOfTurn();
   }
-  // -- larger scale update methods
+  // -- bulk methods
   /**
    * updates every User's actions
    */
@@ -505,64 +576,6 @@ export class GamestateModel extends Model {
       this.addUser(newUserModel);
     });
   }
-  /**
-   * logs the current order of turns
-   */
-  displayTurnQueue() {
-    let displayList = '';
-
-    const turnQueue = this.get('turnQueue');
-    for (let i = 0; i < turnQueue.length; i++) {
-      const characterModel = turnQueue[i];
-      displayList += `\n${i + 1}. "${characterModel.get('name')}"`;
-    }
-
-    console.log('\x1b[93m', 'Turn Order' + displayList);
-  }
-}
-/**
- * returns the Character whose is currently acting
- * (null probably means the game hasn't started)
- *
- * @param {MobX.Observable.Object} state
- * @returns {CharacterModel | null}
- */
-function getActiveCharacter(state) {
-  const turnQueue = state.turnQueue.slice();
-  const activeCharacter = turnQueue[0];
-
-  // not started yet
-  if (activeCharacter === undefined) {
-    return null;
-  }
-
-  return activeCharacter;
-}
-/**
- * returns the User whose character's is Active,
- * - null if there is no `activeCharacter`
- * - null if `activeCharacter` is an NPC
- *
- * @param {MobX.Observable.Object} state
- * @returns {UserModel | null}
- */
-function getActiveUser(state) {
-  const turnQueue = state.turnQueue.slice();
-  const activeCharacter = turnQueue[0];
-
-  // no character is active, means no user is active
-  if (activeCharacter === null) {
-    return null;
-  }
-
-  const activeUser = state.users.find((user) => (user.get('characterId') === activeCharacter.get('characterId')));
-
-  // if no matching user, then it belongs to an NPC
-  if (activeUser === undefined) {
-    return null;
-  }
-
-  return activeUser;
 }
 
 export default GamestateModel;

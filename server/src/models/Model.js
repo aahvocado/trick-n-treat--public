@@ -67,15 +67,10 @@ export class Model {
    */
   removeFromArray(arrayName, item) {
     const currentArray = this.get(arrayName).slice();
+    const newArray = currentArray.filter((existingItem) => (!Object.is(existingItem, item)));
 
-    const itemIdx = currentArray.indexOf(item);
-    if (itemIdx < 0) {
-      return;
-    }
-
-    currentArray.splice(itemIdx, 1);
     this.set({
-      [arrayName]: currentArray,
+      [arrayName]: newArray,
     });
   }
   /**

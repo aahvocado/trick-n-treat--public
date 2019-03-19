@@ -98,17 +98,22 @@ class DebugPage extends Component {
     const currentCharacter = characters.find(character => (character.characterId === currentUser.characterId));
     const {
       candies,
-      health = {},
+      health,
+      movement,
     } = currentCharacter;
 
     return (
       <Fragment>
         <div className='pad-v-2 flex-none'>
-          <span className='sibling-mar-l-1'>
-            {`Health: ${health.value || 0}`}
+        <span className='sibling-mar-l-2'>
+            {`Moves: ${movement || 0}`}
           </span>
 
-          <span className='sibling-mar-l-1'>
+          <span className='sibling-mar-l-2'>
+            {`Health: ${health || 0}`}
+          </span>
+
+          <span className='sibling-mar-l-2'>
             {`Candies: ${candies || 0}`}
           </span>
         </div>

@@ -1,11 +1,12 @@
 import test from 'ava';
+import GamestateModel from 'models/GamestateModel';
 
 import Point from '@studiomoniker/point';
 import TILE_TYPES, {FOG_TYPES} from 'constants/tileTypes';
 
 import CharacterModel from 'models/CharacterModel';
 import EncounterModel from 'models/EncounterModel';
-import GamestateModel from 'models/GamestateModel';
+import HouseModel from 'models/HouseModel';
 import MapModel from 'models/MapModel';
 import UserModel from 'models/UserModel';
 
@@ -111,6 +112,39 @@ test('findEncounterAt() - fail to find an Encounter if none in the List at that 
   }
 });
 
+test('addUser() - able to add a new user to the list', (t) => {
+  const {testGamestate} = t.context;
+
+  const newTestUser = new UserModel({
+    name: 'TEST_USER_2',
+    userId: 'TEST_USER_ID_2',
+  });
+
+  testGamestate.addUser(newTestUser);
+
+  const users = testGamestate.get('users');
+  t.is(users.length, 2);
+});
+
+test('removeUser() - removes given user from a list', (t) => {
+  const {testGamestate} = t.context;
+
+  const newTestUser = new UserModel({
+    name: 'TEST_USER_2',
+    userId: 'TEST_USER_ID_2',
+  });
+
+  testGamestate.addUser(newTestUser);
+  t.is(testGamestate.get('users').length, 2);
+
+  testGamestate.removeUser(newTestUser);
+  t.is(testGamestate.get('users').length, 1);
+
+  const users = testGamestate.get('users');
+  const foundUser = users.find((user) => (user.id === newTestUser.id));
+  t.is(foundUser, undefined);
+});
+
 test('updateMovementActionsForUser() - accurately updates whether a User can move when at a corner', (t) => {
   const {testGamestate} = t.context;
   testGamestate.set({
@@ -143,8 +177,13 @@ test('updateLocationActionsForUser() - accurately updates whether a User can mov
     ],
   });
 
+  const testHouseModel = new HouseModel({
+    position: new Point(0, 0),
+  });
+
   testGamestate.set({
     tileMapModel: testMap,
+    houses: [testHouseModel],
   });
 
   const testCharacter = testGamestate.findCharacterById('TEST_CHARACTER_ID');

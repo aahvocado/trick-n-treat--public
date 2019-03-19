@@ -25,10 +25,8 @@ serverStateManager.onChange('mode', (newMode) => {
   }
 
   // initialize
+  console.log('\x1b[36m', 'Game Starting!', `(Seed "${seed}")`);
   init();
-
-  console.log('\x1b[36m', 'Game Started!', `(Seed "${seed}")`);
-  gamestate.displayTurnQueue();
 });
 /**
  *
@@ -53,8 +51,8 @@ function init() {
   const serverStateObj = serverStateManager.getState();
   gamestate.createUsersFromClients(serverStateObj.clients);
 
-  // create `turnQueue` based on `users`
-  gamestate.initTurnQueue();
+  // start the first round, which will create a turn queue
+  gamestate.handleEndOfRound();
 
   // update visibility
   const activeCharacter = gamestate.get('activeCharacter');

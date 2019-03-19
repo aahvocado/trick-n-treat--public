@@ -58,3 +58,19 @@ export function createHouseList(mapModel) {
   const houseList = houseGenerationUtils.generateHouseList(mapModel);
   return houseList;
 }
+/**
+ * logs the current order of turns
+ *
+ * @param {GamestateModel} gamestateModel
+ */
+export function displayTurnQueue(gamestateModel) {
+  let displayList = '';
+
+  const turnQueue = gamestateModel.get('turnQueue');
+  for (let i = 0; i < turnQueue.length; i++) {
+    const characterModel = turnQueue[i];
+    displayList += `\n${i + 1}. "${characterModel.get('name')}"`;
+  }
+
+  console.log('\x1b[93m', 'Turn Order' + displayList);
+}

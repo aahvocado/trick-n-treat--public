@@ -42,10 +42,10 @@ export class HouseModel extends Model {
     //  and Tricking is mean so they'll be closed after
     this.set({
       checkCanTrick: (houseModel, characterModel) => {
-        return !this.hasTrickedAlready(characterModel) && this.get('trickers').length <= 0;
+        return !this.hasVisitedAlready(characterModel) && this.get('trickers').length <= 0;
       },
       checkCanTreat: (houseModel, characterModel) => {
-        return !this.hasTreatedAlready(characterModel) && this.get('trickers').length <= 0;
+        return !this.hasVisitedAlready(characterModel) && this.get('trickers').length <= 0;
       },
     });
   }
@@ -65,6 +65,7 @@ export class HouseModel extends Model {
     onTrick(this, characterModel);
 
     this.addToArray('trickers', characterModel);
+    this.addToVisitors(characterModel);
   }
   /**
    * base function that will be called when a character Treats here
@@ -76,6 +77,7 @@ export class HouseModel extends Model {
     onTreat(this, characterModel);
 
     this.addToArray('treaters', characterModel);
+    this.addToVisitors(characterModel);
   }
   // --
   /**
@@ -99,6 +101,20 @@ export class HouseModel extends Model {
     return checkCanTreat(this, characterModel);
   }
   // --
+  /**
+   * determines if character has done anything here
+   *
+   * @param {CharacterModel} characterModel
+   * @returns {Boolean}
+   */
+  hasVisitedAlready(characterModel) {
+    const visitors = this.get('visitors');
+    if (visitors.includes(characterModel)) {
+      return true;
+    }
+
+    return false;
+  }
   /**
    * determines if character already `tricked` here
    *
