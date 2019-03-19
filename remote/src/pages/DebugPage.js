@@ -151,14 +151,14 @@ class DebugPage extends Component {
             disabled={!canTrick}
             onActionClick={this.handleOnActionClick}
           >
-            Can Trick
+            Trick
           </DebugActionButton>
           <DebugActionButton
             actionId={CLIENT_ACTIONS.TREAT}
             disabled={!canTreat}
             onActionClick={this.handleOnActionClick}
           >
-            Can Treat
+            Treat
           </DebugActionButton>
 
         </div>

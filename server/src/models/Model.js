@@ -41,6 +41,44 @@ export class Model {
     set(this.attributes, changes);
   }
   /**
+   * PROPOSAL FUNCTION
+   *
+   * @param {String} arrayName
+   * @param {*} item
+   */
+  addToArray(arrayName, item) {
+    const currentArray = this.get(arrayName).slice();
+
+    // no add needed if array already has item
+    if (currentArray.includes(item)) {
+      return;
+    }
+
+    currentArray.push(item);
+    this.set({
+      [arrayName]: currentArray,
+    });
+  }
+  /**
+   * PROPOSAL FUNCTION
+   *
+   * @param {String} arrayName
+   * @param {*} item
+   */
+  removeFromArray(arrayName, item) {
+    const currentArray = this.get(arrayName).slice();
+
+    const itemIdx = currentArray.indexOf(item);
+    if (itemIdx < 0) {
+      return;
+    }
+
+    currentArray.splice(itemIdx, 1);
+    this.set({
+      [arrayName]: currentArray,
+    });
+  }
+  /**
    * wrapper for watching for a change for a specific property
    * @link https://mobx.js.org/refguide/reaction.html
    *

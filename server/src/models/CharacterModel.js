@@ -73,6 +73,18 @@ export class CharacterModel extends Model {
   canMove() {
     return this.get('movement') > 0;
   }
+  /**
+   * changes a numerical stat
+   *
+   * @param {String} statName - name of the stat
+   * @param {Number} modNum - number to change the stat by
+   */
+  modifyStat(statName, modNum) {
+    const currentStatNum = this.get(statName);
+    this.set({
+      [statName]: currentStatNum + modNum,
+    });
+  }
 }
 
 export default CharacterModel;

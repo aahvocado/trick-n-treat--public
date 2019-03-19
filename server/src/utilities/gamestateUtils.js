@@ -3,7 +3,8 @@ import {FOG_TYPES} from 'constants/tileTypes';
 
 import MapModel from 'models/MapModel';
 
-import * as encounterManager from 'managers/encounterManager';
+import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
+import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
 
 import * as matrixUtils from 'utilities/matrixUtils';
 
@@ -33,7 +34,7 @@ export function createTileMapModel(config) {
  * @returns {Array<EncounterModel>}
  */
 export function createEncounterList(mapModel) {
-  return encounterManager.generateEncounters(mapModel);
+  return encounterGenerationUtils.generateEncounters(mapModel);
 }
 /**
  * inits fog of war model
@@ -46,4 +47,14 @@ export function createFogOfWarModel(mapModel) {
     start: mapModel.get('start').clone(),
     matrix: matrixUtils.createMatrix(mapModel.getWidth(), mapModel.getHeight(), FOG_TYPES.HIDDEN),
   });
+}
+/**
+ * generates the houses and sets them on the TileMap
+ *
+ * @param {MapModel} mapModel
+ * @returns {Array<EncounterModel>}
+ */
+export function createHouseList(mapModel) {
+  const houseList = houseGenerationUtils.generateHouseList(mapModel);
+  return houseList;
 }

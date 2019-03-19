@@ -93,20 +93,20 @@ test('isWalkableAt() - determines EMPTY tile type as not walkable', (t) => {
   t.false(testGamestate.isWalkableAt(testPoint));
 });
 
-test('getEncounterAt() - find an Encounter if it exists in the List at that location', (t) => {
+test('findEncounterAt() - find an Encounter if it exists in the List at that location', (t) => {
   const {testGamestate} = t.context;
 
   const testPoint = new Point(4, 4);
-  if (testGamestate.getEncounterAt(testPoint) !== undefined) {
+  if (testGamestate.findEncounterAt(testPoint) !== undefined) {
     return t.pass();
   }
 });
 
-test('getEncounterAt() - fail to find an Encounter if none in the List at that location', (t) => {
+test('findEncounterAt() - fail to find an Encounter if none in the List at that location', (t) => {
   const {testGamestate} = t.context;
 
   const testPoint = new Point(2, 2);
-  if (testGamestate.getEncounterAt(testPoint) === undefined) {
+  if (testGamestate.findEncounterAt(testPoint) === undefined) {
     return t.pass();
   }
 });

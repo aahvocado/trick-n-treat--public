@@ -1,5 +1,3 @@
-import Point from '@studiomoniker/point';
-
 import {FastCharacter} from 'collections/characterCollection';
 
 import {CLIENT_ACTIONS} from 'constants/clientActions';
@@ -54,6 +52,8 @@ export class GamestateModel extends Model {
       users: [],
       /** @type {Array<CharacterModel>} */
       characters: [],
+      /** @type {Array<HouseModel>} */
+      houses: [],
       /** @type {Array<EncounterModel>} */
       encounters: [],
       /** @type {MapModel} */
@@ -123,11 +123,24 @@ export class GamestateModel extends Model {
    * @param {Point} point
    * @returns {EncounterModel | undefined}
    */
-  getEncounterAt(point) {
+  findEncounterAt(point) {
     const encounters = this.get('encounters').slice();
     return encounters.find((encounterModel) => {
       const encounterPosition = encounterModel.get('position');
       return point.equals(encounterPosition);
+    });
+  }
+  /**
+   * gets the House if there is one at given point
+   *
+   * @param {Point} point
+   * @returns {HouseModel | undefined}
+   */
+  findHouseAt(point) {
+    const houses = this.get('houses').slice();
+    return houses.find((houseModel) => {
+      const housePosition = houseModel.get('position');
+      return point.equals(housePosition);
     });
   }
   /**
@@ -186,27 +199,25 @@ export class GamestateModel extends Model {
    */
   handleNextTurn() {
     const currentTurnQueue = this.get('turnQueue').slice();
-    const oldActiveCharacter = currentTurnQueue.shift();
-    oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
 
-    // if the current `activeCharacter` is a User, say its not their turn
-    const activeUser = this.get('activeUser');
-    if (activeUser !== undefined) {
-      activeUser.set({isUserTurn: false});
-    }
+    // remove the previous `activeCharacter`
+    const oldActiveCharacter = currentTurnQueue.shift();
+
+    // reset the old Character's movement
+    oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
 
     // move the previous `activeCharacter` to the end of the `turnQueue`
     const newTurnQueue = [].concat(currentTurnQueue);
     newTurnQueue.push(oldActiveCharacter);
 
+    // if the new `activeCharacter` would be a User, say its their turn
     const newActiveCharacter = newTurnQueue[0];
     const newActiveUser = this.findUserByCharacterId(newActiveCharacter.get('characterId'));
-
-    // if the new `activeCharacter` would be a User, say its their turn
     if (newActiveUser !== undefined) {
       newActiveUser.set({isUserTurn: true});
     }
 
+    // set the new turn queue
     this.set({turnQueue: newTurnQueue});
     console.log('\x1b[93m', `Next Turn: "${newActiveCharacter.get('name')}"`);
   }
@@ -235,13 +246,21 @@ export class GamestateModel extends Model {
   updateLocationActionsForUser(userModel) {
     const characterId = userModel.get('characterId');
     const characterModel = this.findCharacterById(characterId);
+    const characterPosition = characterModel.get('position');
 
-    const tileMapModel = this.get('tileMapModel');
-    const isHouseTile = tileMapModel.isTileEqualTo(characterModel.get('position'), TILE_TYPES.HOUSE);
+
+    const houseModelHere = this.findHouseAt(characterPosition);
+    if (houseModelHere === undefined) {
+      userModel.set({
+        canTrick: false,
+        canTreat: false,
+      });
+      return;
+    };
 
     userModel.set({
-      canTrick: isHouseTile,
-      canTreat: isHouseTile,
+      canTrick: houseModelHere.isTrickable(characterModel),
+      canTreat: houseModelHere.isTreatable(characterModel),
     });
   }
   /**
@@ -321,8 +340,7 @@ export class GamestateModel extends Model {
    * @param {String} userId
    * @param {String} actionId
    */
-  handleUserMoveAction(userId, actionId) {
-    // const userModel = this.findUserById(userId);
+  handleUserActionMove(userId, actionId) {
     const characterModel = this.findCharacterByUserId(userId);
     if (!characterModel.canMove()) {
       return;
@@ -345,11 +363,11 @@ export class GamestateModel extends Model {
     }
 
     // after the move, they lose a movement
-    characterModel.set({movement: characterModel.get('movement') - 1});
+    characterModel.modifyStat('movement', -1);
 
-    // if they're now down to zero, shift the turn
+    // if they're now down to zero, end User's available actions
     if (!characterModel.canMove()) {
-      this.handleNextTurn();
+      this.onUserActionComplete(userId);
     }
   }
   /**
@@ -369,13 +387,80 @@ export class GamestateModel extends Model {
     }
 
     // if there is an Encounter here, we should trigger it
-    const encounterModelHere = this.getEncounterAt(nextPosition);
+    const encounterModelHere = this.findEncounterAt(nextPosition);
     if (encounterModelHere) {
       encounterModelHere.trigger(characterModel);
     }
 
     // finally update the character's position
     characterModel.set({position: nextPosition});
+  }
+  /**
+   * user wants to Treat
+   *
+   * @param {String} userId
+   */
+  handleUserActionTreat(userId) {
+    const characterModel = this.findCharacterByUserId(userId);
+    const characterPosition = characterModel.get('position');
+
+    // are you doing this at a house?
+    const houseModelHere = this.findHouseAt(characterPosition);
+    if (houseModelHere === undefined) {
+      return;
+    }
+
+    // are you allowed to do this here?
+    if (!houseModelHere.isTreatable(characterModel)) {
+      return;
+    }
+
+    // ok cool
+    houseModelHere.triggerTreat(characterModel);
+
+    // end Actions
+    this.onUserActionComplete(userId);
+  }
+  /**
+   * user wants to Trick
+   *
+   * @param {String} userId
+   */
+  handleUserActionTrick(userId) {
+    const characterModel = this.findCharacterByUserId(userId);
+    const characterPosition = characterModel.get('position');
+
+    // are you doing this at a house?
+    const houseModelHere = this.findHouseAt(characterPosition);
+    if (houseModelHere === undefined) {
+      return;
+    }
+
+    // are you allowed to do this here?
+    if (!houseModelHere.isTrickable(characterModel)) {
+      return;
+    }
+
+    // ok cool
+    houseModelHere.triggerTrick(characterModel);
+
+    // end Actions
+    this.onUserActionComplete(userId);
+  }
+  /**
+   * a User's Action (and therefore a User's turn) was finished
+   *
+   * @param {String} userId
+   */
+  onUserActionComplete(userId) {
+    const userModel = this.findUserById(userId);
+
+    userModel.set({
+      isUserTurn: false,
+    });
+
+    // next turn
+    this.handleNextTurn();
   }
   // -- larger scale update methods
   /**

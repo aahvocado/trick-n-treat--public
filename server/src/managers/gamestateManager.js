@@ -1,6 +1,6 @@
 import seedrandom from 'seedrandom';
 
-import {isMovementAction} from 'constants/clientActions';
+import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
 import {GAME_MODES} from 'constants/gameModes';
 
 import * as serverStateManager from 'managers/serverStateManager';
@@ -38,11 +38,13 @@ function init() {
 
   // create the map instance
   const baseTileMapModel = gamestateUtils.createBaseTileMapModel();
+  const houseList = gamestateUtils.createHouseList(baseTileMapModel);
   const encounterList = gamestateUtils.createEncounterList(baseTileMapModel);
   const fogMapModel = gamestateUtils.createFogOfWarModel(baseTileMapModel);
 
   gamestate.set({
     tileMapModel: baseTileMapModel,
+    houses: houseList,
     encounters: encounterList,
     fogMapModel: fogMapModel,
   });
@@ -73,8 +75,18 @@ export function handleUserGameAction(userId, actionId) {
     return;
   }
 
+  // handle movement actions
   if (isMovementAction(actionId)) {
-    gamestate.handleUserMoveAction(userId, actionId);
+    gamestate.handleUserActionMove(userId, actionId);
+    return;
+  }
+
+  //
+  if (actionId === CLIENT_ACTIONS.TRICK) {
+    gamestate.handleUserActionTrick(userId);
+  }
+  if (actionId === CLIENT_ACTIONS.TREAT) {
+    gamestate.handleUserActionTreat(userId);
   }
 }
 /**

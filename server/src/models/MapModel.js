@@ -50,9 +50,6 @@ export class MapModel extends MatrixModel {
 
     // generate tiles which are encounters
     mapGenerationUtils.generateEncounterTiles(this, mapConfig);
-
-    // generate sectors of houses
-    mapGenerationUtils.generateHouseSectors(this, mapConfig);
   }
 }
 
