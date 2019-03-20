@@ -543,38 +543,46 @@ export class GamestateModel extends Model {
       this.updateLocationActionsForUser(userModel);
     });
   }
+  // -- Game / Client handling
   /**
-   * makes Game Users out of given list of Clients
+   * makes Game Users out of given Client
    *
-   * @param {Array<SocketClientModels>} clients
+   * @param {SocketClientModel} clientModel
+   * @returns {UserModel | undefined} - returns the created `userModel`
    */
-  createUsersFromClients(clients) {
-    clients.forEach((clientModel) => {
-      // only make users out of those in Game and Remote Clients
-      if (!clientModel.get('isInGame') || clientModel.get('clientType') !== CLIENT_TYPES.REMOTE) {
-        return;
-      }
+  createUserFromClient(clientModel) {
+    // only make users out of those in Game and Remote Clients
+    if (!clientModel.get('isInGame') || clientModel.get('clientType') !== CLIENT_TYPES.REMOTE) {
+      return undefined;
+    }
 
-      const name = clientModel.get('name');
-      const characterId = `${name}-character-id`;
+    // if this Client has an existing User, no need to create another one
+    const userId = clientModel.get('userId');
+    const existingUser = this.findUserById(userId);
+    if (existingUser !== undefined) {
+      return undefined;
+    }
 
-      const newCharPosition = MAP_START.clone();
-      const newCharacterModel = new FastCharacter({
-        position: newCharPosition,
-        name: `${name}-character`,
-        characterId: characterId,
-      });
+    const name = clientModel.get('name');
+    const characterId = `${name}-character-id`;
 
-      const newUserModel = new UserModel({
-        name: name,
-        characterId: characterId,
-        userId: clientModel.get('userId'),
-      });
-
-      // add
-      this.addCharacter(newCharacterModel);
-      this.addUser(newUserModel);
+    const newCharPosition = MAP_START.clone();
+    const newCharacterModel = new FastCharacter({
+      position: newCharPosition,
+      name: `${name}-character`,
+      characterId: characterId,
     });
+
+    const newUserModel = new UserModel({
+      name: name,
+      characterId: characterId,
+      userId: userId,
+    });
+
+    // add
+    this.addCharacter(newCharacterModel);
+    this.addUser(newUserModel);
+    return newUserModel;
   }
 }
 

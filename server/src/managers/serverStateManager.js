@@ -5,14 +5,8 @@ import {
 } from 'mobx';
 
 import {CLIENT_TYPES} from 'constants/clientTypes';
+import {SERVER_MODES} from 'constants/gameModes';
 
-/**
- * @typedef {String} ServerMode
- */
-export const SERVER_MODES = {
-  LOBBY: 'LOBBY-MODE',
-  GAME: 'GAME-MODE',
-};
 /**
  * state of the Server
  */
@@ -48,7 +42,7 @@ const appStore = observable({
  *  Then we need to generate a world.
  *  then we can switch modes and start.
  */
-export async function handleStartGame() {
+export function handleStartGame() {
   console.log('\x1b[93m', 'Attempting to Start a Game...');
   const canStart = canStartGame();
   if (!canStart) {

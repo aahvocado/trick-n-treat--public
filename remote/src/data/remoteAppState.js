@@ -32,7 +32,7 @@ export const appStore = observable({
   /** @type {Boolean} */
   isInGame: false,
   /** @type {Array<String>} */
-  lobbyNames: [],
+  lobbyData: [],
 
   // -- websocket connection status
   /** @type {Boolean} */
@@ -75,7 +75,8 @@ export function attachSocketListeners(socket) {
     updateState({
       isInLobby: data.isInLobby,
       isInGame: data.isInGame,
-      lobbyNames: data.lobbyNames,
+      isGameInProgress: data.isGameInProgress,
+      lobbyData: data.lobbyData,
     });
   });
 

@@ -1,7 +1,7 @@
 import seedrandom from 'seedrandom';
 
 import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
-import {GAME_MODES} from 'constants/gameModes';
+import {GAME_MODES, SERVER_MODES} from 'constants/gameModes';
 
 import * as serverStateManager from 'managers/serverStateManager';
 
@@ -16,10 +16,11 @@ seedrandom(seed, {global: true});
 const gamestate = new GamestateModel();
 /**
  * listen to when the Server switches to Game Mode
+ * TODO: this feels a bit fragile
  */
 serverStateManager.onChange('mode', (newMode) => {
   // if not in Game Mode, do nothing
-  if (newMode !== 'GAME-MODE') {
+  if (newMode !== SERVER_MODES.GAME) {
     gamestate.set({mode: GAME_MODES.INACTIVE});
     return;
   }
@@ -49,7 +50,9 @@ function init() {
 
   // create `users` based on connected Clients
   const serverStateObj = serverStateManager.getState();
-  gamestate.createUsersFromClients(serverStateObj.clients);
+  serverStateObj.clients.forEach((client) => {
+    gamestate.createUserFromClient(client);
+  });
 
   // start the first round, which will create a turn queue
   gamestate.handleEndOfRound();
@@ -100,4 +103,26 @@ export function onChange(property, callback) {
  */
 export function exportState() {
   return gamestate.export();
+}
+/**
+ * Client is joining a game in session
+ *
+ * @param {SocketClientModel} socketClient
+ */
+export function handleJoinGame(socketClient) {
+  // can't join an inactive game
+  if (gamestate.get('mode') === GAME_MODES.INACTIVE) {
+    return;
+  }
+
+  socketClient.set({
+    isInLobby: false,
+    isInGame: true,
+  });
+
+  gamestate.set({mode: GAME_MODES.WORKING});
+
+  gamestate.createUserFromClient(socketClient);
+
+  gamestate.set({mode: GAME_MODES.ACTIVE});
 }

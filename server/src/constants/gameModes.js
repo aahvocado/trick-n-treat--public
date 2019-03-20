@@ -7,3 +7,10 @@ export const GAME_MODES = {
   PAUSED: 'GAME-PAUSED-MODE',
   WORKING: 'GAME-WORKING-MODE',
 };
+/**
+ * @typedef {String} ServerMode
+ */
+export const SERVER_MODES = {
+  LOBBY: 'LOBBY-MODE',
+  GAME: 'GAME-MODE',
+};

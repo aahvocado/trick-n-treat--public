@@ -1,4 +1,4 @@
-import {GAME_MODES} from 'constants/gameModes';
+import {GAME_MODES, SERVER_MODES} from 'constants/gameModes';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
 import * as gamestateManager from 'managers/gamestateManager';
@@ -21,9 +21,14 @@ export function init(io) {
     const socketClient = handleCreatingNewSocketClient(socket);
     const userId = socketClient.get('userId');
 
-    // client pressed "Game Start"
+    // client wants to "Game Start"
     socket.on(SOCKET_EVENTS.LOBBY.START, () => {
       serverStateManager.handleStartGame();
+    });
+
+    // client wants to "Join" game in session
+    socket.on(SOCKET_EVENTS.LOBBY.JOIN, () => {
+      gamestateManager.handleJoinGame(socketClient);
     });
 
     // client took a game action
@@ -40,10 +45,12 @@ export function init(io) {
 
   // -- Server state changes
   /**
-   * a change to the number of Lobby Clients
+   * when Gamestate changes mode
+   *  if it's ACTIVE, send data to everyone
    */
-  serverStateManager.onChange('lobbyClients', sendClientStateToAll);
-
+  serverStateManager.onChange('lobbyClients', () => {
+    sendClientStateToAll();
+  });
   // -- Game state changes
   /**
    * when Gamestate changes mode
@@ -134,15 +141,21 @@ function createAndAddNewScreenClient(attributes) {
 function generateRemoteClientState(clientModel) {
   const serverState = serverStateManager.getState();
 
-  const lobbyClients = serverState.clients.filter((client) => {
-    return client.get('isInLobby');
+  // also generate some data for the other Clients
+  const lobbyData = serverState.clients.map((client) => {
+    return {
+      clientType: client.get('clientType'),
+      name: client.get('name'),
+      isInLobby: client.get('isInLobby'),
+      isInGame: client.get('isInGame'),
+    };
   });
-  const lobbyNames = lobbyClients.map((client) => (client.get('name')));
 
   return {
     isInLobby: clientModel.get('isInLobby'),
     isInGame: clientModel.get('isInGame'),
-    lobbyNames: lobbyNames,
+    isGameInProgress: serverState.mode === SERVER_MODES.GAME,
+    lobbyData: lobbyData,
   };
 }
 // -- group Client functions
