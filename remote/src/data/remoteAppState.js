@@ -16,20 +16,28 @@ const _name = (() => {
  * This is the state of the Remote App!
  */
 export const appStore = observable({
-  // app session data
+  // -- app session data
+  /** @type {String} */
   name: _name,
+  /** @type {String} */
   userId: `${_name}-${Date.now()}`,
 
-  // gamestate - from the server
+  // -- gamestate - from the server
+  /** @type {GamestateObject} */
   gamestate: undefined,
 
-  // my client state - from the server
-  isInLobby: false,
+  // -- my client state - from the server
+  /** @type {Boolean} */
+  isInLobby: true,
+  /** @type {Boolean} */
   isInGame: false,
+  /** @type {Array<String>} */
   lobbyNames: [],
 
-  // websocket connection status
+  // -- websocket connection status
+  /** @type {Boolean} */
   isConnected: false,
+  /** @type {Boolean} */
   isReconnecting: false,
 });
 /**
