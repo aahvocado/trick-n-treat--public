@@ -2,13 +2,21 @@ import React, { Component, PureComponent } from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUser, faHome} from '@fortawesome/free-solid-svg-icons'
 
-import {TILE_SIZE, TILE_STYLES, FOG_STYLES} from 'constants/tileStyles';
+
+import {TILE_SIZE, MAP_HEIGHT, MAP_WIDTH, calculateMapXOffset, calculateMapYOffset} from 'constants/mapConstants';
+import {TILE_STYLES, FOG_STYLES} from 'constants/tileStyles';
 import {FOG_TYPES, TILE_TYPES} from 'constants/tileTypes';
 
 /**
  * 2D matrix visualizer
  */
 export class TileMapComponent extends Component {
+  static defaultProps = {
+    /** @type {Point} */
+    selectedTilePos: null,
+    /** @type {Function} */
+    onTileClick: () => {},
+  };
   /** @override */
   render() {
     const {
@@ -17,6 +25,8 @@ export class TileMapComponent extends Component {
       fogMapModel,
       tileMapModel,
       myCharacter,
+      onTileClick,
+      selectedTilePos,
     } = this.props;
 
     const fogMatrix = fogMapModel.matrix;
@@ -29,30 +39,48 @@ export class TileMapComponent extends Component {
     }
 
     return (
-      <div className='flex-col-centered position-relative mar-v-2 mar-h-auto bor-4-primary'>
-        { mapMatrix.map((innerMatrix, row) => {
-          return (
-            <div className='flex-row' key={`tile-map-row-${row}-key`} >
-              { innerMatrix.map((tileType, col) => {
-                const charactersHere = characters.filter((character) => (character.position.x === col && character.position.y === row));
-                const isUserHere = charactersHere.some((character) => (character.position.x === myCharacter.position.x && character.position.y === myCharacter.position.y))
-                const housesHere = houses.filter((house) => (house.position.x === col && house.position.y === row));
+      <div
+        className='flex-col-centered position-relative mar-v-2 mar-h-auto bor-4-primary'
+        style={{
+          overflow: 'hidden',
+          backgroundColor: '#252525',
+          height: `${MAP_HEIGHT}px`,
+          width: `${MAP_WIDTH}px`,
+        }}
+      >
+        <div style={{
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          transition: 'transform 400ms',
+          transform: `translate(-${calculateMapXOffset(myCharacter.position.x)}px, -${calculateMapYOffset(myCharacter.position.y)}px)`,
+        }}>
+          { mapMatrix.map((innerMatrix, row) => {
+            return (
+              <div className='flex-row' key={`tile-map-row-${row}-key`} >
+                { innerMatrix.map((tileType, col) => {
+                  const charactersHere = characters.filter((character) => (character.position.x === col && character.position.y === row));
+                  const isUserHere = charactersHere.some((character) => (character.position.x === myCharacter.position.x && character.position.y === myCharacter.position.y))
+                  const housesHere = houses.filter((house) => (house.position.x === col && house.position.y === row));
 
-                return (
-                  <TileItemComponent
-                    key={`tile-item-${col}-${row}-key`}
-                    tileType={tileType}
-                    fogType={fogMatrix[row][col]}
-                    position={{x: col, y: row}}
-                    charactersHere={charactersHere}
-                    housesHere={housesHere}
-                    isUserHere={isUserHere}
-                  />
-                )
-              })}
-            </div>
-          )
-        })}
+                  return (
+                    <TileItemComponent
+                      key={`tile-item-${col}-${row}-key`}
+                      tileType={tileType}
+                      fogType={fogMatrix[row][col]}
+                      position={{x: col, y: row}}
+                      charactersHere={charactersHere}
+                      housesHere={housesHere}
+                      isSelected={selectedTilePos !== null && (selectedTilePos.x === col && selectedTilePos.y === row)}
+                      isUserHere={isUserHere}
+                      onTileClick={onTileClick}
+                    />
+                  )
+                })}
+              </div>
+            )
+          })}
+        </div>
       </div>
     )
   }
@@ -62,12 +90,32 @@ export default TileMapComponent;
  * a single cell in the Matrix
  */
 class TileItemComponent extends Component {
+  static defaultProps = {
+    /** @type {Array<Character.Object>} */
+    charactersHere: [],
+    /** @type {Array<House.Object>} */
+    housesHere: [],
+    /** @type {Boolean} */
+    isSelected: false,
+    /** @type {Boolean} */
+    isUserHere: false,
+
+    /** @type {FogType} */
+    fogType: undefined,
+    /** @type {TileType} */
+    tileType: undefined,
+
+    /** @type {Function} */
+    onTileClick: () => {},
+  };
   /** @override */
   constructor(props) {
     super(props);
 
     this.handleOnMouseEnter = this.handleOnMouseEnter.bind(this);
-    this.handleOnMouseLeave = this.handleOnMouseLeave.bind(this)
+    this.handleOnMouseLeave = this.handleOnMouseLeave.bind(this);
+
+    this.handleOnTileClick = this.handleOnTileClick.bind(this);
 
     this.state = {
       isFocused: false,
@@ -79,16 +127,15 @@ class TileItemComponent extends Component {
       charactersHere,
       housesHere,
       fogType,
+      isSelected,
       isUserHere,
       tileType,
-      position,
     } = this.props;
-    const { isFocused } = this.state;
 
     const isHidden = fogType === FOG_TYPES.HIDDEN;
     const isObscured = fogType === FOG_TYPES.PARTIAL;
 
-    const borderStyles = isFocused ?
+    const borderStyles = isSelected ?
       { border: '2px solid white' } :
       { border: isUserHere ? '2px solid black' : '' };
 
@@ -129,16 +176,8 @@ class TileItemComponent extends Component {
         }}
         onMouseEnter={this.handleOnMouseEnter}
         onMouseLeave={this.handleOnMouseLeave}
+        onClick={this.handleOnTileClick}
       >
-        { isFocused &&
-          <div
-            className='flex-col position-absolute pevents-none pad-1 color-white'
-          >
-            <span>{`x: ${position.x}`}</span>
-            <span>{`y: ${position.y}`}</span>
-          </div>
-        }
-
         { isObscured &&
           <div style={FOG_STYLES[FOG_TYPES.PARTIAL]}></div>
         }
@@ -158,6 +197,13 @@ class TileItemComponent extends Component {
    */
   handleOnMouseLeave() {
     this.setState({ isFocused: false })
+  }
+  /**
+   *
+   */
+  handleOnTileClick() {
+    const { position } = this.props;
+    this.props.onTileClick(position);
   }
 }
 /**

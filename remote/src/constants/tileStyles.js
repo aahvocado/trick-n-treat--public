@@ -1,8 +1,5 @@
 import {FOG_TYPES, TILE_TYPES} from 'constants/tileTypes';
 
-// pixel size of a tile component
-export const TILE_SIZE = 50;
-
 export const TILE_STYLES = {
   [TILE_TYPES.START]: { backgroundColor: 'yellow' },
   [TILE_TYPES.EMPTY]: { backgroundColor: '#313131' },

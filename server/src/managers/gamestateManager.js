@@ -1,4 +1,5 @@
 import seedrandom from 'seedrandom';
+import Point from '@studiomoniker/point';
 
 import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
 import {GAME_MODES, SERVER_MODES} from 'constants/gameModes';
@@ -89,6 +90,15 @@ export function handleUserGameAction(userId, actionId) {
   if (actionId === CLIENT_ACTIONS.TREAT) {
     gamestate.handleUserActionTreat(userId);
   }
+}
+/**
+ * User wants to move to a place
+ *
+ * @param {String} userId
+ * @param {Point} position
+ */
+export function handleUserActionMoveTo(userId, position) {
+  gamestate.handleUserActionMoveTo(userId, new Point(position.x, position.y));
 }
 /**
  * @param {String} property

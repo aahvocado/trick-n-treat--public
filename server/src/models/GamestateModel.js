@@ -187,6 +187,20 @@ export class GamestateModel extends Model {
     this.removeFromArray('users', userModel);
   }
   /**
+   * is given user the active one
+   *
+   * @param {UserModel} userModel
+   * @returns {Boolean}
+   */
+  isActiveUser(userModel) {
+    const activeUser = this.getActiveUser();
+    if (activeUser === null) {
+      return false;
+    }
+
+    return activeUser.get('characterId') === userModel.get('characterId');
+  }
+  /**
    * @param {CharacterModel} characterModel
    */
   addCharacter(characterModel) {
@@ -224,6 +238,20 @@ export class GamestateModel extends Model {
 
     // found character
     return activeCharacter;
+  }
+  /**
+   * is given character the active one
+   *
+   * @param {CharacterModel} characterModel
+   * @returns {Boolean}
+   */
+  isActiveCharacter(characterModel) {
+    const activeCharacter = this.getActiveCharacter();
+    if (activeCharacter === null) {
+      return false;
+    }
+
+    return activeCharacter.get('characterId') === characterModel.get('characterId');
   }
   /**
    * returns the User whose character's is Active,
@@ -536,6 +564,34 @@ export class GamestateModel extends Model {
 
     // end Actions
     this.onUserActionComplete(userId);
+  }
+  /**
+   * user wants to Move to a specific spot
+   *
+   * @param {String} userId
+   * @param {String} nextPosition
+   */
+  handleUserActionMoveTo(userId, nextPosition) {
+    const characterModel = this.findCharacterByUserId(userId);
+    const characterPosition = characterModel.get('position');
+    const movement = characterModel.get('movement');
+
+    // check if place Character is moving to is too far away
+    const tileDistance = matrixUtils.getDistanceBetween(this.get('matrix'), characterPosition, nextPosition);
+    if (tileDistance > movement) {
+      return;
+    }
+
+    // check if destination is actually walkable
+    if (!this.isWalkableAt(nextPosition)) {
+      return;
+    }
+
+    // finally update the character's position
+    characterModel.set({
+      position: nextPosition,
+      movement: movement - tileDistance,
+    });
   }
   /**
    * a User's Action (and therefore a User's turn) was finished

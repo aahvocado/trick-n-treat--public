@@ -36,6 +36,10 @@ export function init(io) {
       gamestateManager.handleUserGameAction(userId, actionId);
     });
 
+    socket.on(SOCKET_EVENTS.GAME.MOVE_TO, (position) => {
+      gamestateManager.handleUserActionMoveTo(userId, position);
+    });
+
     // -- gamestate changes
     /**
      * remainingMoves
