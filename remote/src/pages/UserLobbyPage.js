@@ -1,4 +1,6 @@
 import React, { Fragment, PureComponent } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faDesktop, faMobileAlt } from '@fortawesome/free-solid-svg-icons'
 
 import {BasicButtonComponent} from 'components/ButtonComponent';
 
@@ -121,7 +123,7 @@ class LobbyListRow extends PureComponent {
 
     return (
       <li className={`sibling-mar-t-1 ${isLocalUser ? 'f-bold' : ''} flex-row-center`}>
-        <span className='mar-r-2'>{ clientType === 'SCREEN-CLIENT-TYPE' ? '[S]' : '[R]' }</span>
+        <FontAwesomeIcon className='mar-r-2' icon={clientType === 'SCREEN-CLIENT-TYPE' ? faDesktop : faMobileAlt} />
         <span>{ name }</span>
       </li>
     );

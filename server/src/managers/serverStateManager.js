@@ -1,4 +1,5 @@
 import {
+  get as mobxGet,
   observable,
   reaction,
   toJS,
@@ -138,6 +139,13 @@ export function removeScreenClient(clientModel) {
   update({screenClient: null});
 }
 // -- function wrappers for the Store
+/**
+ * @param {String} property
+ * @returns {*}
+ */
+export function get(property) {
+  return mobxGet(appStore, property);
+}
 /**
  * makes changes to the state
  *

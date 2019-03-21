@@ -55,7 +55,7 @@ function init() {
   });
 
   // start the first round, which will create a turn queue
-  gamestate.handleEndOfRound();
+  gamestate.handleStartOfRound();
 
   // update visibility
   const activeCharacter = gamestate.get('activeCharacter');
@@ -91,6 +91,13 @@ export function handleUserGameAction(userId, actionId) {
   }
 }
 /**
+ * @param {String} property
+ * @returns {*}
+ */
+export function get(property) {
+  return gamestate.get(property);
+}
+/**
  * @param {String} property - one of the observeable properties in the `appStore`
  * @param {Function} callback
  * @returns {Function} - disposer to remove listener
@@ -103,6 +110,23 @@ export function onChange(property, callback) {
  */
 export function exportState() {
   return gamestate.export();
+}
+/**
+ * @param {String} userId
+ * @returns {Object}
+ */
+export function getClientUserAndCharacter(userId) {
+  const characterModel = gamestate.findCharacterByUserId(userId);
+  const userModel = gamestate.findUserById(userId);
+
+  if (characterModel === undefined || userModel === undefined) {
+    return;
+  }
+
+  return {
+    myCharacter: characterModel.export(),
+    myUser: userModel.export(),
+  };
 }
 /**
  * Client is joining a game in session
@@ -120,9 +144,5 @@ export function handleJoinGame(socketClient) {
     isInGame: true,
   });
 
-  gamestate.set({mode: GAME_MODES.WORKING});
-
   gamestate.createUserFromClient(socketClient);
-
-  gamestate.set({mode: GAME_MODES.ACTIVE});
 }

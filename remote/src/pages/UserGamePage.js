@@ -8,17 +8,20 @@ import TileMapComponent from 'components/TileMapComponent';
 class UserGamePage extends PureComponent {
   /** @override */
   render() {
-    const {gamestate} = this.props;
+    const {
+      gamestate,
+      myCharacter,
+    } = this.props;
 
     if (gamestate === undefined) {
-      return <div>no game has started</div>
+      return <div className='bg-secondary flex-grow pad-v-2 flex-centered flex-col width-full text-center'>(waiting for map data)</div>
     }
 
     return (
       <div className='bg-secondary flex-grow pad-v-2 flex-centered flex-col width-full text-center'>
         <TileMapComponent
-          mapMatrix={gamestate.tileMapModel.matrix}
-          fogMatrix={gamestate.fogMapModel.matrix}
+          myCharacter={myCharacter}
+          {...gamestate}
         />
       </div>
     )

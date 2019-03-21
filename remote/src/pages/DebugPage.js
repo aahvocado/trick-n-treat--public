@@ -42,8 +42,8 @@ class DebugPage extends Component {
   }
   /** @returns {React.Component} */
   renderLobbyPage() {
-    const {lobbyNames, name} = this.props;
-    const hasOtherClients = lobbyNames.length > 0;
+    const {lobbyData, name} = this.props;
+    const hasOtherClients = lobbyData.length > 0;
 
     return (
       <span>
@@ -55,13 +55,13 @@ class DebugPage extends Component {
 
         { hasOtherClients &&
           <div className='pad-2 fsize-4'>
-            { lobbyNames.map((lobbyName, idx) => {
-              const isMyName = lobbyName === name;
+            { lobbyData.map((lobbyData, idx) => {
+              const isMyName = lobbyData.name === name;
               return (
                 <div
-                  key={`lobby-name-${lobbyName}-${idx}-key`}
+                  key={`lobby-name-${lobbyData.name}-${idx}-key`}
                   className={`sibling-mar-t-1 ${isMyName ? 'f-bold' : ''}`}>
-                    {lobbyName}
+                    {lobbyData.name}
                 </div>
               )
             })}

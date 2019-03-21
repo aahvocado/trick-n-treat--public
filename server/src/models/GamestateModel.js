@@ -97,7 +97,7 @@ export class GamestateModel extends Model {
   // -- helper methods
   /**
    * @param {String} characterId
-   * @returns {CharacterModel}
+   * @returns {CharacterModel | undefined}
    */
   findCharacterById(characterId) {
     return this.get('characters').find((characterModel) => {
@@ -106,7 +106,7 @@ export class GamestateModel extends Model {
   }
   /**
    * @param {String} userId
-   * @returns {UserModel}
+   * @returns {UserModel | undefined}
    */
   findUserById(userId) {
     return this.get('users').find((userModel) => {
@@ -115,10 +115,14 @@ export class GamestateModel extends Model {
   }
   /**
    * @param {String} userId
-   * @returns {CharacterModel}
+   * @returns {CharacterModel | undefined}
    */
   findCharacterByUserId(userId) {
     const userModel = this.findUserById(userId);
+    if (userModel === undefined) {
+      return undefined;
+    }
+
     const characterId = userModel.get('characterId');
     return this.findCharacterById(characterId);
   }
@@ -257,6 +261,9 @@ export class GamestateModel extends Model {
    * handles start of turn
    */
   handleStartOfTurn() {
+    console.log('\x1b[36m', '(handleStartOfTurn)');
+
+    // if the current active is a User, then we should let them know
     const activeUser = this.get('activeUser');
     if (activeUser !== null) {
       activeUser.set({isUserTurn: true});
@@ -269,27 +276,39 @@ export class GamestateModel extends Model {
    * end of turn
    */
   handleEndOfTurn() {
+    console.log('\x1b[36m', '(handleEndOfTurn)');
+
     const currentTurnQueue = this.get('turnQueue').slice();
 
     // remove the previous `activeCharacter`
     const oldActiveCharacter = currentTurnQueue.shift();
 
-    // reset the old Character's movement
-    oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
-
     // set the new turn queue
     this.set({turnQueue: currentTurnQueue});
+
+    // reset the old Character's movement
+    oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
   }
   /**
    * round
    */
-  handleEndOfRound() {
+  handleStartOfRound() {
+    console.log('\x1b[36m', '(handleStartOfRound)');
+
     // increment round
     this.set({round: this.get('round') + 1});
 
     // create new turn queue
     this.initTurnQueue();
     console.log('\x1b[93m', `Round ${this.get('round')} has started.`);
+  }
+  /**
+   * round
+   */
+  handleEndOfRound() {
+    console.log('\x1b[36m', '(handleEndOfRound)');
+
+    this.handleStartOfRound();
   }
   // -- fog of war methods
   /**

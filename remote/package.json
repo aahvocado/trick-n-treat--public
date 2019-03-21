@@ -10,6 +10,9 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.16",
+    "@fortawesome/free-solid-svg-icons": "^5.8.0",
+    "@fortawesome/react-fontawesome": "^0.1.4",
     "aah-util-css": "^1.0.0",
     "js-schema": "^1.0.1",
     "less": "^3.9.0",
@@ -17,7 +20,7 @@
     "mobx-react": "^5.4.3",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
-    "react-scripts": "2.1.2",
+    "react-scripts": "^2.1.8",
     "socket.io-client": "^2.2.0"
   },
   "devDependencies": {},

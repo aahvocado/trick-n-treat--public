@@ -1,7 +1,7 @@
 import {FOG_TYPES, TILE_TYPES} from 'constants/tileTypes';
 
 // pixel size of a tile component
-export const TILE_SIZE = '15px';
+export const TILE_SIZE = 50;
 
 export const TILE_STYLES = {
   [TILE_TYPES.START]: { backgroundColor: 'yellow' },
@@ -16,7 +16,12 @@ export const TILE_STYLES = {
 };
 
 export const FOG_STYLES = {
-  [FOG_TYPES.HIDDEN]: { opacity: 0 },
+  [FOG_TYPES.HIDDEN]: {},
   [FOG_TYPES.VISIBLE]: {},
-  [FOG_TYPES.PARTIAL]: { opacity: 0.5 },
+  [FOG_TYPES.PARTIAL]: {
+    backgroundColor: 'rgb(49, 49, 49, 0.5)',
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
 };

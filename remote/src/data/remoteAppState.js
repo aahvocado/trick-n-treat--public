@@ -23,8 +23,12 @@ export const appStore = observable({
   userId: `${_name}-${Date.now()}`,
 
   // -- gamestate - from the server
-  /** @type {GamestateObject} */
+  /** @type {GamestateObject | undefined} */
   gamestate: undefined,
+  /** @type {Object | undefined} */
+  myCharacter: undefined,
+  /** @type {Object | undefined} */
+  myUser: undefined,
 
   // -- my client state - from the server
   /** @type {Boolean} */
@@ -72,12 +76,7 @@ export function attachSocketListeners(socket) {
   });
   // -- client
   socket.on(SOCKET_EVENTS.CLIENT.UPDATE, (data) => {
-    updateState({
-      isInLobby: data.isInLobby,
-      isInGame: data.isInGame,
-      isGameInProgress: data.isGameInProgress,
-      lobbyData: data.lobbyData,
-    });
+    updateState(data);
   });
 
   // -- connection stuff
