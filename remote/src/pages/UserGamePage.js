@@ -1,11 +1,20 @@
 import React, { PureComponent } from 'react';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faPause, faRunning} from '@fortawesome/free-solid-svg-icons'
+import {
+  faBacon,
+  faCircle,
+  faDove,
+  faHeart,
+  faPause,
+  faPlay,
+  faRunning,
+} from '@fortawesome/free-solid-svg-icons'
 
 import {BasicButtonComponent} from 'components/ButtonComponent';
 import TileMapComponent from 'components/TileMapComponent';
 
+import {CLIENT_ACTIONS} from 'constants/clientActions';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
 import * as connectionManager from 'managers/connectionManager';
@@ -36,7 +45,6 @@ class UserGamePage extends PureComponent {
     const {
       gamestate,
       myCharacter,
-      myUser,
     } = this.props;
     const {
       selectedTilePos,
@@ -49,7 +57,43 @@ class UserGamePage extends PureComponent {
     const isMyTurn = remoteAppStateUtils.isMyTurn();
 
     return (
-      <div className='bg-secondary flex-grow pad-v-2 flex-centered flex-col width-full text-center'>
+      <div className='bg-secondary flex-grow flex-centered flex-col width-full text-center'>
+        <div className='flex-row-centered pad-v-1'>
+          <span className='sibling-mar-l-2'>
+            <FontAwesomeIcon icon={faHeart} />
+            <span className='fsize-5 mar-l-1'>{myCharacter.health}</span>
+          </span>
+
+          <FontAwesomeIcon className='sibling-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
+
+          <span className='sibling-mar-l-2'>
+            <FontAwesomeIcon icon={faRunning} />
+            <span className='fsize-5 mar-l-1'>{myCharacter.movement}</span>
+          </span>
+
+          <FontAwesomeIcon className='sibling-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
+
+          <span className='sibling-mar-l-2'>
+            <FontAwesomeIcon icon={faBacon} />
+            <span className='fsize-5 mar-l-1'>{myCharacter.candies}</span>
+          </span>
+
+          <FontAwesomeIcon className='sibling-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
+
+          <span className='sibling-mar-l-2'>
+            <FontAwesomeIcon icon={faDove} />
+            <span className='fsize-5 mar-l-1'>{myCharacter.sanity}</span>
+          </span>
+        </div>
+
+        <div className='flex-row-centered bg-primary pad-v-1'>
+          <div className='flex-none sibling-mar-l-2 color-tertiary'>
+            <FontAwesomeIcon icon={isMyTurn ? faPlay : faPause} />
+          </div>
+
+          <div className='flex-none sibling-mar-l-2 color-tertiary' >{`Round ${gamestate.round}`}</div>
+        </div>
+
         <TileMapComponent
           myCharacter={myCharacter}
           onTileClick={this.handleOnTileClick}
@@ -57,30 +101,28 @@ class UserGamePage extends PureComponent {
           {...gamestate}
         />
 
-        <div className='flex-row-centered mar-b-2'>
-          <div className={`fsize-5 flex-none pad-2 sibling-mar-l-1 ${isMyTurn ? 'color-white' : 'color-tertiary'}`}>
-            <FontAwesomeIcon icon={isMyTurn ? faRunning : faPause} />
-          </div>
-
+        <div className='flex-row-centered mar-b-4'>
           <BasicButtonComponent
-            disabled={!this.canMove()}
-            onClick={this.handleMoveToOnClick}
-          >
-            Move To
-          </BasicButtonComponent>
-
-          <BasicButtonComponent
-            disabled={!myUser.canTrick}
+            disabled={!this.canTrick()}
             onClick={this.handleTrickOnClick}
           >
             Trick
           </BasicButtonComponent>
 
           <BasicButtonComponent
-            disabled={!myUser.canTreat}
+            disabled={!this.canTreat()}
             onClick={this.handleTreatOnClick}
           >
             Treat
+          </BasicButtonComponent>
+
+          <FontAwesomeIcon className='sibling-mar-l-1 fsize-2 color-tertiary' icon={faCircle} />
+
+          <BasicButtonComponent
+            disabled={!this.canMove()}
+            onClick={this.handleMoveToOnClick}
+          >
+            Move To
           </BasicButtonComponent>
         </div>
       </div>
@@ -108,6 +150,47 @@ class UserGamePage extends PureComponent {
     return gamestateUtils.canMyCharacterMoveTo(selectedTilePos);
   }
   /**
+   * @returns {Boolean}
+   */
+  isOnSelectedTile() {
+    const {selectedTilePos} = this.state;
+    if (selectedTilePos === null) {
+      return false;
+    }
+
+    const {myCharacter} = this.props;
+    const position = myCharacter.position;
+    return position.x === selectedTilePos.x && position.y === selectedTilePos.y;
+  }
+  /**
+   * @returns {Boolean}
+   */
+  canTrick() {
+    if (!this.isOnSelectedTile()) {
+      return false;
+    }
+
+    if (!remoteAppStateUtils.isMyTurn()) {
+      return false;
+    }
+
+    return gamestateUtils.canMyUserTrick();
+  }
+  /**
+   * @returns {Boolean}
+   */
+  canTreat() {
+    if (!this.isOnSelectedTile()) {
+      return false;
+    }
+
+    if (!remoteAppStateUtils.isMyTurn()) {
+      return false;
+    }
+
+    return gamestateUtils.canMyUserTreat();
+  }
+  /**
    * Move action
    */
   handleMoveToOnClick() {
@@ -122,13 +205,17 @@ class UserGamePage extends PureComponent {
    * Trick
    */
   handleTrickOnClick() {
-
+    if (this.canTrick()) {
+      connectionManager.socket.emit(SOCKET_EVENTS.GAME.ACTION, CLIENT_ACTIONS.TRICK);
+    }
   }
   /**
    * Treat
    */
   handleTreatOnClick() {
-
+    if (this.canTreat()) {
+      connectionManager.socket.emit(SOCKET_EVENTS.GAME.ACTION, CLIENT_ACTIONS.TREAT);
+    }
   }
 }
 

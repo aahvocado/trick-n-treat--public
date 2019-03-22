@@ -18,7 +18,7 @@ export default observer(
         <div className='bg-primary'>
           <WebsocketConnectionIndicator />
 
-          <div className='position-fixed color-white pad-2' style={{right: 0}}>{remoteAppState.get('name')}</div>
+          <div className='position-fixed pad-2' style={{color: '#b5b5b5', bottom: 0, left: 0}}>{remoteAppState.get('name')}</div>
 
           <div className='flex-centered flex-col color-white'>
             <h1 className='flex-none fsize-8 olor-white mar-v-2 f-bold width-full text-center'>Trick & Treat</h1>

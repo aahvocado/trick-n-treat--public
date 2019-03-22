@@ -13,6 +13,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.16",
     "@fortawesome/free-solid-svg-icons": "^5.8.0",
     "@fortawesome/react-fontawesome": "^0.1.4",
+    "@studiomoniker/point": "^2.0.0",
     "aah-util-css": "^1.0.0",
     "js-schema": "^1.0.1",
     "less": "^3.9.0",

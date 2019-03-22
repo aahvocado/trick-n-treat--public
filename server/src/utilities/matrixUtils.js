@@ -9,6 +9,14 @@ import Point from '@studiomoniker/point';
 
 // --- matrix
 /**
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @returns {*}
+ */
+export function getTileAt(matrix, point) {
+  return matrix[point.y][point.x];
+}
+/**
  * helper function to iterate through each tile
  *
  * @param {Matrix} matrix
