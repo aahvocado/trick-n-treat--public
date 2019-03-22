@@ -122,7 +122,7 @@ class LobbyListRow extends PureComponent {
     } = this.props;
 
     return (
-      <li className={`sibling-mar-t-1 ${isLocalUser ? 'f-bold' : ''} flex-row-center`}>
+      <li className={`sibling-mar-t-1 ${isLocalUser ? 'f-bold' : ''} flex-row-centered`}>
         <FontAwesomeIcon className='mar-r-2' icon={clientType === 'SCREEN-CLIENT-TYPE' ? faDesktop : faMobileAlt} />
         <span>{ name }</span>
       </li>

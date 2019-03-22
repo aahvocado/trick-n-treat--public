@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import * as remoteAppState from 'data/remoteAppState';
+import remoteAppState from 'data/remoteAppState';
 
 // services
 import * as serviceWorker from './serviceWorker';

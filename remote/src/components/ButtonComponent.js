@@ -25,7 +25,7 @@ export class BasicButtonComponent extends PureComponent {
       style,
     } = this.props;
 
-    const modClassname = disabled ? 'color-tertiary bor-2-fourth bg-transparent' : 'color-primary bg-fifth';
+    const modClassname = disabled ? 'color-tertiary bor-2-fourth bg-transparent' : 'color-primary bor-2-fourth bg-fifth';
 
     return (
       <button

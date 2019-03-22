@@ -1,3 +1,4 @@
+import {TILE_SIZE} from 'constants/mapConstants';
 import {FOG_TYPES, TILE_TYPES} from 'constants/tileTypes';
 
 export const TILE_STYLES = {
@@ -22,3 +23,20 @@ export const FOG_STYLES = {
     height: '100%',
   },
 };
+/**
+ *
+ * @param {Number} entityIdx
+ * @returns {Object} style
+ */
+export function createEntityIconStyles(entityIdx) {
+  const padding = 5;
+  const oddOrEven = entityIdx % 2;
+  const iconOffsetX = padding + (TILE_SIZE / 2.2) * oddOrEven;
+  const iconOffsetY = padding + (TILE_SIZE / 2.2) * Math.floor(entityIdx / 2);
+
+  return {
+    position: 'absolute',
+    left: `${iconOffsetX}px`,
+    top: `${iconOffsetY}px`,
+  }
+}

@@ -1,8 +1,8 @@
 import {GAME_MODES, SERVER_MODES} from 'constants/gameModes';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
-import * as gamestateManager from 'managers/gamestateManager';
-import * as serverStateManager from 'managers/serverStateManager';
+import gameState from 'data/gameState';
+import serverState from 'data/serverState';
 
 import {RemoteClientModel, ScreenClientModel} from 'models/SocketClientModel';
 
@@ -23,41 +23,41 @@ export function init(io) {
 
     // client wants to "Game Start"
     socket.on(SOCKET_EVENTS.LOBBY.START, () => {
-      serverStateManager.handleStartGame();
+      serverState.handleStartGame();
     });
 
     // client wants to "Join" game in session
     socket.on(SOCKET_EVENTS.LOBBY.JOIN, () => {
-      gamestateManager.handleJoinGame(socketClient);
+      gameState.handleJoinGame(socketClient);
     });
 
     // client took a game action
     socket.on(SOCKET_EVENTS.GAME.ACTION, (actionId) => {
-      gamestateManager.handleUserGameAction(userId, actionId);
+      gameState.handleUserGameAction(userId, actionId);
     });
 
     socket.on(SOCKET_EVENTS.GAME.MOVE_TO, (position) => {
-      gamestateManager.handleUserActionMoveTo(userId, position);
+      gameState.handleUserActionMoveTo(userId, position);
     });
 
     // -- gamestate changes
     /**
      * remainingMoves
      */
-    gamestateManager.onChange('remainingMoves', () => {
-      const activeUser = gamestateManager.get('activeUser');
+    gameState.onChange('remainingMoves', () => {
+      const activeUser = gameState.get('activeUser');
       if (activeUser !== null && activeUser.get('userId') === userId) {
         socket.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(socketClient));
-        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
+        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.export());
       }
     });
     /**
      * activeUser
      */
-    gamestateManager.onChange('activeUser', (activeUser) => {
+    gameState.onChange('activeUser', (activeUser) => {
       if (activeUser !== null && activeUser.get('userId') === userId) {
         socket.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(socketClient));
-        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
+        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.export());
       }
     });
     // -- socket events
@@ -66,7 +66,7 @@ export function init(io) {
      */
     socket.on('disconnect', () => {
       console.log('\x1b[32m', `- Client "${userId}" disconnected`);
-      serverStateManager.removeClient(socketClient);
+      serverState.removeClient(socketClient);
     });
   });
 
@@ -74,25 +74,43 @@ export function init(io) {
   /**
    * when Lobby changes, send data to those in Lobby
    */
-  serverStateManager.onChange('lobbyClients', (lobbyClients) => {
+  serverState.onChange('lobbyClients', (lobbyClients) => {
     lobbyClients.forEach((client) => {
       client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientLobbyData(client));
     });
+  });
+  /**
+   * listen to when the Server switches to Game Mode
+   */
+  serverState.onChange('mode', (mode) => {
+    // if not in Game Mode, do nothing
+    if (mode !== SERVER_MODES.GAME) {
+      gameState.set({mode: GAME_MODES.INACTIVE});
+      return;
+    }
+
+    // create `users` based on connected Clients
+    serverState.get('clients').forEach((client) => {
+      gameState.createUserFromClient(client);
+    });
+
+    // initialize the game
+    gameState.init();
   });
   // -- Gamestate changes
   /**
    * when Gamestate changes mode
    *  if it's ACTIVE, send data to everyone
    */
-  gamestateManager.onChange('mode', (mode) => {
+  gameState.onChange('mode', (mode) => {
     if (mode !== GAME_MODES.ACTIVE) {
       return;
     }
 
-    const clients = serverStateManager.get('clients');
+    const clients = serverState.get('clients');
     clients.forEach((client) => {
       client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(client));
-      client.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
+      client.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.export());
     });
 
     console.log('\x1b[36m', '(sending updates to clients)');
@@ -101,11 +119,11 @@ export function init(io) {
    * when Gamestate changes mode
    *  if it's ACTIVE, send data to everyone
    */
-  gamestateManager.onChange('users', () => {
-    const clients = serverStateManager.get('clients');
+  gameState.onChange('users', () => {
+    const clients = serverState.get('clients');
     clients.forEach((client) => {
       client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(client));
-      client.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateManager.exportState());
+      client.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.export());
     });
 
     console.log('\x1b[36m', '(sending updates to clients)');
@@ -150,7 +168,7 @@ function handleCreatingNewSocketClient(socket) {
  */
 function createAndAddNewRemoteClient(attributes) {
   const newClient = new RemoteClientModel(attributes);
-  serverStateManager.addClient(newClient);
+  serverState.addClient(newClient);
 
   console.log('\x1b[92m', `+ Remote "${newClient.get('userId')}" connected`);
   return newClient;
@@ -161,7 +179,7 @@ function createAndAddNewRemoteClient(attributes) {
  */
 function createAndAddNewScreenClient(attributes) {
   const newClient = new ScreenClientModel(attributes);
-  serverStateManager.addClient(newClient);
+  serverState.addClient(newClient);
 
   console.log('\x1b[92m', `+ Screen "${newClient.get('userId')}" connected`);
   return newClient;
@@ -174,10 +192,10 @@ function createAndAddNewScreenClient(attributes) {
  * @returns {Object} - for the Remote
  */
 function generateClientLobbyData(clientModel) {
-  const serverState = serverStateManager.getState();
+  const clients = serverState.get('clients').slice();
 
   // also generate some data for the other Clients
-  const lobbyData = serverState.clients.map((client) => {
+  const lobbyData = clients.map((client) => {
     return {
       clientType: client.get('clientType'),
       name: client.get('name'),
@@ -189,7 +207,7 @@ function generateClientLobbyData(clientModel) {
   return {
     isInLobby: clientModel.get('isInLobby'),
     isInGame: clientModel.get('isInGame'),
-    isGameInProgress: serverState.mode === SERVER_MODES.GAME,
+    isGameInProgress: serverState.get('mode') === SERVER_MODES.GAME,
     lobbyData: lobbyData,
   };
 }
@@ -203,6 +221,6 @@ function generateClientGameData(clientModel) {
   return {
     isInLobby: clientModel.get('isInLobby'),
     isInGame: clientModel.get('isInGame'),
-    ...gamestateManager.getClientUserAndCharacter(clientModel.get('userId')),
+    ...gameState.getClientUserAndCharacter(clientModel.get('userId')),
   };
 }

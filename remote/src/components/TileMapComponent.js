@@ -2,9 +2,8 @@ import React, { Component, PureComponent } from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUser, faHome} from '@fortawesome/free-solid-svg-icons'
 
-
 import {TILE_SIZE, MAP_HEIGHT, MAP_WIDTH, calculateMapXOffset, calculateMapYOffset} from 'constants/mapConstants';
-import {TILE_STYLES, FOG_STYLES} from 'constants/tileStyles';
+import {TILE_STYLES, FOG_STYLES, createEntityIconStyles} from 'constants/tileStyles';
 import {FOG_TYPES, TILE_TYPES} from 'constants/tileTypes';
 
 /**
@@ -29,8 +28,8 @@ export class TileMapComponent extends Component {
       selectedTilePos,
     } = this.props;
 
-    const fogMatrix = fogMapModel.matrix;
-    const mapMatrix = tileMapModel.matrix;
+    const fogMatrix = fogMapModel.matrix.slice();
+    const mapMatrix = tileMapModel.matrix.slice();
 
     // check if Map has no data yet
     const isEmpty = mapMatrix.length <= 0 || mapMatrix[0].length <= 0;
@@ -53,7 +52,7 @@ export class TileMapComponent extends Component {
           top: '0',
           left: '0',
           transition: 'transform 400ms',
-          transform: `translate(-${calculateMapXOffset(myCharacter.position.x)}px, -${calculateMapYOffset(myCharacter.position.y)}px)`,
+          transform: `translate(${calculateMapXOffset(myCharacter.position.x)}px, ${calculateMapYOffset(myCharacter.position.y)}px)`,
         }}>
           { mapMatrix.map((innerMatrix, row) => {
             return (
@@ -124,8 +123,6 @@ class TileItemComponent extends Component {
   /** @override */
   render() {
     const {
-      charactersHere,
-      housesHere,
       fogType,
       isSelected,
       isUserHere,
@@ -135,6 +132,7 @@ class TileItemComponent extends Component {
     const isHidden = fogType === FOG_TYPES.HIDDEN;
     const isObscured = fogType === FOG_TYPES.PARTIAL;
 
+    // border highlight
     const borderStyles = isSelected ?
       { border: '2px solid white' } :
       { border: isUserHere ? '2px solid black' : '' };
@@ -144,26 +142,6 @@ class TileItemComponent extends Component {
       ...TILE_STYLES[isHidden ? TILE_TYPES.EMPTY : tileType],
       ...borderStyles,
     };
-
-    const renderedEntities = [];
-    housesHere.forEach((house) => {
-      const entityIdx = renderedEntities.length;
-      renderedEntities.push(
-        <HouseMapIconComponent
-          key={`entity-icon-${entityIdx}-key`}
-          entityIdx={entityIdx}
-        />
-      )
-    });
-    charactersHere.forEach((character) => {
-      const entityIdx = renderedEntities.length;
-      renderedEntities.push(
-        <CharacterMapIconComponent
-          key={`entity-icon-${character.characterId}-key`}
-          entityIdx={entityIdx}
-        />
-      )
-    })
 
     return (
       <div
@@ -182,9 +160,44 @@ class TileItemComponent extends Component {
           <div style={FOG_STYLES[FOG_TYPES.PARTIAL]}></div>
         }
 
-        { !isHidden && renderedEntities }
+        { !isHidden &&
+          this.renderEntityIcons()
+        }
       </div>
     )
+  }
+  /**
+   * @returns {Array<React.Component>}
+   */
+  renderEntityIcons() {
+    const {
+      charactersHere,
+      housesHere,
+    } = this.props;
+
+    const renderedEntities = [];
+    housesHere.forEach((house) => {
+      const entityIdx = renderedEntities.length;
+      renderedEntities.push(
+        <MapEntityIconComponent
+          key={`entity-icon-${entityIdx}-key`}
+          entityIdx={entityIdx}
+          icon={faHome}
+        />
+      )
+    });
+    charactersHere.forEach((character) => {
+      const entityIdx = renderedEntities.length;
+      renderedEntities.push(
+        <MapEntityIconComponent
+          key={`entity-icon-${character.characterId}-key`}
+          entityIdx={entityIdx}
+          icon={faUser}
+        />
+      )
+    });
+
+    return renderedEntities;
   }
   /**
    *
@@ -207,57 +220,22 @@ class TileItemComponent extends Component {
   }
 }
 /**
- * represents a character on the map
+ * represents an entity that fits on a tile
  */
-class CharacterMapIconComponent extends PureComponent {
+class MapEntityIconComponent extends PureComponent {
   /** @override */
   render() {
     const {
       entityIdx,
+      icon,
     } = this.props;
-
-    const oddOrEven = entityIdx % 2;
-    const iconOffsetX = 5 + (TILE_SIZE / 2.2) * oddOrEven;
-    const iconOffsetY = 5 + (TILE_SIZE / 2.2) * Math.floor(entityIdx / 2);
 
     return (
       <div
         className='color-primary'
-        style={{
-          position: 'absolute',
-          left: `${iconOffsetX}px`,
-          top: `${iconOffsetY}px`,
-        }}
+        style={createEntityIconStyles(entityIdx)}
       >
-        <FontAwesomeIcon icon={faUser} />
-      </div>
-    )
-  }
-}
-/**
- * represents a house on the map
- */
-class HouseMapIconComponent extends PureComponent {
-  /** @override */
-  render() {
-    const {
-      entityIdx,
-    } = this.props;
-
-    const oddOrEven = entityIdx % 2;
-    const iconOffsetX = 5 + (TILE_SIZE / 2.2) * oddOrEven;
-    const iconOffsetY = 5 + (TILE_SIZE / 2.2) * Math.floor(entityIdx / 2);
-
-    return (
-      <div
-        className='color-primary'
-        style={{
-          position: 'absolute',
-          left: `${iconOffsetX}px`,
-          top: `${iconOffsetY}px`,
-        }}
-      >
-        <FontAwesomeIcon icon={faHome} />
+        <FontAwesomeIcon icon={icon} />
       </div>
     )
   }

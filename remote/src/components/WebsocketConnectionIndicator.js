@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import {observer} from "mobx-react";
 
-import {appStore} from 'data/remoteAppState';
+import remoteAppState from 'data/remoteAppState';
 
 import * as connectionManager from 'managers/connectionManager';
 
@@ -54,10 +54,8 @@ class WebsocketConnectionIndicator extends PureComponent {
 }
 
 export const ObservingWebsocketConnectionIndicator = observer(() => {
-  const {
-    isConnected,
-    isReconnecting,
-  } = appStore;
+  const isConnected = remoteAppState.get('isConnected');
+  const isReconnecting = remoteAppState.get('isReconnecting');
 
   return (
     <WebsocketConnectionIndicator

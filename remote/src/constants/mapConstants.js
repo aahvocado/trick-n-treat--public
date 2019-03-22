@@ -10,7 +10,7 @@ export const MAP_HEIGHT = TILE_SIZE * 7;
  * @returns {Number}
  */
 export function calculateMapXOffset(x) {
-  return TILE_SIZE * x - MAP_WIDTH / 2 + TILE_SIZE / 2;
+  return (TILE_SIZE * x - MAP_WIDTH / 2 + TILE_SIZE / 2) * -1;
 }
 /**
  * @type {Function}
@@ -18,5 +18,5 @@ export function calculateMapXOffset(x) {
  * @returns {Number}
  */
 export function calculateMapYOffset(y) {
-  return TILE_SIZE * y - MAP_HEIGHT / 2 + TILE_SIZE / 2;
+  return (TILE_SIZE * y - MAP_HEIGHT / 2 + TILE_SIZE / 2) * -1;
 }

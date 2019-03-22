@@ -1,7 +1,8 @@
 import test from 'ava';
-import GamestateModel from 'models/GamestateModel';
-
 import Point from '@studiomoniker/point';
+
+import {GamestateModel} from 'data/gameState';
+
 import TILE_TYPES, {FOG_TYPES} from 'constants/tileTypes';
 
 import CharacterModel from 'models/CharacterModel';

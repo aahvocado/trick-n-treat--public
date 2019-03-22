@@ -12,3 +12,20 @@ export function getDistanceBetween(matrix, pointA, pointB) {
   const yDistance = Math.abs(pointB.y - pointA.y);
   return xDistance + yDistance;
 }
+/**
+ *
+ * @param {Matrix} matrix
+ * @param {Point} pointA
+ * @param {Point} pointB
+ * @param {Number} distance
+ * @returns {Boolean}
+ */
+export function isWithinDistance(matrix, pointA, pointB, distance) {
+  // calculate how many tiles it would take to move to the point
+  const tileDistance = getDistanceBetween(matrix, pointA, pointB);
+  if (tileDistance > distance) {
+    return false;
+  }
+
+  return true;
+}

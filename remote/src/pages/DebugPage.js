@@ -4,7 +4,7 @@ import {observer} from 'mobx-react';
 import {CLIENT_ACTIONS} from 'constants/clientActions';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
-import {appStore} from 'data/remoteAppState';
+import remoteAppState from 'data/remoteAppState';
 
 import * as connectionManager from 'managers/connectionManager';
 
@@ -184,13 +184,14 @@ class DebugPage extends Component {
   }
 }
 const ObservingDebugPage = observer(() => {
+  const remoteAppStateObject = remoteAppState.export();
   return (
     <DebugPage
-      {...appStore}
-      userId={appStore.userId}
-      gamestate={appStore.gamestate}
-      isInLobby={appStore.isInLobby}
-      isInGame={appStore.isInGame}
+      {...remoteAppStateObject}
+      userId={remoteAppStateObject.userId}
+      gamestate={remoteAppStateObject.gamestate}
+      isInLobby={remoteAppStateObject.isInLobby}
+      isInGame={remoteAppStateObject.isInGame}
     />
   )
 });

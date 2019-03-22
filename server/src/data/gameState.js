@@ -1,7 +1,10 @@
+import seedrandom from 'seedrandom';
 import {extendObservable} from 'mobx';
+import Point from '@studiomoniker/point';
+
 import {FastCharacter} from 'collections/characterCollection';
 
-import {CLIENT_ACTIONS} from 'constants/clientActions';
+import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
 import {CLIENT_TYPES} from 'constants/clientTypes';
 import {GAME_MODES} from 'constants/gameModes';
 import {MAP_START} from 'constants/mapSettings';
@@ -12,14 +15,15 @@ import Model from 'models/Model';
 import MapModel from 'models/MapModel';
 import UserModel from 'models/UserModel';
 
-// import * as gamestateUtils from 'utilities/gamestateUtils';
+import * as gamestateUtils from 'utilities/gamestateUtils';
 import * as mathUtils from 'utilities/mathUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
 
+// seed for generating gamestate
+const seed = Date.now();
+seedrandom(seed, {global: true});
 /**
- * character class
  *
- * @typedef {Model} GamestateModel
  */
 export class GamestateModel extends Model {
   /** @override */
@@ -93,6 +97,35 @@ export class GamestateModel extends Model {
         this.handleEndOfRound();
       }
     });
+  }
+  /**
+   *
+   */
+  init() {
+    this.set({mode: GAME_MODES.WORKING});
+
+    // create the map instance
+    const baseTileMapModel = gamestateUtils.createBaseTileMapModel();
+    const houseList = gamestateUtils.createHouseList(baseTileMapModel);
+    const encounterList = gamestateUtils.createEncounterList(baseTileMapModel);
+    const fogMapModel = gamestateUtils.createFogOfWarModel(baseTileMapModel);
+
+    this.set({
+      tileMapModel: baseTileMapModel,
+      houses: houseList,
+      encounters: encounterList,
+      fogMapModel: fogMapModel,
+    });
+
+    // start the first round, which will create a turn queue
+    this.handleStartOfRound();
+
+    // update visibility
+    const activeCharacter = this.get('activeCharacter');
+    this.updateToVisibleAt(activeCharacter.get('position'), activeCharacter.get('vision'));
+
+    console.log('\x1b[36m', 'Game Starting!', `(Seed "${seed}")`);
+    this.set({mode: GAME_MODES.ACTIVE});
   }
   // -- helper methods
   /**
@@ -453,6 +486,33 @@ export class GamestateModel extends Model {
     return choice.chosenPoint;
   }
   /**
+   * User did something
+   *
+   * @param {String} userId
+   * @param {String} actionId
+   */
+  handleUserGameAction(userId, actionId) {
+    // check if it is the Turn of the user who clicked
+    const activeUser = this.get('activeUser');
+    if (activeUser.get('userId') !== userId) {
+      return;
+    }
+
+    // handle movement actions
+    if (isMovementAction(actionId)) {
+      this.handleUserActionMove(userId, actionId);
+      return;
+    }
+
+    //
+    if (actionId === CLIENT_ACTIONS.TRICK) {
+      this.handleUserActionTrick(userId);
+    }
+    if (actionId === CLIENT_ACTIONS.TREAT) {
+      this.handleUserActionTreat(userId);
+    }
+  }
+  /**
    * user asked to move
    *
    * @param {String} userId
@@ -569,9 +629,10 @@ export class GamestateModel extends Model {
    * user wants to Move to a specific spot
    *
    * @param {String} userId
-   * @param {String} nextPosition
+   * @param {Point} position
    */
-  handleUserActionMoveTo(userId, nextPosition) {
+  handleUserActionMoveTo(userId, position) {
+    const nextPosition = new Point(position.x, position.y);
     const characterModel = this.findCharacterByUserId(userId);
     const characterPosition = characterModel.get('position');
     const movement = characterModel.get('movement');
@@ -659,6 +720,46 @@ export class GamestateModel extends Model {
     this.addUser(newUserModel);
     return newUserModel;
   }
-}
+  /**
+   * Client is joining a game in session
+   *
+   * @param {SocketClientModel} socketClient
+   */
+  handleJoinGame(socketClient) {
+    // can't join an inactive game
+    if (this.get('mode') === GAME_MODES.INACTIVE) {
+      return;
+    }
 
-export default GamestateModel;
+    socketClient.set({
+      isInLobby: false,
+      isInGame: true,
+    });
+
+    this.createUserFromClient(socketClient);
+  }
+  /**
+   * @param {String} userId
+   * @returns {Object}
+   */
+  getClientUserAndCharacter(userId) {
+    const characterModel = this.findCharacterByUserId(userId);
+    const userModel = this.findUserById(userId);
+
+    if (characterModel === undefined || userModel === undefined) {
+      return;
+    }
+
+    return {
+      myCharacter: characterModel.export(),
+      myUser: userModel.export(),
+    };
+  }
+}
+/**
+ * Gamestate Singleton
+ *
+ * @type {GamestateModel}
+ */
+const gameState = new GamestateModel();
+export default gameState;
