@@ -4,6 +4,9 @@ import {SOCKET_EVENTS} from 'constants/socketEvents';
 import gameState from 'data/gameState';
 import serverState from 'data/serverState';
 
+import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
+import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
+
 import {RemoteClientModel, ScreenClientModel} from 'models/SocketClientModel';
 
 /**
@@ -28,16 +31,16 @@ export function init(io) {
 
     // client wants to "Join" game in session
     socket.on(SOCKET_EVENTS.LOBBY.JOIN, () => {
-      gameState.handleJoinGame(socketClient);
+      gamestateUserHelper.handleJoinGame(socketClient);
     });
 
     // client took a game action
     socket.on(SOCKET_EVENTS.GAME.ACTION, (actionId) => {
-      gameState.handleUserGameAction(userId, actionId);
+      gamestateUserHelper.handleUserGameAction(userId, actionId);
     });
 
     socket.on(SOCKET_EVENTS.GAME.MOVE_TO, (position) => {
-      gameState.handleUserActionMoveTo(userId, position);
+      gamestateUserHelper.handleUserActionMoveTo(userId, position);
     });
 
     // -- gamestate changes
@@ -48,7 +51,7 @@ export function init(io) {
       const activeUser = gameState.get('activeUser');
       if (activeUser !== null && activeUser.get('userId') === userId) {
         socket.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(socketClient));
-        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.export());
+        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
       }
     });
     /**
@@ -57,7 +60,7 @@ export function init(io) {
     gameState.onChange('activeUser', (activeUser) => {
       if (activeUser !== null && activeUser.get('userId') === userId) {
         socket.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(socketClient));
-        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.export());
+        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
       }
     });
     // -- socket events
@@ -91,11 +94,12 @@ export function init(io) {
 
     // create `users` based on connected Clients
     serverState.get('clients').forEach((client) => {
-      gameState.createUserFromClient(client);
+      gamestateUserHelper.createUserFromClient(client);
     });
 
     // initialize the game
-    gameState.init();
+    gamestateDataHelper.generateNewMap();
+    console.log('\x1b[36m', 'Game Starting!');
   });
   // -- Gamestate changes
   /**
@@ -110,7 +114,7 @@ export function init(io) {
     const clients = serverState.get('clients');
     clients.forEach((client) => {
       client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(client));
-      client.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.export());
+      client.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
     });
 
     console.log('\x1b[36m', '(sending updates to clients)');
@@ -123,7 +127,7 @@ export function init(io) {
     const clients = serverState.get('clients');
     clients.forEach((client) => {
       client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(client));
-      client.emit(SOCKET_EVENTS.GAME.UPDATE, gameState.export());
+      client.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
     });
 
     console.log('\x1b[36m', '(sending updates to clients)');
@@ -221,6 +225,6 @@ function generateClientGameData(clientModel) {
   return {
     isInLobby: clientModel.get('isInLobby'),
     isInGame: clientModel.get('isInGame'),
-    ...gameState.getClientUserAndCharacter(clientModel.get('userId')),
+    ...gamestateUserHelper.getClientUserAndCharacter(clientModel.get('userId')),
   };
 }

@@ -4,6 +4,7 @@ import {TILE_TYPES} from 'constants/tileTypes';
 import Point from '@studiomoniker/point';
 
 import Pathfinding from 'pathfinding';
+import * as mapUtils from 'utilities/mapUtils';
 import * as mathUtils from 'utilities/mathUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
 
@@ -129,7 +130,7 @@ export function generateSpecialTiles(mapModel, options) {
     const endY = mapModel.get('start').y;
 
     // create grid for the Finder, setting the specific tiles as walkable (since non-0 is typically unwalkable)
-    const grid = new Pathfinding.Grid(mapModel.getMatrix());
+    const grid = mapUtils.createGridForPathfinding(mapModel.getMatrix());
     grid.setWalkableAt(startX, startY, true);
     grid.setWalkableAt(endX, endY, true);
 
@@ -191,33 +192,31 @@ export function generateEncounterTiles(mapModel, options) {
 
   // go through every single point on the map
   // (at some point we can do better than this)
-  mapModel.forEach((tile, x, y) => {
-    const location = new Point(x, y);
-
+  mapModel.forEach((tile, point) => {
     // if tile is not a path, don't do anything
     if (tile !== TILE_TYPES.PATH) {
       return;
     }
 
     // grab a chunk of the map to ease calculations
-    const localizedSubmatrix = mapModel.getSubmatrixByDistance(location, 1);
+    const localizedSubmatrix = mapModel.getSubmatrixByDistance(point, 1);
     localizedSubmatrix[1][1] = 'center';
 
     // see if we are surrounded by many paths
     //  if so, lets put an encounter here
     const typeCounts = matrixUtils.getTypeCounts(localizedSubmatrix);
     if (typeCounts[TILE_TYPES.PATH] >= 3 && typeCounts[TILE_TYPES.ENCOUNTER] === undefined) {
-      mapModel.setTileAt(location, TILE_TYPES.ENCOUNTER);
+      mapModel.setTileAt(point, TILE_TYPES.ENCOUNTER);
       return;
     }
 
     // if too close to another encounter, don't use this tile
     const minDistance = mathUtils.getRandomIntInclusive(encounterRangeDistance[0], encounterRangeDistance[1]);
-    if (mapModel.hasNearbyTileType(location, TILE_TYPES.ENCOUNTER, minDistance)) {
+    if (mapModel.hasNearbyTileType(point, TILE_TYPES.ENCOUNTER, minDistance)) {
       return;
     }
 
     // otherwise we can make this an Encounter tile
-    mapModel.setTileAt(location, TILE_TYPES.ENCOUNTER);
+    mapModel.setTileAt(point, TILE_TYPES.ENCOUNTER);
   });
 }

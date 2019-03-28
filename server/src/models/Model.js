@@ -41,7 +41,7 @@ export class Model {
     set(this.attributes, changes);
   }
   /**
-   * PROPOSAL FUNCTION
+   * EXPERIMENTAL - I'm wary of functions that are too abstract
    *
    * @param {String} arrayName
    * @param {*} item
@@ -60,7 +60,7 @@ export class Model {
     });
   }
   /**
-   * PROPOSAL FUNCTION
+   * EXPERIMENTAL - I'm wary of functions that are too abstract
    *
    * @param {String} arrayName
    * @param {*} item

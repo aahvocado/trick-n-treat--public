@@ -1,7 +1,7 @@
 import TILE_TYPES from 'constants/tileTypes';
 // import ENCOUNTER_TYPES from 'constants/encounterTypes';
 
-import Point from '@studiomoniker/point';
+// import Point from '@studiomoniker/point';
 // import EncounterModel from 'models/EncounterModel';
 
 import * as encounterCollections from 'collections/encounterCollections';
@@ -17,12 +17,12 @@ import * as mathUtils from 'utilities/mathUtils';
 export function generateEncounters(mapModel) {
   const encounterList = [];
 
-  mapModel.forEach((tile, x, y) => {
+  mapModel.forEach((tile, point) => {
     if (tile !== TILE_TYPES.ENCOUNTER) {
       return;
     }
 
-    const newEncounter = generateRandomEncounter(mapModel, new Point(x, y));
+    const newEncounter = generateRandomEncounter(mapModel, point);
     encounterList.push(newEncounter);
   });
 

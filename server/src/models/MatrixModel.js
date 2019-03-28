@@ -142,12 +142,17 @@ export class MatrixModel extends Model {
   }
   // ---- matrix utilities
   /**
-   * gets matrix of the matrix in given box boundary
-   *
    * @param {Function} callback
    */
   forEach(callback) {
     matrixUtils.forEach(this.getMatrix(), callback);
+  }
+  /**
+   * @param {Function} callback
+   * @returns {Matrix}
+   */
+  map(callback) {
+    return matrixUtils.map(this.getMatrix(), callback);
   }
   /**
    * gets matrix of the matrix in given box boundary

@@ -20,6 +20,7 @@ module.exports = {
       collections: path.resolve(serverPath, 'collections'),
       constants: path.resolve(serverPath, 'constants'),
       data: path.resolve(serverPath, 'data'),
+      helpers: path.resolve(serverPath, 'helpers'),
       managers: path.resolve(serverPath, 'managers'),
       models: path.resolve(serverPath, 'models'),
       tests: path.resolve(serverPath, 'tests'),

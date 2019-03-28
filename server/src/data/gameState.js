@@ -1,23 +1,24 @@
 import seedrandom from 'seedrandom';
 import {extendObservable} from 'mobx';
-import Point from '@studiomoniker/point';
 
-import {FastCharacter} from 'collections/characterCollection';
 
-import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
-import {CLIENT_TYPES} from 'constants/clientTypes';
 import {GAME_MODES} from 'constants/gameModes';
-import {MAP_START} from 'constants/mapSettings';
-import POINTS, {getPointFromString} from 'constants/points';
 import TILE_TYPES, {FOG_TYPES, isWalkableTile} from 'constants/tileTypes';
+
+import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
 import Model from 'models/Model';
 import MapModel from 'models/MapModel';
-import UserModel from 'models/UserModel';
 
-import * as gamestateUtils from 'utilities/gamestateUtils';
-import * as mathUtils from 'utilities/mathUtils';
+import * as mapUtils from 'utilities/mapUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
+
+/**
+ * A note on this Gamestate Model and the other helper files:
+ * Hypothetically, everything in the helpers could be a method in this class
+ *  but I'm trying to let this model be very generalized getters
+ *  with the helpers doing more complex actions
+ */
 
 // seed for generating gamestate
 const seed = Date.now();
@@ -86,7 +87,7 @@ export class GamestateModel extends Model {
       }
 
       this.handleStartOfTurn();
-      this.updateActionsForAllUsers();
+      gamestateUserHelper.updateActionsForAllUsers();
     });
     /**
      * `turnQueue` changes
@@ -97,142 +98,10 @@ export class GamestateModel extends Model {
         this.handleEndOfRound();
       }
     });
-  }
-  /**
-   *
-   */
-  init() {
-    this.set({mode: GAME_MODES.WORKING});
 
-    // create the map instance
-    const baseTileMapModel = gamestateUtils.createBaseTileMapModel();
-    const houseList = gamestateUtils.createHouseList(baseTileMapModel);
-    const encounterList = gamestateUtils.createEncounterList(baseTileMapModel);
-    const fogMapModel = gamestateUtils.createFogOfWarModel(baseTileMapModel);
-
-    this.set({
-      tileMapModel: baseTileMapModel,
-      houses: houseList,
-      encounters: encounterList,
-      fogMapModel: fogMapModel,
-    });
-
-    // start the first round, which will create a turn queue
-    this.handleStartOfRound();
-
-    // update visibility
-    const activeCharacter = this.get('activeCharacter');
-    this.updateToVisibleAt(activeCharacter.get('position'), activeCharacter.get('vision'));
-
-    console.log('\x1b[36m', 'Game Starting!', `(Seed "${seed}")`);
-    this.set({mode: GAME_MODES.ACTIVE});
+    console.log('\x1b[36m', `Gamestate instantiated - (Seed "${seed}")`);
   }
-  // -- helper methods
-  /**
-   * @param {String} characterId
-   * @returns {CharacterModel | undefined}
-   */
-  findCharacterById(characterId) {
-    return this.get('characters').find((characterModel) => {
-      return characterModel.get('characterId') === characterId;
-    });
-  }
-  /**
-   * @param {String} userId
-   * @returns {UserModel | undefined}
-   */
-  findUserById(userId) {
-    return this.get('users').find((userModel) => {
-      return userModel.get('userId') === userId;
-    });
-  }
-  /**
-   * @param {String} userId
-   * @returns {CharacterModel | undefined}
-   */
-  findCharacterByUserId(userId) {
-    const userModel = this.findUserById(userId);
-    if (userModel === undefined) {
-      return undefined;
-    }
-
-    const characterId = userModel.get('characterId');
-    return this.findCharacterById(characterId);
-  }
-  /**
-   * @param {String} characterId
-   * @returns {CharacterModel | undefined}
-   */
-  findUserByCharacterId(characterId) {
-    const users = this.get('users').slice();
-    const foundUser = users.find((user) => (user.get('characterId') === characterId));
-    if (foundUser === undefined) {
-      return undefined;
-    }
-
-    return foundUser;
-  }
-  /**
-   * @param {Point} point
-   * @returns {Boolean}
-   */
-  isWalkableAt(point) {
-    const tileMapModel = this.get('tileMapModel');
-    const foundTile = tileMapModel.getTileAt(point);
-    return isWalkableTile(foundTile);
-  }
-  /**
-   * gets the Encounter if there is one at given point
-   *
-   * @param {Point} point
-   * @returns {EncounterModel | undefined}
-   */
-  findEncounterAt(point) {
-    const encounters = this.get('encounters').slice();
-    return encounters.find((encounterModel) => {
-      const encounterPosition = encounterModel.get('position');
-      return point.equals(encounterPosition);
-    });
-  }
-  /**
-   * gets the House if there is one at given point
-   *
-   * @param {Point} point
-   * @returns {HouseModel | undefined}
-   */
-  findHouseAt(point) {
-    const houses = this.get('houses').slice();
-    return houses.find((houseModel) => {
-      const housePosition = houseModel.get('position');
-      return point.equals(housePosition);
-    });
-  }
-  /**
-   * @param {UserModel} userModel
-   */
-  addUser(userModel) {
-    this.addToArray('users', userModel);
-  }
-  /**
-   * @param {UserModel} userModel
-   */
-  removeUser(userModel) {
-    this.removeFromArray('users', userModel);
-  }
-  /**
-   * is given user the active one
-   *
-   * @param {UserModel} userModel
-   * @returns {Boolean}
-   */
-  isActiveUser(userModel) {
-    const activeUser = this.getActiveUser();
-    if (activeUser === null) {
-      return false;
-    }
-
-    return activeUser.get('characterId') === userModel.get('characterId');
-  }
+  // -- Character methods
   /**
    * @param {CharacterModel} characterModel
    */
@@ -242,7 +111,7 @@ export class GamestateModel extends Model {
     // attach onChange listeners to the character - probably can be set up better elsewhere
     characterModel.onChange('position', (position) => {
       this.updateToVisibleAt(position, characterModel.get('vision'));
-      this.updateActionsForAllUsers();
+      gamestateUserHelper.updateActionsForAllUsers();
     });
   }
   /**
@@ -273,6 +142,15 @@ export class GamestateModel extends Model {
     return activeCharacter;
   }
   /**
+   * gets list of Character at a given Tile position
+   *
+   * @param {Point} point
+   * @returns {Array<CharacterModel>}
+   */
+  getCharactersAt(point) {
+    return this.get('characters').filter((characterModel) => (point.equals(characterModel.get('position'))));
+  }
+  /**
    * is given character the active one
    *
    * @param {CharacterModel} characterModel
@@ -285,6 +163,41 @@ export class GamestateModel extends Model {
     }
 
     return activeCharacter.get('characterId') === characterModel.get('characterId');
+  }
+  /**
+   * @param {String} characterId
+   * @returns {CharacterModel | undefined}
+   */
+  findCharacterById(characterId) {
+    return this.get('characters').find((characterModel) => {
+      return characterModel.get('characterId') === characterId;
+    });
+  }
+  /**
+   * @param {String} userId
+   * @returns {CharacterModel | undefined}
+   */
+  findCharacterByUserId(userId) {
+    const userModel = this.findUserById(userId);
+    if (userModel === undefined) {
+      return undefined;
+    }
+
+    const characterId = userModel.get('characterId');
+    return this.findCharacterById(characterId);
+  }
+  // -- User methods
+  /**
+   * @param {UserModel} userModel
+   */
+  addUser(userModel) {
+    this.addToArray('users', userModel);
+  }
+  /**
+   * @param {UserModel} userModel
+   */
+  removeUser(userModel) {
+    this.removeFromArray('users', userModel);
   }
   /**
    * returns the User whose character's is Active,
@@ -308,6 +221,113 @@ export class GamestateModel extends Model {
 
     // found User
     return activeUser;
+  }
+  /**
+   * gets list of Users at a given Tile position
+   *
+   * @param {Point} point
+   * @returns {Array<UserModel>}
+   */
+  getUsersAt(point) {
+    // our strategy here is to search for Characters at a location,
+    //  then find their corresponding User
+    const foundCharacters = this.getCharactersAt(point);
+    return this.get('users').filter((userModel) => {
+      return foundCharacters.find((characterModel) => (userModel.get('characterId') === characterModel.get('characterId')));
+    });
+  }
+  /**
+   * is given user the active one
+   *
+   * @param {UserModel} userModel
+   * @returns {Boolean}
+   */
+  isActiveUser(userModel) {
+    const activeUser = this.getActiveUser();
+    if (activeUser === null) {
+      return false;
+    }
+
+    return activeUser.get('characterId') === userModel.get('characterId');
+  }
+  /**
+   * @param {String} userId
+   * @returns {UserModel | undefined}
+   */
+  findUserById(userId) {
+    return this.get('users').find((userModel) => {
+      return userModel.get('userId') === userId;
+    });
+  }
+  /**
+   * @param {String} characterId
+   * @returns {CharacterModel | undefined}
+   */
+  findUserByCharacterId(characterId) {
+    const users = this.get('users').slice();
+    const foundUser = users.find((user) => (user.get('characterId') === characterId));
+    if (foundUser === undefined) {
+      return undefined;
+    }
+
+    return foundUser;
+  }
+  // -- Map methods
+  /**
+   * @param {Point} point
+   * @returns {Boolean}
+   */
+  isWalkableAt(point) {
+    const tileMapModel = this.get('tileMapModel');
+    const foundTile = tileMapModel.getTileAt(point);
+    return isWalkableTile(foundTile);
+  }
+  // -- Encounter methods
+  /**
+   * gets the Encounter if there is one at given point
+   *
+   * @param {Point} point
+   * @returns {EncounterModel | undefined}
+   */
+  findEncounterAt(point) {
+    const encounters = this.get('encounters').slice();
+    return encounters.find((encounterModel) => {
+      const encounterPosition = encounterModel.get('position');
+      return point.equals(encounterPosition);
+    });
+  }
+  // -- House methods
+  /**
+   * gets the House if there is one at given point
+   *
+   * @param {Point} point
+   * @returns {HouseModel | undefined}
+   */
+  findHouseAt(point) {
+    const houses = this.get('houses').slice();
+    return houses.find((houseModel) => {
+      const housePosition = houseModel.get('position');
+      return point.equals(housePosition);
+    });
+  }
+  /**
+   * gets all Entities at a given position
+   * EXPERIMENTAL - this is potentially bad since it's list of mixed types
+   *
+   * @param {Point} point
+   * @returns {Array<Model>}
+   */
+  getEntitiesAt(point) {
+    // singular entities
+    const foundHouse = this.findHouseAt(point);
+    const foundEncounter = this.findEncounterAt(point);
+
+    // arrays
+    const foundCharacters = this.getCharactersAt(point);
+    const foundUsers = this.getUsersAt(point);
+
+    // this part puts everything together and removes anything that is undefined/null (falsey)
+    return [foundHouse, foundEncounter, ...foundCharacters, ...foundUsers].filter(Boolean);
   }
   // -- Round / Turn logic
   /**
@@ -371,7 +391,7 @@ export class GamestateModel extends Model {
 
     this.handleStartOfRound();
   }
-  // -- fog of war methods
+  // -- Fog methods
   /**
    * updates Fog of War visibility to Fully visible at a given point
    *
@@ -385,7 +405,7 @@ export class GamestateModel extends Model {
     fogMapModel.setTileAt(point, FOG_TYPES.VISIBLE);
 
     // other tiles that are a given distance away should be partially visible, if not already
-    const nearbyPoints = matrixUtils.getPointsOfNearbyTiles(fogMapModel.get('matrix'), point, distance);
+    const nearbyPoints = mapUtils.getPointsWithinPathDistance(this.get('tileMapModel').get('matrix'), point, distance);
     nearbyPoints.forEach((point) => {
       this.updateToPartiallyVisibleAt(point);
     });
@@ -412,348 +432,6 @@ export class GamestateModel extends Model {
 
     // otherwise make it partially visible
     fogMapModel.setTileAt(point, FOG_TYPES.PARTIAL);
-  }
-  // -- user actions
-  /**
-   * updates all `canMove` attributes in a given user
-   *
-   * @param {UserModel} userModel
-   */
-  updateMovementActionsForUser(userModel) {
-    const characterId = userModel.get('characterId');
-    const characterModel = this.findCharacterById(characterId);
-
-    userModel.set({
-      canMoveLeft: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.LEFT)),
-      canMoveRight: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.RIGHT)),
-      canMoveUp: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.UP)),
-      canMoveDown: this.isWalkableAt(characterModel.getPotentialPosition(POINTS.DOWN)),
-    });
-  }
-  /**
-   * updates `canTrick` and `canTreat` attributes in a given user
-   *
-   * @param {UserModel} userModel
-   */
-  updateLocationActionsForUser(userModel) {
-    const characterId = userModel.get('characterId');
-    const characterModel = this.findCharacterById(characterId);
-    const characterPosition = characterModel.get('position');
-
-
-    const houseModelHere = this.findHouseAt(characterPosition);
-    if (houseModelHere === undefined) {
-      userModel.set({
-        canTrick: false,
-        canTreat: false,
-      });
-      return;
-    };
-
-    userModel.set({
-      canTrick: houseModelHere.isTrickable(characterModel),
-      canTreat: houseModelHere.isTreatable(characterModel),
-    });
-  }
-  /**
-   * picks a random adjacent point that a given character can be on
-   *
-   * @param {CharacterModel} characterModel
-   * @returns {Point}
-   */
-  getRandomCharacterDirection(characterModel) {
-    const potentialLeftPoint = characterModel.getPotentialPosition(POINTS.LEFT);
-    const potentialRightPoint = characterModel.getPotentialPosition(POINTS.RIGHT);
-    const potentialUpPoint = characterModel.getPotentialPosition(POINTS.UP);
-    const potentialDownPoint = characterModel.getPotentialPosition(POINTS.DOWN);
-
-    const choice = mathUtils.getRandomWeightedChoice([
-      {
-        chosenPoint: POINTS.LEFT,
-        weight: this.isWalkableAt(potentialLeftPoint) ? 1 : 0,
-      }, {
-        chosenPoint: POINTS.RIGHT,
-        weight: this.isWalkableAt(potentialRightPoint) ? 1 : 0,
-      }, {
-        chosenPoint: POINTS.UP,
-        weight: this.isWalkableAt(potentialUpPoint) ? 1 : 0,
-      }, {
-        chosenPoint: POINTS.DOWN,
-        weight: this.isWalkableAt(potentialDownPoint) ? 1 : 0,
-      },
-    ]);
-
-    return choice.chosenPoint;
-  }
-  /**
-   * User did something
-   *
-   * @param {String} userId
-   * @param {String} actionId
-   */
-  handleUserGameAction(userId, actionId) {
-    // check if it is the Turn of the user who clicked
-    const activeUser = this.get('activeUser');
-    if (activeUser.get('userId') !== userId) {
-      return;
-    }
-
-    // handle movement actions
-    if (isMovementAction(actionId)) {
-      this.handleUserActionMove(userId, actionId);
-      return;
-    }
-
-    //
-    if (actionId === CLIENT_ACTIONS.TRICK) {
-      this.handleUserActionTrick(userId);
-    }
-    if (actionId === CLIENT_ACTIONS.TREAT) {
-      this.handleUserActionTreat(userId);
-    }
-  }
-  /**
-   * user asked to move
-   *
-   * @param {String} userId
-   * @param {String} actionId
-   */
-  handleUserActionMove(userId, actionId) {
-    const characterModel = this.findCharacterByUserId(userId);
-    if (!characterModel.canMove()) {
-      return;
-    }
-
-    if (actionId === CLIENT_ACTIONS.MOVE.LEFT) {
-      this.updateCharacterPosition(userId, 'left');
-    }
-
-    if (actionId === CLIENT_ACTIONS.MOVE.RIGHT) {
-      this.updateCharacterPosition(userId, 'right');
-    }
-
-    if (actionId === CLIENT_ACTIONS.MOVE.UP) {
-      this.updateCharacterPosition(userId, 'up');
-    }
-
-    if (actionId === CLIENT_ACTIONS.MOVE.DOWN) {
-      this.updateCharacterPosition(userId, 'down');
-    }
-
-    // after the move, they lose a movement
-    characterModel.modifyStat('movement', -1);
-
-    // if they're now down to zero, end User's available actions
-    if (!characterModel.canMove()) {
-      this.onUserActionComplete(userId);
-    }
-  }
-  /**
-   * moves a Character a single direction
-   *
-   * @param {String} userId
-   * @param {String} directionId
-   */
-  updateCharacterPosition(userId, directionId) {
-    const characterModel = this.findCharacterByUserId(userId);
-    const directionPoint = getPointFromString(directionId);
-
-    // nothing to do if given direction is not walkable
-    const nextPosition = characterModel.getPotentialPosition(directionPoint);
-    if (!this.isWalkableAt(nextPosition)) {
-      return;
-    }
-
-    // if there is an Encounter here, we should trigger it
-    const encounterModelHere = this.findEncounterAt(nextPosition);
-    if (encounterModelHere) {
-      encounterModelHere.trigger(characterModel);
-    }
-
-    // finally update the character's position
-    characterModel.set({position: nextPosition});
-  }
-  /**
-   * user wants to Treat
-   *
-   * @param {String} userId
-   */
-  handleUserActionTreat(userId) {
-    const characterModel = this.findCharacterByUserId(userId);
-    const characterPosition = characterModel.get('position');
-
-    // are you doing this at a house?
-    const houseModelHere = this.findHouseAt(characterPosition);
-    if (houseModelHere === undefined) {
-      return;
-    }
-
-    // are you allowed to do this here?
-    if (!houseModelHere.isTreatable(characterModel)) {
-      return;
-    }
-
-    // ok cool
-    houseModelHere.triggerTreat(characterModel);
-
-    // end Actions
-    this.onUserActionComplete(userId);
-  }
-  /**
-   * user wants to Trick
-   *
-   * @param {String} userId
-   */
-  handleUserActionTrick(userId) {
-    const characterModel = this.findCharacterByUserId(userId);
-    const characterPosition = characterModel.get('position');
-
-    // are you doing this at a house?
-    const houseModelHere = this.findHouseAt(characterPosition);
-    if (houseModelHere === undefined) {
-      return;
-    }
-
-    // are you allowed to do this here?
-    if (!houseModelHere.isTrickable(characterModel)) {
-      return;
-    }
-
-    // ok cool
-    houseModelHere.triggerTrick(characterModel);
-
-    // end Actions
-    this.onUserActionComplete(userId);
-  }
-  /**
-   * user wants to Move to a specific spot
-   *
-   * @param {String} userId
-   * @param {Point} position
-   */
-  handleUserActionMoveTo(userId, position) {
-    const nextPosition = new Point(position.x, position.y);
-    const characterModel = this.findCharacterByUserId(userId);
-    const characterPosition = characterModel.get('position');
-    const movement = characterModel.get('movement');
-
-    // check if place Character is moving to is too far away
-    const tileDistance = matrixUtils.getDistanceBetween(this.get('matrix'), characterPosition, nextPosition);
-    if (tileDistance > movement) {
-      return;
-    }
-
-    // check if destination is actually walkable
-    if (!this.isWalkableAt(nextPosition)) {
-      return;
-    }
-
-    // finally update the character's position
-    characterModel.set({
-      position: nextPosition,
-      movement: movement - tileDistance,
-    });
-  }
-  /**
-   * a User's Action (and therefore a User's turn) was finished
-   *
-   * @param {String} userId
-   */
-  onUserActionComplete(userId) {
-    const userModel = this.findUserById(userId);
-
-    userModel.set({
-      isUserTurn: false,
-    });
-
-    // next turn
-    this.handleEndOfTurn();
-  }
-  // -- bulk methods
-  /**
-   * updates every User's actions
-   */
-  updateActionsForAllUsers() {
-    this.get('users').forEach((userModel) => {
-      this.updateMovementActionsForUser(userModel);
-      this.updateLocationActionsForUser(userModel);
-    });
-  }
-  // -- Game / Client handling
-  /**
-   * makes Game Users out of given Client
-   *
-   * @param {SocketClientModel} clientModel
-   * @returns {UserModel | undefined} - returns the created `userModel`
-   */
-  createUserFromClient(clientModel) {
-    // only make users out of those in Game and Remote Clients
-    if (!clientModel.get('isInGame') || clientModel.get('clientType') !== CLIENT_TYPES.REMOTE) {
-      return undefined;
-    }
-
-    // if this Client has an existing User, no need to create another one
-    const userId = clientModel.get('userId');
-    const existingUser = this.findUserById(userId);
-    if (existingUser !== undefined) {
-      return undefined;
-    }
-
-    const name = clientModel.get('name');
-    const characterId = `${name}-character-id`;
-
-    const newCharPosition = MAP_START.clone();
-    const newCharacterModel = new FastCharacter({
-      position: newCharPosition,
-      name: `${name}-character`,
-      characterId: characterId,
-    });
-
-    const newUserModel = new UserModel({
-      name: name,
-      characterId: characterId,
-      userId: userId,
-    });
-
-    // add
-    this.addCharacter(newCharacterModel);
-    this.addUser(newUserModel);
-    return newUserModel;
-  }
-  /**
-   * Client is joining a game in session
-   *
-   * @param {SocketClientModel} socketClient
-   */
-  handleJoinGame(socketClient) {
-    // can't join an inactive game
-    if (this.get('mode') === GAME_MODES.INACTIVE) {
-      return;
-    }
-
-    socketClient.set({
-      isInLobby: false,
-      isInGame: true,
-    });
-
-    this.createUserFromClient(socketClient);
-  }
-  /**
-   * @param {String} userId
-   * @returns {Object}
-   */
-  getClientUserAndCharacter(userId) {
-    const characterModel = this.findCharacterByUserId(userId);
-    const userModel = this.findUserById(userId);
-
-    if (characterModel === undefined || userModel === undefined) {
-      return;
-    }
-
-    return {
-      myCharacter: characterModel.export(),
-      myUser: userModel.export(),
-    };
   }
 }
 /**

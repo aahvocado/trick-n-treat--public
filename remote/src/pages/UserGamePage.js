@@ -17,13 +17,15 @@ import TileMapComponent from 'components/TileMapComponent';
 import {CLIENT_ACTIONS} from 'constants/clientActions';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
+import * as gamestateHelper from 'helpers/gamestateHelper.remote';
+import * as remoteAppStateHelper from 'helpers/remoteAppStateHelper';
+
 import * as connectionManager from 'managers/connectionManager';
 
-import * as gamestateUtils from 'utilities/gamestateUtils.remote';
-import * as remoteAppStateUtils from 'utilities/remoteAppStateUtils';
+import * as mapUtils from 'utilities/mapUtils.remote';
 
 /**
- * page to select the pieces
+ * page to for the game
  */
 class UserGamePage extends PureComponent {
   /** @override */
@@ -37,7 +39,10 @@ class UserGamePage extends PureComponent {
     this.handleTreatOnClick = this.handleTreatOnClick.bind(this);
 
     this.state = {
-      selectedTilePos: null,
+      /** @type {Point} */
+      selectedTilePos: props.myCharacter.position,
+      /** @type {Path} */
+      selectedPath: [],
     }
   }
   /** @override */
@@ -48,13 +53,14 @@ class UserGamePage extends PureComponent {
     } = this.props;
     const {
       selectedTilePos,
+      selectedPath,
     } = this.state;
 
     if (gamestate === undefined) {
       return <div className='bg-secondary flex-grow pad-v-2 flex-centered flex-col width-full text-center'>(waiting for map data)</div>
     }
 
-    const isMyTurn = remoteAppStateUtils.isMyTurn();
+    const isMyTurn = remoteAppStateHelper.isMyTurn();
 
     return (
       <div className='bg-secondary flex-grow flex-centered flex-col width-full text-center'>
@@ -86,19 +92,22 @@ class UserGamePage extends PureComponent {
           </span>
         </div>
 
-        <div className='flex-row-centered bg-primary pad-v-1'>
-          <div className='flex-none sibling-mar-l-2 color-tertiary'>
+        <div className='flex-row-centered bg-primary pad-v-1 color-tertiary'>
+          <div className='flex-none sibling-mar-l-2'>
             <FontAwesomeIcon icon={isMyTurn ? faPlay : faPause} />
           </div>
 
-          <div className='flex-none sibling-mar-l-2 color-tertiary' >{`Round ${gamestate.round}`}</div>
+          <div className='flex-none sibling-mar-l-2' >{`Round ${gamestate.round}`}</div>
+
+          <span className='pad-h-2'>{`( x: ${selectedTilePos.x}, y: ${selectedTilePos.y} )`}</span>
         </div>
 
         <TileMapComponent
+          mapData={gamestate.mapData}
           myCharacter={myCharacter}
           onTileClick={this.handleOnTileClick}
           selectedTilePos={selectedTilePos}
-          {...gamestate}
+          selectedPath={selectedPath}
         />
 
         <div className='flex-row-centered mar-b-4'>
@@ -132,35 +141,40 @@ class UserGamePage extends PureComponent {
    * selection of a Tile
    */
   handleOnTileClick(tilePosition) {
-    this.setState({selectedTilePos: tilePosition});
+    const { myCharacter } = this.props;
+
+    const aStarPath = mapUtils.getAStarPath(gamestateHelper.getVisibileTileMapData(), myCharacter.position, tilePosition);
+
+    this.setState({
+      selectedTilePos: tilePosition,
+      selectedPath: aStarPath,
+    });
   }
   /**
    * check if User can Move to a Tile
    */
   canMove() {
+    const {myCharacter} = this.props;
     const {selectedTilePos} = this.state;
-    if (selectedTilePos === null) {
+
+    if (!remoteAppStateHelper.isMyTurn()) {
       return false;
     }
 
-    if (!remoteAppStateUtils.isMyTurn()) {
+    if (selectedTilePos.equals(myCharacter.position)) {
       return false;
     }
 
-    return gamestateUtils.canMyCharacterMoveTo(selectedTilePos);
+    return gamestateHelper.canMyCharacterMoveTo(selectedTilePos);
   }
   /**
    * @returns {Boolean}
    */
   isOnSelectedTile() {
-    const {selectedTilePos} = this.state;
-    if (selectedTilePos === null) {
-      return false;
-    }
-
     const {myCharacter} = this.props;
-    const position = myCharacter.position;
-    return position.x === selectedTilePos.x && position.y === selectedTilePos.y;
+    const {selectedTilePos} = this.state;
+
+    return myCharacter.position.equals(selectedTilePos);
   }
   /**
    * @returns {Boolean}
@@ -170,11 +184,11 @@ class UserGamePage extends PureComponent {
       return false;
     }
 
-    if (!remoteAppStateUtils.isMyTurn()) {
+    if (!remoteAppStateHelper.isMyTurn()) {
       return false;
     }
 
-    return gamestateUtils.canMyUserTrick();
+    return gamestateHelper.canMyUserTrick();
   }
   /**
    * @returns {Boolean}
@@ -184,11 +198,11 @@ class UserGamePage extends PureComponent {
       return false;
     }
 
-    if (!remoteAppStateUtils.isMyTurn()) {
+    if (!remoteAppStateHelper.isMyTurn()) {
       return false;
     }
 
-    return gamestateUtils.canMyUserTreat();
+    return gamestateHelper.canMyUserTreat();
   }
   /**
    * Move action
@@ -200,6 +214,8 @@ class UserGamePage extends PureComponent {
 
     const {selectedTilePos} = this.state;
     connectionManager.socket.emit(SOCKET_EVENTS.GAME.MOVE_TO, selectedTilePos);
+
+    this.setState({selectedPath: []});
   }
   /**
    * Trick

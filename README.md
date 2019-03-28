@@ -16,9 +16,12 @@ Represents the "board" that the game is being played on.
 Handles all the game logic and communication of events between all the projects.
 
 ### Folder Terminology
-- `./collections` : a predefined bunch of data
+- `./collections` : (?) a predefined bunch of data
 - `./constants` : static values to be referenced
+- `./data` : app-level state and architectural actions
+- `./helpers` : files that aid and depend on other modules, typically helping parse 'data'
 - `./managers` : singletons that handle logic code
-- `./models` : reuseable classes with data and methods
+- `./models` : reuseable classes that typically hold and modify data
 - `./tests` : unit tests
-- `./utilities` : (TODO: I want to separate utilities and helpers, where utils apply actions and modifications where helpers only return a result)
+- `./utilities` : general use functions that takes an input and output
+

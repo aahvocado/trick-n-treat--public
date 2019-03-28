@@ -1,4 +1,7 @@
 import Point from '@studiomoniker/point';
+
+import {TILE_TYPES} from 'constants/tileTypes';
+
 /**
  * Matrix represents 2D array
  *
@@ -24,11 +27,32 @@ export function getTileAt(matrix, point) {
  */
 export function forEach(matrix, callback) {
   matrix.forEach((row, y) => {
-    row.forEach((tile, x) => {
+    row.forEach((tileData, x) => {
       /**
-       * each callback will be given the tile and their position
+       * callback arguments:
+       * @param {*} tileData
+       * @param {Point} point
        */
-      callback(tile, x, y);
+      callback(tileData, new Point(x, y));
+    });
+  });
+}
+/**
+ * helper function for running map through a 2D array
+ *
+ * @param {Matrix} matrix
+ * @param {Function} callback
+ * @returns {Matrix}
+ */
+export function map(matrix, callback) {
+  return matrix.map((row, y) => {
+    return row.map((tileData, x) => {
+      /**
+       * callback arguments:
+       * @param {*} tileData
+       * @param {Point} point
+       */
+      return callback(tileData, new Point(x, y));
     });
   });
 }
@@ -113,7 +137,10 @@ export function getSubmatrixSquareByDistance(matrix, point, distance) {
 export function getSubmatrixByDistance(matrix, point, distance) {
   // make a copy to remove tiles that are too far
   const nullMatrix = createMatrix(matrix[0].length, matrix.length, null);
-  forEach(nullMatrix, (tile, x, y) => {
+  forEach(nullMatrix, (tile, tilePoint) => {
+    const x = tilePoint.x;
+    const y = tilePoint.y;
+
     const distanceFromOriginY = Math.abs(point.clone().y - y);
     const distanceFromOriginX = Math.abs(point.clone().x - x);
 
@@ -141,13 +168,16 @@ export function getPointsOfNearbyTiles(matrix, point, distance) {
 
   // make a copy to remove tiles that are too far
   const nullMatrix = createMatrix(matrix[0].length, matrix.length, null);
-  forEach(nullMatrix, (tile, x, y) => {
+  forEach(nullMatrix, (tile, tilePoint) => {
+    const x = tilePoint.x;
+    const y = tilePoint.y;
+
     const distanceFromOriginY = Math.abs(point.clone().y - y);
     const distanceFromOriginX = Math.abs(point.clone().x - x);
 
     // set tile to available if it's within distance
     if (distanceFromOriginY + distanceFromOriginX <= distance) {
-      submatrixPoints.push(new Point(x, y));
+      submatrixPoints.push(tilePoint);
     };
   });
 
@@ -283,26 +313,20 @@ export function getTypeCounts(matrix) {
   // will be returned
   const typeMap = {};
 
-  // create a copy because...
-  const cleanMatrix = matrix.slice();
+  forEach(matrix, (tileData) => {
+    // types that can't be handled
+    if (tileData === undefined || tileData === null) {
+      return;
+    }
 
-  // iterate through the matrix
-  cleanMatrix.forEach((row) => {
-    row.forEach((tile) => {
-      // types that can't be handled
-      if (tile === undefined || tile === null) {
-        return;
-      }
+    // if it doesn't exist, create it in the map
+    if (typeMap[tileData] === undefined) {
+      typeMap[tileData] = 1;
+      return;
+    }
 
-      // if it doesn't exist, create it in the map
-      if (typeMap[tile] === undefined) {
-        typeMap[tile] = 1;
-        return;
-      }
-
-      // otherwise add to the count
-      typeMap[tile] += 1;
-    });
+    // otherwise add to the count
+    typeMap[tileData] += 1;
   });
 
   return typeMap;

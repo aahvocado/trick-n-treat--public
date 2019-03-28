@@ -1,6 +1,10 @@
+import Point from '@studiomoniker/point';
+
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
 import Model from 'models/Model';
+
+import * as matrixUtils from 'utilities/matrixUtils.remote';
 
 // TESTING
 const _name = (() => {
@@ -53,13 +57,31 @@ export class RemoteStateModel extends Model {
   attachSocketListeners(socket) {
     // received new Gamestate from Server
     socket.on(SOCKET_EVENTS.GAME.UPDATE, (data) => {
+      // convert positional Coordinates into points
+      // @todo - fix this ugly
       this.set({
-        gamestate: data,
+        gamestate: {
+          ...data,
+          mapData: matrixUtils.map(data.mapData, ((tileData) => ({
+            ...tileData,
+            position: new Point(tileData.position.x, tileData.position.y),
+          }))),
+        },
       });
     });
     // -- client
     socket.on(SOCKET_EVENTS.CLIENT.UPDATE, (data) => {
-      this.set(data);
+      // convert positional Coordinates into points
+      // @todo - fix this ugly
+      const myCharacterData = data.myCharacter ? {
+        ...data.myCharacter,
+        position: new Point(data.myCharacter.position.x, data.myCharacter.position.y),
+      } : {};
+
+      this.set({
+        ...data,
+        myCharacter: myCharacterData,
+      });
     });
 
     // -- connection stuff

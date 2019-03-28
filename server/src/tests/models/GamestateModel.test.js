@@ -4,19 +4,19 @@ import Point from '@studiomoniker/point';
 import {GamestateModel} from 'data/gameState';
 
 import TILE_TYPES, {FOG_TYPES} from 'constants/tileTypes';
-
-import CharacterModel from 'models/CharacterModel';
-import EncounterModel from 'models/EncounterModel';
-import HouseModel from 'models/HouseModel';
-import MapModel from 'models/MapModel';
-import UserModel from 'models/UserModel';
-
-import * as gamestateUtils from 'utilities/gamestateUtils';
-
 const STAR = TILE_TYPES.START;
 const NOPE = TILE_TYPES.EMPTY;
 const PATH = TILE_TYPES.PATH;
 const HOUS = TILE_TYPES.HOUSE;
+
+import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
+
+import CharacterModel from 'models/CharacterModel';
+import EncounterModel from 'models/EncounterModel';
+// import HouseModel from 'models/HouseModel';
+import MapModel from 'models/MapModel';
+import UserModel from 'models/UserModel';
+
 
 test.beforeEach((t) => {
   const testUser = new UserModel({
@@ -146,57 +146,6 @@ test('removeUser() - removes given user from a list', (t) => {
   t.is(foundUser, undefined);
 });
 
-test('updateMovementActionsForUser() - accurately updates whether a User can move when at a corner', (t) => {
-  const {testGamestate} = t.context;
-  testGamestate.set({
-    tileMapModel: new MapModel({
-      matrix: [
-        [STAR, NOPE],
-        [PATH, NOPE],
-      ],
-    }),
-  });
-
-  const testCharacter = testGamestate.findCharacterById('TEST_CHARACTER_ID');
-  const testUser = testGamestate.findUserById('TEST_USER_ID');
-
-  testCharacter.set({position: new Point(0, 0)});
-  testGamestate.updateMovementActionsForUser(testUser);
-
-  t.false(testUser.get('canMoveLeft'));
-  t.false(testUser.get('canMoveRight'));
-  t.false(testUser.get('canMoveUp'));
-  t.true(testUser.get('canMoveDown'));
-});
-
-test('updateLocationActionsForUser() - accurately updates whether a User can move when at a corner', (t) => {
-  const {testGamestate} = t.context;
-  const testMap = new MapModel({
-    matrix: [
-      [HOUS, PATH],
-      [PATH, NOPE],
-    ],
-  });
-
-  const testHouseModel = new HouseModel({
-    position: new Point(0, 0),
-  });
-
-  testGamestate.set({
-    tileMapModel: testMap,
-    houses: [testHouseModel],
-  });
-
-  const testCharacter = testGamestate.findCharacterById('TEST_CHARACTER_ID');
-  const testUser = testGamestate.findUserById('TEST_USER_ID');
-
-  testCharacter.set({position: new Point(0, 0)});
-  testGamestate.updateLocationActionsForUser(testUser);
-
-  t.true(testUser.get('canTrick'));
-  t.true(testUser.get('canTreat'));
-});
-
 test('updateToPartiallyVisibleAt() - changes the Fog of War map to partially visible at a given point', (t) => {
   const {testGamestate} = t.context;
   const testMap = new MapModel({
@@ -206,7 +155,7 @@ test('updateToPartiallyVisibleAt() - changes the Fog of War map to partially vis
     ],
   });
 
-  const testFogMap = gamestateUtils.createFogOfWarModel(testMap);
+  const testFogMap = gamestateDataHelper.createFogOfWarModel(testMap);
 
   testGamestate.set({
     tileMapModel: testMap,
@@ -219,4 +168,79 @@ test('updateToPartiallyVisibleAt() - changes the Fog of War map to partially vis
   const testPoint = new Point(0, 1);
   testGamestate.updateToPartiallyVisibleAt(testPoint);
   t.is(testFogMap.getTileAt(testPoint), FOG_TYPES.PARTIAL);
+});
+
+// -- Map Getters
+test('getCharactersAt() - finds correct list of Characters at a point', (t) => {
+  const {testGamestate} = t.context;
+
+  testGamestate.addCharacter(new CharacterModel({
+    name: 'TEST_CHAR_0',
+    characterId: 'TEST_CHAR_0',
+    position: new Point(1, 1),
+  }));
+
+  testGamestate.addCharacter(new CharacterModel({
+    name: 'TEST_CHAR_1',
+    characterId: 'TEST_CHAR_1',
+    position: new Point(1, 1),
+  }));
+
+  testGamestate.addCharacter(new CharacterModel({
+    name: 'TEST_CHAR_2',
+    characterId: 'TEST_CHAR_2',
+    position: new Point(2, 2),
+  }));
+
+  const foundCharacters = testGamestate.getCharactersAt(new Point(1, 1));
+  t.is(foundCharacters.length, 2);
+  t.is(foundCharacters[0].get('name'), 'TEST_CHAR_0');
+  t.is(foundCharacters[1].get('name'), 'TEST_CHAR_1');
+});
+
+test('getUsersAt() - finds correct list of Users with Characters at a point', (t) => {
+  const {testGamestate} = t.context;
+
+  // characters
+  testGamestate.addCharacter(new CharacterModel({
+    name: 'TEST_CHAR_0',
+    characterId: 'TEST_CHAR_0',
+    position: new Point(1, 1),
+  }));
+
+  testGamestate.addCharacter(new CharacterModel({
+    name: 'TEST_CHAR_1',
+    characterId: 'TEST_CHAR_1',
+    position: new Point(1, 1),
+  }));
+
+  testGamestate.addCharacter(new CharacterModel({
+    name: 'TEST_CHAR_2',
+    characterId: 'TEST_CHAR_2',
+    position: new Point(2, 2),
+  }));
+
+  // users
+  testGamestate.addUser(new UserModel({
+    name: 'TEST_USER_0',
+    userId: 'TEST_USER_0',
+    characterId: 'TEST_CHAR_0',
+  }));
+
+  testGamestate.addUser(new UserModel({
+    name: 'TEST_USER_1',
+    userId: 'TEST_USER_1',
+    characterId: 'TEST_CHAR_1',
+  }));
+
+  testGamestate.addUser(new UserModel({
+    name: 'TEST_USER_2',
+    userId: 'TEST_USER_2',
+    characterId: 'TEST_CHAR_2',
+  }));
+
+  const foundUsers = testGamestate.getUsersAt(new Point(1, 1));
+  t.is(foundUsers.length, 2);
+  t.is(foundUsers[0].get('name'), 'TEST_USER_0');
+  t.is(foundUsers[1].get('name'), 'TEST_USER_1');
 });

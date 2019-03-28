@@ -19,6 +19,26 @@ test('forEach() - properly executes callback for each tile', (t) => {
   t.is(tileCount, 9);
 });
 
+test('map() - properly creates a new 2D array using given callback', (t) => {
+  const testMatrix = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+  ];
+
+  const expectedMatrix = [
+    [3, 4, 5],
+    [6, 7, 8],
+    [9, 10, 11],
+  ];
+
+  const resultMatrix = matrixUtils.map(testMatrix, (tile) => {
+    return (tile + 3);
+  });
+
+  t.is(Array.toString(resultMatrix), Array.toString(expectedMatrix));
+});
+
 test('createMatrix() - creates a perfect square matrix', (t) => {
   const expectedMatrix = [
     [0, 0, 0],
@@ -156,6 +176,42 @@ test('hasAdjacentTileType() - returns false if no tiles directly adjacent match 
 
   const hasTile = matrixUtils.hasAdjacentTileType(testMatrix, point, 2);
   t.false(hasTile);
+});
+
+test('getDistanceBetween() - gets the distance between two points on a matrix', (t) => {
+  const testMatrix = [
+    [1, 0, 0, 0, 2],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ];
+
+  const pointOne = new Point(0, 0);
+  const pointTwo = new Point(0, 4);
+
+  const distanceResult = matrixUtils.getDistanceBetween(testMatrix, pointOne, pointTwo);
+  t.is(distanceResult, 4);
+});
+
+test('isWithinDistance() - returns true if the distance between two points are less than or equal to given distance', (t) => {
+  const testMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 2, 0, 0],
+    [0, 0, 0, 3, 0],
+    [0, 0, 0, 0, 4],
+  ];
+
+  const pointOne = new Point(1, 1);
+  const pointTwo = new Point(2, 2);
+  const pointThree = new Point(3, 3);
+  const pointFour = new Point(4, 4);
+
+  t.false(matrixUtils.isWithinDistance(testMatrix, pointOne, pointThree, 3));
+  t.false(matrixUtils.isWithinDistance(testMatrix, pointTwo, pointFour, 3));
+  t.true(matrixUtils.isWithinDistance(testMatrix, pointOne, pointFour, 6));
+  t.true(matrixUtils.isWithinDistance(testMatrix, pointOne, pointTwo, 3));
 });
 
 test('getTypeCounts() - returns typeCount with appropriate types', (t) => {

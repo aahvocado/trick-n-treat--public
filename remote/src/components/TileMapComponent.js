@@ -1,4 +1,6 @@
 import React, { Component, PureComponent } from 'react';
+import Point from '@studiomoniker/point';
+
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUser, faHome} from '@fortawesome/free-solid-svg-icons'
 
@@ -11,29 +13,29 @@ import {FOG_TYPES, TILE_TYPES} from 'constants/tileTypes';
  */
 export class TileMapComponent extends Component {
   static defaultProps = {
-    /** @type {Point} */
-    selectedTilePos: null,
+    /** @type {Matrix} */
+    mapData: undefined,
+    /** @type {CharacterModel.export} */
+    myCharacter: undefined,
     /** @type {Function} */
     onTileClick: () => {},
+    /** @type {Point} */
+    selectedTilePos: undefined,
+    /** @type {Path} */
+    selectedPath: [],
   };
   /** @override */
   render() {
     const {
-      characters,
-      houses,
-      fogMapModel,
-      tileMapModel,
+      mapData,
       myCharacter,
       onTileClick,
       selectedTilePos,
+      selectedPath,
     } = this.props;
 
-    const fogMatrix = fogMapModel.matrix.slice();
-    const mapMatrix = tileMapModel.matrix.slice();
-
     // check if Map has no data yet
-    const isEmpty = mapMatrix.length <= 0 || mapMatrix[0].length <= 0;
-    if (isEmpty) {
+    if (mapData === undefined) {
       return <div className='width-full pad-2'>(waiting for map data)</div>
     }
 
@@ -54,23 +56,26 @@ export class TileMapComponent extends Component {
           transition: 'transform 400ms',
           transform: `translate(${calculateMapXOffset(myCharacter.position.x)}px, ${calculateMapYOffset(myCharacter.position.y)}px)`,
         }}>
-          { mapMatrix.map((innerMatrix, row) => {
+          { mapData.map((mapRowData, rowIdx) => {
             return (
-              <div className='flex-row' key={`tile-map-row-${row}-key`} >
-                { innerMatrix.map((tileType, col) => {
-                  const charactersHere = characters.filter((character) => (character.position.x === col && character.position.y === row));
-                  const isUserHere = charactersHere.some((character) => (character.position.x === myCharacter.position.x && character.position.y === myCharacter.position.y))
-                  const housesHere = houses.filter((house) => (house.position.x === col && house.position.y === row));
+              <div className='flex-row' key={`tile-map-row-${rowIdx}-key`} >
+                { mapRowData.map((tileData, colIdx) => {
+                  // is `myCharacter` one of the characters on this tile`
+                  const isUserHere = tileData.charactersHere.some((character) => (character.position.x === myCharacter.position.x && character.position.y === myCharacter.position.y))
+
+                  // assuming the path is in order, finding the index of this point on the path will tell us how far it is
+                  const distanceFromMyCharacter = selectedPath.findIndex((pathPoint) => (pathPoint.equals(tileData.position)));
+
+                  // tile is considered selected if it is the `selectedTilePos`, or is in the path
+                  const isSelected = (selectedTilePos !== null && selectedTilePos.equals(tileData.position)) || distanceFromMyCharacter >= 0;
 
                   return (
                     <TileItemComponent
-                      key={`tile-item-${col}-${row}-key`}
-                      tileType={tileType}
-                      fogType={fogMatrix[row][col]}
-                      position={{x: col, y: row}}
-                      charactersHere={charactersHere}
-                      housesHere={housesHere}
-                      isSelected={selectedTilePos !== null && (selectedTilePos.x === col && selectedTilePos.y === row)}
+                      key={`tile-item-${colIdx}-${rowIdx}-key`}
+                      {...tileData}
+                      position={tileData.position}
+                      isSelected={isSelected}
+                      isTooFar={distanceFromMyCharacter > myCharacter.movement || (!isUserHere && selectedPath.length === 0)}
                       isUserHere={isUserHere}
                       onTileClick={onTileClick}
                     />
@@ -90,20 +95,25 @@ export default TileMapComponent;
  */
 class TileItemComponent extends Component {
   static defaultProps = {
-    /** @type {Array<Character.Object>} */
+    /** @type {Array<CharacterModel.export>} */
     charactersHere: [],
-    /** @type {Array<House.Object>} */
-    housesHere: [],
-    /** @type {Boolean} */
-    isSelected: false,
-    /** @type {Boolean} */
-    isUserHere: false,
-
+    /** @type {EncounterModel.export} */
+    encounterHere: undefined,
+    /** @type {HouseModel.export} */
+    houseHere: undefined,
+    /** @type {Point} */
+    position: new Point(),
     /** @type {FogType} */
     fogType: undefined,
     /** @type {TileType} */
     tileType: undefined,
 
+    /** @type {Boolean} */
+    isSelected: false,
+    /** @type {Boolean} */
+    isTooFar: false,
+    /** @type {Boolean} */
+    isUserHere: false,
     /** @type {Function} */
     onTileClick: () => {},
   };
@@ -124,6 +134,7 @@ class TileItemComponent extends Component {
   render() {
     const {
       fogType,
+      isTooFar,
       isSelected,
       isUserHere,
       tileType,
@@ -134,8 +145,8 @@ class TileItemComponent extends Component {
 
     // border highlight
     const borderStyles = isSelected ?
-      { border: '2px solid white' } :
-      { border: isUserHere ? '2px solid black' : '' };
+      { border: isTooFar ? '1px solid #ff4747' : '2px solid #0cd2ff' } :
+      { border: isUserHere ? '2px solid yellow' : '' };
 
     // make hidden tiles just look like empty tiles
     const modifierStyles = {
@@ -172,11 +183,11 @@ class TileItemComponent extends Component {
   renderEntityIcons() {
     const {
       charactersHere,
-      housesHere,
+      houseHere,
     } = this.props;
 
     const renderedEntities = [];
-    housesHere.forEach((house) => {
+    if (houseHere !== undefined) {
       const entityIdx = renderedEntities.length;
       renderedEntities.push(
         <MapEntityIconComponent
@@ -185,7 +196,8 @@ class TileItemComponent extends Component {
           icon={faHome}
         />
       )
-    });
+    };
+
     charactersHere.forEach((character) => {
       const entityIdx = renderedEntities.length;
       renderedEntities.push(

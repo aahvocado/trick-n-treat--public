@@ -1,0 +1,88 @@
+import test from 'ava';
+import Point from '@studiomoniker/point';
+import POINTS from 'constants/points';
+
+import gameState from 'data/gameState';
+
+import TILE_TYPES from 'constants/tileTypes';
+const STAR = TILE_TYPES.START;
+const NOPE = TILE_TYPES.EMPTY;
+const PATH = TILE_TYPES.PATH;
+const HOUS = TILE_TYPES.HOUSE;
+
+import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
+
+import CharacterModel from 'models/CharacterModel';
+import MapModel from 'models/MapModel';
+
+test.beforeEach((t) => {
+  // reset the gamestate for each test
+  gameState.set({
+    users: [],
+    characters: [],
+    tileMapModel: new MapModel(),
+    houses: [],
+    encounters: [],
+  });
+});
+
+test('getRandomCharacterDirection() - (randomly) picks a valid directional Point based on the Characters position', (t) => {
+  // -- setup
+  const testMap = new MapModel({
+    matrix: [
+      [STAR, NOPE, PATH, PATH, HOUS],
+      [PATH, NOPE, PATH, NOPE, NOPE],
+      [PATH, NOPE, PATH, PATH, PATH],
+      [PATH, NOPE, NOPE, NOPE, PATH],
+      [HOUS, PATH, PATH, PATH, HOUS],
+    ],
+  });
+
+  const testCharacter = new CharacterModel({
+    name: 'TEST-CHAR-1',
+    characterId: 'TEST-CHAR-ID-1',
+    position: new Point(0, 0),
+  });
+
+  gameState.set({
+    tileMapModel: testMap,
+    characters: [testCharacter],
+  });
+
+  // -- test starts here
+  const chosenPoint = gamestateCharacterHelper.getRandomCharacterDirection(testCharacter);
+  t.true(chosenPoint.equals(POINTS.DOWN));
+});
+
+test('updateCharacterPosition() - correctly updates a Characters position if the direction is valid', (t) => {
+  // -- setup
+  const testMap = new MapModel({
+    matrix: [
+      [STAR, NOPE, PATH, PATH, HOUS],
+      [PATH, NOPE, PATH, NOPE, NOPE],
+      [PATH, NOPE, PATH, PATH, PATH],
+      [PATH, NOPE, NOPE, NOPE, PATH],
+      [HOUS, PATH, PATH, PATH, HOUS],
+    ],
+  });
+
+  const testCharacter = new CharacterModel({
+    name: 'TEST-CHAR-1',
+    characterId: 'TEST-CHAR-ID-1',
+    position: new Point(0, 0),
+  });
+
+  gameState.set({
+    tileMapModel: testMap,
+    characters: [testCharacter],
+  });
+
+  // -- test starts here
+  // from the Start, they can move down
+  gamestateCharacterHelper.updateCharacterPosition('TEST-CHAR-ID-1', 'down');
+  t.true(testCharacter.get('position').equals(new Point(0, 1)));
+
+  // but not right
+  gamestateCharacterHelper.updateCharacterPosition('TEST-CHAR-ID-1', 'right');
+  t.true(testCharacter.get('position').equals(new Point(0, 1)));
+});
