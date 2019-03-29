@@ -1,6 +1,5 @@
 import test from 'ava';
 import Point from '@studiomoniker/point';
-import POINTS from 'constants/points';
 
 import gameState from 'data/gameState';
 

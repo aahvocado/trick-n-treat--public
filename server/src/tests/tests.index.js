@@ -1,4 +1,6 @@
+import './helpers/gamestateCharacterHelper.test.js';
 import './helpers/gamestateDataHelper.test.js';
+import './helpers/gamestateUserHelper.test.js';
 
 import './models/GamestateModel.test.js';
 

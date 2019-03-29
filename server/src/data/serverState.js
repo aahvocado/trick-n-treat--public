@@ -41,6 +41,15 @@ export class ServerStateModel extends Model {
       },
     });
   }
+  // --
+  /**
+   * @param {String} userId
+   * @returns {SocketClientModel | undefined}
+   */
+  findClientByUserId(userId) {
+    const clients = this.get('clients');
+    return clients.find((clientModel) => (clientModel.get('userId') === userId));
+  }
   // -- Actions for the Server state
   /**
    * Its time to Start the Game!

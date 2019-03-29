@@ -43,26 +43,6 @@ export function init(io) {
       gamestateUserHelper.handleUserActionMoveTo(userId, position);
     });
 
-    // -- gamestate changes
-    /**
-     * remainingMoves
-     */
-    gameState.onChange('remainingMoves', () => {
-      const activeUser = gameState.get('activeUser');
-      if (activeUser !== null && activeUser.get('userId') === userId) {
-        socket.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(socketClient));
-        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
-      }
-    });
-    /**
-     * activeUser
-     */
-    gameState.onChange('activeUser', (activeUser) => {
-      if (activeUser !== null && activeUser.get('userId') === userId) {
-        socket.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(socketClient));
-        socket.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
-      }
-    });
     // -- socket events
     /**
      * disconnect
@@ -100,37 +80,6 @@ export function init(io) {
     // initialize the game
     gamestateDataHelper.generateNewMap();
     console.log('\x1b[36m', 'Game Starting!');
-  });
-  // -- Gamestate changes
-  /**
-   * when Gamestate changes mode
-   *  if it's ACTIVE, send data to everyone
-   */
-  gameState.onChange('mode', (mode) => {
-    if (mode !== GAME_MODES.ACTIVE) {
-      return;
-    }
-
-    const clients = serverState.get('clients');
-    clients.forEach((client) => {
-      client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(client));
-      client.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
-    });
-
-    console.log('\x1b[36m', '(sending updates to clients)');
-  });
-  /**
-   * when Gamestate changes mode
-   *  if it's ACTIVE, send data to everyone
-   */
-  gameState.onChange('users', () => {
-    const clients = serverState.get('clients');
-    clients.forEach((client) => {
-      client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(client));
-      client.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
-    });
-
-    console.log('\x1b[36m', '(sending updates to clients)');
   });
 }
 // -- connection events
@@ -189,6 +138,42 @@ function createAndAddNewScreenClient(attributes) {
   return newClient;
 }
 // -- individual Client functions
+/**
+ * sends data to a User by finding its associated Client
+ *
+ * @param {UserModel} userModel
+ */
+export function sendUpdateToClientByUser(userModel) {
+  const userId = userModel.get('userId');
+  const clientModel = serverState.findClientByUserId(userId);
+  if (clientModel === undefined) {
+    return;
+  };
+
+  sendUpdateToClient(clientModel);
+}
+/**
+ * sends data to a User by finding its associated Client
+ *
+ * @param {SocketClientModel} clientModel
+ */
+export function sendUpdateToClient(clientModel) {
+  console.log('\x1b[36m', `. (sending update to client "${clientModel.get('name')}")`);
+  clientModel.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(clientModel));
+  clientModel.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
+}
+/**
+ * sends data to all Clients
+ *
+ * @param {SocketClientModel} clientModel
+ */
+export function sendUpdateToAllClients(clientModel) {
+  const clients = serverState.get('clients');
+  console.log('\x1b[36m', `(sending updates to all ${clients.length} clients)`);
+  clients.forEach((client) => {
+    sendUpdateToClient(client);
+  });
+}
 /**
  * creates some State data for a Remote Client
  *

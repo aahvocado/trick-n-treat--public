@@ -6,6 +6,7 @@ export const GAME_MODES = {
   ACTIVE: 'GAME-ACTIVE-MODE',
   PAUSED: 'GAME-PAUSED-MODE',
   WORKING: 'GAME-WORKING-MODE',
+  CUTSCENE: 'GAME-CUTSCENE-MODE',
 };
 /**
  * @typedef {String} ServerMode

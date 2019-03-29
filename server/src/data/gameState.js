@@ -1,11 +1,12 @@
 import seedrandom from 'seedrandom';
 import {extendObservable} from 'mobx';
 
-
 import {GAME_MODES} from 'constants/gameModes';
 import TILE_TYPES, {FOG_TYPES, isWalkableTile} from 'constants/tileTypes';
 
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
+
+import {sendUpdateToAllClients} from 'managers/clientManager';
 
 import Model from 'models/Model';
 import MapModel from 'models/MapModel';
@@ -350,6 +351,8 @@ export class GamestateModel extends Model {
       activeUser.set({isUserTurn: true});
     }
 
+    // send update
+    sendUpdateToAllClients();
     const activeCharacter = this.get('activeCharacter');
     console.log('\x1b[93m', `. Turn for: "${activeCharacter.get('name')}"`);
   }
@@ -359,9 +362,8 @@ export class GamestateModel extends Model {
   handleEndOfTurn() {
     console.log('\x1b[36m', '(handleEndOfTurn)');
 
-    const currentTurnQueue = this.get('turnQueue').slice();
-
     // remove the previous `activeCharacter`
+    const currentTurnQueue = this.get('turnQueue').slice();
     const oldActiveCharacter = currentTurnQueue.shift();
 
     // set the new turn queue
@@ -369,6 +371,9 @@ export class GamestateModel extends Model {
 
     // reset the old Character's movement
     oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
+
+    // send update
+    sendUpdateToAllClients();
   }
   /**
    * round

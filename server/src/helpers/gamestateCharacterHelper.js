@@ -1,7 +1,11 @@
+// import {GAME_MODES} from 'constants/gameModes';
 import POINTS, {getPointFromString} from 'constants/points';
 
 import gameState from 'data/gameState';
 
+import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
+
+import * as mapUtils from 'utilities/mapUtils';
 import * as mathUtils from 'utilities/mathUtils';
 
 /**
@@ -39,27 +43,75 @@ export function getRandomCharacterDirection(characterModel) {
   return choice.chosenPoint.clone();
 }
 /**
- * moves a Character a single direction
+ * moves a Character to a given Position
  *
- * @param {String} userId
- * @param {String} directionId
+ * @param {CharacterModel} characterModel
+ * @param {Point} nextPosition
  */
-export function updateCharacterPosition(userId, directionId) {
-  const characterModel = gameState.findCharacterByUserId(userId);
-  const directionPoint = getPointFromString(directionId);
-
+export function updateCharacterPosition(characterModel, nextPosition) {
   // nothing to do if given direction is not walkable
-  const nextPosition = characterModel.getPotentialPosition(directionPoint);
   if (!gameState.isWalkableAt(nextPosition)) {
     return;
   }
 
+  // finally update the character's position
+  characterModel.set({position: nextPosition});
+
   // if there is an Encounter here, we should trigger it
   const encounterModelHere = gameState.findEncounterAt(nextPosition);
   if (encounterModelHere) {
-    encounterModelHere.trigger(characterModel);
+    // console.log(`(encounter at [x: ${nextPosition.x}, y: ${nextPosition.y}])`);
+    // encounterModelHere.trigger(characterModel);
+
+    // gameState.set({mode: GAME_MODES.CUTSCENE});
+  }
+}
+/**
+ * moves a Character a single direction
+ *
+ * @param {CharacterModel} characterModel
+ * @param {String} directionId
+ */
+export function updateCharacterPositionByDirection(characterModel, directionId) {
+  const directionPoint = getPointFromString(directionId);
+  const nextPosition = characterModel.getPotentialPosition(directionPoint);
+  updateCharacterPosition(characterModel, nextPosition);
+}
+/**
+ * moves a Character a single direction
+ *
+ * @param {CharacterModel} characterModel
+ * @param {String} endPoint
+ */
+export function handleMoveCharacterTo(characterModel, endPoint) {
+  // check if destination is actually walkable
+  if (!gameState.isWalkableAt(endPoint)) {
+    return;
   }
 
-  // finally update the character's position
-  characterModel.set({position: nextPosition});
+  // make the potential path the Character will walk,
+  const characterPos = characterModel.get('position');
+  const movePath = mapUtils.getAStarPath(gameState.get('tileMapModel').get('matrix'), characterPos, endPoint);
+  movePath.shift(); // remove the first Point, which is the one the Character is on
+
+  // check if destination is too far away
+  const movement = characterModel.get('movement');
+  if (movePath.length > movement) {
+    return;
+  }
+
+  console.log(`(moving "${characterModel.get('name')}" to [x: ${endPoint.x}, y: ${endPoint.y}])`);
+
+  // take one step at a time for moving along the path
+  movePath.forEach((pathPoint) => {
+    // subtract a Movement
+    characterModel.modifyStat('movement', -1);
+
+    // attempt to update the character's position
+    updateCharacterPosition(characterModel, pathPoint);
+
+    // we're going to consider this one movement as an end of action
+    const userModel = gameState.findUserByCharacterId(characterModel.get('characterId'));
+    gamestateUserHelper.onUserActionComplete(userModel);
+  });
 }

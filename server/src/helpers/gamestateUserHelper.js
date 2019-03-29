@@ -6,16 +6,15 @@ import {CLIENT_TYPES} from 'constants/clientTypes';
 import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
 import {GAME_MODES} from 'constants/gameModes';
 import {MAP_START} from 'constants/mapSettings';
-
 import POINTS from 'constants/points';
 
 import gameState from 'data/gameState';
 
-import UserModel from 'models/UserModel';
-
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 
-import * as matrixUtils from 'utilities/matrixUtils';
+import {sendUpdateToClientByUser} from 'managers/clientManager';
+
+import UserModel from 'models/UserModel';
 
 /**
  * this Helper is for handling actions from the User
@@ -186,28 +185,27 @@ export function handleUserActionMove(userId, actionId) {
   }
 
   if (actionId === CLIENT_ACTIONS.MOVE.LEFT) {
-    gamestateCharacterHelper.updateCharacterPosition(userId, 'left');
+    gamestateCharacterHelper.updateCharacterPositionByDirection(characterModel, 'left');
   }
 
   if (actionId === CLIENT_ACTIONS.MOVE.RIGHT) {
-    gamestateCharacterHelper.updateCharacterPosition(userId, 'right');
+    gamestateCharacterHelper.updateCharacterPositionByDirection(characterModel, 'right');
   }
 
   if (actionId === CLIENT_ACTIONS.MOVE.UP) {
-    gamestateCharacterHelper.updateCharacterPosition(userId, 'up');
+    gamestateCharacterHelper.updateCharacterPositionByDirection(characterModel, 'up');
   }
 
   if (actionId === CLIENT_ACTIONS.MOVE.DOWN) {
-    gamestateCharacterHelper.updateCharacterPosition(userId, 'down');
+    gamestateCharacterHelper.updateCharacterPositionByDirection(characterModel, 'down');
   }
 
   // after the move, they lose a movement
   characterModel.modifyStat('movement', -1);
 
-  // if they're now down to zero, end User's available actions
-  if (!characterModel.canMove()) {
-    onUserActionComplete(userId);
-  }
+  // action complete
+  const userModel = gameState.findUserById(userId);
+  onUserActionComplete(userModel);
 }
 /**
  * user wants to Treat
@@ -232,8 +230,9 @@ export function handleUserActionTreat(userId) {
   // ok cool
   houseModelHere.triggerTreat(characterModel);
 
-  // end Actions
-  onUserActionComplete(userId);
+  // action complete
+  const userModel = gameState.findUserById(userId);
+  onUserActionComplete(userModel);
 }
 /**
  * user wants to Trick
@@ -258,46 +257,42 @@ export function handleUserActionTrick(userId) {
   // ok cool
   houseModelHere.triggerTrick(characterModel);
 
-  // end Actions
-  onUserActionComplete(userId);
+  // action complete
+  const userModel = gameState.findUserById(userId);
+  onUserActionComplete(userModel);
 }
 /**
  * user wants to Move to a specific spot
  *
  * @param {String} userId
- * @param {Point} position
+ * @param {Point} endPosition
  */
-export function handleUserActionMoveTo(userId, position) {
-  const nextPosition = new Point(position.x, position.y);
+export function handleUserActionMoveTo(userId, endPosition) {
   const characterModel = gameState.findCharacterByUserId(userId);
-  const characterPosition = characterModel.get('position');
-  const movement = characterModel.get('movement');
-
-  // check if place Character is moving to is too far away
-  const tileDistance = matrixUtils.getDistanceBetween(gameState.get('matrix'), characterPosition, nextPosition);
-  if (tileDistance > movement) {
-    return;
-  }
-
-  // check if destination is actually walkable
-  if (!gameState.isWalkableAt(nextPosition)) {
-    return;
-  }
-
-  // finally update the character's position
-  characterModel.set({
-    position: nextPosition,
-    movement: movement - tileDistance,
-  });
+  const endPoint = new Point(endPosition.x, endPosition.y);
+  gamestateCharacterHelper.handleMoveCharacterTo(characterModel, endPoint);
 }
 /**
- * a User's Action (and therefore a User's turn) was finished
+ * a User's Action was finished
  *
- * @param {String} userId
+ * @param {UserModel} userModel
  */
-export function onUserActionComplete(userId) {
-  const userModel = gameState.findUserById(userId);
+export function onUserActionComplete(userModel) {
+  // a character's movement is now 0, end User's available actions
+  const characterModel = gameState.findCharacterByUserId(userModel.get('userId'));
+  if (!characterModel.canMove()) {
+    onUserTurnComplete(userModel);
+  }
 
+  // after they finish an action, we should update the Client
+  sendUpdateToClientByUser(userModel);
+}
+/**
+ * a User's Turn finished
+ *
+ * @param {UserModel} userModel
+ */
+export function onUserTurnComplete(userModel) {
   userModel.set({
     isUserTurn: false,
   });
