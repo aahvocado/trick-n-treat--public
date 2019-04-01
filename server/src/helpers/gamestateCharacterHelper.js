@@ -8,6 +8,8 @@ import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 import * as mapUtils from 'utilities/mapUtils';
 import * as mathUtils from 'utilities/mathUtils';
 
+import logger from 'utilities/logger';
+
 /**
  * this Helper is for applying actions to Characters
  */
@@ -60,7 +62,7 @@ export function updateCharacterPosition(characterModel, nextPosition) {
   // if there is an Encounter here, we should trigger it
   const encounterModelHere = gameState.findEncounterAt(nextPosition);
   if (encounterModelHere) {
-    // console.log(`(encounter at [x: ${nextPosition.x}, y: ${nextPosition.y}])`);
+    // logger.verbose(`(encounter at [x: ${nextPosition.x}, y: ${nextPosition.y}])`);
     // encounterModelHere.trigger(characterModel);
 
     // gameState.set({mode: GAME_MODES.CUTSCENE});
@@ -100,7 +102,7 @@ export function handleMoveCharacterTo(characterModel, endPoint) {
     return;
   }
 
-  console.log(`(moving "${characterModel.get('name')}" to [x: ${endPoint.x}, y: ${endPoint.y}])`);
+  logger.verbose(`(moving "${characterModel.get('name')}" to [x: ${endPoint.x}, y: ${endPoint.y}])`);
 
   // take one step at a time for moving along the path
   movePath.forEach((pathPoint) => {

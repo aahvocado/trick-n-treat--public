@@ -11,21 +11,18 @@ import {sendUpdateToAllClients} from 'managers/clientManager';
 import Model from 'models/Model';
 import MapModel from 'models/MapModel';
 
+import logger from 'utilities/logger';
 import * as mapUtils from 'utilities/mapUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
 
-/**
- * A note on this Gamestate Model and the other helper files:
- * Hypothetically, everything in the helpers could be a method in this class
- *  but I'm trying to let this model be very generalized getters
- *  with the helpers doing more complex actions
- */
-
-// seed for generating gamestate
+// seed for generating data
 const seed = Date.now();
 seedrandom(seed, {global: true});
 /**
- *
+ * A note on this GamestateModel and the related helper files:
+ * Hypothetically, everything in the helpers could be a method in this class
+ *  but I'm trying to let this model be very generalized getters
+ *  with the helpers doing more complex actions
  */
 export class GamestateModel extends Model {
   /** @override */
@@ -100,7 +97,7 @@ export class GamestateModel extends Model {
       }
     });
 
-    console.log('\x1b[36m', `Gamestate instantiated - (Seed "${seed}")`);
+    logger.lifecycle(`Gamestate instantiated - (Seed "${seed}")`);
   }
   // -- Character methods
   /**
@@ -336,6 +333,11 @@ export class GamestateModel extends Model {
    */
   initTurnQueue() {
     const characters = this.get('characters').slice();
+    if (characters.length <= 0) {
+      logger.error('Why are we creating a TurnQueue with no Characters?');
+      return;
+    }
+
     const newTurnQueue = matrixUtils.shuffleArray(characters);
     this.set({turnQueue: newTurnQueue});
   }
@@ -343,7 +345,7 @@ export class GamestateModel extends Model {
    * handles start of turn
    */
   handleStartOfTurn() {
-    console.log('\x1b[36m', '(handleStartOfTurn)');
+    logger.lifecycle('(handleStartOfTurn)');
 
     // if the current active is a User, then we should let them know
     const activeUser = this.get('activeUser');
@@ -354,13 +356,13 @@ export class GamestateModel extends Model {
     // send update
     sendUpdateToAllClients();
     const activeCharacter = this.get('activeCharacter');
-    console.log('\x1b[93m', `. Turn for: "${activeCharacter.get('name')}"`);
+    logger.game(`. Turn for: "${activeCharacter.get('name')}"`);
   }
   /**
    * end of turn
    */
   handleEndOfTurn() {
-    console.log('\x1b[36m', '(handleEndOfTurn)');
+    logger.lifecycle('(handleEndOfTurn)');
 
     // remove the previous `activeCharacter`
     const currentTurnQueue = this.get('turnQueue').slice();
@@ -379,20 +381,20 @@ export class GamestateModel extends Model {
    * round
    */
   handleStartOfRound() {
-    console.log('\x1b[36m', '(handleStartOfRound)');
+    logger.lifecycle('(handleStartOfRound)');
 
     // increment round
     this.set({round: this.get('round') + 1});
 
     // create new turn queue
     this.initTurnQueue();
-    console.log('\x1b[93m', `Round ${this.get('round')} has started.`);
+    logger.game(`Round ${this.get('round')} has started.`);
   }
   /**
    * round
    */
   handleEndOfRound() {
-    console.log('\x1b[36m', '(handleEndOfRound)');
+    logger.lifecycle('(handleEndOfRound)');
 
     this.handleStartOfRound();
   }

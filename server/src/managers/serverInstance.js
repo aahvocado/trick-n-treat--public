@@ -3,6 +3,8 @@ import http from 'http';
 
 import * as websocketInstance from 'managers/websocketInstance';
 
+import logger from 'utilities/logger';
+
 let app;
 let server;
 
@@ -24,6 +26,6 @@ export function init() {
   // START!
   const SERVER_PORT = process.env.SERVER_PORT;
   server.listen(SERVER_PORT, async () => {
-    console.log('\x1b[36m', `Trick & Treat Server Started - localhost:${SERVER_PORT}`);
+    logger.server(`Trick & Treat Server Started - localhost:${SERVER_PORT}`);
   });
 }

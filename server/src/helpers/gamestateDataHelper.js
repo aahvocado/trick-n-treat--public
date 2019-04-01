@@ -6,6 +6,7 @@ import gameState from 'data/gameState';
 
 import MapModel from 'models/MapModel';
 
+import logger from 'utilities/logger';
 import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
 import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
@@ -19,6 +20,8 @@ import * as matrixUtils from 'utilities/matrixUtils';
  * generates a New Map for the current Gamestate
  */
 export function generateNewMap() {
+  logger.game('Generating Map...');
+
   // create the map instance
   const baseTileMapModel = createTileMapModel(MAP_SETTINGS);
   const houseList = createHouseList(baseTileMapModel);
@@ -33,12 +36,13 @@ export function generateNewMap() {
     fogMapModel: fogMapModel,
   });
 
+  // update initial visibility
+  gameState.get('characters').forEach((characterModel) => {
+    gameState.updateToVisibleAt(characterModel.get('position'), characterModel.get('vision'));
+  });
+
   // start the first round, which will create a turn queue
   gameState.handleStartOfRound();
-
-  // update visibility
-  const activeCharacter = gameState.get('activeCharacter');
-  gameState.updateToVisibleAt(activeCharacter.get('position'), activeCharacter.get('vision'));
 }
 /**
  * generates a MapModel
@@ -95,7 +99,7 @@ export function displayTurnQueue() {
     displayList += `\n${i + 1}. "${characterModel.get('name')}"`;
   }
 
-  console.log('\x1b[93m', 'Turn Order' + displayList);
+  logger.game('Turn Order' + displayList);
 }
 /**
  * formats Gamestate into something more convenient for the Remote

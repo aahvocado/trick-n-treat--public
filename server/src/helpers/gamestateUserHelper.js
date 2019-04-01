@@ -16,6 +16,8 @@ import {sendUpdateToClientByUser} from 'managers/clientManager';
 
 import UserModel from 'models/UserModel';
 
+import logger from 'utilities/logger';
+
 /**
  * this Helper is for handling actions from the User
  */
@@ -29,13 +31,6 @@ import UserModel from 'models/UserModel';
 export function createUserFromClient(clientModel) {
   // only make users out of those in Game and Remote Clients
   if (!clientModel.get('isInGame') || clientModel.get('clientType') !== CLIENT_TYPES.REMOTE) {
-    return undefined;
-  }
-
-  // if this Client has an existing User, no need to create another one
-  const userId = clientModel.get('userId');
-  const existingUser = gameState.findUserById(userId);
-  if (existingUser !== undefined) {
     return undefined;
   }
 
@@ -55,8 +50,8 @@ export function createUserFromClient(clientModel) {
     userId: userId,
   });
 
-
   // add
+  logger.game(`User "${clientModel.get('name')}" joined the game.`);
   gameState.addCharacter(newCharacterModel);
   gameState.addUser(newUserModel);
   return newUserModel;
@@ -64,20 +59,29 @@ export function createUserFromClient(clientModel) {
 /**
  * Client is joining a game in session
  *
- * @param {SocketClientModel} socketClient
+ * @param {SocketClientModel} clientModel
  */
-export function handleJoinGame(socketClient) {
+export function handleJoinGame(clientModel) {
   // can't join an inactive game
   if (gameState.get('mode') === GAME_MODES.INACTIVE) {
     return;
   }
 
-  socketClient.set({
+  // only allow existing rejoins for now
+  const userId = clientModel.get('userId');
+  const existingUser = gameState.findUserById(userId);
+  if (existingUser === undefined) {
+    logger.game('Not allowing new Users for now');
+    return;
+  };
+
+  // update and send
+  clientModel.set({
     isInLobby: false,
     isInGame: true,
   });
 
-  createUserFromClient(socketClient);
+  sendUpdateToClientByUser(existingUser);
 }
 /**
  * @param {String} userId

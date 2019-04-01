@@ -3,7 +3,12 @@ import {extendObservable} from 'mobx';
 import {CLIENT_TYPES} from 'constants/clientTypes';
 import {SERVER_MODES} from 'constants/gameModes';
 
+import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
+import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
+
 import Model from 'models/Model';
+
+import logger from 'utilities/logger';
 
 /**
  *
@@ -58,24 +63,29 @@ export class ServerStateModel extends Model {
    *  then we can switch modes and start.
    */
   handleStartGame() {
-    console.log('\x1b[93m', 'Attempting to Start a Game...');
+    logger.game('Attempting to Start a Game...');
     if (!this.canStartGame()) {
       return;
     }
 
     // move everyone from the Lobby to the Game
-    const clientsCopy = this.get('clients').slice();
-    clientsCopy.map((client) => {
-      client.set({
+    const clientList = this.get('clients').slice();
+    clientList.forEach((clientModel) => {
+      clientModel.set({
         isInLobby: false,
         isInGame: true,
       });
+
+      gamestateUserHelper.createUserFromClient(clientModel);
     });
 
     this.set({
-      clients: this.get('clients').replace(clientsCopy),
+      clients: this.get('clients').replace(clientList),
       mode: SERVER_MODES.GAME,
     });
+
+    // initialize the game
+    gamestateDataHelper.generateNewMap();
   }
   /**
    * check if everything is valid to create a game
@@ -84,22 +94,22 @@ export class ServerStateModel extends Model {
    */
   canStartGame() {
     if (this.get('mode') === SERVER_MODES.GAME) {
-      console.error('\x1b[91m', '. There is already a game in progress!');
+      logger.error('. There is already a game in progress!');
       return false;
     }
 
     if (this.get('clients').length <= 0) {
-      console.error('\x1b[91m', '. There is no one here!');
+      logger.error('. There is no one here!');
       return false;
     }
 
     if (this.get('lobbyClients').length <= 0) {
-      console.error('\x1b[91m', '. There are no players!');
+      logger.error('. There are no players!');
       return false;
     }
 
     if (this.get('screenClient') === null) {
-      console.error('\x1b[91m', '. There is no Screen!');
+      logger.error('. There is no Screen!');
       // return false;
     }
 

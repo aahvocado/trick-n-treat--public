@@ -13,7 +13,7 @@ const _name = (() => {
 
   const randomChoice = (list) => (list[Math.floor(Math.random()*list.length)]);
 
-  return `${randomChoice(firsts)}-${randomChoice(seconds)}`
+  return `${randomChoice(firsts)}-${randomChoice(seconds)}`;
 })();
 /**
  *
@@ -24,9 +24,10 @@ export class RemoteStateModel extends Model {
     super({
       // -- app session data
       /** @type {String} */
-      name: _name,
+      name: 'TEST-REMOTE-USER',
       /** @type {String} */
-      userId: `${_name}-${Date.now()}`,
+      _userId: `${_name}-${Date.now()}`,
+      userId: 'TEST-REMOTE-USER',
 
       // -- gamestate - from the server
       /** @type {GamestateObject | undefined} */

@@ -39,7 +39,6 @@ export class EncounterModel extends Model {
    * @param {CharacterModel} characterModel
    */
   trigger(characterModel) {
-    console.log('encounter trigger');
     const onTrigger = this.get('onTrigger');
     onTrigger(characterModel);
 

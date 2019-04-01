@@ -1,13 +1,15 @@
-import {GAME_MODES, SERVER_MODES} from 'constants/gameModes';
+import {CLIENT_TYPES} from 'constants/clientTypes';
+import {SERVER_MODES} from 'constants/gameModes';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
-import gameState from 'data/gameState';
 import serverState from 'data/serverState';
 
 import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
-import {RemoteClientModel, ScreenClientModel} from 'models/SocketClientModel';
+import {SocketClientModel} from 'models/SocketClientModel';
+
+import logger from 'utilities/logger';
 
 /**
  * acts as the middleman between Client connections and the Server state
@@ -19,39 +21,7 @@ import {RemoteClientModel, ScreenClientModel} from 'models/SocketClientModel';
  * @param {socket.io-server} io
  */
 export function init(io) {
-  io.on('connection', (socket) => {
-    // create a Client object and add it to the Server State
-    const socketClient = handleCreatingNewSocketClient(socket);
-    const userId = socketClient.get('userId');
-
-    // client wants to "Game Start"
-    socket.on(SOCKET_EVENTS.LOBBY.START, () => {
-      serverState.handleStartGame();
-    });
-
-    // client wants to "Join" game in session
-    socket.on(SOCKET_EVENTS.LOBBY.JOIN, () => {
-      gamestateUserHelper.handleJoinGame(socketClient);
-    });
-
-    // client took a game action
-    socket.on(SOCKET_EVENTS.GAME.ACTION, (actionId) => {
-      gamestateUserHelper.handleUserGameAction(userId, actionId);
-    });
-
-    socket.on(SOCKET_EVENTS.GAME.MOVE_TO, (position) => {
-      gamestateUserHelper.handleUserActionMoveTo(userId, position);
-    });
-
-    // -- socket events
-    /**
-     * disconnect
-     */
-    socket.on('disconnect', () => {
-      console.log('\x1b[32m', `- Client "${userId}" disconnected`);
-      serverState.removeClient(socketClient);
-    });
-  });
+  io.on('connection', onSocketConnect);
 
   // -- Server state changes
   /**
@@ -62,27 +32,53 @@ export function init(io) {
       client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientLobbyData(client));
     });
   });
-  /**
-   * listen to when the Server switches to Game Mode
-   */
-  serverState.onChange('mode', (mode) => {
-    // if not in Game Mode, do nothing
-    if (mode !== SERVER_MODES.GAME) {
-      gameState.set({mode: GAME_MODES.INACTIVE});
-      return;
-    }
-
-    // create `users` based on connected Clients
-    serverState.get('clients').forEach((client) => {
-      gamestateUserHelper.createUserFromClient(client);
-    });
-
-    // initialize the game
-    gamestateDataHelper.generateNewMap();
-    console.log('\x1b[36m', 'Game Starting!');
-  });
 }
 // -- connection events
+/**
+ * when a new socket connects
+ *
+ * @param {Socket} socket
+ */
+function onSocketConnect(socket) {
+  const clientModel = handleCreatingNewSocketClient(socket);
+  attachClientEvents(clientModel);
+}
+/**
+ * add websocket event handlers
+ *
+ * @param {SocketClientModel} clientModel
+ */
+function attachClientEvents(clientModel) {
+  const socket = clientModel.get('socket');
+  const userId = clientModel.get('userId');
+
+  // client wants to "Game Start"
+  socket.on(SOCKET_EVENTS.LOBBY.START, () => {
+    serverState.handleStartGame();
+  });
+
+  // client wants to "Join" game in session
+  socket.on(SOCKET_EVENTS.LOBBY.JOIN, () => {
+    gamestateUserHelper.handleJoinGame(clientModel);
+  });
+
+  // client took a game action
+  socket.on(SOCKET_EVENTS.GAME.ACTION, (actionId) => {
+    gamestateUserHelper.handleUserGameAction(userId, actionId);
+  });
+
+  // direct move path action
+  socket.on(SOCKET_EVENTS.GAME.MOVE_TO, (position) => {
+    gamestateUserHelper.handleUserActionMoveTo(userId, position);
+  });
+  /**
+   * disconnect
+   */
+  socket.on('disconnect', () => {
+    logger.old(`- Client "${clientModel.get('name')}" disconnected`);
+    serverState.removeClient(clientModel);
+  });
+}
 /**
  * create a `SocketClientModel` based on the socket
  *
@@ -90,14 +86,14 @@ export function init(io) {
  * @returns {SocketClientModel}
  */
 function handleCreatingNewSocketClient(socket) {
-  const query = socket.handshake.query;
   const {
     name,
     clientType,
     userId,
-  } = query;
+  } = socket.handshake.query;
 
   const clientAttributes = {
+    clientType: clientType === 'SCREEN_SOCKET_CLIENT' ? CLIENT_TYPES.SCREEN : CLIENT_TYPES.REMOTE,
     name: name,
     userId: userId,
     socket: socket,
@@ -105,36 +101,10 @@ function handleCreatingNewSocketClient(socket) {
     isInLobby: true,
   };
 
-  // connected to a Remote
-  if (clientType === 'REMOTE_SOCKET_CLIENT') {
-    return createAndAddNewRemoteClient(clientAttributes);
-  }
-
-  // connected to a Screen
-  if (clientType === 'SCREEN_SOCKET_CLIENT') {
-    return createAndAddNewScreenClient(clientAttributes);
-  }
-}
-/**
- * @param {Object} attributes
- * @returns {RemoteClientModel}
- */
-function createAndAddNewRemoteClient(attributes) {
-  const newClient = new RemoteClientModel(attributes);
+  const newClient = new SocketClientModel(clientAttributes);
   serverState.addClient(newClient);
 
-  console.log('\x1b[92m', `+ Remote "${newClient.get('userId')}" connected`);
-  return newClient;
-}
-/**
- * @param {Object} attributes
- * @returns {ScreenClientModel}
- */
-function createAndAddNewScreenClient(attributes) {
-  const newClient = new ScreenClientModel(attributes);
-  serverState.addClient(newClient);
-
-  console.log('\x1b[92m', `+ Screen "${newClient.get('userId')}" connected`);
+  logger.new(`+ Client "${newClient.get('name')}" connected`);
   return newClient;
 }
 // -- individual Client functions
@@ -158,7 +128,7 @@ export function sendUpdateToClientByUser(userModel) {
  * @param {SocketClientModel} clientModel
  */
 export function sendUpdateToClient(clientModel) {
-  console.log('\x1b[36m', `. (sending update to client "${clientModel.get('name')}")`);
+  logger.verbose(`. (sending update to client "${clientModel.get('name')}")`);
   clientModel.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(clientModel));
   clientModel.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
 }
@@ -169,7 +139,7 @@ export function sendUpdateToClient(clientModel) {
  */
 export function sendUpdateToAllClients(clientModel) {
   const clients = serverState.get('clients');
-  console.log('\x1b[36m', `(sending updates to all ${clients.length} clients)`);
+  logger.lifecycle(`(sending updates to all ${clients.length} clients)`);
   clients.forEach((client) => {
     sendUpdateToClient(client);
   });
