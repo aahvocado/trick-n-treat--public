@@ -36,6 +36,7 @@ export function createUserFromClient(clientModel) {
 
   const name = clientModel.get('name');
   const characterId = `${name}-character-id`;
+  const userId = clientModel.get('userId');
 
   const newCharPosition = MAP_START.clone();
   const newCharacterModel = new FastCharacter({
@@ -164,16 +165,22 @@ export function handleUserGameAction(userId, actionId) {
 
   // handle movement actions
   if (isMovementAction(actionId)) {
-    handleUserActionMove(userId, actionId);
+    gameState.addToActionQueue(() => {
+      handleUserActionMove(userId, actionId);
+    });
     return;
   }
 
   //
   if (actionId === CLIENT_ACTIONS.TRICK) {
-    handleUserActionTrick(userId);
+    gameState.addToActionQueue(() => {
+      handleUserActionTrick(userId);
+    });
   }
   if (actionId === CLIENT_ACTIONS.TREAT) {
-    handleUserActionTreat(userId);
+    gameState.addToActionQueue(() => {
+      handleUserActionTreat(userId);
+    });
   }
 }
 /**
@@ -209,7 +216,9 @@ export function handleUserActionMove(userId, actionId) {
 
   // action complete
   const userModel = gameState.findUserById(userId);
-  onUserActionComplete(userModel);
+  gameState.addToActionQueue(() => {
+    onUserActionComplete(userModel);
+  });
 }
 /**
  * user wants to Treat
@@ -236,7 +245,9 @@ export function handleUserActionTreat(userId) {
 
   // action complete
   const userModel = gameState.findUserById(userId);
-  onUserActionComplete(userModel);
+  gameState.addToActionQueue(() => {
+    onUserActionComplete(userModel);
+  });
 }
 /**
  * user wants to Trick
@@ -263,7 +274,9 @@ export function handleUserActionTrick(userId) {
 
   // action complete
   const userModel = gameState.findUserById(userId);
-  onUserActionComplete(userModel);
+  gameState.addToActionQueue(() => {
+    onUserActionComplete(userModel);
+  });
 }
 /**
  * user wants to Move to a specific spot
@@ -285,7 +298,9 @@ export function onUserActionComplete(userModel) {
   // a character's movement is now 0, end User's available actions
   const characterModel = gameState.findCharacterByUserId(userModel.get('userId'));
   if (!characterModel.canMove()) {
-    onUserTurnComplete(userModel);
+    gameState.addToActionQueue(() => {
+      onUserTurnComplete(userModel);
+    });
   }
 
   // after they finish an action, we should update the Client
@@ -302,5 +317,7 @@ export function onUserTurnComplete(userModel) {
   });
 
   // next turn
-  gameState.handleEndOfTurn();
+  gameState.addToActionQueue(() => {
+    gameState.handleEndOfTurn();
+  });
 }

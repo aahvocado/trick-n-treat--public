@@ -18,7 +18,6 @@ import {CLIENT_ACTIONS} from 'constants/clientActions';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
 import * as gamestateHelper from 'helpers/gamestateHelper.remote';
-import * as remoteAppStateHelper from 'helpers/remoteAppStateHelper';
 
 import * as connectionManager from 'managers/connectionManager';
 
@@ -28,6 +27,18 @@ import * as mapUtils from 'utilities/mapUtils.remote';
  * page to for the game
  */
 class UserGamePage extends PureComponent {
+  static defaultProps = {
+    /** @type {Boolean} */
+    canUseActions: false,
+
+    // -- from appState
+    /** @type {GamestateObject | undefined} */
+    gamestate: undefined,
+    /** @type {Object | undefined} */
+    myCharacter: undefined,
+    /** @type {Object | undefined} */
+    myUser: undefined,
+  };
   /** @override */
   constructor(props) {
     super(props);
@@ -48,6 +59,7 @@ class UserGamePage extends PureComponent {
   /** @override */
   render() {
     const {
+      canUseActions,
       gamestate,
       myCharacter,
     } = this.props;
@@ -59,8 +71,6 @@ class UserGamePage extends PureComponent {
     if (gamestate === undefined) {
       return <div className='bg-secondary flex-grow pad-v-2 flex-centered flex-col width-full text-center'>(waiting for map data)</div>
     }
-
-    const isMyTurn = remoteAppStateHelper.isMyTurn();
 
     return (
       <div className='bg-secondary flex-grow flex-centered flex-col width-full text-center'>
@@ -94,7 +104,7 @@ class UserGamePage extends PureComponent {
 
         <div className='flex-row-centered bg-primary pad-v-1 color-tertiary'>
           <div className='flex-none sibling-mar-l-2'>
-            <FontAwesomeIcon icon={isMyTurn ? faPlay : faPause} />
+            <FontAwesomeIcon icon={canUseActions ? faPlay : faPause} />
           </div>
 
           <div className='flex-none sibling-mar-l-2' >{`Round ${gamestate.round}`}</div>
@@ -154,17 +164,18 @@ class UserGamePage extends PureComponent {
    * check if User can Move to a Tile
    */
   canMove() {
-    const {myCharacter} = this.props;
+    const {canUseActions} = this.props;
+    if (!canUseActions) {
+      return false;
+    }
+
+    // no need to move to same spot
+    if (this.isOnSelectedTile()) {
+      return false;
+    }
+
+    // if we are allowed to move, check if we can actually move to the location we selected
     const {selectedTilePos} = this.state;
-
-    if (!remoteAppStateHelper.isMyTurn()) {
-      return false;
-    }
-
-    if (selectedTilePos.equals(myCharacter.position)) {
-      return false;
-    }
-
     return gamestateHelper.canMyCharacterMoveTo(selectedTilePos);
   }
   /**
@@ -180,11 +191,13 @@ class UserGamePage extends PureComponent {
    * @returns {Boolean}
    */
   canTrick() {
-    if (!this.isOnSelectedTile()) {
+    const {canUseActions} = this.props;
+    if (!canUseActions) {
       return false;
     }
 
-    if (!remoteAppStateHelper.isMyTurn()) {
+    // can only action when on the Tile
+    if (!this.isOnSelectedTile()) {
       return false;
     }
 
@@ -194,11 +207,13 @@ class UserGamePage extends PureComponent {
    * @returns {Boolean}
    */
   canTreat() {
-    if (!this.isOnSelectedTile()) {
+    const {canUseActions} = this.props;
+    if (!canUseActions) {
       return false;
     }
 
-    if (!remoteAppStateHelper.isMyTurn()) {
+    // can only action when on the Tile
+    if (!this.isOnSelectedTile()) {
       return false;
     }
 
@@ -208,7 +223,8 @@ class UserGamePage extends PureComponent {
    * Move action
    */
   handleMoveToOnClick() {
-    if (!this.canMove()) {
+    const {canUseActions} = this.props;
+    if (!canUseActions) {
       return;
     }
 

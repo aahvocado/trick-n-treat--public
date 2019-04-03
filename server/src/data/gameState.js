@@ -4,6 +4,7 @@ import {extendObservable} from 'mobx';
 import {GAME_MODES} from 'constants/gameModes';
 import TILE_TYPES, {FOG_TYPES, isWalkableTile} from 'constants/tileTypes';
 
+import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
 import {sendUpdateToAllClients} from 'managers/clientManager';
@@ -15,6 +16,10 @@ import logger from 'utilities/logger';
 import * as mapUtils from 'utilities/mapUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
 
+// EXPERIMENTAL - number of actions we've ever created
+let actionCount = 0;
+// EXPERIMENTAL - ms to wait between each resolving action
+const timeBetweenActions = 150;
 // seed for generating data
 const seed = Date.now();
 seedrandom(seed, {global: true});
@@ -30,6 +35,10 @@ export class GamestateModel extends Model {
     super({
       /** @type {GameMode} */
       mode: GAME_MODES.INACTIVE,
+      /** @type {Array<GameAction>} */
+      actionQueue: [],
+      /** @type {GameAction | null} */
+      activeAction: null,
 
       /** @type {Number} */
       round: 0,
@@ -52,20 +61,20 @@ export class GamestateModel extends Model {
       ...newAttributes,
     });
 
-    // computed attributes - (have to pass in this model as context because getters have their own context)
-    const stateModel = this;
+    // computed attributes - (have to pass in `this` as context because getters have their own context)
+    const self = this;
     extendObservable(this.attributes, {
       /** @type {UserModel | null} */
       get activeUser() {
-        return stateModel.getActiveUser();
+        return self.getActiveUser();
       },
       /** @type {CharacterModel | null} */
       get activeCharacter() {
-        return stateModel.getActiveCharacter();
+        return self.getActiveCharacter();
       },
       /** @type {Number} */
       get remainingMoves() {
-        const activeCharacter = stateModel.getActiveCharacter();
+        const activeCharacter = self.getActiveCharacter();
         if (activeCharacter === null) {
           return -1;
         }
@@ -76,6 +85,18 @@ export class GamestateModel extends Model {
 
     // -- react to own state changing
     /**
+     * `actionQueue` changes
+     * Start resolving the `actionQueue` when the moment there's one added
+     */
+    this.onChange('actionQueue', (actionQueue) => {
+      if (actionQueue.length <= 0 || this.get('activeAction') !== null) {
+        return;
+      }
+
+      logger.new('[[resolving ActionQueue from the top]]');
+      gamestateActionHelper.resolveActionQueue();
+    });
+    /**
      * `activeCharacter` changes
      */
     this.onChange('activeCharacter', (activeCharacter) => {
@@ -84,8 +105,10 @@ export class GamestateModel extends Model {
         return;
       }
 
-      this.handleStartOfTurn();
-      gamestateUserHelper.updateActionsForAllUsers();
+      this.addToActionQueue(() => {
+        this.handleStartOfTurn();
+        gamestateUserHelper.updateActionsForAllUsers();
+      });
     });
     /**
      * `turnQueue` changes
@@ -93,7 +116,8 @@ export class GamestateModel extends Model {
     this.onChange('turnQueue', (turnQueue) => {
       // empty `turnQueue` means end of round
       if (turnQueue.length <= 0) {
-        this.handleEndOfRound();
+        // this.handleEndOfRound();
+        this.addToActionQueue(this.handleEndOfRound.bind(this));
       }
     });
 
@@ -105,12 +129,6 @@ export class GamestateModel extends Model {
    */
   addCharacter(characterModel) {
     this.addToArray('characters', characterModel);
-
-    // attach onChange listeners to the character - probably can be set up better elsewhere
-    characterModel.onChange('position', (position) => {
-      this.updateToVisibleAt(position, characterModel.get('vision'));
-      gamestateUserHelper.updateActionsForAllUsers();
-    });
   }
   /**
    * @param {CharacterModel} characterModel
@@ -327,6 +345,55 @@ export class GamestateModel extends Model {
     // this part puts everything together and removes anything that is undefined/null (falsey)
     return [foundHouse, foundEncounter, ...foundCharacters, ...foundUsers].filter(Boolean);
   }
+  // -- Action Queue
+  /**
+   * EXPERIMENTAL
+   * creates an asynchronous Action for the ActionQueue using given function
+   *
+   * @param {Function} action
+   * @returns {Function}
+   */
+  createActionFunction(action) {
+    const actionId = actionCount;
+    actionCount += 1;
+    logger.verbose(`. [[adding action #${actionId}]]`);
+
+    return () => {
+      return new Promise((resolve) => {
+        logger.verbose(`. [[resolving action #${actionId}]]`);
+
+        // actually call the function here
+        action();
+
+        // pause between actions
+        setTimeout(resolve, timeBetweenActions);
+      });
+    };
+  }
+  /**
+   * EXPERIMENTAL
+   *
+   * @param {Function} action
+   */
+  addToActionQueue(action) {
+    const actionFunction = this.createActionFunction(action);
+    this.addToArray('actionQueue', actionFunction);
+  }
+  /**
+   * EXPERIMENTAL
+   * insert an Action onto the front of the Queue
+   *
+   * @param {Function} action
+   * @param {Number} [idx]
+   */
+  insertIntoActionQueue(action, idx = 0) {
+    const actionFunction = this.createActionFunction(action);
+
+    const actionQueue = this.get('actionQueue').slice();
+    actionQueue.splice(idx, 0, actionFunction);
+
+    this.set({actionQueue: actionQueue});
+  }
   // -- Round / Turn logic
   /**
    * builds a Turn Queue based on stuff
@@ -354,7 +421,8 @@ export class GamestateModel extends Model {
     }
 
     // send update
-    sendUpdateToAllClients();
+    this.addToActionQueue(sendUpdateToAllClients);
+
     const activeCharacter = this.get('activeCharacter');
     logger.game(`. Turn for: "${activeCharacter.get('name')}"`);
   }
@@ -375,7 +443,7 @@ export class GamestateModel extends Model {
     oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
 
     // send update
-    sendUpdateToAllClients();
+    this.addToActionQueue(sendUpdateToAllClients);
   }
   /**
    * round
@@ -387,7 +455,8 @@ export class GamestateModel extends Model {
     this.set({round: this.get('round') + 1});
 
     // create new turn queue
-    this.initTurnQueue();
+    // this.initTurnQueue();
+    this.addToActionQueue(this.initTurnQueue.bind(this));
     logger.game(`Round ${this.get('round')} has started.`);
   }
   /**
@@ -396,7 +465,8 @@ export class GamestateModel extends Model {
   handleEndOfRound() {
     logger.lifecycle('(handleEndOfRound)');
 
-    this.handleStartOfRound();
+    // this.handleStartOfRound();
+    this.addToActionQueue(this.handleStartOfRound.bind(this));
   }
   // -- Fog methods
   /**

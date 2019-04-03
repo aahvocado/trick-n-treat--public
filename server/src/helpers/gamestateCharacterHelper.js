@@ -56,17 +56,21 @@ export function updateCharacterPosition(characterModel, nextPosition) {
     return;
   }
 
-  // finally update the character's position
+  // finally update the character's position and map visibility
   characterModel.set({position: nextPosition});
+  gameState.updateToVisibleAt(nextPosition, characterModel.get('vision'));
 
-  // if there is an Encounter here, we should trigger it
+  // check if there is an Encounter here
   const encounterModelHere = gameState.findEncounterAt(nextPosition);
-  if (encounterModelHere) {
-    // logger.verbose(`(encounter at [x: ${nextPosition.x}, y: ${nextPosition.y}])`);
-    // encounterModelHere.trigger(characterModel);
-
-    // gameState.set({mode: GAME_MODES.CUTSCENE});
+  if (encounterModelHere === undefined) {
+    return;
   }
+
+  // if there is one, then we can add the Encounter Trigger to the `actionQueue`
+  gameState.insertIntoActionQueue(() => {
+    logger.verbose(`(encounter at [x: ${nextPosition.x}, y: ${nextPosition.y}])`);
+    encounterModelHere.trigger(characterModel);
+  });
 }
 /**
  * moves a Character a single direction
@@ -106,14 +110,16 @@ export function handleMoveCharacterTo(characterModel, endPoint) {
 
   // take one step at a time for moving along the path
   movePath.forEach((pathPoint) => {
-    // subtract a Movement
-    characterModel.modifyStat('movement', -1);
+    gameState.addToActionQueue(() => {
+      // subtract a Movement
+      characterModel.modifyStat('movement', -1);
 
-    // attempt to update the character's position
-    updateCharacterPosition(characterModel, pathPoint);
+      // attempt to update the character's position
+      updateCharacterPosition(characterModel, pathPoint);
 
-    // we're going to consider this one movement as an end of action
-    const userModel = gameState.findUserByCharacterId(characterModel.get('characterId'));
-    gamestateUserHelper.onUserActionComplete(userModel);
+      // we're going to consider this one movement as an end of action
+      const userModel = gameState.findUserByCharacterId(characterModel.get('characterId'));
+      gamestateUserHelper.onUserActionComplete(userModel);
+    });
   });
 }

@@ -42,7 +42,7 @@ export function generateNewMap() {
   });
 
   // start the first round, which will create a turn queue
-  gameState.handleStartOfRound();
+  gameState.addToActionQueue(gameState.handleStartOfRound.bind(gameState));
 }
 /**
  * generates a MapModel
@@ -111,6 +111,7 @@ export function getFormattedGamestateData() {
 
   return {
     mapData: formattedMapData,
+    mode: gameState.get('mode'),
     round: gameState.get('round'),
   };
 }

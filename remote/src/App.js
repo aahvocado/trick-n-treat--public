@@ -3,6 +3,8 @@ import {observer} from 'mobx-react';
 
 import remoteAppState from 'data/remoteAppState';
 
+import * as remoteAppStateHelper from 'helpers/remoteAppStateHelper';
+
 import WebsocketConnectionIndicator from 'components/WebsocketConnectionIndicator';
 
 import UserGamePage from 'pages/UserGamePage';
@@ -26,6 +28,8 @@ export default observer(
             { remoteAppState.get('isInGame') &&
               <UserGamePage
                 {...remoteAppState.export()}
+                canUseActions={remoteAppStateHelper.canUseActions()}
+
               />
             }
 
