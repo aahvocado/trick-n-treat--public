@@ -2,7 +2,7 @@ import seedrandom from 'seedrandom';
 import {extendObservable} from 'mobx';
 
 import {GAME_MODES} from 'constants/gameModes';
-import TILE_TYPES, {FOG_TYPES, isWalkableTile} from 'constants/tileTypes';
+import {FOG_TYPES, isWalkableTile} from 'constants/tileTypes';
 
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
@@ -477,38 +477,16 @@ export class GamestateModel extends Model {
    */
   updateToVisibleAt(point, distance) {
     const fogMapModel = this.get('fogMapModel');
+    const tileMapModel = this.get('tileMapModel');
 
     // given tile is now visible
     fogMapModel.setTileAt(point, FOG_TYPES.VISIBLE);
 
     // other tiles that are a given distance away should be partially visible, if not already
-    const nearbyPoints = mapUtils.getPointsWithinPathDistance(this.get('tileMapModel').get('matrix'), point, distance);
+    const nearbyPoints = mapUtils.getPointsWithinPathDistance(tileMapModel.getMatrix(), point, distance);
     nearbyPoints.forEach((point) => {
-      this.updateToPartiallyVisibleAt(point);
+      mapUtils.updateFogPointToVisible(fogMapModel, tileMapModel, point);
     });
-  }
-  /**
-   * updates Fog of War visibility to Partially visible at a given point
-   *
-   * @param {Point} point
-   */
-  updateToPartiallyVisibleAt(point) {
-    const fogMapModel = this.get('fogMapModel');
-    const tileMapModel = this.get('tileMapModel');
-
-    // if already fully visibile, do nothing
-    if (fogMapModel.isTileEqualTo(point, FOG_TYPES.VISIBLE)) {
-      return;
-    }
-
-    // if adjacent tile is just an empty tile, let it be fully visible
-    if (tileMapModel.isTileEqualTo(point, TILE_TYPES.EMPTY)) {
-      fogMapModel.setTileAt(point, FOG_TYPES.VISIBLE);
-      return;
-    }
-
-    // otherwise make it partially visible
-    fogMapModel.setTileAt(point, FOG_TYPES.PARTIAL);
   }
 }
 /**

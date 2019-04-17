@@ -282,7 +282,9 @@ function Tile(options) {
 
   // determine mesh color based on type
   switch(fogType) {
-    case FOG_TYPES.PARTIAL:
+    case FOG_TYPES.DIM:
+    case FOG_TYPES.DIMMER:
+    case FOG_TYPES.DIMMEST:
       tile.add(threeGeometry.createPartialTileMesh());
       break;
     case FOG_TYPES.HIDDEN:

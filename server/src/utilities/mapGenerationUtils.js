@@ -1,75 +1,272 @@
-import POINTS from 'constants/points';
-import {TILE_TYPES} from 'constants/tileTypes';
-
+import Pathfinding from 'pathfinding';
 import Point from '@studiomoniker/point';
 
-import Pathfinding from 'pathfinding';
+import {graveyardBiomeBaseModel} from 'collections/biomeCollection';
+
+import {POINTS} from 'constants/points';
+import {
+  TILE_TYPES,
+  FOG_TYPES,
+  isLitTile,
+} from 'constants/tileTypes';
+
+import MapModel from 'models/MapModel';
+
 import * as mapUtils from 'utilities/mapUtils';
 import * as mathUtils from 'utilities/mathUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
 
 /**
- * uses the Random Walk process to apply paths to a Map
+ * creates the Model for the Tile Map
+ *
+ * @param {Object} mapSettings
+ * @returns {MapModel}
+ */
+export function createBaseTileMapModel(mapSettings) {
+  const baseMatrix = matrixUtils.createMatrix(mapSettings.width, mapSettings.height, TILE_TYPES.EMPTY);
+
+  // starting Tile is a House
+  const startPoint = mapSettings.startPoint.clone();
+  matrixUtils.setTileAt(baseMatrix, startPoint, TILE_TYPES.HOUSE);
+
+  return new MapModel({
+    matrix: baseMatrix,
+    start: startPoint,
+    mapSettings: mapSettings,
+  });
+}
+/**
+ * creates the Model for the Fog Matrix
+ *
+ * @param {MapModel} baseMapModel
+ * @param {Object} mapSettings
+ * @returns {MapModel}
+ */
+export function createFogMapModel(baseMapModel, mapSettings) {
+  const startPoint = mapSettings.startPoint.clone();
+
+  // we're going to keep track of lit tiles so we can create the gradation afterwords
+  const pointsWithLight = [startPoint];
+
+  // create a matrix with lit and hidden tiles
+  const baseMatrix = baseMapModel.map((tileData, tilePoint) => {
+    // if tile is defined as a lit tile, we can say it's visible
+    if (isLitTile(tileData)) {
+      pointsWithLight.push(tilePoint);
+      return FOG_TYPES.VISIBLE;
+    }
+
+    return FOG_TYPES.HIDDEN;
+  });
+
+  // create the Model
+  const newFogMapModel = new MapModel({
+    start: startPoint,
+    matrix: baseMatrix,
+    mapSettings: mapSettings,
+  });
+
+  // starting point is Visible
+  newFogMapModel.setTileAt(startPoint, FOG_TYPES.VISIBLE);
+
+  // update slowly dimming visibility to those
+  pointsWithLight.forEach((lightPoint) => {
+    mapUtils.updateFogPointToVisible(newFogMapModel, baseMapModel, lightPoint);
+  });
+
+  return newFogMapModel;
+}
+/**
+ * @param {MapModel} baseMapModel
+ * @param {BiomeSettings} biomeSettings
+ * @returns {MapModel}
+ */
+export function createHomeBiomeModel(baseMapModel, biomeSettings) {
+  const {
+    width,
+    height,
+  } = biomeSettings;
+
+  // create an empty Map
+  const fullBiomeMapModel = new MapModel({
+    baseWidth: baseMapModel.getWidth(),
+    baseHeight: baseMapModel.getHeight(),
+  });
+
+  // use recursion to create paths on our MapModel
+  const centerPoint = new Point(
+    Math.floor(width / 2),
+    Math.floor(height / 2),
+  );
+  randomWalkStep(fullBiomeMapModel, centerPoint, 200, 3);
+
+  return fullBiomeMapModel;
+}
+/**
+ * recursively uses the Random Walk process to apply paths to a Map
  *  https://en.wikipedia.org/wiki/Random_walk
  *
  * @param {MapModel} mapModel
- * @param {Object} mapConfig
+ * @param {Point} currentPoint
+ * @param {Number} remainingSteps
+ * @param {Number} stepSize
+ * @param {TileType} [stepType]
  */
-export function executeRandomWalk(mapModel, mapConfig) {
-  // use recursion to create paths on our MatrixModel
-  randomWalkStep(mapModel, mapConfig.numSteps, mapModel.get('start'), mapConfig);
-}
-/**
- * recursively updates a point on the map and takes a step
- *
- * @param {MapModel} mapModel
- * @param {Number} remainingSteps - steps left to make
- * @param {Point} currentPoint - current point on the matrix
- * @param {Object} mapConfig
- */
-function randomWalkStep(mapModel, remainingSteps, currentPoint, mapConfig) {
-  const {
-    stepSize = 1,
-  } = mapConfig;
-
+function randomWalkStep(mapModel, currentPoint, remainingSteps, stepSize, stepType = TILE_TYPES.SIDEWALK) {
   // pick a direction for the next step
-  const nextDirectionPoint = getRandomWeightedDirection(mapModel, currentPoint);
+  const nextDirectionPoint = getRandomWeightedDirection(mapModel.get('matrix'), currentPoint);
 
   // loop to handle each step covering more than one Tile
-  let _currentPoint = currentPoint;
+  let nextPoint = currentPoint.clone();
   for (let i = 0; i < stepSize; i++) {
     // get the next Point on the map, and check if it is a valid point on the map
-    const nextPoint = _currentPoint.add(nextDirectionPoint);
-    _currentPoint = mapModel.getAvailablePoint(nextPoint);
+    const stepPoint = nextPoint.clone().add(nextDirectionPoint);
+    nextPoint = mapModel.getAvailablePoint(stepPoint);
 
-    // only update if the tile is empty
-    if (mapModel.getTileAt(_currentPoint) === TILE_TYPES.EMPTY) {
-      mapModel.setTileAt(_currentPoint, TILE_TYPES.PATH);
+    // only update if the tile is not defined
+    const nextTileType = mapModel.getTileAt(nextPoint);
+    if (nextTileType === TILE_TYPES.EMPTY || nextTileType === null) {
+      mapModel.setTileAt(nextPoint, stepType);
     }
   }
 
   // continue recursion if there are remaining steps
   if (remainingSteps > 0) {
-    randomWalkStep(mapModel, (remainingSteps - 1), _currentPoint, mapConfig);
+    randomWalkStep(mapModel, nextPoint, (remainingSteps - 1), stepSize, stepType);
   }
+}
+/**
+ * create this Biome based on given map using given settings
+ *
+ * @param {MapModel} baseMapModel
+ * @param {BiomeSettings} biomeSettings
+ * @returns {MapModel}
+ */
+export function createGraveyardBiomeModel(baseMapModel, biomeSettings) {
+  const {
+    connectingPoints,
+    spawnPoint,
+  } = biomeSettings;
+
+  // create an empty MapModel
+  const fullBiomeMapModel = new MapModel({
+    baseWidth: baseMapModel.getWidth(),
+    baseHeight: baseMapModel.getHeight(),
+  });
+
+  // set our Biome matrix at the spawn point
+  fullBiomeMapModel.mergeMatrix(graveyardBiomeBaseModel, spawnPoint);
+
+  // use the base Map to find the Point of the nearest walkable tile
+  const chosenConnectingPoint = connectingPoints[0].clone();
+  const nearestPathPoint = mapUtils.getPointOfNearestWalkableType(baseMapModel.getMatrix(), chosenConnectingPoint, 25);
+
+  // find a path that takes us from the graveyard to the nearest path
+  const walkableMatrix = matrixUtils.createMatrix(fullBiomeMapModel.getWidth(), fullBiomeMapModel.getHeight(), TILE_TYPES.PATH);
+  const connectingPath = mapUtils.getAStarPath(walkableMatrix, chosenConnectingPoint, nearestPathPoint);
+
+  // connect them together on our new Biome MapModel
+  fullBiomeMapModel.setTileList(connectingPath, TILE_TYPES.PATH);
+
+  // done
+  return fullBiomeMapModel;
+}
+/**
+ * idea: there can be many kinds of woods of different sizes and shapes
+ *
+ * @param {MapModel} baseMapModel
+ * @returns {MapModel}
+ */
+export function createSmallWoodsBiomeModel(baseMapModel) {
+  const biomeWidth = mathUtils.getRandomIntInclusive(5, 8);
+  const biomeHeight = mathUtils.getRandomIntInclusive(5, 8);
+  const spawnPoint = mapUtils.getRandomEmptyLocationNearWalkableTile(baseMapModel, biomeWidth, biomeHeight, 3);
+  const connectingPoint = new Point(spawnPoint.x + Math.floor(biomeWidth / 2), spawnPoint.y + Math.floor(biomeHeight / 2));
+
+  // create the basic model
+  const woodsBiomeModel = new MapModel({
+    start: spawnPoint,
+    baseWidth: biomeWidth,
+    baseHeight: biomeHeight,
+  });
+
+  // the Woods is small and just built with stuff
+  randomWalkStep(woodsBiomeModel, connectingPoint, 25, 2, TILE_TYPES.WOODS);
+
+  // add some decor
+  woodsBiomeModel.forEach((tileType, tilePoint) => {
+    // don't override existing tiles
+    if (tileType !== TILE_TYPES.EMPTY && tileType !== null) {
+      return;
+    }
+
+    // pick a random decor
+    const {result} = mathUtils.getRandomWeightedChoice([
+      {
+        result: TILE_TYPES.TREE_ONE,
+        weight: 10,
+      }, {
+        result: TILE_TYPES.TREE_TWO,
+        weight: 10,
+      }, {
+        result: TILE_TYPES.TREE_THREE,
+        weight: 10,
+      }, {
+        result: TILE_TYPES.SPOOKY_TREE_ONE,
+        weight: 1,
+      }, {
+        result: TILE_TYPES.LIT_WOODS,
+        weight: 5,
+      }, {
+        result: TILE_TYPES.WOODS_TWO,
+        weight: 5,
+      }, {
+        result: TILE_TYPES.LIT_WOODS_TWO,
+        weight: 5,
+      }, {
+        result: null,
+        weight: 75,
+      },
+    ]);
+
+    woodsBiomeModel.setTileAt(tilePoint, result);
+  });
+
+  // create a MapModel using the base map's dimensions
+  const fullBiomeMapModel = new MapModel({
+    baseWidth: baseMapModel.getWidth(),
+    baseHeight: baseMapModel.getHeight(),
+  });
+
+  // set our Biome matrix at the spawn point
+  fullBiomeMapModel.mergeMatrix(woodsBiomeModel, spawnPoint);
+
+  // create the path that takes us from this Biome to the nearest walkable Tile
+  const nearestPathPoint = mapUtils.getPointOfNearestWalkableType(baseMapModel.getMatrix(), spawnPoint, 25);
+  const walkableMatrix = matrixUtils.createMatrix(fullBiomeMapModel.getWidth(), fullBiomeMapModel.getHeight(), TILE_TYPES.PATH);
+  const connectingPath = mapUtils.getAStarPath(walkableMatrix, connectingPoint, nearestPathPoint);
+  fullBiomeMapModel.setTileList(connectingPath, TILE_TYPES.WOODS);
+
+  // done
+  return fullBiomeMapModel;
 }
 /**
  * creates a Point that indicates a direction to go
  *  but weighted based on how close they are to the edge
  *
- * @param {MapModel} mapModel
+ * @param {Matrix} matrix
  * @param {Point} currentPoint - current point on the matrix
  * @returns {Point}
  */
-export function getRandomWeightedDirection(mapModel, currentPoint) {
+export function getRandomWeightedDirection(matrix, currentPoint) {
   // anonymous function to calculate adjust weight
   const calculateWeight = (val) => {
     return Math.pow((val * 100), 2);
   };
 
   // wip set up some variables
-  const xMaxIdx = mapModel.getWidth() - 1;
-  const yMaxIdx = mapModel.getHeight() - 1;
+  const xMaxIdx = matrix[0].length - 1;
+  const yMaxIdx = matrix.length - 1;
 
   const distanceFromLeft = currentPoint.x;
   const distanceFromRight = xMaxIdx - currentPoint.x;
@@ -77,32 +274,23 @@ export function getRandomWeightedDirection(mapModel, currentPoint) {
   const distanceFromBottom = yMaxIdx - currentPoint.y;
 
   // pick a direction based on its weight
-  const direction = mathUtils.getRandomWeightedChoice([
+  const chosenChoice = mathUtils.getRandomWeightedChoice([
     {
-      name: 'left',
+      result: POINTS.LEFT,
       weight: calculateWeight(distanceFromLeft / xMaxIdx),
     }, {
-      name: 'right',
+      result: POINTS.RIGHT,
       weight: calculateWeight(distanceFromRight / xMaxIdx),
     }, {
-      name: 'up',
+      result: POINTS.UP,
       weight: calculateWeight(distanceFromTop / yMaxIdx),
     }, {
-      name: 'down',
+      result: POINTS.DOWN,
       weight: calculateWeight(distanceFromBottom / yMaxIdx),
     },
   ]);
 
-  switch (direction.name) {
-    case 'left':
-      return POINTS.LEFT;
-    case 'right':
-      return POINTS.RIGHT;
-    case 'up':
-      return POINTS.UP;
-    case 'down':
-      return POINTS.DOWN;
-  }
+  return chosenChoice.result;
 }
 /**
  * places special Tiles onto the Map

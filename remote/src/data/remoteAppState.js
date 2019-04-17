@@ -50,6 +50,12 @@ export class RemoteStateModel extends Model {
       isConnected: false,
       /** @type {Boolean} */
       isReconnecting: false,
+
+      // -- dev stuff
+      /** @type {Boolean} */
+      isDevMode: true,
+      /** @type {Boolean} */
+      isDebugMode: false,
     });
   }
   /**

@@ -1,5 +1,5 @@
-import TILE_TYPES from 'constants/tileTypes';
-// import ENCOUNTER_TYPES from 'constants/encounterTypes';
+import {TILE_TYPES} from 'constants/tileTypes';
+// import {ENCOUNTER_TYPES} from 'constants/encounterTypes';
 
 // import Point from '@studiomoniker/point';
 // import EncounterModel from 'models/EncounterModel';

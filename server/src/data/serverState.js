@@ -3,7 +3,7 @@ import {extendObservable} from 'mobx';
 import {CLIENT_TYPES} from 'constants/clientTypes';
 import {SERVER_MODES} from 'constants/gameModes';
 
-import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
+import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
 import Model from 'models/Model';
@@ -31,6 +31,8 @@ export class ServerStateModel extends Model {
       createDate: undefined,
       /** @type {Date} */
       lastUpdateDate: undefined,
+      //
+      ...newAttributes,
     });
 
     // computed attributes - (have to pass in this model as context because getters have their own context)
@@ -85,7 +87,7 @@ export class ServerStateModel extends Model {
     });
 
     // initialize the game
-    gamestateDataHelper.generateNewMap();
+    gamestateMapHelper.generateNewMap();
   }
   /**
    * check if everything is valid to create a game

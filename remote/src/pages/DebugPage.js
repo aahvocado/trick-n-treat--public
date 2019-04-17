@@ -1,366 +1,709 @@
-import React, { Component, Fragment } from 'react';
-import {observer} from 'mobx-react';
+import React, { Component, Fragment, PureComponent } from 'react';
+import Point from '@studiomoniker/point';
 
-import {CLIENT_ACTIONS} from 'constants/clientActions';
-import {SOCKET_EVENTS} from 'constants/socketEvents';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {
+  faCircle,
+} from '@fortawesome/free-solid-svg-icons'
+
+import ButtonComponent from 'common-components/ButtonComponent';
+import CheckboxComponent from 'common-components/CheckboxComponent';
+import InputFieldComponent from 'common-components/InputFieldComponent';
+import ModalComponent from 'common-components/ModalComponent';
+import RadioButtonComponent from 'common-components/RadioButtonComponent';
+
+import {TileItemComponent} from 'components/TileMapComponent';
+
+import {
+  TILE_TYPES,
+  TILE_TYPES_NAME,
+  FOG_TYPES,
+} from 'constants/tileTypes';
+// import {SOCKET_EVENTS} from 'constants/socketEvents';
 
 import remoteAppState from 'data/remoteAppState';
 
-import * as connectionManager from 'managers/connectionManager';
+// import * as connectionManager from 'managers/connectionManager';
+
+import debounce from 'utilities/debounce';
+import * as matrixUtils from 'utilities/matrixUtils.remote';
 
 /**
  * page for testing
  */
-class DebugPage extends Component {
+export default class DebugPage extends Component {
   /** @override */
   constructor(props) {
     super(props);
 
-    this.handleOnActionClick = this.handleOnActionClick.bind(this);
-    this.handleOnStartClick = this.handleOnStartClick.bind(this);
+    this.handleOnChangeHeightValue = this.handleOnChangeHeightValue.bind(this);
+    this.handleOnChangeWidthValue = this.handleOnChangeWidthValue.bind(this);
+    this.handleOnChangeTileSizeValue = this.handleOnChangeTileSizeValue.bind(this);
+    this.handleNewMatrix = this.handleNewMatrix.bind(this);
+    this.updateMatrix = debounce(this.updateMatrix.bind(this), 350);
+
+    this.handleOnClickTile = this.handleOnClickTile.bind(this);
+    this.handleOnHoverTile = this.handleOnHoverTile.bind(this);
+    this.handleOnLeaveTile = this.handleOnLeaveTile.bind(this);
+    this.handleOnChangeEditorTile = this.handleOnChangeEditorTile.bind(this);
+
+    this.state = {
+      selectedEditorTile: 'GRASS_EDITOR_TILE',
+      focusedTile: new Point(-1, -1),
+      mapMatrix: matrixUtils.createMatrix(10, 10, null),
+      mapWidth: 10,
+      mapHeight: 10,
+      tileSize: 40,
+    }
   }
   /** @override */
   render() {
     const {
-      isInLobby,
-      isInGame,
-    } = this.props;
+      focusedTile,
+      mapMatrix,
+      mapWidth,
+      mapHeight,
+      selectedEditorTile,
+      tileSize,
+    } = this.state;
 
     return (
-      <div className='bg-secondary flex-grow flex-centered flex-col width-full text-center'>
-        <h2 className='pad-v-2 flex-none'>Debug Page</h2>
+      <div className='flex-centered flex-col color-white bg-primary'>
+        <h1 className='flex-none fsize-8 olor-white mar-v-2 f-bold width-full text-center'>T&T Tile Editor</h1>
 
-        { isInLobby &&
-          this.renderLobbyPage()
-        }
+        <div className='flex-row height-full bg-primary-darker'>
+          <EditorPanel
+            mapMatrix={mapMatrix}
+            mapWidth={mapWidth}
+            mapHeight={mapHeight}
+            tileSize={tileSize}
+            selectedEditorTile={selectedEditorTile}
 
-        { isInGame &&
-          this.renderGamePage()
-        }
+            onChangeHeightValue={this.handleOnChangeHeightValue}
+            onChangeWidthValue={this.handleOnChangeWidthValue}
+            onChangeTileSizeValue={this.handleOnChangeTileSizeValue}
+            onChangeEditorTile={this.handleOnChangeEditorTile}
+
+            onNewMatrix={this.handleNewMatrix}
+          />
+
+          <div
+            className='flex-row-centered mar-auto'
+          >
+            <div
+              className='flex-grow-1 flex-shrink-1 flex-col aitems-center position-relative bor-4-primary'
+              style={{
+                overflow: 'hidden',
+                backgroundColor: '#d2d2d2',
+              }}
+            >
+              { mapMatrix.map((mapRowData, rowIdx) => {
+                return (
+                  <div className='flex-row flex-shrink-0' key={`tile-map-row-${rowIdx}-key`} >
+                    { mapRowData.map((tileData, colIdx) => {
+                      const position = new Point(colIdx, rowIdx);
+
+                      return (
+                        <TileItemComponent
+                          key={`tile-item-${colIdx}-${rowIdx}-key`}
+                          {...tileData}
+                          tileSize={tileSize}
+                          position={position}
+                          tileType={tileData}
+                          fogType={FOG_TYPES.VISIBLE}
+                          isSelected={focusedTile.equals(position)}
+
+
+                          onTileClick={this.handleOnClickTile}
+                          onTileHover={this.handleOnHoverTile}
+                          onTileLeave={this.handleOnLeaveTile}
+                        />
+                      )
+                    })}
+                  </div>
+                )})
+              }
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
-  /** @returns {React.Component} */
-  renderLobbyPage() {
-    const {lobbyData, name} = this.props;
-    const hasOtherClients = lobbyData.length > 0;
+  /**
+   * @param {Point} point
+   */
+  handleOnClickTile(point) {
+    const {
+      selectedEditorTile,
+      mapMatrix,
+    } = this.state;
+
+    const translatedEditorTile = (() => {
+      switch(selectedEditorTile) {
+        case 'EMPTY_EDITOR_TILE':
+          return TILE_TYPES.EMPTY;
+        case 'GRASS_EDITOR_TILE':
+          return TILE_TYPES.GRASS;
+        case 'SIDEWALK_EDITOR_TILE':
+          return TILE_TYPES.SIDEWALK;
+        case 'ROAD_EDITOR_TILE':
+          return TILE_TYPES.ROAD;
+        case 'SWAMP_EDITOR_TILE':
+          return TILE_TYPES.SWAMP;
+        case 'PLANKS_EDITOR_TILE':
+          return TILE_TYPES.PLANKS;
+        case 'WOODS_EDITOR_TILE':
+          return TILE_TYPES.WOODS;
+        case 'WATER_EDITOR_TILE':
+          return TILE_TYPES.WATER;
+        case 'FOREST_EDITOR_TILE':
+          return TILE_TYPES.FOREST;
+        case 'NULL_EDITOR_TILE':
+        default:
+          return null;
+      }
+    })();
+
+    // look at what's existing, if we're about to use the same type on a tile, then make it empty
+    const existingTileType = matrixUtils.getTileAt(mapMatrix, point);
+    const isIdentitical = existingTileType === translatedEditorTile;
+    const nextTileType = !isIdentitical ? translatedEditorTile : TILE_TYPES.EMPTY;
+
+    // update that tile
+    matrixUtils.setTileAt(mapMatrix, point, nextTileType);
+    this.setState({mapMatrix: mapMatrix});
+  }
+  /**
+   *
+   */
+  handleOnHoverTile(position) {
+    this.setState({focusedTile: position});
+  }
+  /**
+   *
+   */
+  handleOnLeaveTile(position) {
+
+  }
+  /**
+   *
+   */
+  handleOnChangeHeightValue(newHeight) {
+    this.setState({mapHeight: newHeight}, () => {
+      this.updateMatrix();
+    });
+  }
+  /**
+   *
+   */
+  handleOnChangeWidthValue(newWidth) {
+    this.setState({mapWidth: newWidth}, () => {
+      this.updateMatrix();
+    });
+  }
+  /**
+   *
+   */
+  handleNewMatrix(newMatrix) {
+    const newHeight = newMatrix[0].length;
+    const newWidth = newMatrix.length;
+
+    this.setState({
+      mapMatrix: newMatrix,
+      mapHeight: newHeight,
+      mapWidth: newWidth,
+    });
+  }
+  /**
+   *
+   */
+  updateMatrix() {
+    const oldMatrix = this.state.mapMatrix;
+    const newHeight = this.state.mapHeight;
+    const newWidth = this.state.mapWidth;
+
+    // go through and assign old data
+    const newMatrix = matrixUtils.createMatrix(newWidth, newHeight, null);
+    matrixUtils.forEach(newMatrix, (tile, position) => {
+      const oldTileData = oldMatrix[position.y] && oldMatrix[position.y][position.x];
+      if (oldTileData === null || oldTileData === undefined) {
+        return;
+      }
+
+      newMatrix[position.y][position.x] = oldTileData;
+    });
+
+    this.setState({
+      mapMatrix: newMatrix,
+      mapHeight: newHeight,
+      mapWidth: newWidth,
+    });
+  }
+  /**
+   *
+   */
+  handleOnChangeTileSizeValue(newValue) {
+    this.setState({tileSize: newValue});
+  }
+  /**
+   * @param {String} newValue
+   */
+  handleOnChangeEditorTile(newValue) {
+    this.setState({selectedEditorTile: newValue});
+  }
+}
+/**
+ *
+ */
+class EditorPanel extends PureComponent {
+  static defaultProps = {
+    onChangeHeightValue: () => {},
+    onChangeWidthValue: () => {},
+    onChangeTileSizeValue: () => {},
+
+    mapWidth: 10,
+    mapHeight: 10,
+    tileSize: 15,
+  };
+  /** @override */
+  constructor(props) {
+    super(props);
+
+    this.onExportClick = this.onExportClick.bind(this);
+    this.onImportClick = this.onImportClick.bind(this);
+    this.onClickModalOverlay = this.onClickModalOverlay.bind(this);
+    this.onClickSwitchToEditor = this.onClickSwitchToEditor.bind(this);
+
+    this.onChangeExportType = this.onChangeExportType.bind(this);
+    this.onChangeWidthValue = this.onChangeWidthValue.bind(this);
+    this.onChangeHeightValue = this.onChangeHeightValue.bind(this);
+    this.onChangeTileSizeValue = this.onChangeTileSizeValue.bind(this);
+
+    this.onChangeUseLitTiles = this.onChangeUseLitTiles.bind(this);
+    this.onSelectTileEditorType = this.onSelectTileEditorType.bind(this);
+
+    this.createExportedMatrix = this.createExportedMatrix.bind(this);
+    this.handleImportMatrix = this.handleImportMatrix.bind(this);
+
+    this.state = {
+      showModal: false,
+      ModalContent: ImportModal,
+
+      // -- form values
+      useLitTiles: false,
+      selectedExportType: 'EXPORT_TILE_ID',
+    }
+  }
+  /** @override */
+  render() {
+    const {
+      mapWidth,
+      mapHeight,
+      tileSize,
+      selectedEditorTile,
+    } = this.props;
+
+    const {
+      ModalContent,
+      showModal,
+      selectedExportType,
+      useLitTiles,
+    } = this.state;
 
     return (
-      <span>
-        <h2 className='pad-v-2 flex-none'>Hiya, welcome to the Lobby!</h2>
+      <div
+        className='flex-col aitems-center color-white bg-secondary pad-2'
+        style={{
+          width: '230px',
+        }}
+      >
+        {/* Modals */}
+        <ModalComponent
+          className='flex-col-centered bg-white pad-2'
+          style={{
+            width: '500px',
+            height: '500px',
+          }}
+          active={showModal}
+          onOverlayClick={this.onClickModalOverlay}
+        >
+          <ModalContent />
+        </ModalComponent>
 
-        <DebugActionButton onActionClick={this.handleOnStartClick} >
-          Start Game
-        </DebugActionButton>
+        {/* Tile options */}
+        <form
+          className='sibling-mar-t-3 width-full flex-col'
+          onSubmit={e => e.preventDefault()}
+        >
+          <CheckboxComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={useLitTiles}
+            value='USE_LIT_CHECKBOX'
+            onChange={this.onChangeUseLitTiles}
+          >
+            Lit
+          </CheckboxComponent>
 
-        { hasOtherClients &&
-          <div className='pad-2 fsize-4'>
-            { lobbyData.map((lobbyData, idx) => {
-              const isMyName = lobbyData.name === name;
-              return (
-                <div
-                  key={`lobby-name-${lobbyData.name}-${idx}-key`}
-                  className={`sibling-mar-t-1 ${isMyName ? 'f-bold' : ''}`}>
-                    {lobbyData.name}
-                </div>
-              )
-            })}
-          </div>
-        }
-      </span>
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'NULL_EDITOR_TILE'}
+            value='NULL_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            null
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'EMPTY_EDITOR_TILE'}
+            value='EMPTY_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            Empty
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'GRASS_EDITOR_TILE'}
+            value='GRASS_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            Grass
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'SIDEWALK_EDITOR_TILE'}
+            value='SIDEWALK_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            Sidewalk
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'ROAD_EDITOR_TILE'}
+            value='ROAD_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            Road
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'SWAMP_EDITOR_TILE'}
+            value='SWAMP_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            Swamp
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'PLANKS_EDITOR_TILE'}
+            value='PLANKS_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            Planks
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'WOODS_EDITOR_TILE'}
+            value='WOODS_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            Woods
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'WATER_EDITOR_TILE'}
+            value='WATER_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            Water
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedEditorTile === 'FOREST_EDITOR_TILE'}
+            value='FOREST_EDITOR_TILE'
+            onChange={this.onSelectTileEditorType}
+          >
+            Forest
+          </RadioButtonComponent>
+        </form>
+
+        <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
+
+        {/* Map options */}
+        <form
+          className='sibling-mar-t-3 width-full flex-col'
+          onSubmit={e => e.preventDefault()}
+        >
+          <InputFieldComponent
+            value={mapWidth}
+            onChange={this.onChangeWidthValue}
+          >
+            <span className='mar-h-1 flex-shrink-0 color-white opacity-7'>Width</span>
+          </InputFieldComponent>
+
+          <InputFieldComponent
+            value={mapHeight}
+            onChange={this.onChangeHeightValue}
+          >
+            <span className='mar-h-1 flex-shrink-0 color-white opacity-7'>Height</span>
+          </InputFieldComponent>
+
+          <InputFieldComponent
+            value={tileSize}
+            onChange={this.onChangeTileSizeValue}
+          >
+            <span className='mar-h-1 flex-shrink-0 color-white opacity-7'>Tile Size</span>
+          </InputFieldComponent>
+        </form>
+
+        <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
+
+        {/* Export options */}
+        <form
+          className='sibling-mar-t-3 width-full flex-col'
+          onSubmit={e => e.preventDefault()}
+        >
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedExportType === 'EXPORT_TILE_ID'}
+            value='EXPORT_TILE_ID'
+            onChange={this.onChangeExportType}
+          >
+            export with Tile ID
+          </RadioButtonComponent>
+
+          <RadioButtonComponent
+            className='fsize-3 sibling-mar-t-2'
+            checked={selectedExportType === 'EXPORT_TILE_STRING'}
+            value='EXPORT_TILE_STRING'
+            onChange={this.onChangeExportType}
+          >
+            export with Tile Name
+          </RadioButtonComponent>
+
+          <ButtonComponent
+            className='fsize-3 pad-1 f-bold sibling-mar-t-2'
+            onClick={this.onExportClick}
+          >
+            Export
+          </ButtonComponent>
+        </form>
+
+        <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
+
+        {/* Import options */}
+        <form
+          className='sibling-mar-t-3 width-full flex-col'
+          onSubmit={e => e.preventDefault()}
+        >
+          <ButtonComponent
+            className='fsize-3 pad-1 f-bold sibling-mar-t-3'
+            onClick={this.onImportClick}
+          >
+            Import
+          </ButtonComponent>
+        </form>
+
+        <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
+
+        <form
+          className='sibling-mar-t-3 width-full flex-col'
+          onSubmit={e => e.preventDefault()}
+        >
+          <ButtonComponent
+            className='fsize-3 pad-1 f-bold sibling-mar-t-3'
+            onClick={this.onClickSwitchToEditor}
+          >
+            Switch to Game
+          </ButtonComponent>
+        </form>
+      </div>
     );
   }
-  /** @returns {React.Component} */
-  renderGamePage() {
-    const { gamestate, userId } = this.props;
-    if (gamestate === undefined) {
-      return null;
+  /**
+   * @param {SyntheticEvent} e
+   */
+  onChangeExportType(e) {
+    const value = e.target.value;
+    this.setState({selectedExportType: value});
+  }
+  /**
+   *
+   */
+  onExportClick() {
+    const exportMatrixString = this.createExportedMatrix();
+    this.setState({
+      showModal: true,
+      ModalContent: () => (<ExportModal value={exportMatrixString} />),
+    });
+  }
+  /**
+   * @returns {String}
+   */
+  createExportedMatrix() {
+    const {mapMatrix} = this.props;
+
+    const {selectedExportType} = this.state;
+    const useTileName = selectedExportType === 'EXPORT_TILE_STRING';
+
+    let exportString = '[';
+
+    mapMatrix.forEach((matrixRow, rowIdx) => {
+      exportString += '[';
+
+      matrixRow.forEach((tileData, colIdx) => {
+        exportString += useTileName ? TILE_TYPES_NAME[tileData] : tileData;
+
+        if (colIdx < matrixRow.length - 1) {
+          exportString += ', ';
+        }
+      });
+
+      exportString += ']';
+      if (rowIdx < mapMatrix.length - 1) {
+        exportString += ',\n';
+      }
+    });
+
+    exportString += ']';
+
+    return exportString;
+  }
+  /**
+   *
+   */
+  onImportClick() {
+    this.setState({
+      showModal: true,
+      ModalContent: () => (<ImportModal onClickModalSubmit={this.handleImportMatrix} />),
+    });
+  }
+  /**
+   *
+   */
+  handleImportMatrix(matrixText) {
+    const parseResult = JSON.parse(matrixText);
+    if (!Array.isArray(parseResult)) {
+      console.error('Did not import a 2D Array');
+      return;
     }
 
+    this.props.onNewMatrix(parseResult);
+    this.setState({showModal: false});
+  }
+  /**
+   *
+   */
+  onClickModalOverlay() {
+    this.setState({showModal: false});
+  }
+  /**
+   * @param {SyntheticEvent} e
+   */
+  onChangeWidthValue(e) {
+    this.props.onChangeWidthValue(e.target.value);
+  }
+  /**
+   * @param {SyntheticEvent} e
+   */
+  onChangeHeightValue(e) {
+    this.props.onChangeHeightValue(e.target.value);
+  }
+  /**
+   * @param {SyntheticEvent} e
+   */
+  onChangeTileSizeValue(e) {
+    this.props.onChangeTileSizeValue(e.target.value);
+  }
+  /**
+   * @param {SyntheticEvent} e
+   */
+  onChangeUseLitTiles(e) {
+    const checked = e.target.checked;
+    this.setState({useLitTiles: checked});
+  }
+  /**
+   * @param {SyntheticEvent} e
+   */
+  onSelectTileEditorType(e) {
+    const value = e.target.value;
+    this.props.onChangeEditorTile(value);
+  }
+  /**
+   *
+   */
+  onClickSwitchToEditor() {
+    remoteAppState.set({isDebugMode: false});
+  }
+}
+class ExportModal extends Component {
+  render() {
     const {
-      tileMapModel,
-      fogMapModel,
-      users,
-      characters,
-    } = gamestate;
-
-    const currentUser = users.find(user => (user.userId === userId));
-    const {
-      canMoveLeft,
-      canMoveRight,
-      canMoveUp,
-      canMoveDown,
-      canTrick,
-      canTreat,
-      isUserTurn,
-    } = currentUser;
-
-    const currentCharacter = characters.find(character => (character.characterId === currentUser.characterId));
-    const {
-      candies,
-      health,
-      movement,
-    } = currentCharacter;
+      value,
+    } = this.props;
 
     return (
       <Fragment>
-        <div className='pad-v-2 flex-none'>
-        <span className='sibling-mar-l-2'>
-            {`Moves: ${movement || 0}`}
-          </span>
-
-          <span className='sibling-mar-l-2'>
-            {`Health: ${health || 0}`}
-          </span>
-
-          <span className='sibling-mar-l-2'>
-            {`Candies: ${candies || 0}`}
-          </span>
-        </div>
-
-        <div className='pad-v-2 flex-none'>
-          { isUserTurn ? 'Your turn!' : 'Not your turn.' }
-        </div>
-
-        <div className='pad-v-2 flex-none'>
-          <DebugActionButton
-            actionId={CLIENT_ACTIONS.MOVE.LEFT}
-            disabled={!canMoveLeft}
-            onActionClick={this.handleOnActionClick}
-          >
-            left
-          </DebugActionButton>
-          <DebugActionButton
-            actionId={CLIENT_ACTIONS.MOVE.RIGHT}
-            disabled={!canMoveRight}
-            onActionClick={this.handleOnActionClick}
-          >
-            Right
-          </DebugActionButton>
-          <DebugActionButton
-            actionId={CLIENT_ACTIONS.MOVE.UP}
-            disabled={!canMoveUp}
-            onActionClick={this.handleOnActionClick}
-          >
-            Up
-          </DebugActionButton>
-          <DebugActionButton
-            actionId={CLIENT_ACTIONS.MOVE.DOWN}
-            disabled={!canMoveDown}
-            onActionClick={this.handleOnActionClick}
-          >
-            Down
-          </DebugActionButton>
-          <DebugActionButton
-            actionId={CLIENT_ACTIONS.TRICK}
-            disabled={!canTrick}
-            onActionClick={this.handleOnActionClick}
-          >
-            Trick
-          </DebugActionButton>
-          <DebugActionButton
-            actionId={CLIENT_ACTIONS.TREAT}
-            disabled={!canTreat}
-            onActionClick={this.handleOnActionClick}
-          >
-            Treat
-          </DebugActionButton>
-
-        </div>
-
-        <World
-          mapMatrix={tileMapModel.matrix}
-          fogMatrix={fogMapModel.matrix}
-          characters={characters}
+        <span className='color-black fsize-4'>Export Result</span>
+        <textarea
+          className='color-black pad-2 width-full height-full'
+          style={{
+            border: '1px solid lightgray',
+            boxSizing: 'border-box',
+          }}
+          defaultValue={value}
         />
       </Fragment>
     )
   }
-  handleOnActionClick(actionId) {
-    connectionManager.socket.emit(SOCKET_EVENTS.GAME.ACTION, actionId);
-  }
-  handleOnStartClick() {
-    connectionManager.socket.emit(SOCKET_EVENTS.LOBBY.START);
-  }
 }
-const ObservingDebugPage = observer(() => {
-  const remoteAppStateObject = remoteAppState.export();
-  return (
-    <DebugPage
-      {...remoteAppStateObject}
-      userId={remoteAppStateObject.userId}
-      gamestate={remoteAppStateObject.gamestate}
-      isInLobby={remoteAppStateObject.isInLobby}
-      isInGame={remoteAppStateObject.isInGame}
-    />
-  )
-});
-
-
-class DebugActionButton extends React.PureComponent {
+class ImportModal extends Component {
   render() {
-    const {
-      disabled,
-    } = this.props;
-
     return (
-      <button
-        className={`pad-2 bg-fourth sibling-mar-l-1 ${!disabled ? 'color-white' : 'color-black'}`}
-        disabled={ disabled }
-        onClick={this.onActionDidClick.bind(this)}
-      >
-        { this.props.children }
-      </button>
+      <Fragment>
+        <span className='color-black fsize-4'>Import</span>
+        <textarea
+          className='color-black pad-2 width-full height-full'
+          style={{
+            border: '1px solid lightgray',
+            boxSizing: 'border-box',
+          }}
+          placeholder='I want a Matrix'
+          onChange={this.handleOnChangeTextarea.bind(this)}
+        />
+
+        <ButtonComponent
+          className='fsize-3 pad-1 f-bold mar-t-2'
+          onClick={this.onClickSubmit.bind(this)}
+        >
+          Submit
+        </ButtonComponent>
+      </Fragment>
     )
   }
-
-  onActionDidClick() {
-    this.props.onActionClick(this.props.actionId);
+  /**
+   *
+   */
+  handleOnChangeTextarea(e) {
+    this.setState({value: e.target.value});
   }
-}
-
-class World extends Component {
-  render() {
-    const {
-      mapMatrix,
-      fogMatrix,
-      characters,
-    } = this.props;
-
-    const isEmpty = mapMatrix.length <= 0 || mapMatrix[0].length <= 0;
-    if (isEmpty) {
-      return <div className='pad-2'>(waiting for map data)</div>
+  /**
+   *
+   */
+  onClickSubmit() {
+    const {value} = this.state;
+    if (value === undefined && value === null) {
+      return;
     }
 
-    return (
-      <div className='flex-col-centered position-relative mar-v-2 mar-h-auto bor-4-primary'>
-        { mapMatrix.map((innerMatrix, row) => {
-          return (
-            <div className='flex-row' key={`row-${row}-key`} >
-              { innerMatrix.map((tileType, col) => {
-                return (
-                  <Tile
-                    key={`tile-${col}-${row}-key`}
-                    tileType={tileType}
-                    fogType={fogMatrix[row][col]}
-                    characters={characters}
-                    pos={{row, col}}
-                  />
-                )
-              })}
-            </div>
-          )
-        })}
-      </div>
-    )
+    this.props.onClickModalSubmit(value);
   }
 }
-
-const TILE_SIZE = '15px';
-const TILE_TYPE_STYLES = {
-  //'start',
-  '*': { backgroundColor: 'yellow' },
-  //'empty',
-  0: { backgroundColor: '#313131' },
-  //'path',
-  1: { backgroundColor: 'lightgreen' },
-  //'house',
-  2: {
-    backgroundColor: '#33c3ff',
-    border: '1px solid #299fd0',
-  },
-  //'encounter',
-  4: {
-    backgroundColor: '#d0ffd0',
-  },
-  //'special',
-  9: { backgroundColor: '#da5cff' },
-}
-const FOG_STYLES = {
-  //'hidden',
-  0: {
-    opacity: 0,
-  },
-  //'visible',
-  1: {},
-  //'partial',
-  2: {
-    opacity: 0.5,
-  },
-}
-class Tile extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isFocused: false,
-    }
-  }
-  render() {
-    const { fogType, tileType, pos } = this.props;
-    const { isFocused } = this.state;
-    const charactersHere = this.getCharactersHere();
-    const characterDisplay = charactersHere.length > 1 ? `[${charactersHere.length}]` : (charactersHere[0] && charactersHere[0].name[0]);
-
-    // make hidden tiles just look like empty tiles
-    const isHidden = fogType === 0;
-    const modifierStyles = isHidden ? TILE_TYPE_STYLES[0] : {
-      ...TILE_TYPE_STYLES[tileType],
-      ...FOG_STYLES[fogType],
-    }
-
-    return (
-      <div
-        style={{
-          width: TILE_SIZE,
-          height: TILE_SIZE,
-          boxSizing: 'border-box',
-          ...modifierStyles,
-        }}
-        onMouseEnter={this.handleOnMouseEnter.bind(this)}
-        onMouseLeave={this.handleOnMouseLeave.bind(this)}
-      >
-        { isFocused &&
-          <span
-            style={{
-              position: 'absolute',
-              top: '10px',
-              left: '10px',
-              pointerEncounters: 'none',
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              padding: '4px',
-              color: 'white',
-            }}
-          >
-            {`${pos.col}, ${pos.row}`}
-          </span>
-        }
-
-        <span className='color-white text-stroke'>
-          { characterDisplay }
-        </span>
-      </div>
-    )
-  }
-  handleOnMouseEnter() {
-    this.setState({ isFocused: true })
-  }
-  handleOnMouseLeave() {
-    this.setState({ isFocused: false })
-  }
-  getCharactersHere() {
-    const { characters, pos } = this.props;
-    const charactersHere = characters.map((character) => {
-      if (character) {
-        const characterPos = character.position;
-        if (characterPos.x === pos.col && characterPos.y === pos.row) {
-          return character;
-        }
-      }
-      return null;
-    });
-
-    return charactersHere.filter(Boolean);
-  }
-}
-
-export default ObservingDebugPage;

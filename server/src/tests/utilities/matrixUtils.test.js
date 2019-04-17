@@ -1,7 +1,7 @@
 import test from 'ava';
-import * as matrixUtils from 'utilities/matrixUtils';
-
 import Point from '@studiomoniker/point';
+
+import * as matrixUtils from 'utilities/matrixUtils';
 
 test('forEach() - properly executes callback for each tile', (t) => {
   let tileCount = 0;
@@ -124,6 +124,34 @@ test('hasNearbyTileType() - returns true if tile is nearby, using a distance of 
   t.true(isNearby);
 });
 
+test('mergeMatrices() - properly inserts one matrix into another', (t) => {
+  const bigMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ];
+
+  const smallMatrix = [
+    [1, 1, 1],
+    [1, 1, 1],
+    [1, 1, 1],
+  ];
+
+  const expectedMatrix = [
+    [0, 0, 1, 1, 1],
+    [0, 0, 1, 1, 1],
+    [0, 0, 1, 1, 1],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ];
+
+  const resultMatrix = matrixUtils.mergeMatrices(bigMatrix, smallMatrix, new Point(2, 0));
+
+  t.is(Array.toString(resultMatrix), Array.toString(expectedMatrix));
+});
+
 test('containsTileType() - returns true if any of the tiles match given type', (t) => {
   const testMatrix = [
     [0, 0, 0, 0, 0],
@@ -179,18 +207,10 @@ test('hasAdjacentTileType() - returns false if no tiles directly adjacent match 
 });
 
 test('getDistanceBetween() - gets the distance between two points on a matrix', (t) => {
-  const testMatrix = [
-    [1, 0, 0, 0, 2],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-  ];
-
   const pointOne = new Point(0, 0);
   const pointTwo = new Point(0, 4);
 
-  const distanceResult = matrixUtils.getDistanceBetween(testMatrix, pointOne, pointTwo);
+  const distanceResult = matrixUtils.getDistanceBetween(pointOne, pointTwo);
   t.is(distanceResult, 4);
 });
 
@@ -416,7 +436,7 @@ test('getTypeCountsAdjacentTo() - gets the counts of adjacent values', (t) => {
   t.deepEqual(typeCountMap, expectedCounts);
 });
 
-test('getPointsOfNearbyTiles() - gets correct set of Points of the points X distance away', (t) => {
+test('getPointsListOfNearbyTiles() - gets correct set of Points of the points X distance away', (t) => {
   const testMatrix = [
     [0, 0, 1, 0, 0],
     [0, 1, 1, 1, 0],
@@ -443,7 +463,23 @@ test('getPointsOfNearbyTiles() - gets correct set of Points of the points X dist
 
   const testPoint = new Point(2, 2);
 
-  const testPointsList = matrixUtils.getPointsOfNearbyTiles(testMatrix, testPoint, 2);
+  const testPointsList = matrixUtils.getPointsListOfNearbyTiles(testMatrix, testPoint, 2);
   t.is(Array.toString(testPointsList), Array.toString(expectedList));
+});
+
+test('getPointOfNearestTileType() - gets the point of the nearest tile that is of given type', (t) => {
+  const testMatrix = [
+    ['*', 0, 0, 1, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0],
+    [1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1],
+  ];
+
+  const startPoint = new Point(0, 0);
+  const matchingType = 1;
+  const nearestPoint = matrixUtils.getPointOfNearestTileType(testMatrix, startPoint, matchingType, 4);
+
+  t.true(nearestPoint.equals(new Point(1, 1)));
 });
 

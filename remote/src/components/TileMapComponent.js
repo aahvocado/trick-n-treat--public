@@ -4,9 +4,19 @@ import Point from '@studiomoniker/point';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUser, faHome} from '@fortawesome/free-solid-svg-icons'
 
-import {TILE_SIZE, MAP_HEIGHT, MAP_WIDTH, calculateMapXOffset, calculateMapYOffset} from 'constants/mapConstants';
+import {
+  MAP_CONTAINER_HEIGHT,
+  MAP_CONTAINER_WIDTH,
+  calculateMapXOffset,
+  calculateMapYOffset,
+} from 'constants/mapConstants';
 import {TILE_STYLES, FOG_STYLES, createEntityIconStyles} from 'constants/tileStyles';
-import {FOG_TYPES, TILE_TYPES} from 'constants/tileTypes';
+import {
+  FOG_TYPES,
+  TILE_TYPES,
+  isPartiallyVisibleFog,
+  isWalkableTile,
+} from 'constants/tileTypes';
 
 /**
  * 2D matrix visualizer
@@ -23,15 +33,23 @@ export class TileMapComponent extends Component {
     selectedTilePos: undefined,
     /** @type {Path} */
     selectedPath: [],
+
+    /** @type {Boolean} */
+    isFullyVisible: false,
+    /** @type {Boolean} */
+    isZoomedOut: false,
   };
   /** @override */
   render() {
     const {
+      isFullyVisible,
+      isZoomedOut,
       mapData,
       myCharacter,
       onTileClick,
       selectedTilePos,
       selectedPath,
+      tileSize,
     } = this.props;
 
     // check if Map has no data yet
@@ -39,14 +57,19 @@ export class TileMapComponent extends Component {
       return <div className='width-full pad-2'>(waiting for map data)</div>
     }
 
+    const mapContainerTransform = isZoomedOut ?
+      `translate(-${(mapData[0].length * 39) / 2}px, -${(mapData.length * 39.5) / 2}px) scale(${0.2}, ${0.2})` :
+      `translate(${calculateMapXOffset(myCharacter.position.x)}px, ${calculateMapYOffset(myCharacter.position.y)}px)`;
+
     return (
       <div
         className='flex-col-centered position-relative mar-v-2 mar-h-auto bor-4-primary'
         style={{
           overflow: 'hidden',
           backgroundColor: '#252525',
-          height: `${MAP_HEIGHT}px`,
-          width: `${MAP_WIDTH}px`,
+          height: `${MAP_CONTAINER_HEIGHT}px`,
+          width: `${MAP_CONTAINER_WIDTH}px`,
+          flex: '0 0 auto',
         }}
       >
         <div style={{
@@ -54,7 +77,7 @@ export class TileMapComponent extends Component {
           top: '0',
           left: '0',
           transition: 'transform 400ms',
-          transform: `translate(${calculateMapXOffset(myCharacter.position.x)}px, ${calculateMapYOffset(myCharacter.position.y)}px)`,
+          transform: mapContainerTransform,
         }}>
           { mapData.map((mapRowData, rowIdx) => {
             return (
@@ -73,6 +96,8 @@ export class TileMapComponent extends Component {
                     <TileItemComponent
                       key={`tile-item-${colIdx}-${rowIdx}-key`}
                       {...tileData}
+                      fogType={isFullyVisible ? FOG_TYPES.VISIBLE : tileData.fogType}
+                      tileSize={tileSize}
                       position={tileData.position}
                       isSelected={isSelected}
                       isTooFar={distanceFromMyCharacter > myCharacter.movement || (!isUserHere && selectedPath.length === 0)}
@@ -93,7 +118,7 @@ export default TileMapComponent;
 /**
  * a single cell in the Matrix
  */
-class TileItemComponent extends Component {
+export class TileItemComponent extends Component {
   static defaultProps = {
     /** @type {Array<CharacterModel.export>} */
     charactersHere: [],
@@ -103,10 +128,13 @@ class TileItemComponent extends Component {
     houseHere: undefined,
     /** @type {Point} */
     position: new Point(),
+
     /** @type {FogType} */
     fogType: undefined,
     /** @type {TileType} */
     tileType: undefined,
+    /** @type {Number} */
+    tileSize: 15,
 
     /** @type {Boolean} */
     isSelected: false,
@@ -116,6 +144,10 @@ class TileItemComponent extends Component {
     isUserHere: false,
     /** @type {Function} */
     onTileClick: () => {},
+    /** @type {Function} */
+    onTileHover: () => {},
+    /** @type {Function} */
+    onTileLeave: () => {},
   };
   /** @override */
   constructor(props) {
@@ -137,15 +169,16 @@ class TileItemComponent extends Component {
       isTooFar,
       isSelected,
       isUserHere,
+      tileSize,
       tileType,
     } = this.props;
 
     const isHidden = fogType === FOG_TYPES.HIDDEN;
-    const isObscured = fogType === FOG_TYPES.PARTIAL;
+    const isPartiallyVisible = isPartiallyVisibleFog(fogType);
 
     // border highlight
     const borderStyles = isSelected ?
-      { border: isTooFar ? '1px solid #ff4747' : '2px solid #0cd2ff' } :
+      { border: (!isWalkableTile(tileType) || isTooFar) ? '1px solid #ff4747' : '2px solid #0cd2ff' } :
       { border: isUserHere ? '2px solid yellow' : '' };
 
     // make hidden tiles just look like empty tiles
@@ -158,8 +191,8 @@ class TileItemComponent extends Component {
       <div
         className='position-relative'
         style={{
-          width: `${TILE_SIZE}px`,
-          height: `${TILE_SIZE}px`,
+          width: `${tileSize}px`,
+          height: `${tileSize}px`,
           boxSizing: 'border-box',
           ...modifierStyles,
         }}
@@ -167,8 +200,8 @@ class TileItemComponent extends Component {
         onMouseLeave={this.handleOnMouseLeave}
         onClick={this.handleOnTileClick}
       >
-        { isObscured &&
-          <div style={FOG_STYLES[FOG_TYPES.PARTIAL]}></div>
+        { isPartiallyVisible &&
+          <div style={FOG_STYLES[fogType]}></div>
         }
 
         { !isHidden &&
@@ -215,13 +248,19 @@ class TileItemComponent extends Component {
    *
    */
   handleOnMouseEnter() {
-    this.setState({ isFocused: true })
+    this.setState({ isFocused: true });
+
+    const { position } = this.props;
+    this.props.onTileHover(position);
   }
   /**
    *
    */
   handleOnMouseLeave() {
-    this.setState({ isFocused: false })
+    this.setState({ isFocused: false });
+
+    const { position } = this.props;
+    this.props.onTileLeave(position);
   }
   /**
    *

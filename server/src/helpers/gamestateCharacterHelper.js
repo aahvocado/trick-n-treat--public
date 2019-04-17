@@ -1,5 +1,5 @@
 // import {GAME_MODES} from 'constants/gameModes';
-import POINTS, {getPointFromString} from 'constants/points';
+import {POINTS, getPointFromString} from 'constants/points';
 
 import gameState from 'data/gameState';
 

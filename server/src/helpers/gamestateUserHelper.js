@@ -6,7 +6,7 @@ import {CLIENT_TYPES} from 'constants/clientTypes';
 import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
 import {GAME_MODES} from 'constants/gameModes';
 import {MAP_START} from 'constants/mapSettings';
-import POINTS from 'constants/points';
+import {POINTS} from 'constants/points';
 
 import gameState from 'data/gameState';
 

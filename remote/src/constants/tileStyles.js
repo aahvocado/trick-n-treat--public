@@ -2,22 +2,63 @@ import {TILE_SIZE} from 'constants/mapConstants';
 import {FOG_TYPES, TILE_TYPES} from 'constants/tileTypes';
 
 export const TILE_STYLES = {
-  [TILE_TYPES.START]: { backgroundColor: 'yellow' },
   [TILE_TYPES.EMPTY]: { backgroundColor: '#313131' },
-  [TILE_TYPES.PATH]: { backgroundColor: 'lightgreen' },
+
+  [TILE_TYPES.PATH]: { backgroundColor: '#d49864' },
+  [TILE_TYPES.LIT_PATH]: { backgroundColor: '#d49864' },
+
+  [TILE_TYPES.GRASS]: { backgroundColor: 'lightgreen' },
+  [TILE_TYPES.LIT_GRASS]: { backgroundColor: 'lightgreen' },
+
+  [TILE_TYPES.SIDEWALK]: { backgroundColor: '#99caff' },
+  [TILE_TYPES.LIT_SIDEWALK]: { backgroundColor: '#99caff' },
+
+  [TILE_TYPES.ROAD]: { backgroundColor: '#c792c7' },
+  [TILE_TYPES.LIT_ROAD]: { backgroundColor: '#c792c7' },
+
+  [TILE_TYPES.SWAMP]: { backgroundColor: '#31ab8a' },
+  [TILE_TYPES.LIT_SWAMP]: { backgroundColor: '#31ab8a' },
+
+  [TILE_TYPES.PLANKS]: { backgroundColor: '#99caff' },
+  [TILE_TYPES.PLANKS_TWO]: { backgroundColor: '#99caff' },
+
+  [TILE_TYPES.WOODS]: { backgroundColor: '#8cb9a5' },
+  [TILE_TYPES.LIT_WOODS]: { backgroundColor: '#8cb9a5' },
+  [TILE_TYPES.WOODS_TWO]: { backgroundColor: '#8cb9a5' },
+  [TILE_TYPES.LIT_WOODS_TWO]: { backgroundColor: '#8cb9a5' },
+
   [TILE_TYPES.HOUSE]: {
     backgroundColor: '#33c3ff',
     border: '1px solid #299fd0',
   },
   [TILE_TYPES.ENCOUNTER]: { backgroundColor: '#d0ffd0' },
   [TILE_TYPES.SPECIAL]: { backgroundColor: '#da5cff' },
+
+  [TILE_TYPES.TREE_ONE]: { backgroundImage: 'repeating-linear-gradient(45deg, #556f64, #556f64 5px, #8cb9a5 5px, #8cb9a5 12px)' },
+  [TILE_TYPES.TREE_TWO]: { backgroundImage: 'repeating-linear-gradient(45deg, #556f64, #556f64 5px, #8cb9a5 5px, #8cb9a5 12px)' },
+  [TILE_TYPES.TREE_THREE]: { backgroundImage: 'repeating-linear-gradient(45deg, #556f64, #556f64 5px, #8cb9a5 5px, #8cb9a5 12px)' },
+  [TILE_TYPES.SPOOKY_TREE_ONE]: { backgroundImage: 'repeating-linear-gradient(45deg, #8c56a7, #8c56a7 5px, #66a756 5px, #66a756 12px)' },
+  [TILE_TYPES.BUSH]: { backgroundImage: 'repeating-linear-gradient(45deg, #69af4f, #69af4f 5px, #8cb9a5 5px, #8cb9a5 12px)' },
 };
 
 export const FOG_STYLES = {
   [FOG_TYPES.HIDDEN]: {},
   [FOG_TYPES.VISIBLE]: {},
-  [FOG_TYPES.PARTIAL]: {
+
+  [FOG_TYPES.DIM]: {
+    backgroundColor: 'rgb(49, 49, 49, 0.3)',
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  [FOG_TYPES.DIMMER]: {
     backgroundColor: 'rgb(49, 49, 49, 0.5)',
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  [FOG_TYPES.DIMMEST]: {
+    backgroundColor: 'rgb(49, 49, 49, 0.7)',
     position: 'absolute',
     width: '100%',
     height: '100%',

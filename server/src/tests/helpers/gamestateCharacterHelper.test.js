@@ -1,19 +1,20 @@
 import test from 'ava';
 import Point from '@studiomoniker/point';
-import POINTS from 'constants/points';
 
-import gameState from 'data/gameState';
-
-import TILE_TYPES from 'constants/tileTypes';
-const STAR = TILE_TYPES.START;
+import {POINTS} from 'constants/points';
+import {TILE_TYPES} from 'constants/tileTypes';
 const NOPE = TILE_TYPES.EMPTY;
 const PATH = TILE_TYPES.PATH;
 const HOUS = TILE_TYPES.HOUSE;
+
+import gameState from 'data/gameState';
 
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 
 import CharacterModel from 'models/CharacterModel';
 import MapModel from 'models/MapModel';
+
+import * as matrixUtils from 'utilities/matrixUtils';
 
 test.beforeEach((t) => {
   // reset the gamestate for each test
@@ -30,7 +31,7 @@ test('getRandomCharacterDirection() - (randomly) picks a valid directional Point
   // -- setup
   const testMap = new MapModel({
     matrix: [
-      [STAR, NOPE, PATH, PATH, HOUS],
+      [PATH, NOPE, PATH, PATH, HOUS],
       [PATH, NOPE, PATH, NOPE, NOPE],
       [PATH, NOPE, PATH, PATH, PATH],
       [PATH, NOPE, NOPE, NOPE, PATH],
@@ -58,7 +59,7 @@ test('updateCharacterPosition() - correctly updates a Characters position if the
   // -- setup
   const testMap = new MapModel({
     matrix: [
-      [STAR, NOPE, PATH, PATH, HOUS],
+      [PATH, NOPE, PATH, PATH, HOUS],
       [PATH, NOPE, PATH, NOPE, NOPE],
       [PATH, NOPE, PATH, PATH, PATH],
       [PATH, NOPE, NOPE, NOPE, PATH],
@@ -74,6 +75,7 @@ test('updateCharacterPosition() - correctly updates a Characters position if the
 
   gameState.set({
     tileMapModel: testMap,
+    fogMapModel: new MapModel({matrix: matrixUtils.createMatrix(testMap.getWidth(), testMap.getHeight())}),
     characters: [testCharacter],
   });
 
@@ -91,7 +93,7 @@ test('updateCharacterPositionByDirection() - correctly updates a Characters posi
   // -- setup
   const testMap = new MapModel({
     matrix: [
-      [STAR, NOPE, PATH, PATH, HOUS],
+      [PATH, NOPE, PATH, PATH, HOUS],
       [PATH, NOPE, PATH, NOPE, NOPE],
       [PATH, NOPE, PATH, PATH, PATH],
       [PATH, NOPE, NOPE, NOPE, PATH],
@@ -107,6 +109,7 @@ test('updateCharacterPositionByDirection() - correctly updates a Characters posi
 
   gameState.set({
     tileMapModel: testMap,
+    fogMapModel: new MapModel({matrix: matrixUtils.createMatrix(testMap.getWidth(), testMap.getHeight())}),
     characters: [testCharacter],
   });
 

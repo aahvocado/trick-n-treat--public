@@ -1,4 +1,5 @@
 import CharacterModel from 'models/CharacterModel';
+
 /**
  *
  */
@@ -8,9 +9,9 @@ export class FastCharacter extends CharacterModel {
     super({
       typeId: 'FAST_CHARACTER_TYPE',
       health: 4,
-      movement: 5,
+      movement: 4,
       sanity: 4,
-      vision: 4,
+      vision: 0,
       ...newAttributes,
     });
   }
@@ -26,7 +27,7 @@ export class StrongCharacter extends CharacterModel {
       health: 5,
       movement: 3,
       sanity: 5,
-      vision: 3,
+      vision: 0,
       ...newAttributes,
     });
   }
@@ -42,7 +43,7 @@ export class SmartCharacter extends CharacterModel {
       health: 3,
       movement: 3,
       sanity: 7,
-      vision: 5,
+      vision: 0,
       ...newAttributes,
     });
   }

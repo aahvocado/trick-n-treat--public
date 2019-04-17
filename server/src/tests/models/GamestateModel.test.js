@@ -1,15 +1,11 @@
 import test from 'ava';
 import Point from '@studiomoniker/point';
 
-import {GamestateModel} from 'data/gameState';
-
-import TILE_TYPES, {FOG_TYPES} from 'constants/tileTypes';
-const STAR = TILE_TYPES.START;
+import {TILE_TYPES} from 'constants/tileTypes';
 const NOPE = TILE_TYPES.EMPTY;
 const PATH = TILE_TYPES.PATH;
-const HOUS = TILE_TYPES.HOUSE;
 
-import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
+import {GamestateModel} from 'data/gameState';
 
 import CharacterModel from 'models/CharacterModel';
 import EncounterModel from 'models/EncounterModel';
@@ -17,6 +13,7 @@ import EncounterModel from 'models/EncounterModel';
 import MapModel from 'models/MapModel';
 import UserModel from 'models/UserModel';
 
+// import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
 
 test.beforeEach((t) => {
   const testUser = new UserModel({
@@ -34,7 +31,7 @@ test.beforeEach((t) => {
 
   const testMap = new MapModel({
     matrix: [
-      [STAR, NOPE, PATH, PATH, PATH],
+      [PATH, NOPE, PATH, PATH, PATH],
       [PATH, NOPE, PATH, NOPE, NOPE],
       [PATH, NOPE, PATH, PATH, PATH],
       [PATH, NOPE, NOPE, NOPE, PATH],
@@ -144,30 +141,6 @@ test('removeUser() - removes given user from a list', (t) => {
   const users = testGamestate.get('users');
   const foundUser = users.find((user) => (user.id === newTestUser.id));
   t.is(foundUser, undefined);
-});
-
-test('updateToPartiallyVisibleAt() - changes the Fog of War map to partially visible at a given point', (t) => {
-  const {testGamestate} = t.context;
-  const testMap = new MapModel({
-    matrix: [
-      [HOUS, PATH],
-      [PATH, NOPE],
-    ],
-  });
-
-  const testFogMap = gamestateDataHelper.createFogOfWarModel(testMap);
-
-  testGamestate.set({
-    tileMapModel: testMap,
-    fogMapModel: testFogMap,
-  });
-
-  const testCharacter = testGamestate.findCharacterById('TEST_CHARACTER_ID');
-  testCharacter.set({position: new Point(0, 0)});
-
-  const testPoint = new Point(0, 1);
-  testGamestate.updateToPartiallyVisibleAt(testPoint);
-  t.is(testFogMap.getTileAt(testPoint), FOG_TYPES.PARTIAL);
 });
 
 // -- Map Getters

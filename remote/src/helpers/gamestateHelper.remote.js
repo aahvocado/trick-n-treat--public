@@ -1,4 +1,7 @@
-import {FOG_TYPES} from 'constants/tileTypes';
+import {
+  FOG_TYPES,
+  isWalkableTile,
+} from 'constants/tileTypes';
 
 import remoteAppState from 'data/remoteAppState';
 
@@ -11,6 +14,12 @@ import * as matrixUtils from 'utilities/matrixUtils.remote';
  * @returns {Boolean}
  */
 export function canMyCharacterMoveTo(endPoint) {
+  const mapData = remoteAppState.get('gamestate').mapData;
+  const tileData = matrixUtils.getTileAt(mapData, endPoint);
+  if (!isWalkableTile(tileData.tileType)) {
+    return false;
+  }
+
   const myCharacter = remoteAppState.get('myCharacter');
   const isWithinDistance = mapUtils.isWithinPathDistance(getVisibileTileMapData(), myCharacter.position, endPoint, myCharacter.movement);
   return isWithinDistance;

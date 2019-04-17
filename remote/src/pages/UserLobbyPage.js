@@ -2,7 +2,7 @@ import React, { Fragment, PureComponent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDesktop, faMobileAlt } from '@fortawesome/free-solid-svg-icons'
 
-import {BasicButtonComponent} from 'components/ButtonComponent';
+import ButtonComponent from 'common-components/ButtonComponent';
 
 import {SOCKET_EVENTS} from 'constants/socketEvents';
 
@@ -32,8 +32,8 @@ export class UserLobbyPage extends PureComponent {
 
     return (
       <div className='bg-secondary pad-h-2 flex-grow flex-centered flex-col text-center'>
-        <BasicButtonComponent
-          className='mar-t-2 flex-col'
+        <ButtonComponent
+          className='fsize-4 pad-2 f-bold mar-t-2 flex-col'
           disabled={!isConnected}
           onClick={this.handleOnStartClick}
         >
@@ -50,7 +50,7 @@ export class UserLobbyPage extends PureComponent {
               <span className='fsize-4'>on your candy inquisition</span>
             </Fragment>
           }
-        </BasicButtonComponent>
+        </ButtonComponent>
 
         <h2 className='mar-t-2 pad-v-2 flex-none'>
           { isConnected ? 'Welcome to the Disciples of Trick and Treat!' : 'You do not have a connection to the cosmos...' }

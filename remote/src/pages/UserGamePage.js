@@ -11,11 +11,21 @@ import {
   faRunning,
 } from '@fortawesome/free-solid-svg-icons'
 
-import {BasicButtonComponent} from 'components/ButtonComponent';
+import {
+  TILE_TYPES_NAME,
+} from 'constants/tileTypes';
+import {
+  TILE_SIZE,
+} from 'constants/mapConstants';
+
+import ButtonComponent from 'common-components/ButtonComponent';
+
 import TileMapComponent from 'components/TileMapComponent';
 
 import {CLIENT_ACTIONS} from 'constants/clientActions';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
+
+import remoteAppState from 'data/remoteAppState';
 
 import * as gamestateHelper from 'helpers/gamestateHelper.remote';
 
@@ -49,7 +59,15 @@ class UserGamePage extends PureComponent {
     this.handleTrickOnClick = this.handleTrickOnClick.bind(this);
     this.handleTreatOnClick = this.handleTreatOnClick.bind(this);
 
+    this.onClickToggleZoom = this.onClickToggleZoom.bind(this);
+    this.onClickToggleVisibility = this.onClickToggleVisibility.bind(this);
+
     this.state = {
+      /** @type {Boolean} */
+      isFullyVisible: false,
+      /** @type {Boolean} */
+      isZoomedOut: false,
+
       /** @type {Point} */
       selectedTilePos: props.myCharacter.position,
       /** @type {Path} */
@@ -63,7 +81,10 @@ class UserGamePage extends PureComponent {
       gamestate,
       myCharacter,
     } = this.props;
+
     const {
+      isFullyVisible,
+      isZoomedOut,
       selectedTilePos,
       selectedPath,
     } = this.state;
@@ -108,42 +129,66 @@ class UserGamePage extends PureComponent {
           </div>
 
           <div className='flex-none sibling-mar-l-2' >{`Round ${gamestate.round}`}</div>
-
-          <span className='pad-h-2'>{`( x: ${selectedTilePos.x}, y: ${selectedTilePos.y} )`}</span>
         </div>
 
         <TileMapComponent
+          isFullyVisible={isFullyVisible}
+          isZoomedOut={isZoomedOut}
           mapData={gamestate.mapData}
           myCharacter={myCharacter}
           onTileClick={this.handleOnTileClick}
           selectedTilePos={selectedTilePos}
           selectedPath={selectedPath}
+          tileSize={TILE_SIZE}
         />
 
         <div className='flex-row-centered mar-b-4'>
-          <BasicButtonComponent
-            disabled={!this.canTrick()}
-            onClick={this.handleTrickOnClick}
-          >
-            Trick
-          </BasicButtonComponent>
-
-          <BasicButtonComponent
-            disabled={!this.canTreat()}
-            onClick={this.handleTreatOnClick}
-          >
-            Treat
-          </BasicButtonComponent>
-
           <FontAwesomeIcon className='sibling-mar-l-1 fsize-2 color-tertiary' icon={faCircle} />
 
-          <BasicButtonComponent
+          <ButtonComponent
             disabled={!this.canMove()}
             onClick={this.handleMoveToOnClick}
           >
             Move To
-          </BasicButtonComponent>
+          </ButtonComponent>
         </div>
+
+        { remoteAppState.get('isDevMode') &&
+          <div className='flex-col-centered'>
+            <span>Dev Tools</span>
+
+            <div className='flex-row-centered pad-2'>
+              <span>Selected Tile: </span>
+
+              <span className='pad-h-2'>{`( x: ${selectedTilePos.x}, y: ${selectedTilePos.y} )`}</span>
+
+              <span>{TILE_TYPES_NAME[gamestate.mapData[selectedTilePos.y][selectedTilePos.x].tileType]}</span>
+            </div>
+
+            <div className='flex-row-centered mar-b-4'>
+              <ButtonComponent
+                className='fsize-3 pad-2 sibling-mar-l-1'
+                onClick={this.onClickToggleZoom}
+              >
+                Toggle Zoom
+              </ButtonComponent>
+
+              <ButtonComponent
+                className='fsize-3 pad-2 sibling-mar-l-1'
+                onClick={this.onClickToggleVisibility}
+              >
+                Toggle Visibility
+              </ButtonComponent>
+
+              <ButtonComponent
+                className='fsize-3 pad-2 sibling-mar-l-1'
+                onClick={this.onClickSwitchToEditor}
+              >
+                Switch To Editor
+              </ButtonComponent>
+            </div>
+          </div>
+        }
       </div>
     )
   }
@@ -248,6 +293,26 @@ class UserGamePage extends PureComponent {
     if (this.canTreat()) {
       connectionManager.socket.emit(SOCKET_EVENTS.GAME.ACTION, CLIENT_ACTIONS.TREAT);
     }
+  }
+  /**
+   *
+   */
+  onClickToggleZoom() {
+    const { isZoomedOut } = this.state;
+    this.setState({isZoomedOut: !isZoomedOut});
+  }
+  /**
+   *
+   */
+  onClickSwitchToEditor() {
+    remoteAppState.set({isDebugMode: true});
+  }
+  /**
+   *
+   */
+  onClickToggleVisibility() {
+    const { isFullyVisible } = this.state;
+    this.setState({isFullyVisible: !isFullyVisible});
   }
 }
 

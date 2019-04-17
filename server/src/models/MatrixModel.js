@@ -1,4 +1,5 @@
 import Point from '@studiomoniker/point';
+
 import Model from 'models/Model';
 
 import * as matrixUtils from 'utilities/matrixUtils';
@@ -12,17 +13,50 @@ export class MatrixModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super({
-      matrix: [[]],
+      /** @type {Matrix} */
+      matrix: undefined,
+      /** @type {Number} */
+      baseWidth: 0,
+      /** @type {Number} */
+      baseHeight: 0,
+      // other
       ...newAttributes,
     });
+
+    // if no `matrix` was given, then we'll make one automatically
+    const baseMatrix = this.get('matrix');
+    if (baseMatrix === undefined) {
+      this.generateBaseMatrix();
+    }
+
+    // otherwise, we should set the base dimensions to our Matrix`
+    if (baseMatrix !== undefined) {
+      this.set({
+        baseWidth: baseMatrix[0].length,
+        baseHeight: baseMatrix.length,
+      });
+    }
   }
+  // -- class generators
+  /**
+   * uses available settings to create a default Matrix
+   *
+   * @param {TileType} [tileType]
+   */
+  generateBaseMatrix(tileType = null) {
+    const baseWidth = this.get('baseWidth');
+    const baseHeight = this.get('baseHeight');
+    const baseMatrix = matrixUtils.createMatrix(baseWidth, baseHeight, tileType);
+    this.set({matrix: baseMatrix});
+  }
+  // -- class methods
   /**
    * returns the 2D array of tiles
    *
    * @returns {Matrix}
    */
   getMatrix() {
-    return this.get('matrix');
+    return this.get('matrix').slice();
   }
   /**
    * @returns {Number}
@@ -51,7 +85,7 @@ export class MatrixModel extends Model {
    * returns the Tile located at a given Point
    *
    * @param {Point} point
-   * @returns {Tile | null}
+   * @returns {* | null}
    */
   getTileAt(point) {
     const {x, y} = point;
@@ -63,24 +97,23 @@ export class MatrixModel extends Model {
     }
   }
   /**
-   * replaces the data of a Tile at a given Point
+   * replaces the value of a Tile at a given Point
    *
    * @param {Point} point
-   * @param {*} tileData - what to update tile with
+   * @param {*} value - what to update tile with
    */
-  setTileAt(point, tileData) {
-    const matrix = this.get('matrix');
-    matrix[point.y][point.x] = tileData;
+  setTileAt(point, value) {
+    matrixUtils.setTileAt(this.getMatrix(), point, value);
   }
   /**
-   * updates the data of Tiles from an Array of Points
+   * updates the value of Tiles from an Array of Points
    *
    * @param {Array<Point>} pointList
-   * @param {*} tileData - what to update tile with
+   * @param {*} value - what to update tile with
    */
-  setTileList(pointList, tileData) {
+  setTileList(pointList, value) {
     pointList.forEach((point) => {
-      this.setTileAt(point, tileData);
+      this.setTileAt(point, value);
     });
   }
   /**
@@ -140,7 +173,7 @@ export class MatrixModel extends Model {
   isTileEqualTo(point, comparison) {
     return this.getTileAt(point) === comparison;
   }
-  // ---- matrix utilities
+  // -- uses matrix utility
   /**
    * @param {Function} callback
    */
@@ -217,6 +250,17 @@ export class MatrixModel extends Model {
    */
   getTypeCountsAdjacentTo(point) {
     return matrixUtils.getTypeCountsAdjacentTo(this.getMatrix(), point);
+  }
+  /**
+   * replaces a portion of a matrix with another MatrixModel
+   *
+   * @param {MatrixModel} matrixModel - what's being merged onto this map
+   * @param {Point} [point] - where to merge, by default at the top-left
+   */
+  mergeMatrix(matrixModel, point = new Point(0, 0)) {
+    const myMatrix = this.getMatrix();
+    const resultMatrix = matrixUtils.mergeMatrices(myMatrix, matrixModel.getMatrix(), point);
+    this.set({matrix: resultMatrix});
   }
 }
 

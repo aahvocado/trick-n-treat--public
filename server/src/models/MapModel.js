@@ -1,10 +1,6 @@
 import Point from '@studiomoniker/point';
+
 import MatrixModel from 'models/MatrixModel';
-
-import TILE_TYPES from 'constants/tileTypes';
-
-import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
-import * as matrixUtils from 'utilities/matrixUtils';
 
 /**
  * abstract helper that organizes all the map generation utility functions
@@ -15,41 +11,17 @@ export class MapModel extends MatrixModel {
   /** @override */
   constructor(newAttributes = {}) {
     super({
-      matrix: [[]],
-      // rules for how this map should be generated
-      mapConfig: {},
-      // where the starting location of the map is made
+      /** @type {Matrix} */
+      matrix: undefined,
+      /** @type {Object} */
+      mapSettings: undefined,
+      /** @type {Point} */
       start: new Point(),
-      // TODO - mapmodel does not need this, handle it differently - should probably be encounters
+      /** @type {Array} */
       specialPoints: [],
+      // other
       ...newAttributes,
     });
-  }
-  /**
-   * handles through the entire generation process
-   *
-   * @param {MapConfig} mapConfig
-   */
-  generateMap() {
-    const mapConfig = this.get('mapConfig');
-
-    // create an empty Matrix
-    const emptyMatrix = matrixUtils.createMatrix(mapConfig.width, mapConfig.height, TILE_TYPES.EMPTY);
-    this.set({matrix: emptyMatrix});
-
-    // set our starting point Tile
-    const startPoint = mapConfig.startPoint.clone();
-    this.set({start: startPoint});
-    this.setTileAt(startPoint, TILE_TYPES.START);
-
-    // create special tiles on the Map
-    mapGenerationUtils.generateSpecialTiles(this, mapConfig);
-
-    // create paths on the Map
-    mapGenerationUtils.executeRandomWalk(this, mapConfig);
-
-    // generate tiles which are encounters
-    mapGenerationUtils.generateEncounterTiles(this, mapConfig);
   }
 }
 

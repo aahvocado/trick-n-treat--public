@@ -37,7 +37,7 @@ export async function resolveActionQueue() {
     return;
   }
 
-  logger.old('[[finished resolving ActionQueue]]');
   gameState.set({mode: GAME_MODES.ACTIVE});
   sendUpdateToAllClients();
+  logger.old('[[finished resolving ActionQueue]]');
 }

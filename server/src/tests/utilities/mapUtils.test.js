@@ -1,13 +1,11 @@
 import test from 'ava';
-
 import Point from '@studiomoniker/point';
 
-import * as mapUtils from 'utilities/mapUtils';
-
-import TILE_TYPES from 'constants/tileTypes';
-const STAR = TILE_TYPES.START;
+import {TILE_TYPES} from 'constants/tileTypes';
 const NOPE = TILE_TYPES.EMPTY;
 const PATH = TILE_TYPES.PATH;
+
+import * as mapUtils from 'utilities/mapUtils';
 
 test('getAStarPath() - finds the Path from one Point to another', (t) => {
   // -- setup
@@ -15,7 +13,7 @@ test('getAStarPath() - finds the Path from one Point to another', (t) => {
     [PATH, PATH, PATH, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
-    [NOPE, NOPE, NOPE, STAR, NOPE, NOPE, NOPE],
+    [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, PATH, PATH, PATH],
@@ -34,7 +32,7 @@ test('isWithinPathDistance() - returns true if a distance between two Points is 
     [PATH, PATH, PATH, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
-    [NOPE, NOPE, NOPE, STAR, NOPE, NOPE, NOPE],
+    [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, PATH, PATH, PATH],
@@ -54,7 +52,7 @@ test('getPointsWithinPathDistance() - finds walkable points within a given dista
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, PATH, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, PATH, PATH, NOPE],
-    [NOPE, PATH, NOPE, STAR, PATH, PATH, PATH],
+    [NOPE, PATH, NOPE, PATH, PATH, PATH, PATH],
     [NOPE, NOPE, PATH, NOPE, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, PATH, NOPE, NOPE, NOPE],
     [NOPE, NOPE, NOPE, NOPE, NOPE, NOPE, NOPE],

@@ -7,6 +7,7 @@ import * as remoteAppStateHelper from 'helpers/remoteAppStateHelper';
 
 import WebsocketConnectionIndicator from 'components/WebsocketConnectionIndicator';
 
+import DebugPage from 'pages/DebugPage';
 import UserGamePage from 'pages/UserGamePage';
 import UserLobbyPage from 'pages/UserLobbyPage';
 
@@ -16,6 +17,11 @@ import UserLobbyPage from 'pages/UserLobbyPage';
 export default observer(
   class App extends Component {
     render() {
+
+      if (remoteAppState.get('isDebugMode')) {
+        return <DebugPage />
+      }
+
       return (
         <div className='bg-primary'>
           <WebsocketConnectionIndicator />

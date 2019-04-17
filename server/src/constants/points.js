@@ -53,5 +53,3 @@ export function getRandomDirection() {
       return POINTS.DOWN;
   }
 }
-
-export default POINTS;

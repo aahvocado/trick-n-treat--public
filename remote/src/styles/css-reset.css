@@ -75,3 +75,23 @@ button {
     /* Corrects inability to style clickable `input` types in iOS */
     -webkit-appearance: none;
 }
+
+input,
+label,
+select,
+button,
+textarea
+{
+    margin:0;
+    border:0;
+    padding:0;
+    display:inline-block;
+    vertical-align:middle;
+    white-space:normal;
+    background:none;
+    line-height:1;
+
+    /* Browsers have different default form fonts */
+    font-size: inherit;
+    font-family:Arial;
+}

@@ -1,13 +1,12 @@
 import test from 'ava';
 import Point from '@studiomoniker/point';
 
-import gameState from 'data/gameState';
-
-import TILE_TYPES from 'constants/tileTypes';
-const STAR = TILE_TYPES.START;
+import {TILE_TYPES} from 'constants/tileTypes';
 const NOPE = TILE_TYPES.EMPTY;
 const PATH = TILE_TYPES.PATH;
 const HOUS = TILE_TYPES.HOUSE;
+
+import gameState from 'data/gameState';
 
 import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 
@@ -31,7 +30,7 @@ test.beforeEach((t) => {
 test('getFormattedMapData() - formats gamestate data into expected object', (t) => {
   const testMap = new MapModel({
     matrix: [
-      [STAR, NOPE, PATH, PATH, HOUS],
+      [PATH, NOPE, PATH, PATH, HOUS],
       [PATH, NOPE, PATH, NOPE, NOPE],
       [PATH, NOPE, PATH, PATH, PATH],
       [PATH, NOPE, NOPE, NOPE, PATH],
@@ -74,7 +73,7 @@ test('getFormattedMapData() - formats gamestate data into expected object', (t) 
 
   const firstTile = formatResult[0][0];
   t.true(firstTile.position.equals(new Point(0, 0)));
-  t.is(firstTile.tileType, STAR);
+  t.is(firstTile.tileType, PATH);
   t.is(firstTile.charactersHere[0].name, 'TEST-CHAR-1');
   t.is(firstTile.houseHere, undefined);
   t.is(firstTile.encounterHere, undefined);

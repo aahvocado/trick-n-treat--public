@@ -57,6 +57,21 @@ export function map(matrix, callback) {
   });
 }
 /**
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @param {*} value
+ * @returns {Boolean} - returns true if successfully set
+ */
+export function setTileAt(matrix, point, value) {
+  const tileData = matrix[point.y] !== undefined ? matrix[point.y][point.x] : undefined;
+  if (tileData === undefined) {
+    return false;
+  }
+
+  matrix[point.y][point.x] = value;
+  return true;
+}
+/**
  * creates a 2D array of empty tiles
  *
  * @param {Number} width
@@ -155,7 +170,7 @@ export function getSubmatrixByDistance(matrix, point, distance) {
   return submatrix;
 }
 /**
- * returns a list of Points within given distance away from a point
+ * returns a LIST of Points within given distance away from a point
  *  but only by adjacent tiles (so diagonals are 2 spaces away)
  *
  * @param {Matrix} matrix
@@ -163,25 +178,39 @@ export function getSubmatrixByDistance(matrix, point, distance) {
  * @param {Number} distance - how many tiles further to check
  * @returns {Array<Point>}
  */
-export function getPointsOfNearbyTiles(matrix, point, distance) {
-  const submatrixPoints = [];
+export function getPointsListOfNearbyTiles(matrix, point, distance) {
+  const pointsList = [];
 
-  // make a copy to remove tiles that are too far
-  const nullMatrix = createMatrix(matrix[0].length, matrix.length, null);
-  forEach(nullMatrix, (tile, tilePoint) => {
-    const x = tilePoint.x;
-    const y = tilePoint.y;
-
-    const distanceFromOriginY = Math.abs(point.clone().y - y);
-    const distanceFromOriginX = Math.abs(point.clone().x - x);
-
-    // set tile to available if it's within distance
-    if (distanceFromOriginY + distanceFromOriginX <= distance) {
-      submatrixPoints.push(tilePoint);
+  forEach(matrix, (tile, tilePoint) => {
+    // add it to the list of it's within distance
+    if (getDistanceBetween(point, tilePoint) <= distance) {
+      pointsList.push(tilePoint);
     };
   });
 
-  return submatrixPoints;
+  return pointsList;
+}
+/**
+ * returns a MATRIX of Points within given distance away from a point
+ *  but only by adjacent tiles (so diagonals are 2 spaces away)
+ *
+ * @todo - not sure what the use is yet, this might get changed
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point - where to start looking from
+ * @param {Number} distance - how many tiles further to check
+ * @returns {Matrix}
+ */
+export function getPointsMatrixOfNearbyTiles(matrix, point, distance) {
+  return map(matrix, (tile, tilePoint) => {
+    // set onto matrix if within distance
+    if (getDistanceBetween(point, tilePoint) <= distance) {
+      return tilePoint;
+    };
+
+    // null if not
+    return null;
+  });
 }
 /**
  * finds if there are any tiles around a Point of given Type
@@ -234,15 +263,14 @@ export function hasAdjacentTileType(matrix, point, type) {
  * gets how many tiles apart two points are
  * (only adjacently, so diagonals count as 2 tiles away)
  *
- * @param {Matrix} matrix
  * @param {Point} pointA
  * @param {Point} pointB
  * @returns {Number}
  */
-export function getDistanceBetween(matrix, pointA, pointB) {
-  const xDistance = Math.abs(pointB.x - pointA.x);
-  const yDistance = Math.abs(pointB.y - pointA.y);
-  return xDistance + yDistance;
+export function getDistanceBetween(pointA, pointB) {
+  const differenceX = Math.abs(pointA.x - pointB.x);
+  const differenceY = Math.abs(pointA.y - pointB.y);
+  return differenceX + differenceY;
 }
 /**
  *
@@ -254,12 +282,35 @@ export function getDistanceBetween(matrix, pointA, pointB) {
  */
 export function isWithinDistance(matrix, pointA, pointB, distance) {
   // calculate how many tiles it would take to move to the point
-  const tileDistance = getDistanceBetween(matrix, pointA, pointB);
+  const tileDistance = getDistanceBetween(pointA, pointB);
   if (tileDistance > distance) {
     return false;
   }
 
   return true;
+}
+/**
+ * replaces a portion of a matrix with a given submatrix
+ *
+ * @param {Matrix} matrix - to be inserted into
+ * @param {Matrix} submatrix - to put in
+ * @param {Point} point - this point will be where we start inserting with the top left of the submatrix
+ * @returns {Matrix}
+ */
+export function mergeMatrices(matrix, submatrix, point) {
+  // look through the matrix we are inserting
+  forEach(submatrix, (tileData, position) => {
+    // don't replace existing tiles with null tiles
+    if (tileData === null) {
+      return;
+    }
+
+    // find the relative position of the submatrix to the parent and try to replace the data there
+    const adjustedPoint = point.clone().add(position);
+    setTileAt(matrix, adjustedPoint, tileData);
+  });
+
+  return matrix;
 }
 // --- other
 /**
@@ -345,4 +396,41 @@ export function getTypeCountsAdjacentTo(matrix, point) {
 
   // use that submatrix to get the counts
   return getTypeCounts(submatrix);
+}
+/**
+ * finds the closest point of the Tile that matches given point
+ *
+ * @param {Matrix} matrix
+ * @param {Point} startPoint
+ * @param {Tile} type - what you're looking for
+ * @param {Number} distance - how many tiles further to check
+ * @returns {Point}
+ */
+export function getPointOfNearestTileType(matrix, startPoint, type, distance) {
+  // keep track of what the Position and Distance of the most recently found Tile that matches the type
+  let currentNearestDistance = distance;
+  let currentNearestPoint = undefined;
+
+  // look at the nearby tiles, then iterate through them to see if any of them are of given Type
+  const nearbyPointsList = getPointsListOfNearbyTiles(matrix, startPoint, distance);
+  nearbyPointsList.forEach((nearbyPoint) => {
+    // don't care about different types
+    const tileType = getTileAt(matrix, nearbyPoint);
+    if (tileType !== type) {
+      return;
+    }
+
+    // don't care about tiles that are farther than the one we found
+    const tileDistance = getDistanceBetween(startPoint, nearbyPoint);
+    if (tileDistance > currentNearestDistance) {
+      return;
+    }
+
+    // found a contender, so save it
+    currentNearestDistance = tileDistance;
+    currentNearestPoint = nearbyPoint.clone();
+  });
+
+  // after going through the process, we can finally return the Point of the Tile with the asked for Type
+  return currentNearestPoint;
 }

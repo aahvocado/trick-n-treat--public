@@ -1,4 +1,4 @@
-import ENCOUNTER_TYPES from 'constants/encounterTypes';
+import {ENCOUNTER_TYPES} from 'constants/encounterTypes';
 
 import EncounterModel from 'models/EncounterModel';
 

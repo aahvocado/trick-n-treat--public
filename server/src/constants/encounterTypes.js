@@ -1,4 +1,3 @@
-
 /**
  * @typedef {String | Number} EncounterType
  */
@@ -11,5 +10,3 @@ export const ENCOUNTER_TYPES = {
   DEAD_END: 'DEAD_END-ENCOUNTER-TYPE',
   CUL_DE_SAC: 'CUL_DE_SAC-ENCOUNTER-TYPE',
 };
-
-export default ENCOUNTER_TYPES;
