@@ -4,18 +4,14 @@ import {
   GRAVEYARD_BIOME_SETTINGS,
 } from 'constants/biomeSettings';
 import {MAP_SETTINGS} from 'constants/mapSettings';
-// import {TILE_TYPES} from 'constants/tileTypes';
 
 import gameState from 'data/gameState';
-
-// import MapModel from 'models/MapModel';
 
 import logger from 'utilities/logger';
 import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
 import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
 // import * as mapUtils from 'utilities/mapUtils';
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
-// import * as matrixUtils from 'utilities/matrixUtils';
 
 /**
  * this Helper should try to organize the data (to be fleshed out later)
@@ -25,40 +21,39 @@ import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
 /**
  * generates a New Map for the current Gamestate
  *
- * @param {Object} settings
+ * @param {Object} mapSettings
  */
-export function generateNewMap(settings = MAP_SETTINGS) {
+export function generateNewMap(mapSettings = MAP_SETTINGS) {
   logger.game('Generating New Map...');
 
   // create the map instance
-  const baseTileMapModel = mapGenerationUtils.createBaseTileMapModel(settings);
-  gameState.set({tileMapModel: baseTileMapModel});
+  const newTileMapModel = mapGenerationUtils.createBaseTileMapModel(mapSettings);
+  gameState.set({tileMapModel: newTileMapModel});
 
   //
-  const homeBiomeMapModel = mapGenerationUtils.createHomeBiomeModel(baseTileMapModel, HOME_BIOME_SETTINGS);
-  baseTileMapModel.mergeMatrix(homeBiomeMapModel);
+  const homeBiomeMapModel = mapGenerationUtils.createHomeBiomeModel(newTileMapModel, HOME_BIOME_SETTINGS);
+  newTileMapModel.mergeMatrixModel(homeBiomeMapModel);
 
-  // put biome locations onto the map
-  const graveyardMapModel = mapGenerationUtils.createGraveyardBiomeModel(baseTileMapModel, GRAVEYARD_BIOME_SETTINGS);
-  baseTileMapModel.mergeMatrix(graveyardMapModel);
+  // --  put biome locations onto the map
+  const graveyardMapModel = mapGenerationUtils.createGraveyardBiomeModel(newTileMapModel, GRAVEYARD_BIOME_SETTINGS);
+  newTileMapModel.mergeMatrixModel(graveyardMapModel);
 
-  const woodsMapModel = mapGenerationUtils.createSmallWoodsBiomeModel(baseTileMapModel);
-  baseTileMapModel.mergeMatrix(woodsMapModel);
+  const woodsMapModel = mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel);
+  newTileMapModel.mergeMatrixModel(woodsMapModel);
 
-  baseTileMapModel.mergeMatrix(mapGenerationUtils.createSmallWoodsBiomeModel(baseTileMapModel));
+  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  baseTileMapModel.mergeMatrix(mapGenerationUtils.createSmallWoodsBiomeModel(baseTileMapModel));
+  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  baseTileMapModel.mergeMatrix(mapGenerationUtils.createSmallWoodsBiomeModel(baseTileMapModel));
+  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  baseTileMapModel.mergeMatrix(mapGenerationUtils.createSmallWoodsBiomeModel(baseTileMapModel));
+  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  // place encounters and house instances
-  // const houseList = createHouseList(baseTileMapModel);
-  // const encounterList = createEncounterList(baseTileMapModel);
+  // -- put house locations
+  houseGenerationUtils.findValidHouseLocation(newTileMapModel);
 
   // generate a fog model
-  const fogMapModel = mapGenerationUtils.createFogMapModel(baseTileMapModel, settings);
+  const fogMapModel = mapGenerationUtils.createFogMapModel(newTileMapModel, mapSettings);
   gameState.set({fogMapModel: fogMapModel});
 
   // finally, actually set the actual data onto the gamestate
@@ -68,30 +63,11 @@ export function generateNewMap(settings = MAP_SETTINGS) {
     // encounters: encounterList,
   });
 
-  // update initial visibility
+  // update Visibility for where Characters are located
   gameState.get('characters').forEach((characterModel) => {
     gameState.updateToVisibleAt(characterModel.get('position'), characterModel.get('vision'));
   });
 
   // start the first round, which will create a turn queue
   gameState.addToActionQueue(gameState.handleStartOfRound.bind(gameState));
-}
-/**
- * generates the encounters
- *
- * @param {MapModel} mapModel
- * @returns {Array<EncounterModel>}
- */
-export function createEncounterList(mapModel) {
-  return encounterGenerationUtils.generateEncounters(mapModel);
-}
-/**
- * generates the houses and sets them on the TileMap
- *
- * @param {MapModel} mapModel
- * @returns {Array<EncounterModel>}
- */
-export function createHouseList(mapModel) {
-  const houseList = houseGenerationUtils.generateHouseList(mapModel);
-  return houseList;
 }

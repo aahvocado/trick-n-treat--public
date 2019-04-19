@@ -10,59 +10,52 @@ import {TILE_TYPES} from 'constants/tileTypes';
  * @typedef {Object} TypeCounts
  */
 
-// --- matrix
+// -- basic Matrix methods
 /**
- * @param {Matrix} matrix
- * @param {Point} point
- * @returns {* | undefined}
+ * creates a 2D array of empty tiles
+ *
+ * @param {Number} width
+ * @param {Number} height
+ * @param {TileData} [defaultValue]
+ * @returns {Matrix}
  */
-export function getTileAt(matrix, point) {
-  // check for out of bounds
-  if (matrix[point.y] === undefined) {
-    return undefined;
-  };
+export function createMatrix(width, height, defaultValue = TILE_TYPES.EMPTY) {
+  const matrix = [];
 
-  return matrix[point.y][point.x];
+  for (let y = 0; y < height; y++) {
+    matrix.push([]);
+    for (let x = 0; x < width; x++) {
+      matrix[y][x] = defaultValue;
+    }
+  }
+
+  return matrix;
 }
 /**
  * @param {Matrix} matrix
- * @param {Point} point
- * @param {Point} [distance]
- * @returns {*}
+ * @returns {Number}
  */
-export function getTileLeft(matrix, point, distance = 1) {
-  const newPoint = point.clone().subtractX(distance);
-  return getTileAt(matrix, newPoint);
+export function getWidth(matrix) {
+  return matrix[0].length;
 }
 /**
  * @param {Matrix} matrix
- * @param {Point} point
- * @param {Point} [distance]
- * @returns {*}
+ * @returns {Number}
  */
-export function getTileRight(matrix, point, distance = 1) {
-  const newPoint = point.clone().addX(distance);
-  return getTileAt(matrix, newPoint);
+export function getHeight(matrix) {
+  return matrix.length;
 }
 /**
+ * gets the center Point of this Matrix
+ *
  * @param {Matrix} matrix
- * @param {Point} point
- * @param {Point} [distance]
- * @returns {*}
+ * @returns {Point}
  */
-export function getTileAbove(matrix, point, distance = 1) {
-  const newPoint = point.clone().addY(distance);
-  return getTileAt(matrix, newPoint);
-}
-/**
- * @param {Matrix} matrix
- * @param {Point} point
- * @param {Point} [distance]
- * @returns {*}
- */
-export function getTileDown(matrix, point, distance = 1) {
-  const newPoint = point.clone().subtractY(distance);
-  return getTileAt(matrix, newPoint);
+export function getCenter(matrix) {
+  return new Point(
+    Math.floor(getWidth(matrix) / 2),
+    Math.floor(getHeight(matrix) / 2),
+  );
 }
 /**
  * helper function to iterate through each tile
@@ -75,8 +68,8 @@ export function forEach(matrix, callback) {
     row.forEach((tileData, x) => {
       /**
        * callback arguments:
-       * @param {*} tileData
-       * @param {Point} point
+       * @param {TileData} tileData
+       * @param {Point} tilePoint
        */
       callback(tileData, new Point(x, y));
     });
@@ -94,48 +87,206 @@ export function map(matrix, callback) {
     return row.map((tileData, x) => {
       /**
        * callback arguments:
-       * @param {*} tileData
-       * @param {Point} point
+       * @param {TileData} tileData
+       * @param {Point} tilePoint
        */
       return callback(tileData, new Point(x, y));
     });
   });
 }
 /**
+ * replaces the TileData at a given Point
+ *
  * @param {Matrix} matrix
  * @param {Point} point
- * @param {*} value
+ * @param {TileData} newTileData
  * @returns {Boolean} - returns true if successfully set
  */
-export function setTileAt(matrix, point, value) {
+export function setTileAt(matrix, point, newTileData) {
   const tileData = matrix[point.y] !== undefined ? matrix[point.y][point.x] : undefined;
   if (tileData === undefined) {
     return false;
   }
 
-  matrix[point.y][point.x] = value;
+  matrix[point.y][point.x] = newTileData;
   return true;
 }
 /**
- * creates a 2D array of empty tiles
+ * updates all points in an list to given `tileData`
  *
- * @param {Number} width
- * @param {Number} height
- * @param {*} [defaultValue]
+ * @param {Matrix} matrix
+ * @param {Array<Point>} pointList
+ * @param {TileData} tileData
+ */
+export function setTileList(matrix, pointList, tileData) {
+  pointList.forEach((point) => {
+    setTileAt(matrix, point, tileData);
+  });
+}
+/**
+ * replace a Matrix with another Matrix
+ * - will not replace with `null` tiles
+ * - if the `childMatrix` doesn't fit, it will just be truncated
+ *
+ * @param {Matrix} parentMatrix
+ * @param {Matrix} childMatrix
+ * @param {Point} [point] - coordinates to place, defaults to top-left otherwise
  * @returns {Matrix}
  */
-export function createMatrix(width, height, defaultValue = TILE_TYPES.EMPTY) {
-  const matrix = [];
-
-  for (let y = 0; y < height; y++) {
-    matrix.push([]);
-    for (let x = 0; x < width; x++) {
-      matrix[y][x] = defaultValue;
+export function mergeMatrices(parentMatrix, childMatrix, point = new Point(0, 0)) {
+  forEach(childMatrix, (tileData, position) => {
+    // don't replace existing tiles with null tiles
+    if (tileData === null) {
+      return;
     }
-  }
 
-  return matrix;
+    // find the relative position of the submatrix to the parent and try to replace the data there
+    const adjustedPoint = point.clone().add(position);
+    setTileAt(parentMatrix, adjustedPoint, tileData);
+  });
+
+  return parentMatrix;
 }
+// --- finding Tile data
+/**
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @returns {TileData | undefined}
+ */
+export function getTileAt(matrix, point) {
+  // check for out of bounds
+  if (matrix[point.y] === undefined) {
+    return undefined;
+  };
+
+  return matrix[point.y][point.x];
+}
+/**
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @param {Point} [distance]
+ * @returns {TileData | undefined}
+ */
+export function getTileLeft(matrix, point, distance = 1) {
+  const newPoint = point.clone().subtractX(distance);
+  return getTileAt(matrix, newPoint);
+}
+/**
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @param {Point} [distance]
+ * @returns {TileData | undefined}
+ */
+export function getTileRight(matrix, point, distance = 1) {
+  const newPoint = point.clone().addX(distance);
+  return getTileAt(matrix, newPoint);
+}
+/**
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @param {Point} [distance]
+ * @returns {TileData | undefined}
+ */
+export function getTileAbove(matrix, point, distance = 1) {
+  const newPoint = point.clone().addY(distance);
+  return getTileAt(matrix, newPoint);
+}
+/**
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @param {Point} [distance]
+ * @returns {TileData | undefined}
+ */
+export function getTileBelow(matrix, point, distance = 1) {
+  const newPoint = point.clone().subtractY(distance);
+  return getTileAt(matrix, newPoint);
+}
+/**
+ * compares if tile at given point is equal to given comparison
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @param {*} comparison
+ * @returns {Boolean}
+ */
+export function isTileEqualTo(matrix, point, comparison) {
+  return getTileAt(matrix, point) === comparison;
+}
+/**
+ * finds if Matrix has ANY instance of given TileData
+ *
+ * @param {Matrix} matrix
+ * @param {TileType} tileType
+ * @returns {Boolean}
+ */
+export function containsTileType(matrix, tileType) {
+  return matrix.some((row) => {
+    return row.includes(tileType);
+  });
+}
+/**
+ * finds if there are any tiles of given Type in a Matrix
+ *
+ * @param {Matrix} matrix
+ * @param {TileType} tileType
+ * @returns {Number}
+ */
+export function getCountOfTileType(matrix, tileType) {
+  return matrix.reduce((count, row) => {
+    return count + row.reduce((rowCount, tile) => {
+      return rowCount + (tile === tileType ? 1 : 0);
+    }, 0);
+  }, 0);
+}
+/**
+ * gives back the number of each type of tile in a matrix
+ *
+ * @param {Matrix} matrix - 3x3
+ * @returns {TypeCounts}
+ */
+export function getTypeCounts(matrix) {
+  // will be returned
+  const typeMap = {};
+
+  forEach(matrix, (tileData) => {
+    // types that can't be handled
+    if (tileData === undefined || tileData === null) {
+      return;
+    }
+
+    // if it doesn't exist, create it in the map
+    if (typeMap[tileData] === undefined) {
+      typeMap[tileData] = 1;
+      return;
+    }
+
+    // otherwise add to the count
+    typeMap[tileData] += 1;
+  });
+
+  return typeMap;
+}
+/**
+ * finds if there are any tiles around a Point of given Type
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @param {Number} [distance]
+ * @returns {TypeCounts}
+ */
+export function getTypeCountsAdjacentTo(matrix, point, distance = 1) {
+  // get submatrix
+  const submatrix = getSubmatrixByDistance(matrix, point, distance);
+
+  // the center point does not count
+  const submatrixWidth = submatrix[0].length;
+  const submatrixHeight = submatrix.length;
+  submatrix[Math.floor(submatrixHeight / 2)][Math.floor(submatrixWidth / 2)] = null;
+
+  // use that submatrix to get the counts
+  return getTypeCounts(submatrix);
+}
+// -- Submatrix methods
 /**
  * gets Submatrix of a larger Matrix
  *
@@ -155,13 +306,13 @@ export function getSubmatrixSquare(matrix, topLeftX, topLeftY, bottomRightX, bot
 
   // iterate to get a section of larger matrix
   const submatrix = [];
-  for (let y = topLeftY; y < (bottomRightY + 1); y++) {
+  for (let y = topLeftY; y < (bottomRightY); y++) {
     const row = matrix[y];
     if (row === undefined || row.length < bottomRightX - topLeftX) {
       return null;
     }
 
-    submatrix.push(row.slice(topLeftX, bottomRightX + 1)); // offset by 1 to be inclusive
+    submatrix.push(row.slice(topLeftX, bottomRightX)); // offset by 1 to be inclusive
   }
 
   return submatrix;
@@ -217,6 +368,7 @@ export function getSubmatrixByDistance(matrix, point, distance) {
   const submatrix = getSubmatrixSquareByDistance(nullMatrix, point, distance);
   return submatrix;
 }
+// -- finding Points (coordinates)
 /**
  * returns a LIST of Points within given distance away from a point
  *  but only by adjacent tiles (so diagonals are 2 spaces away)
@@ -308,149 +460,6 @@ export function hasAdjacentTileType(matrix, point, type) {
   return false;
 }
 /**
- * gets how many tiles apart two points are
- * (only adjacently, so diagonals count as 2 tiles away)
- *
- * @param {Point} pointA
- * @param {Point} pointB
- * @returns {Number}
- */
-export function getDistanceBetween(pointA, pointB) {
-  const differenceX = Math.abs(pointA.x - pointB.x);
-  const differenceY = Math.abs(pointA.y - pointB.y);
-  return differenceX + differenceY;
-}
-/**
- *
- * @param {Matrix} matrix
- * @param {Point} pointA
- * @param {Point} pointB
- * @param {Number} distance
- * @returns {Boolean}
- */
-export function isWithinDistance(matrix, pointA, pointB, distance) {
-  // calculate how many tiles it would take to move to the point
-  const tileDistance = getDistanceBetween(pointA, pointB);
-  if (tileDistance > distance) {
-    return false;
-  }
-
-  return true;
-}
-/**
- * replaces a portion of a matrix with a given submatrix
- *
- * @param {Matrix} matrix - to be inserted into
- * @param {Matrix} submatrix - to put in
- * @param {Point} point - this point will be where we start inserting with the top left of the submatrix
- * @returns {Matrix}
- */
-export function mergeMatrices(matrix, submatrix, point) {
-  // look through the matrix we are inserting
-  forEach(submatrix, (tileData, position) => {
-    // don't replace existing tiles with null tiles
-    if (tileData === null) {
-      return;
-    }
-
-    // find the relative position of the submatrix to the parent and try to replace the data there
-    const adjustedPoint = point.clone().add(position);
-    setTileAt(matrix, adjustedPoint, tileData);
-  });
-
-  return matrix;
-}
-// --- other
-/**
- * finds if a matrix contains a type
- *
- * @param {Matrix} matrix
- * @param {Tile} type - what you're looking for
- * @returns {Boolean}
- */
-export function containsTileType(matrix, type) {
-  return matrix.some((row) => {
-    return row.includes(type);
-  });
-}
-/**
- * Durstenfeld shuffle
- * @see https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
- *
- * @param {Array} array
- * @returns {Array}
- */
-export function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-/**
- * finds if there are any tiles of given Type in a Matrix
- *
- * @param {Matrix} matrix
- * @param {Tile} type - what type to count
- * @param {Number} distance - how many tiles further to check
- * @returns {Number}
- */
-export function getCount(matrix, type) {
-  return matrix.reduce((count, row) => {
-    return count + row.reduce((rowCount, tile) => {
-      return rowCount + (tile === type ? 1 : 0);
-    }, 0);
-  }, 0);
-}
-/**
- * gives back the number of each type of tile in a matrix
- *
- * @param {Matrix} matrix - 3x3
- * @returns {TypeCounts}
- */
-export function getTypeCounts(matrix) {
-  // will be returned
-  const typeMap = {};
-
-  forEach(matrix, (tileData) => {
-    // types that can't be handled
-    if (tileData === undefined || tileData === null) {
-      return;
-    }
-
-    // if it doesn't exist, create it in the map
-    if (typeMap[tileData] === undefined) {
-      typeMap[tileData] = 1;
-      return;
-    }
-
-    // otherwise add to the count
-    typeMap[tileData] += 1;
-  });
-
-  return typeMap;
-}
-/**
- * finds if there are any tiles around a Point of given Type
- *
- * @param {Matrix} matrix
- * @param {Point} point
- * @param {Number} [distance]
- * @returns {TypeCounts}
- */
-export function getTypeCountsAdjacentTo(matrix, point, distance = 1) {
-  // get submatrix
-  const submatrix = getSubmatrixByDistance(matrix, point, distance);
-
-  // the center point does not count
-  const submatrixWidth = submatrix[0].length;
-  const submatrixHeight = submatrix.length;
-  submatrix[Math.floor(submatrixHeight / 2)][Math.floor(submatrixWidth / 2)] = null;
-
-  // use that submatrix to get the counts
-  return getTypeCounts(submatrix);
-}
-/**
  * finds the closest point of the Tile that matches given point
  *
  * @param {Matrix} matrix
@@ -486,4 +495,35 @@ export function getPointOfNearestTileType(matrix, startPoint, type, distance) {
 
   // after going through the process, we can finally return the Point of the Tile with the asked for Type
   return currentNearestPoint;
+}
+// -- distance methods
+/**
+ * gets how many tiles apart two points are
+ * (only adjacently, so diagonals count as 2 tiles away)
+ *
+ * @param {Point} pointA
+ * @param {Point} pointB
+ * @returns {Number}
+ */
+export function getDistanceBetween(pointA, pointB) {
+  const differenceX = Math.abs(pointA.x - pointB.x);
+  const differenceY = Math.abs(pointA.y - pointB.y);
+  return differenceX + differenceY;
+}
+/**
+ *
+ * @param {Matrix} matrix
+ * @param {Point} pointA
+ * @param {Point} pointB
+ * @param {Number} distance
+ * @returns {Boolean}
+ */
+export function isWithinDistance(matrix, pointA, pointB, distance) {
+  // calculate how many tiles it would take to move to the point
+  const tileDistance = getDistanceBetween(pointA, pointB);
+  if (tileDistance > distance) {
+    return false;
+  }
+
+  return true;
 }

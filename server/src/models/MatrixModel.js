@@ -26,10 +26,10 @@ export class MatrixModel extends Model {
     // if no `matrix` was given, then we'll make one automatically
     const baseMatrix = this.get('matrix');
     if (baseMatrix === undefined) {
-      this.generateBaseMatrix();
+      this.generateMatrix();
     }
 
-    // otherwise, we should set the base dimensions to our Matrix`
+    // otherwise, we can set the base dimensions to our Matrix`
     if (baseMatrix !== undefined) {
       this.set({
         baseWidth: baseMatrix[0].length,
@@ -37,21 +37,21 @@ export class MatrixModel extends Model {
       });
     }
   }
-  // -- class generators
+  // -- unique class methods
   /**
-   * uses available settings to create a default Matrix
+   * creates a Matrix and sets the attribute,
+   *  if no parameters are passed it will use base attributes
    *
+   * @param {Number} [width]
+   * @param {Number} [height]
    * @param {TileType} [tileType]
    */
-  generateBaseMatrix(tileType = null) {
-    const baseWidth = this.get('baseWidth');
-    const baseHeight = this.get('baseHeight');
-    const baseMatrix = matrixUtils.createMatrix(baseWidth, baseHeight, tileType);
+  generateMatrix(width = this.get('baseWidth'), height = this.get('baseHeight'), tileType = null) {
+    const baseMatrix = matrixUtils.createMatrix(width, height, tileType);
     this.set({matrix: baseMatrix});
   }
-  // -- class methods
   /**
-   * returns the 2D array of tiles
+   * gets a shallow copy of this Matrix
    *
    * @returns {Matrix}
    */
@@ -59,121 +59,38 @@ export class MatrixModel extends Model {
     return this.get('matrix').slice();
   }
   /**
-   * @returns {Number}
+   * replaces a portion of a matrix with another MatrixModel
+   *
+   * @param {MatrixModel} childMatrixModel - what's being merged onto this map
+   * @param {Point} [point] - where to merge, by default at the top-left
    */
-  getHeight() {
-    return this.getMatrix().length;
+  mergeMatrixModel(childMatrixModel, point = new Point(0, 0)) {
+    const myMatrix = this.get('matrix');
+    const childMatrix = childMatrixModel.getMatrix();
+    const resultMatrix = matrixUtils.mergeMatrices(myMatrix, childMatrix, point);
+    this.set({matrix: resultMatrix});
   }
+  // -- implements `matrixUtils.js`
   /**
    * @returns {Number}
    */
   getWidth() {
-    return this.getMatrix()[0].length;
+    return matrixUtils.getWidth(this.getMatrix());
   }
   /**
-   * gets the center of this Map
+   * @returns {Number}
+   */
+  getHeight() {
+    return matrixUtils.getHeight(this.getMatrix());
+  }
+  /**
+   * gets the center Point of this Matrix
    *
    * @returns {Point}
    */
   getCenter() {
-    return new Point(
-      Math.floor(this.getWidth() / 2),
-      Math.floor(this.getHeight() / 2),
-    );
+    return matrixUtils.getCenter(this.getMatrix());
   }
-  /**
-   * returns the Tile located at a given Point
-   *
-   * @param {Point} point
-   * @returns {* | null}
-   */
-  getTileAt(point) {
-    const {x, y} = point;
-
-    try {
-      return this.getMatrix()[y][x];
-    } catch (e) {
-      return null;
-    }
-  }
-  /**
-   * replaces the value of a Tile at a given Point
-   *
-   * @param {Point} point
-   * @param {*} value - what to update tile with
-   */
-  setTileAt(point, value) {
-    matrixUtils.setTileAt(this.getMatrix(), point, value);
-  }
-  /**
-   * updates the value of Tiles from an Array of Points
-   *
-   * @param {Array<Point>} pointList
-   * @param {*} value - what to update tile with
-   */
-  setTileList(pointList, value) {
-    pointList.forEach((point) => {
-      this.setTileAt(point, value);
-    });
-  }
-  /**
-   * checks if given Point is a valid point
-   *  and loops around if it was out of bounds
-   *
-   * @param {Point} point
-   * @returns {Point}
-   */
-  getAvailablePoint(point) {
-    let {x, y} = point;
-
-    const leftBounds = 0;
-    const rightBounds = this.getWidth() - 1;
-    const topBounds = 0;
-    const bottomBounds = this.getHeight() - 1;
-
-    // handle loopable pathing
-    if (this.get('isLoopable')) {
-      if (x > rightBounds) {
-        x = leftBounds;
-      } else if (x < leftBounds) {
-        x = rightBounds;
-      }
-
-      if (y > bottomBounds) {
-        y = topBounds;
-      } else if (y < topBounds) {
-        y = bottomBounds;
-      }
-
-      return new Point(x, y);
-    }
-
-    // constrained pathing - return the boundary if the point is beyond it
-    if (x > rightBounds) {
-      x = rightBounds;
-    } else if (x < leftBounds) {
-      x = leftBounds;
-    }
-
-    if (y > bottomBounds) {
-      y = bottomBounds;
-    } else if (y < topBounds) {
-      y = topBounds;
-    }
-
-    return new Point(x, y);
-  }
-  /**
-   * compares a tile at a given point the same as a value
-   *
-   * @param {Point} point
-   * @param {*} comparison - value to compare to
-   * @returns {Boolean}
-   */
-  isTileEqualTo(point, comparison) {
-    return this.getTileAt(point) === comparison;
-  }
-  // -- uses matrix utility
   /**
    * @param {Function} callback
    */
@@ -185,7 +102,114 @@ export class MatrixModel extends Model {
    * @returns {Matrix}
    */
   map(callback) {
-    return matrixUtils.map(this.getMatrix(), callback);
+    return matrixUtils.map(this.get('matrix'), callback);
+  }
+  /**
+   * replaces the TileData at a given Point
+   *
+   * @param {Point} point
+   * @param {TileData} newTileData
+   * @returns {Boolean} - returns true if successfully set
+   */
+  setTileAt(point, newTileData) {
+    return matrixUtils.setTileAt(this.get('matrix'), point, newTileData);
+  }
+  /**
+   * updates the value of Tiles from an Array of Points
+   *
+   * @param {Array<Point>} pointList
+   * @param {TileData} tileData
+   */
+  setTileList(pointList, tileData) {
+    pointList.forEach((point) => {
+      this.setTileAt(point, tileData);
+    });
+  }
+  /**
+   * returns the Tile located at a given Point
+   *
+   * @param {Point} point
+   * @returns {TileData | undefined}
+   */
+  getTileAt(point) {
+    return matrixUtils.getTileAt(this.getMatrix(), point);
+  }
+  /**
+   * @param {Point} point
+   * @param {Point} [distance]
+   * @returns {TileData | undefined}
+   */
+  getTileLeft(point, distance = 1) {
+    return matrixUtils.getTileLeft(this.getMatrix(), point, distance);
+  }
+  /**
+   * @param {Point} point
+   * @param {Point} [distance]
+   * @returns {TileData | undefined}
+   */
+  getTileRight(point, distance = 1) {
+    return matrixUtils.getTileRight(this.getMatrix(), point, distance);
+  }
+  /**
+   * @param {Point} point
+   * @param {Point} [distance]
+   * @returns {TileData | undefined}
+   */
+  getTileAbove(point, distance = 1) {
+    return matrixUtils.getTileAbove(this.getMatrix(), point, distance);
+  }
+  /**
+   * @param {Point} point
+   * @param {Point} [distance]
+   * @returns {TileData | undefined}
+   */
+  getTileBelow(point, distance = 1) {
+    return matrixUtils.getTileBelow(this.getMatrix(), point, distance);
+  }
+  /**
+   * compares a tile at a given point the same as a value
+   *
+   * @param {Point} point
+   * @param {*} comparison - value to compare to
+   * @returns {Boolean}
+   */
+  isTileEqualTo(point, comparison) {
+    return matrixUtils.isTileEqualTo(this.getMatrix(), point, comparison);
+  }
+  /**
+   * finds if Matrix has ANY instance of given TileData
+   *
+   * @param {TileType} tileType
+   * @returns {Boolean}
+   */
+  containsTileType(tileData) {
+    return matrixUtils.containsTileType(this.getMatrix(), tileData);
+  }
+  /**
+   * finds if there are any tiles of given Type in a Matrix
+   *
+   * @param {TileType} tileType
+   * @returns {Number}
+   */
+  getCountOfTileType(tileType) {
+    return matrixUtils.getCountOfTileType(this.getMatrix(), tileType);
+  }
+  /**
+   * gives back the number of each type of tile in a matrix
+   *
+   * @returns {TypeCounts}
+   */
+  getTypeCounts() {
+    return matrixUtils.getTypeCounts(this.getMatrix());
+  }
+  /**
+   * finds if there are any tiles around a Point of given Type
+   *
+   * @param {Point} point
+   * @returns {TypeCounts}
+   */
+  getTypeCountsAdjacentTo(point) {
+    return matrixUtils.getTypeCountsAdjacentTo(this.getMatrix(), point);
   }
   /**
    * gets matrix of the matrix in given box boundary
@@ -198,6 +222,51 @@ export class MatrixModel extends Model {
    */
   getSubmatrixSquare(topLeftX, topLeftY, bottomRightX, bottomRightY) {
     return matrixUtils.getSubmatrixSquare(this.getMatrix(), topLeftX, topLeftY, bottomRightX, bottomRightY);
+  }
+  /**
+   * calculates the appropriate coordinates given a point and distance
+   *
+   * @param {Point} point - where to look from
+   * @param {Number} distance - how many tiles further to check
+   * @returns {Submatrix}
+   */
+  getSubmatrixSquareByDistance(point, distance) {
+    return matrixUtils.getSubmatrixSquareByDistance(this.getMatrix(), point, distance);
+  }
+  /**
+   * calculates the appropriate coordinates given a point and distance
+   *  but only by adjacent tiles (so diagonals are 2 spaces away)
+   *
+   * @param {Point} point - where to look from
+   * @param {Number} distance - how many tiles further to check
+   * @returns {Submatrix}
+   */
+  getSubmatrixByDistance(point, distance) {
+    return matrixUtils.getSubmatrixByDistance(this.getMatrix(), point, distance);
+  }
+  /**
+   * returns a LIST of Points within given distance away from a point
+   *  but only by adjacent tiles (so diagonals are 2 spaces away)
+   *
+   * @param {Point} point - where to start looking from
+   * @param {Number} distance - how many tiles further to check
+   * @returns {Array<Point>}
+   */
+  getPointsListOfNearbyTiles(point, distance) {
+    return matrixUtils.getPointsListOfNearbyTiles(this.getMatrix(), point, distance);
+  }
+  /**
+   * returns a MATRIX of Points within given distance away from a point
+   *  but only by adjacent tiles (so diagonals are 2 spaces away)
+   *
+   * @todo - not sure what the use is yet, this might get changed
+   *
+   * @param {Point} point - where to start looking from
+   * @param {Number} distance - how many tiles further to check
+   * @returns {Matrix}
+   */
+  getPointsMatrixOfNearbyTiles(point, distance) {
+    return matrixUtils.getPointsMatrixOfNearbyTiles(this.getMatrix(), point, distance);
   }
   /**
    * finds if there are any tiles around a Point of given Type
@@ -222,45 +291,36 @@ export class MatrixModel extends Model {
     return matrixUtils.hasAdjacentTileType(this.getMatrix(), point, type);
   }
   /**
-   * calculates the appropriate coordinates given a point and distance
+   * finds the closest point of the Tile that matches given point
    *
-   * @param {Point} point - where to look from
+   * @param {Point} startPoint
+   * @param {Tile} type - what you're looking for
    * @param {Number} distance - how many tiles further to check
-   * @returns {Submatrix}
+   * @returns {Point}
    */
-  getSubmatrixSquareByDistance(point, distance) {
-    return matrixUtils.getSubmatrixSquareByDistance(this.getMatrix(), point, distance);
+  getPointOfNearestTileType(startPoint, type, distance) {
+    return matrixUtils.getPointOfNearestTileType(this.getMatrix(), startPoint, type, distance);
   }
   /**
-   * calculates the appropriate coordinates given a point and distance
-   *  but only by adjacent tiles (so diagonals are 2 spaces away)
+   * gets how many tiles apart two points are
+   * (only adjacently, so diagonals count as 2 tiles away)
    *
-   * @param {Point} point - where to look from
-   * @param {Number} distance - how many tiles further to check
-   * @returns {Submatrix}
+   * @param {Point} pointA
+   * @param {Point} pointB
+   * @returns {Number}
    */
-  getSubmatrixByDistance(point, distance) {
-    return matrixUtils.getSubmatrixByDistance(this.getMatrix(), point, distance);
+  getDistanceBetween(pointA, pointB) {
+    return matrixUtils.getDistanceBetween(pointA, pointB);
   }
   /**
-   * finds if there are any tiles around a Point of given Type
    *
-   * @param {Point} point
-   * @returns {TypeCounts}
+   * @param {Point} pointA
+   * @param {Point} pointB
+   * @param {Number} distance
+   * @returns {Boolean}
    */
-  getTypeCountsAdjacentTo(point) {
-    return matrixUtils.getTypeCountsAdjacentTo(this.getMatrix(), point);
-  }
-  /**
-   * replaces a portion of a matrix with another MatrixModel
-   *
-   * @param {MatrixModel} matrixModel - what's being merged onto this map
-   * @param {Point} [point] - where to merge, by default at the top-left
-   */
-  mergeMatrix(matrixModel, point = new Point(0, 0)) {
-    const myMatrix = this.getMatrix();
-    const resultMatrix = matrixUtils.mergeMatrices(myMatrix, matrixModel.getMatrix(), point);
-    this.set({matrix: resultMatrix});
+  isWithinDistance(pointA, pointB, distance) {
+    return matrixUtils.isWithinDistance(this.getMatrix(), pointA, pointB);
   }
 }
 

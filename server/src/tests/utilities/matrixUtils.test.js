@@ -300,35 +300,35 @@ test('getTypeCounts() - handles strings and numbers', (t) => {
   t.deepEqual(typeCountMap, expectedCounts);
 });
 
-test('getCount() - returns correct count', (t) => {
+test('getCountOfTileType() - returns correct count', (t) => {
   const testMatrix = [
     [0, 0, 0],
     [1, 1, 1],
     [2, 2, 2],
   ];
 
-  const typeCount = matrixUtils.getCount(testMatrix, 0);
+  const typeCount = matrixUtils.getCountOfTileType(testMatrix, 0);
   t.is(typeCount, 3);
 });
 
-test('getCount() - returns a count 0 if there are no count', (t) => {
+test('getCountOfTileType() - returns a count 0 if there are no count', (t) => {
   const testMatrix = [
     [0, 0, 0],
     [0, 0, 0],
     [0, 0, 0],
   ];
 
-  const typeCount = matrixUtils.getCount(testMatrix, 1);
+  const typeCount = matrixUtils.getCountOfTileType(testMatrix, 1);
   t.is(typeCount, 0);
 });
 
-test('getCount() - can find undefined (and handle null)', (t) => {
+test('getCountOfTileType() - can find undefined (and handle null)', (t) => {
   const testMatrix = [
     [undefined, undefined, undefined],
     [null, null, null],
   ];
 
-  const typeCount = matrixUtils.getCount(testMatrix, undefined);
+  const typeCount = matrixUtils.getCountOfTileType(testMatrix, undefined);
   t.is(typeCount, 3);
 });
 

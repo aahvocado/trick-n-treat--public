@@ -8,29 +8,9 @@ import * as encounterCollections from 'collections/encounterCollections';
 
 import * as mathUtils from 'utilities/mathUtils';
 
+// -- Generators pick Encounters based on conditions
 /**
- * generates encounters for each of the encounter tiles in the map
- *
- * @param {MapModel} mapModel
- * @returns {Array<EncounterModel>}
- */
-export function generateEncounters(mapModel) {
-  const encounterList = [];
-
-  mapModel.forEach((tile, point) => {
-    if (tile !== TILE_TYPES.ENCOUNTER) {
-      return;
-    }
-
-    const newEncounter = generateRandomEncounter(mapModel, point);
-    encounterList.push(newEncounter);
-  });
-
-  return encounterList;
-}
-/**
- * generates an Encounter
- *  by determining what type of encounter it should generate
+ * determines what type of encounter it should generate
  *
  * @param {MapModel} mapModel
  * @param {Point} location

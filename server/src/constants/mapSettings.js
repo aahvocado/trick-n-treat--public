@@ -29,15 +29,4 @@ export const MAP_SETTINGS = {
 
   numSteps: 200,
   stepSize: 3,
-
-  numSpecialTiles: 6,
-  specialMinDistance: 9,
-
-  numSectors: 10,
-  sectorSize: 10,
-  numHousePerSector: 10,
-  houseMinDistance: 1,
-
-  encounterMinDistance: 1,
-  encounterRangeDistance: [1, 2],
 };

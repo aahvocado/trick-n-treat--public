@@ -12,9 +12,10 @@ import {sendUpdateToAllClients} from 'managers/clientManager';
 import Model from 'models/Model';
 import MapModel from 'models/MapModel';
 
+import * as fogUtils from 'utilities/fogUtils';
 import logger from 'utilities/logger';
 import * as mapUtils from 'utilities/mapUtils';
-import * as matrixUtils from 'utilities/matrixUtils';
+import randomizeArray from 'utilities/randomizeArray';
 
 // EXPERIMENTAL - number of actions we've ever created
 let actionCount = 0;
@@ -405,7 +406,7 @@ export class GamestateModel extends Model {
       return;
     }
 
-    const newTurnQueue = matrixUtils.shuffleArray(characters);
+    const newTurnQueue = randomizeArray(characters);
     this.set({turnQueue: newTurnQueue});
   }
   /**
@@ -485,7 +486,7 @@ export class GamestateModel extends Model {
     // other tiles that are a given distance away should be partially visible, if not already
     const nearbyPoints = mapUtils.getPointsWithinPathDistance(tileMapModel.getMatrix(), point, distance);
     nearbyPoints.forEach((point) => {
-      mapUtils.updateFogPointToVisible(fogMapModel, tileMapModel, point);
+      fogUtils.updateFogPointToVisible(fogMapModel, tileMapModel, point);
     });
   }
 }

@@ -3,9 +3,7 @@ import Point from '@studiomoniker/point';
 
 import {
   TILE_TYPES,
-  FOG_TYPES,
   isWalkableTile,
-  isLessLit,
 } from 'constants/tileTypes';
 
 import * as mathUtils from 'utilities/mathUtils';
@@ -15,6 +13,7 @@ import * as matrixUtils from 'utilities/matrixUtils';
  * @typedef {Array<Point>} Path
  */
 
+// -- pathfinding
 /**
  * for the Pathfinding package, 0 is walkable and 1 is a wall
  *  we need to convert our Matrix to be be compliant
@@ -52,6 +51,25 @@ export function getAStarPath(matrix, startPoint, endPoint) {
   return pointPath;
 }
 /**
+ * returns a Matrix with a path created
+ *
+ * @param {Matrix} matrix
+ * @param {Point} startPoint
+ * @param {Point} endPoint
+ * @param {TileType} [tileType]
+ * @returns {Matrix}
+ */
+export function createPath(matrix, startPoint, endPoint, tileType = TILE_TYPES.NULL) {
+  const matrixCopy = matrix.slice();
+
+  const aStarPath = getAStarPath(matrixCopy, startPoint, endPoint);
+  aStarPath.forEach((pathPoint) => {
+    matrixUtils.setTileAt(matrixCopy, pathPoint, tileType);
+  });
+
+  return matrixCopy;
+}
+/**
  * @param {Matrix} matrix
  * @param {Point} startPoint
  * @param {Point} endPoint
@@ -71,10 +89,12 @@ export function isWithinPathDistance(matrix, startPoint, endPoint, distance) {
   return true;
 }
 /**
+ * gets all Points that are within walkable distance
+ *
  * @param {Matrix} matrix
  * @param {Point} startPoint
  * @param {Number} distance
- * @returns {*}
+ * @returns {Array<Points>}
  */
 export function getPointsWithinPathDistance(matrix, startPoint, distance) {
   const submatrixPoints = [];
@@ -106,25 +126,7 @@ export function getPointsWithinPathDistance(matrix, startPoint, distance) {
 
   return submatrixPoints;
 }
-/**
- * returns a Matrix with a path created
- *
- * @param {Matrix} matrix
- * @param {Point} startPoint
- * @param {Point} endPoint
- * @param {TileType} tileType
- * @returns {Matrix}
- */
-export function createPath(matrix, startPoint, endPoint, tileType) {
-  const matrixCopy = matrix.slice();
-
-  const aStarPath = getAStarPath(matrixCopy, startPoint, endPoint);
-  aStarPath.forEach((pathPoint) => {
-    matrixUtils.setTileAt(matrixCopy, pathPoint, tileType);
-  });
-
-  return matrixCopy;
-}
+// -- map searching
 /**
  * finds the closest point of the Tile that is walkable
  * @todo - refactor since this is nearly identical `getPointOfNearestTileType()` in `matrixUtils.js`
@@ -163,79 +165,32 @@ export function getPointOfNearestWalkableType(matrix, startPoint, distance) {
   return currentNearestPoint;
 }
 /**
- * @todo - refactor
- *
- * @param {MapModel} fogMapModel
- * @param {MapModel} tileMapModel
- * @param {Point} startPoint
- */
-export function updateFogPointToVisible(fogMapModel, tileMapModel, startPoint) {
-  const nearbyPoints = getPointsWithinPathDistance(tileMapModel.getMatrix(), startPoint, 3);
-  nearbyPoints.forEach((nearbyFogPoint) => {
-    // if already fully visibile, do nothing
-    const existingFogType = fogMapModel.getTileAt(nearbyFogPoint);
-    if (existingFogType === FOG_TYPES.VISIBLE) {
-      return;
-    }
-
-    // get the visibility level based on the distance
-    const getPotentialFogType = (distance) => {
-      if (tileDistance === 1) {
-        return FOG_TYPES.DIM;
-      }
-
-      if (tileDistance === 2) {
-        return FOG_TYPES.DIMMER;
-      }
-
-      if (tileDistance === 3) {
-        return FOG_TYPES.DIMMEST;
-      }
-
-      return FOG_TYPES.HIDDEN;
-    };
-
-    // find what FogType this can be
-    const tileDistance = matrixUtils.getDistanceBetween(startPoint, nearbyFogPoint);
-    const potentialFogType = getPotentialFogType(tileDistance);
-
-    // don't replace fog if this would be less lit than what's already there
-    if (isLessLit(potentialFogType, existingFogType)) {
-      return;
-    }
-
-    // update it
-    fogMapModel.setTileAt(nearbyFogPoint, potentialFogType);
-  });
-}
-/**
  * gets all locations that a given dimension will fit into
  *  if you pass in width and height it will make sure there is enough space with given dimensions
  *
- * @param {MapModel} mapModel
+ * @param {Matrix} matrix
  * @param {Number} [width]
  * @param {Number} [height]
- * @returns {Point}
+ * @returns {Array<Point>}
  */
-export function getValidEmptyLocations(mapModel, width = 1, height = 1) {
+export function getValidEmptyLocations(matrix, width = 1, height = 1) {
   const potentialLocations = [];
 
-  matrixUtils.forEach(mapModel.getMatrix(), (tileData, tilePoint) => {
+  matrixUtils.forEach(matrix, (tileData, tilePoint) => {
     // only look at empty tiles
     if (tileData !== null && tileData !== TILE_TYPES.EMPTY) {
       return;
     }
 
     // will this fit?
-    const mapMatrix = mapModel.getMatrix();
-    const submatrix = matrixUtils.getSubmatrixSquare(mapMatrix, tilePoint.x, tilePoint.y, tilePoint.x + width - 1, tilePoint.y + height - 1);
+    const submatrix = matrixUtils.getSubmatrixSquare(matrix, tilePoint.x, tilePoint.y, tilePoint.x + width, tilePoint.y + height);
     if (submatrix === null || submatrix.length < height || submatrix[0].length < width) {
       return;
     }
 
     // are there enough empty spaces here?
     const typeCounts = matrixUtils.getTypeCounts(submatrix);
-    if (typeCounts[TILE_TYPES.EMPTY] <= ((width * height) - 2)) {
+    if (typeCounts[TILE_TYPES.EMPTY] < (width * height)) {
       return;
     }
 
@@ -249,41 +204,40 @@ export function getValidEmptyLocations(mapModel, width = 1, height = 1) {
  * we want to pick a good location to place something
  *  if you pass in width and height it will make sure there is enough space with given dimensions
  *
- * @param {MapModel} mapModel
+ * @param {Matrix} matrix
  * @param {Number} [width]
  * @param {Number} [height]
  * @returns {Point}
  */
-export function getRandomEmptyLocation(mapModel, width = 1, height = 1) {
-  const potentialLocations = getValidEmptyLocations(mapModel, width, height);
+export function getRandomEmptyLocation(matrix, width = 1, height = 1) {
+  const potentialLocations = getValidEmptyLocations(matrix, width, height);
   const randomPotentialIndex = mathUtils.getRandomIntInclusive(0, potentialLocations.length - 1);
   return potentialLocations[randomPotentialIndex];
 }
 /**
  * tries to finds a random location and near a given TileType
  *
- * @param {MapModel} mapModel
+ * @param {Matrix} matrix
  * @param {Number} [width]
  * @param {Number} [height]
  * @param {Number} [distance]
  * @returns {Point}
  */
-export function getRandomEmptyLocationNearWalkableTile(mapModel, width = 1, height = 1, distance = 3) {
-  const mapMatrix = mapModel.getMatrix();
-
-  const potentialLocations = getValidEmptyLocations(mapModel, width, height);
+export function getRandomEmptyLocationNearWalkableTile(matrix, width = 1, height = 1, distance = 3) {
+  const potentialLocations = getValidEmptyLocations(matrix, width, height);
 
   // find those who are close to a Walkable Tile
   const nearbyPotentialLocations = potentialLocations.filter((potentialPoint) => {
-    const adjustedWidth = Math.floor(width / 2);
-    const adjustedHeight = Math.floor(height / 2);
+    const adjustedWidth = width > 2 ? Math.floor(width / 2) : 1;
+    const adjustedHeight = height > 2 ? Math.floor(height / 2) : 1;
     const adjustedCenter = new Point(adjustedWidth, adjustedHeight);
     const adjustedPoint = potentialPoint.clone().add(adjustedCenter);
     const adjustedDistance = adjustedWidth > adjustedHeight ? (adjustedWidth + distance) : (adjustedHeight + distance);
 
-    const nearbyPoint = getPointOfNearestWalkableType(mapMatrix, adjustedPoint, adjustedDistance);
+    const nearbyPoint = getPointOfNearestWalkableType(matrix, adjustedPoint, adjustedDistance);
     return nearbyPoint !== undefined;
   });
+  // console.log('getRandomEmptyLocationNearWalkableTile()', potentialLocations);
 
   // pick one of the valid nearby tiles
   const randomPotentialIndex = mathUtils.getRandomIntInclusive(0, nearbyPotentialLocations.length - 1);

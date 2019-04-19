@@ -5,10 +5,9 @@ import gameState from 'data/gameState';
 
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
-import * as mapUtils from 'utilities/mapUtils';
-import * as mathUtils from 'utilities/mathUtils';
-
+import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
 import logger from 'utilities/logger';
+import * as mapUtils from 'utilities/mapUtils';
 
 /**
  * this Helper is for applying actions to Characters
@@ -26,23 +25,21 @@ export function getRandomCharacterDirection(characterModel) {
   const potentialUpPoint = characterModel.getPotentialPosition(POINTS.UP);
   const potentialDownPoint = characterModel.getPotentialPosition(POINTS.DOWN);
 
-  const choice = mathUtils.getRandomWeightedChoice([
+  return pickRandomWeightedChoice([
     {
-      chosenPoint: POINTS.LEFT,
+      returns: POINTS.LEFT.clone(),
       weight: gameState.isWalkableAt(potentialLeftPoint) ? 1 : 0,
     }, {
-      chosenPoint: POINTS.RIGHT,
+      returns: POINTS.RIGHT.clone(),
       weight: gameState.isWalkableAt(potentialRightPoint) ? 1 : 0,
     }, {
-      chosenPoint: POINTS.UP,
+      returns: POINTS.UP.clone(),
       weight: gameState.isWalkableAt(potentialUpPoint) ? 1 : 0,
     }, {
-      chosenPoint: POINTS.DOWN,
+      returns: POINTS.DOWN.clone(),
       weight: gameState.isWalkableAt(potentialDownPoint) ? 1 : 0,
     },
   ]);
-
-  return choice.chosenPoint.clone();
 }
 /**
  * moves a Character to a given Position

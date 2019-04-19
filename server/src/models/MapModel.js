@@ -1,9 +1,13 @@
 import Point from '@studiomoniker/point';
 
+import {TILE_TYPES} from 'constants/tileTypes';
+
 import MatrixModel from 'models/MatrixModel';
 
+import * as mapUtils from 'utilities/mapUtils';
+
 /**
- * abstract helper that organizes all the map generation utility functions
+ * class for handling Map methods
  *
  * @typedef {Model} MapModel
  */
@@ -17,11 +21,108 @@ export class MapModel extends MatrixModel {
       mapSettings: undefined,
       /** @type {Point} */
       start: new Point(),
+
       /** @type {Array} */
-      specialPoints: [],
+      encounters: [],
       // other
       ...newAttributes,
     });
+  }
+  /**
+   * combines this with another MapModel, more specifically:
+   * - merges that `matrix` onto this
+   * - combines the list of `encounters` (removing duplicates)
+   *
+   * @param {MapModel} mergingMapModel
+   */
+  mergeMapModel(mergingMapModel) {
+    this.mergeMatrixModel(mergingMapModel);
+
+    const myEncounters = this.get('encounters');
+    const newEncounters = mergingMapModel.get('encounters');
+  }
+  // -- class methods
+  /**
+   * finds if a matrix contains a type
+   *
+   * @param {Point} startPoint
+   * @param {Point} endPoint
+   * @returns {Path}
+   */
+  findPath(startPoint, endPoint) {
+    return mapUtils.getAStarPath(this.getMatrix(), startPoint, endPoint);
+  }
+  /**
+   * finds a path and then applies it using given `tileType`
+   *
+   * @param {Point} startPoint
+   * @param {Point} endPoint
+   * @param {TileType} [tileType]
+   */
+  generatePath(startPoint, endPoint, tileType = TILE_TYPES.NULL) {
+    const newPath = this.findPath(startPoint, endPoint);
+    this.setTileList(newPath, tileType);
+  }
+  // -- implements `mapUtils.js`
+  /**
+   * @param {Point} startPoint
+   * @param {Point} endPoint
+   * @param {Number} distance
+   * @returns {Boolean}
+   */
+  isWithinPathDistance(startPoint, endPoint, distance) {
+    return mapUtils.isWithinPathDistance(this.getMatrix(), startPoint, endPoint, distance);
+  }
+  /**
+   * @param {Point} startPoint
+   * @param {Number} distance
+   * @returns {Array<Points>}
+   */
+  getPointsWithinPathDistance(startPoint, distance) {
+    return mapUtils.getPointsWithinPathDistance(this.getMatrix(), startPoint, distance);
+  }
+  /**
+   * finds the closest point of the Tile that is walkable
+   *
+   * @param {Point} startPoint
+   * @param {Number} distance
+   * @returns {Point}
+   */
+  getPointOfNearestWalkableType(startPoint, distance) {
+    return mapUtils.getPointOfNearestWalkableType(this.getMatrix(), startPoint, distance);
+  }
+  /**
+   * gets all locations that a given dimension will fit into
+   *  if you pass in width and height it will make sure there is enough space with given dimensions
+   *
+   * @param {Number} [width]
+   * @param {Number} [height]
+   * @returns {Array<Point>}
+   */
+  getValidEmptyLocations(width = 1, height = 1) {
+    return mapUtils.getValidEmptyLocations(this.getMatrix(), width, height);
+  }
+  /**
+   * we want to pick a good location to place something
+   *  if you pass in width and height it will make sure there is enough space with given dimensions
+   *
+   * @param {Number} [width]
+   * @param {Number} [height]
+   * @returns {Point}
+   */
+  getRandomEmptyLocation(width = 1, height = 1) {
+    return mapUtils.getRandomEmptyLocation(this.getMatrix(), width, height);
+  }
+  /**
+   * tries to finds a random location and near a given TileType
+   *
+   * @param {Number} [width]
+   * @param {Number} [height]
+   * @param {Number} [distance]
+   * @returns {Point}
+   */
+  getRandomEmptyLocationNearWalkableTile(width = 1, height = 1, distance = 3) {
+    return mapUtils.getRandomEmptyLocationNearWalkableTile(this.getMatrix(), width, height, distance);
   }
 }
 
