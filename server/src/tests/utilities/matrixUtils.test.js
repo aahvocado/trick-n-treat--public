@@ -78,49 +78,139 @@ test('createMatrix() - creates wider matrix', (t) => {
   t.is(Array.toString(createdMatrix), Array.toString(expectedMatrix));
 });
 
-test('getSubmatrixSquare() - returns a submatrix with two locations creating a 2x2 square', (t) => {
+test('getSubmatrixSquare() - able to get submatrices with a width or height of 1', (t) => {
   const testMatrix = [
     [0, 0, 0, 0, 0],
-    [0, '*', 1, 0, 0],
+    [0, 1, 1, 0, 0],
     [0, 1, 1, 0, 0],
     [0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0],
   ];
 
-  const expectedMatrix = [
-    ['*', 1],
-    [1, 1],
+  const submatrixA = matrixUtils.getSubmatrixSquare(testMatrix, new Point(1, 0), new Point(1, 4));
+  t.is(Array.toString(submatrixA), Array.toString([
+    [0],
+    [1],
+    [1],
+    [0],
+    [0],
+  ]));
+
+  const submatrixB = matrixUtils.getSubmatrixSquare(testMatrix, new Point(0, 1), new Point(4, 1));
+  t.is(Array.toString(submatrixB), Array.toString([
+    [0, 1, 1, 0, 0],
+  ]));
+});
+
+test('getSubmatrixSquare() - returns a submatrix with basic case of finding a 2x2 square', (t) => {
+  const testMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 2, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
   ];
 
-  const submatrix = matrixUtils.getSubmatrixSquare(testMatrix, 1, 1, 2, 2);
-  t.is(Array.toString(submatrix), Array.toString(expectedMatrix));
+  const submatrix = matrixUtils.getSubmatrixSquare(testMatrix, new Point(1, 1), new Point(2, 2));
+  t.is(Array.toString(submatrix), Array.toString([
+    [2, 1],
+    [1, 1],
+  ]));
+});
+
+test('getSubmatrixSquare() - returns a submatrix with basic case of finding a 3x3 square', (t) => {
+  const testMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 2, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ];
+
+  const submatrix = matrixUtils.getSubmatrixSquare(testMatrix, new Point(1, 1), new Point(3, 3));
+  t.is(Array.toString(submatrix), Array.toString([
+    [2, 1, 0],
+    [1, 1, 0],
+    [0, 0, 0],
+  ]));
+});
+
+test('getSubmatrixSquare() - returns a submatrix with basic case of finding a 2x5 square', (t) => {
+  const testMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 2, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ];
+
+  const submatrix = matrixUtils.getSubmatrixSquare(testMatrix, new Point(0, 0), new Point(1, 4));
+  t.is(Array.toString(submatrix), Array.toString([
+    [0, 0, 0, 0, 0],
+    [0, 2, 1, 0, 0],
+  ]));
+});
+
+test('getSubmatrixSquare() - handles when given points result in a submatrix too small or too big', (t) => {
+  const testMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ];
+
+  // resulting submatrix bigger than original width
+  t.is(matrixUtils.getSubmatrixSquare(testMatrix, new Point(0, 0), new Point(10, 0)), undefined);
+
+  // resulting submatrix bigger than original height
+  t.is(matrixUtils.getSubmatrixSquare(testMatrix, new Point(0, 0), new Point(0, 10)), undefined);
+});
+
+test('getSubmatrixSquare() - handles when given points are out of bounds', (t) => {
+  const testMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 2, 0, 0],
+    [0, 0, 0, 3, 0],
+    [0, 0, 0, 0, 4],
+  ];
+
+  // out of bounds to the bottom right
+  t.is(matrixUtils.getSubmatrixSquare(testMatrix, new Point(3, 3), new Point(5, 5)), undefined);
+
+  // out of bounds to the left
+  t.is(matrixUtils.getSubmatrixSquare(testMatrix, new Point(-1, 3), new Point(3, 4)), undefined);
+
+  // out of bounds to the top right
+  t.is(matrixUtils.getSubmatrixSquare(testMatrix, new Point(3, -1), new Point(5, -1)), undefined);
 });
 
 test('hasNearbyTileType() - returns false if tile is not nearby, using a distance of 1', (t) => {
   const testMatrix = [
-    [0, 0, 0, 0, 1],
+    [0, 0, 0, 0, '*'],
     [0, 0, 0, 0, 0],
-    [0, 0, '*', 0, 0],
+    [0, 0, 1, 0, 0],
     [0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0],
   ];
   const point = new Point(2, 2);
 
-  const isNearby = matrixUtils.hasNearbyTileType(testMatrix, point, 1, 1);
+  const isNearby = matrixUtils.hasNearbyTileType(testMatrix, point, '*', 1);
   t.false(isNearby);
 });
 
 test('hasNearbyTileType() - returns true if tile is nearby, using a distance of 2', (t) => {
   const testMatrix = [
-    [0, 0, 0, 0, 1],
+    [0, 0, 0, 0, '*'],
     [0, 0, 0, 0, 0],
-    [0, 0, '*', 0, 0],
+    [0, 0, 1, 0, 0],
     [0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0],
   ];
   const point = new Point(2, 2);
 
-  const isNearby = matrixUtils.hasNearbyTileType(testMatrix, point, 1, 2);
+  const isNearby = matrixUtils.hasNearbyTileType(testMatrix, point, '*', 2);
   t.true(isNearby);
 });
 
@@ -341,16 +431,35 @@ test('getSubmatrixSquareByDistance() - properly returns the submatrix with dista
     [0, 0, 0, 0, 0],
   ];
 
-  const expectedMatrix = [
+  const point = new Point(2, 2);
+
+  const submatrix = matrixUtils.getSubmatrixSquareByDistance(testMatrix, point, 1);
+  t.is(Array.toString(submatrix), Array.toString([
     [1, 1, 1],
     [1, '*', 1],
     [1, 1, 1],
+  ]));
+});
+
+test('getSubmatrixSquareByDistance() - properly returns the submatrix with distance of 2', (t) => {
+  const testMatrix = [
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 1, 2, 1, 0],
+    [0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0],
   ];
 
   const point = new Point(2, 2);
 
-  const submatrix = matrixUtils.getSubmatrixSquareByDistance(testMatrix, point, 1);
-  t.is(Array.toString(submatrix), Array.toString(expectedMatrix));
+  const submatrix = matrixUtils.getSubmatrixSquareByDistance(testMatrix, point, 2);
+  t.is(Array.toString(submatrix), Array.toString([
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 1, 2, 1, 0],
+    [0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0],
+  ]));
 });
 
 test('getSubmatrixSquareByDistance() - handles submatrix when distance from given point could be negatively outside the matrix', (t) => {
@@ -422,7 +531,7 @@ test('getTypeCountsAdjacentTo() - gets the counts of adjacent values', (t) => {
   const testMatrix = [
     [0, 0, 0, 0, 0],
     [0, 1, 2, 1, 0],
-    [0, 2, '*', 3, 0],
+    [0, 2, 0, 3, 0],
     [0, 1, 3, 1, 0],
     [0, 0, 0, 0, 0],
   ];

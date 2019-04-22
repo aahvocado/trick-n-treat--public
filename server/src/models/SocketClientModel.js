@@ -1,26 +1,7 @@
-import schema from 'js-schema';
-
 import {CLIENT_TYPES} from 'constants/clientTypes';
 
 import Model from 'models/Model';
 
-// define attribute types
-const socketClientSchema = schema({
-  // name of Client
-  name: String,
-  // Remote or Screen?
-  clientType: undefined,
-  // represents the user and should be constant
-  userId: String,
-  // the websocket connection
-  socket: undefined,
-  // socket.id - will probably change per session
-  sessionId: String,
-  // is the user in Game
-  isInGame: Boolean,
-  // is the user in Lobby
-  isInLobby: Boolean,
-});
 /**
  * class for a Websocket Client
  *
@@ -37,10 +18,6 @@ export class SocketClientModel extends Model {
 
     // onConnection
     this.init();
-
-    // set schema and then validate
-    this.schema = socketClientSchema;
-    this.validate();
   }
   /**
    * adds Remote specific event listeners

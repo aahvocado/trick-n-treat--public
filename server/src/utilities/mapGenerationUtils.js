@@ -182,7 +182,7 @@ export function createSmallWoodsBiomeModel(tileMapModel) {
     }
 
     // pick a random decor
-    const decorTileType = mathUtils.pickRandomWeightedChoice([
+    const decorTileType = pickRandomWeightedChoice([
       {
         returns: TILE_TYPES.TREE_ONE,
         weight: 10,

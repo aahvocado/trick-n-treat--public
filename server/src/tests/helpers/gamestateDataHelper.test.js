@@ -2,9 +2,11 @@ import test from 'ava';
 import Point from '@studiomoniker/point';
 
 import {TILE_TYPES} from 'constants/tileTypes';
-const NOPE = TILE_TYPES.EMPTY;
-const PATH = TILE_TYPES.PATH;
-const HOUS = TILE_TYPES.HOUSE;
+const {
+  EMPTY,
+  HOUSE,
+  PATH,
+} = TILE_TYPES;
 
 import gameState from 'data/gameState';
 
@@ -30,11 +32,11 @@ test.beforeEach((t) => {
 test('getFormattedMapData() - formats gamestate data into expected object', (t) => {
   const testMap = new MapModel({
     matrix: [
-      [PATH, NOPE, PATH, PATH, HOUS],
-      [PATH, NOPE, PATH, NOPE, NOPE],
-      [PATH, NOPE, PATH, PATH, PATH],
-      [PATH, NOPE, NOPE, NOPE, PATH],
-      [HOUS, PATH, PATH, PATH, HOUS],
+      [PATH, EMPTY, PATH, PATH, HOUSE],
+      [PATH, EMPTY, PATH, EMPTY, EMPTY],
+      [PATH, EMPTY, PATH, PATH, PATH],
+      [PATH, EMPTY, EMPTY, EMPTY, PATH],
+      [HOUSE, PATH, PATH, PATH, HOUSE],
     ],
   });
 

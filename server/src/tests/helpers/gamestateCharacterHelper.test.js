@@ -3,9 +3,11 @@ import Point from '@studiomoniker/point';
 
 import {POINTS} from 'constants/points';
 import {TILE_TYPES} from 'constants/tileTypes';
-const NOPE = TILE_TYPES.EMPTY;
-const PATH = TILE_TYPES.PATH;
-const HOUS = TILE_TYPES.HOUSE;
+const {
+  EMPTY,
+  HOUSE,
+  PATH,
+} = TILE_TYPES;
 
 import gameState from 'data/gameState';
 
@@ -31,11 +33,11 @@ test('getRandomCharacterDirection() - (randomly) picks a valid directional Point
   // -- setup
   const testMap = new MapModel({
     matrix: [
-      [PATH, NOPE, PATH, PATH, HOUS],
-      [PATH, NOPE, PATH, NOPE, NOPE],
-      [PATH, NOPE, PATH, PATH, PATH],
-      [PATH, NOPE, NOPE, NOPE, PATH],
-      [HOUS, PATH, PATH, PATH, HOUS],
+      [PATH, EMPTY, PATH, PATH, HOUSE],
+      [PATH, EMPTY, PATH, EMPTY, EMPTY],
+      [PATH, EMPTY, PATH, PATH, PATH],
+      [PATH, EMPTY, EMPTY, EMPTY, PATH],
+      [HOUSE, PATH, PATH, PATH, HOUSE],
     ],
   });
 
@@ -59,11 +61,11 @@ test('updateCharacterPosition() - correctly updates a Characters position if the
   // -- setup
   const testMap = new MapModel({
     matrix: [
-      [PATH, NOPE, PATH, PATH, HOUS],
-      [PATH, NOPE, PATH, NOPE, NOPE],
-      [PATH, NOPE, PATH, PATH, PATH],
-      [PATH, NOPE, NOPE, NOPE, PATH],
-      [HOUS, PATH, PATH, PATH, HOUS],
+      [PATH, EMPTY, PATH, PATH, HOUSE],
+      [PATH, EMPTY, PATH, EMPTY, EMPTY],
+      [PATH, EMPTY, PATH, PATH, PATH],
+      [PATH, EMPTY, EMPTY, EMPTY, PATH],
+      [HOUSE, PATH, PATH, PATH, HOUSE],
     ],
   });
 
@@ -93,11 +95,11 @@ test('updateCharacterPositionByDirection() - correctly updates a Characters posi
   // -- setup
   const testMap = new MapModel({
     matrix: [
-      [PATH, NOPE, PATH, PATH, HOUS],
-      [PATH, NOPE, PATH, NOPE, NOPE],
-      [PATH, NOPE, PATH, PATH, PATH],
-      [PATH, NOPE, NOPE, NOPE, PATH],
-      [HOUS, PATH, PATH, PATH, HOUS],
+      [PATH, EMPTY, PATH, PATH, HOUSE],
+      [PATH, EMPTY, PATH, EMPTY, EMPTY],
+      [PATH, EMPTY, PATH, PATH, PATH],
+      [PATH, EMPTY, EMPTY, EMPTY, PATH],
+      [HOUSE, PATH, PATH, PATH, HOUSE],
     ],
   });
 

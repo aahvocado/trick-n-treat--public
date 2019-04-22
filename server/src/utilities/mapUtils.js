@@ -183,8 +183,8 @@ export function getValidEmptyLocations(matrix, width = 1, height = 1) {
     }
 
     // will this fit?
-    const submatrix = matrixUtils.getSubmatrixSquare(matrix, tilePoint.x, tilePoint.y, tilePoint.x + width, tilePoint.y + height);
-    if (submatrix === null || submatrix.length < height || submatrix[0].length < width) {
+    const submatrix = matrixUtils.getSubmatrixSquare(matrix, new Point(tilePoint.x, tilePoint.y), new Point(tilePoint.x + width - 1, tilePoint.y + height - 1));
+    if (submatrix === undefined || matrixUtils.getHeight(submatrix) < height || matrixUtils.getWidth(submatrix) < width) {
       return;
     }
 

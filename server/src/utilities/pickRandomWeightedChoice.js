@@ -23,7 +23,7 @@
  * @param {Array<Choice>} choiceList
  * @returns {Choice.returns}
  */
-export function pickRandomWeightedChoice(choiceList) {
+export default function pickRandomWeightedChoice(choiceList) {
   // sum up the chances
   const totalChance = choiceList.reduce((accumulator, choice) => {
     // range of values that could indicate this was picked

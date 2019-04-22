@@ -270,18 +270,17 @@ export function getTypeCounts(matrix) {
  * finds if there are any tiles around a Point of given Type
  *
  * @param {Matrix} matrix
- * @param {Point} point
+ * @param {Point} centerPoint
  * @param {Number} [distance]
  * @returns {TypeCounts}
  */
-export function getTypeCountsAdjacentTo(matrix, point, distance = 1) {
+export function getTypeCountsAdjacentTo(matrix, centerPoint, distance = 1) {
   // get submatrix
-  const submatrix = getSubmatrixByDistance(matrix, point, distance);
+  const submatrix = getSubmatrixByDistance(matrix, centerPoint, distance);
 
-  // the center point does not count
-  const submatrixWidth = submatrix[0].length;
-  const submatrixHeight = submatrix.length;
-  submatrix[Math.floor(submatrixHeight / 2)][Math.floor(submatrixWidth / 2)] = null;
+  // the center of the submatrix should be counted
+  const submatrixCenterPoint = getCenter(submatrix);
+  setTileAt(submatrix, submatrixCenterPoint, null);
 
   // use that submatrix to get the counts
   return getTypeCounts(submatrix);
@@ -291,28 +290,33 @@ export function getTypeCountsAdjacentTo(matrix, point, distance = 1) {
  * gets Submatrix of a larger Matrix
  *
  * @param {Matrix} matrix
- * @param {Number} topLeftX
- * @param {Number} topLeftY
- * @param {Number} bottomRightX
- * @param {Number} bottomRightY
- * @returns {Matrix | null}
+ * @param {Point} topLeftPoint
+ * @param {Point} bottomRightPoint
+ * @returns {Matrix | undefined}
  */
-export function getSubmatrixSquare(matrix, topLeftX, topLeftY, bottomRightX, bottomRightY) {
-  // if the range is 0 then there's no submatrix to get
-  const width = bottomRightX - topLeftX;
-  if (width <= 0) {
-    return null;
+export function getSubmatrixSquare(matrix, topLeftPoint, bottomRightPoint) {
+  // if either points are out of bounds, then not possible
+  if (getTileAt(matrix, topLeftPoint) === undefined || getTileAt(matrix, bottomRightPoint) === undefined) {
+    return undefined;
   }
 
-  // iterate to get a section of larger matrix
-  const submatrix = [];
-  for (let y = topLeftY; y < (bottomRightY); y++) {
-    const row = matrix[y];
-    if (row === undefined || row.length < bottomRightX - topLeftX) {
-      return null;
-    }
+  // find the width and height of the points, we add 1 because it needs to be inclusive of 0
+  //  eg. [0, 1] has width of 2, despite 1 - 0 equalling 1
+  const width = bottomRightPoint.x - topLeftPoint.x + 1;
+  const height = bottomRightPoint.y - topLeftPoint.y + 1;
 
-    submatrix.push(row.slice(topLeftX, bottomRightX)); // offset by 1 to be inclusive
+  // if width is too small or too big, then no submatrix is possible
+  if (width <= 0 || height <= 0 || width > getWidth(matrix) || height > getHeight(matrix)) {
+    return undefined;
+  }
+
+  // prepare submatrix to be returned
+  const submatrix = [];
+
+  for (let y = topLeftPoint.y; y <= bottomRightPoint.y; y++) {
+    const row = matrix[y];
+    const subrow = row.slice(topLeftPoint.x, bottomRightPoint.x + 1); // + 1 because its not inclusive
+    submatrix.push(subrow);
   }
 
   return submatrix;
@@ -321,51 +325,47 @@ export function getSubmatrixSquare(matrix, topLeftX, topLeftY, bottomRightX, bot
  * calculates the appropriate coordinates given a point and distance
  *
  * @param {Matrix} matrix
- * @param {Point} point - where to look from
+ * @param {Point} centerPoint - where to look from
  * @param {Number} distance - how many tiles further to check
  * @returns {Submatrix}
  */
-export function getSubmatrixSquareByDistance(matrix, point, distance) {
+export function getSubmatrixSquareByDistance(matrix, centerPoint, distance) {
   // with a distance of zero there will never be anything nearby
   if (distance <= 0) {
-    return false;
+    return undefined;
   }
 
-  const topLeftX = Math.max(point.x - distance, 0);
-  const topLeftY = Math.max(point.y - distance, 0);
-  const bottomRightX = Math.min(point.x + distance, matrix[0].length - 1);
-  const bottomRightY = Math.min(point.y + distance, matrix.length - 1);
+  // create points for the resulting submatrix,
+  //  and handle points that would be out of bounds
+  const topLeftX = Math.max(centerPoint.x - distance, 0);
+  const topLeftY = Math.max(centerPoint.y - distance, 0);
+  const bottomRightX = Math.min(centerPoint.x + distance, getWidth(matrix) - 1);
+  const bottomRightY = Math.min(centerPoint.y + distance, getHeight(matrix) - 1);
 
   // find get the submatrix and look within it
-  return getSubmatrixSquare(matrix, topLeftX, topLeftY, bottomRightX, bottomRightY);
+  return getSubmatrixSquare(matrix, new Point(topLeftX, topLeftY), new Point(bottomRightX, bottomRightY));
 }
 /**
  * calculates the appropriate coordinates given a point and distance
  *  but only by adjacent tiles (so diagonals are 2 spaces away)
  *
  * @param {Matrix} matrix
- * @param {Point} point - where to look from
+ * @param {Point} centerPoint - where to look from
  * @param {Number} distance - how many tiles further to check
  * @returns {Submatrix}
  */
-export function getSubmatrixByDistance(matrix, point, distance) {
-  // make a copy to remove tiles that are too far
-  const nullMatrix = createMatrix(matrix[0].length, matrix.length, null);
-  forEach(nullMatrix, (tile, tilePoint) => {
-    const x = tilePoint.x;
-    const y = tilePoint.y;
+export function getSubmatrixByDistance(matrix, centerPoint, distance) {
+  // make a copy of the matrix where tiles too far are set to `null`
+  const adjustedMatrix = map(matrix, (tileData, tilePoint) => {
+    if (getDistanceBetween(tilePoint, centerPoint) > distance) {
+      return null;
+    }
 
-    const distanceFromOriginY = Math.abs(point.clone().y - y);
-    const distanceFromOriginX = Math.abs(point.clone().x - x);
-
-    // set tile to available if it's within distance
-    if (distanceFromOriginY + distanceFromOriginX <= distance) {
-      nullMatrix[y][x] = matrix[y][x];
-    };
+    return tileData;
   });
 
-  // get the submatrix with all the tiles
-  const submatrix = getSubmatrixSquareByDistance(nullMatrix, point, distance);
+  // then get the submatrix
+  const submatrix = getSubmatrixSquareByDistance(adjustedMatrix, centerPoint, distance);
   return submatrix;
 }
 // -- finding Points (coordinates)
@@ -416,13 +416,13 @@ export function getPointsMatrixOfNearbyTiles(matrix, point, distance) {
  * finds if there are any tiles around a Point of given Type
  *
  * @param {Matrix} matrix
- * @param {Point} point - where to look from
+ * @param {Point} centerPoint - where to look from
  * @param {Tile} type - what you're looking for
  * @param {Number} distance - how many tiles further to check
  * @returns {Boolean}
  */
-export function hasNearbyTileType(matrix, point, type, distance) {
-  const submatrix = getSubmatrixSquareByDistance(matrix, point, distance);
+export function hasNearbyTileType(matrix, centerPoint, type, distance) {
+  const submatrix = getSubmatrixSquareByDistance(matrix, centerPoint, distance);
   return containsTileType(submatrix, type);
 }
 /**

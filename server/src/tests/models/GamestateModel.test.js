@@ -2,8 +2,10 @@ import test from 'ava';
 import Point from '@studiomoniker/point';
 
 import {TILE_TYPES} from 'constants/tileTypes';
-const NOPE = TILE_TYPES.EMPTY;
-const PATH = TILE_TYPES.PATH;
+const {
+  EMPTY,
+  PATH,
+} = TILE_TYPES;
 
 import {GamestateModel} from 'data/gameState';
 
@@ -31,10 +33,10 @@ test.beforeEach((t) => {
 
   const testMap = new MapModel({
     matrix: [
-      [PATH, NOPE, PATH, PATH, PATH],
-      [PATH, NOPE, PATH, NOPE, NOPE],
-      [PATH, NOPE, PATH, PATH, PATH],
-      [PATH, NOPE, NOPE, NOPE, PATH],
+      [PATH, EMPTY, PATH, PATH, PATH],
+      [PATH, EMPTY, PATH, EMPTY, EMPTY],
+      [PATH, EMPTY, PATH, PATH, PATH],
+      [PATH, EMPTY, EMPTY, EMPTY, PATH],
       [PATH, PATH, PATH, PATH, PATH],
     ],
   });

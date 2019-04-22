@@ -12,18 +12,3 @@ test('getRandomIntInclusive() - returns a number between the two given ranges', 
   const isWithinRange = randomInt >= lowerRange && randomInt <= upperRange;
   t.true(isWithinRange);
 });
-
-test('getRandomWeightedChoice() - returns the choice that is not 0', (t) => {
-  const choiceList = [
-    {
-      arbitraryLabel: 'A',
-      weight: 0,
-    }, {
-      arbitraryLabel: 'B',
-      weight: 100,
-    },
-  ];
-
-  const choice = mathUtils.getRandomWeightedChoice(choiceList);
-  t.is(choice.arbitraryLabel, 'B');
-});
