@@ -3,6 +3,7 @@ import {
   HOME_BIOME_SETTINGS,
   GRAVEYARD_BIOME_SETTINGS,
 } from 'constants/biomeSettings';
+import {TILE_TYPES} from 'constants/tileTypes';
 import {MAP_SETTINGS} from 'constants/mapSettings';
 
 import gameState from 'data/gameState';
@@ -30,27 +31,30 @@ export function generateNewMap(mapSettings = MAP_SETTINGS) {
   const newTileMapModel = mapGenerationUtils.createBaseTileMapModel(mapSettings);
   gameState.set({tileMapModel: newTileMapModel});
 
-  //
+  // -- home neighborhood biome
   const homeBiomeMapModel = mapGenerationUtils.createHomeBiomeModel(newTileMapModel, HOME_BIOME_SETTINGS);
+  const houseList = houseGenerationUtils.generateHouses(homeBiomeMapModel, HOME_BIOME_SETTINGS);
+
+  houseList.forEach((houseModel) => {
+    newTileMapModel.setTileAt(houseModel.get('position'), TILE_TYPES.HOUSE);
+  });
+
   newTileMapModel.mergeMatrixModel(homeBiomeMapModel);
 
-  // --  put biome locations onto the map
-  const graveyardMapModel = mapGenerationUtils.createGraveyardBiomeModel(newTileMapModel, GRAVEYARD_BIOME_SETTINGS);
-  newTileMapModel.mergeMatrixModel(graveyardMapModel);
+  // // --  put biome locations onto the map
+  // const graveyardMapModel = mapGenerationUtils.createGraveyardBiomeModel(newTileMapModel, GRAVEYARD_BIOME_SETTINGS);
+  // newTileMapModel.mergeMatrixModel(graveyardMapModel);
 
-  const woodsMapModel = mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel);
-  newTileMapModel.mergeMatrixModel(woodsMapModel);
+  // const woodsMapModel = mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel);
+  // newTileMapModel.mergeMatrixModel(woodsMapModel);
 
-  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
+  // newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
+  // newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
+  // newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
-
-  // -- put house locations
-  houseGenerationUtils.findValidHouseLocation(newTileMapModel);
+  // newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
   // generate a fog model
   const fogMapModel = mapGenerationUtils.createFogMapModel(newTileMapModel, mapSettings);
@@ -59,7 +63,7 @@ export function generateNewMap(mapSettings = MAP_SETTINGS) {
   // finally, actually set the actual data onto the gamestate
   gameState.set({
     mode: GAME_MODES.ACTIVE,
-    // houses: houseList,
+    houses: houseList,
     // encounters: encounterList,
   });
 
@@ -71,3 +75,4 @@ export function generateNewMap(mapSettings = MAP_SETTINGS) {
   // start the first round, which will create a turn queue
   gameState.addToActionQueue(gameState.handleStartOfRound.bind(gameState));
 }
+

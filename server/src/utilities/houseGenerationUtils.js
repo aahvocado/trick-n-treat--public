@@ -1,10 +1,11 @@
 import Point from '@studiomoniker/point';
 
-import * as houseCollection from 'collections/houseCollection';
-
 import {TILE_TYPES} from 'constants/tileTypes';
 import {MAP_SETTINGS} from 'constants/mapSettings';
 
+import HouseModel from 'models/HouseModel';
+
+import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
 import * as mathUtils from 'utilities/mathUtils';
 import * as matrixUtils from 'utilities/matrixUtils';
 import randomizeArray from 'utilities/randomizeArray';
@@ -12,29 +13,101 @@ import randomizeArray from 'utilities/randomizeArray';
 /**
  * chance of using generating one of these generic Houses
  */
-const genericHouseOddsList = [
+const genericHouseDataList = [
   {
-    choice: houseCollection.basicCandyHouse,
+    // normal house
     weight: 70,
-  },
-  {
-    choice: houseCollection.lameCandyHouse,
+    returns: {
+      onTrick: (houseModel, characterModel) => {
+        const randomAddCandy = mathUtils.getRandomIntInclusive(3, 5);
+        characterModel.modifyStat('candies', randomAddCandy);
+      },
+      onTreat: (houseModel, characterModel) => {
+        const randomAddCandy = mathUtils.getRandomIntInclusive(1, 4);
+        characterModel.modifyStat('candies', randomAddCandy);
+      },
+    },
+  }, {
+    // lame house
     weight: 33,
-  },
-  {
-    choice: houseCollection.bestCandyHouse,
+    returns: {
+      checkCanTrick: () => true,
+      onTrick: (houseModel, characterModel) => {
+        characterModel.modifyStat('candies', 1);
+      },
+      checkCanTreat: () => true,
+      onTreat: (houseModel, characterModel) => {
+        characterModel.modifyStat('candies', 1);
+      },
+    },
+  }, {
+    // super sweet house
     weight: 1,
+    returns: {
+      onTrick: (houseModel, characterModel) => {
+        const numberTrickers = houseModel.get('trickers').length;
+        const randomAddCandy = mathUtils.getRandomIntInclusive(8 - numberTrickers, 12 - numberTrickers);
+        characterModel.modifyStat('candies', randomAddCandy);
+      },
+      onTreat: (houseModel, characterModel) => {
+        characterModel.modifyStat('candies', 10);
+      },
+    },
   },
 ];
 
-// -- Creators place onto Map
+// -- primary
+/**
+ * generates Houses onto given MapModel
+ *
+ * @param {MapModel} mapModel
+ * @param {BiomeSettings} biomeSettings
+ * @returns {Array<HouseModel>}
+ */
+export function generateHouses(mapModel, biomeSettings) {
+  const {
+    numHouses
+  } = biomeSettings;
+
+  const newHousesList = [];
+  for (let i=0; i<numHouses; i++) {
+    const newHouseModel = createNewGenericHouse(mapModel);
+    newHousesList.push(newHouseModel);
+  }
+
+  return newHousesList;
+}
+// -- find
 /**
  * determines where to place
  *
- * @param {MapModel} tileMapModel
+ * @param {MapModel} mapModel
  * @returns {Array<EncounterModel>}
  */
-export function findValidHouseLocation(tileMapModel) {
-  return tileMapModel.getRandomEmptyLocationNearWalkableTile(1, 1, 1);
+export function findValidHouseLocation(mapModel) {
+  return mapModel.getRandomEmptyLocationNearWalkableTile(1, 1, 1);
 }
+// -- place
+/**
+ * does the entire House creating process
+ * - picks a place to put it
+ * - changes the tile to a house
+ * - generates a House model
+ *
+ * returns the HouseModel that was created
+ *
+ * @param {MapModel} mapModel
+ * @returns {HouseModel}
+ */
+export function createNewGenericHouse(mapModel) {
+  const houseLocation = findValidHouseLocation(mapModel);
+  // mapModel.setTileAt(houseLocation, TILE_TYPES.HOUSE);
 
+  const houseData = pickRandomWeightedChoice(genericHouseDataList);
+  const newHouseModel = new HouseModel({
+    ...houseData,
+    position: houseLocation,
+  });
+
+  return newHouseModel;
+}

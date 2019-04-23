@@ -128,6 +128,57 @@ export function getPointsWithinPathDistance(matrix, startPoint, distance) {
 }
 // -- map searching
 /**
+ * iterates through each point and returns anything that fulfils the given callback with condition
+ *
+ * @param {Matrix} matrix
+ * @param {Function} callback - make sure this returns a truthy
+ * @returns {Array<Point>}
+ */
+export function findPoints(matrix, callback) {
+  const points = [];
+
+  matrixUtils.forEach(matrix, (tileData, tilePoint) => {
+    if (callback(tileData, tilePoint)) {
+      points.push(tilePoint);
+    };
+  });
+
+  return points;
+}
+/**
+ * iterates through each point and returns anything that fulfils the given callback with condition
+ *
+ * @param {Matrix} matrix
+ * @param {Point} startPoint
+ * @param {Function} callback - make sure this returns a truthy
+ * @returns {Array<Point>}
+ */
+export function findPointNearestConditionally(matrix, startPoint, callback) {
+  // keep track of what the Position and Distance of the most recently found Tile that matches the type
+  let currentNearestDistance = matrixUtils.getWidth(matrix);
+  let currentNearestPoint = undefined;
+
+  // look at the nearby tiles, then iterate through them to see if any of them are of given Type
+  const nearbyPointsList = matrixUtils.getPointsListOfNearbyTiles(matrix, startPoint, matrixUtils.getWidth(matrix));
+  nearbyPointsList.forEach((tilePoint) => {
+    const tileType = matrixUtils.getTileAt(matrix, tilePoint);
+    if (callback(tileType, tilePoint)) {
+      // don't care about tiles that are farther than the one we found
+      const tileDistance = matrixUtils.getDistanceBetween(startPoint, tilePoint);
+      if (tileDistance > currentNearestDistance) {
+        return;
+      }
+
+      // found a contender, so save it
+      currentNearestDistance = tileDistance;
+      currentNearestPoint = tilePoint.clone();
+    }
+  });
+
+  // after going through the process, we can finally return the Point of the Tile with the asked for Type
+  return currentNearestPoint;
+}
+/**
  * finds the closest point of the Tile that is walkable
  * @todo - refactor since this is nearly identical `getPointOfNearestTileType()` in `matrixUtils.js`
  *
@@ -137,32 +188,9 @@ export function getPointsWithinPathDistance(matrix, startPoint, distance) {
  * @returns {Point}
  */
 export function getPointOfNearestWalkableType(matrix, startPoint, distance) {
-  // keep track of what the Position and Distance of the most recently found Tile that matches the type
-  let currentNearestDistance = distance;
-  let currentNearestPoint = undefined;
-
-  // look at the nearby tiles, then iterate through them to see if any of them are of given Type
-  const nearbyPointsList = matrixUtils.getPointsListOfNearbyTiles(matrix, startPoint, distance);
-  nearbyPointsList.forEach((nearbyPoint) => {
-    // don't care about different types
-    const tileType = matrixUtils.getTileAt(matrix, nearbyPoint);
-    if (!isWalkableTile(tileType)) {
-      return;
-    }
-
-    // don't care about tiles that are farther than the one we found
-    const tileDistance = matrixUtils.getDistanceBetween(startPoint, nearbyPoint);
-    if (tileDistance > currentNearestDistance) {
-      return;
-    }
-
-    // found a contender, so save it
-    currentNearestDistance = tileDistance;
-    currentNearestPoint = nearbyPoint.clone();
-  });
-
-  // after going through the process, we can finally return the Point of the Tile with the asked for Type
-  return currentNearestPoint;
+  return findPointNearestConditionally(matrix, startPoint, (tileType, tilePoint) => (
+    isWalkableTile(tileType) && matrixUtils.getDistanceBetween(startPoint, tilePoint) <= distance
+  ));
 }
 /**
  * gets all locations that a given dimension will fit into
@@ -226,18 +254,18 @@ export function getRandomEmptyLocation(matrix, width = 1, height = 1) {
 export function getRandomEmptyLocationNearWalkableTile(matrix, width = 1, height = 1, distance = 3) {
   const potentialLocations = getValidEmptyLocations(matrix, width, height);
 
+  // find the center point of the potential area
+  const adjustedCenter = new Point(Math.floor((width - 1) / 2), Math.floor((height - 1) / 2));
+
   // find those who are close to a Walkable Tile
   const nearbyPotentialLocations = potentialLocations.filter((potentialPoint) => {
-    const adjustedWidth = width > 2 ? Math.floor(width / 2) : 1;
-    const adjustedHeight = height > 2 ? Math.floor(height / 2) : 1;
-    const adjustedCenter = new Point(adjustedWidth, adjustedHeight);
-    const adjustedPoint = potentialPoint.clone().add(adjustedCenter);
-    const adjustedDistance = adjustedWidth > adjustedHeight ? (adjustedWidth + distance) : (adjustedHeight + distance);
+    const adjustedPoint = potentialPoint.clone().add(adjustedCenter.clone());
+    const adjustedDistance = adjustedCenter.x > adjustedCenter.y ? (adjustedCenter.clone().x + distance) : (adjustedCenter.clone().y + distance);
 
     const nearbyPoint = getPointOfNearestWalkableType(matrix, adjustedPoint, adjustedDistance);
+    // console.log('chosen nearbyPoint is', nearbyPoint, 'for adjusted', adjustedPoint);
     return nearbyPoint !== undefined;
   });
-  // console.log('getRandomEmptyLocationNearWalkableTile()', potentialLocations);
 
   // pick one of the valid nearby tiles
   const randomPotentialIndex = mathUtils.getRandomIntInclusive(0, nearbyPotentialLocations.length - 1);

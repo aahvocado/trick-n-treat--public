@@ -80,7 +80,6 @@ test('getPointOfNearestWalkableType() - finds the point of the nearest walkable 
   t.true(nearestPathPoint.equals(new Point(2, 0)));
 });
 
-
 test('getValidEmptyLocations() - able to find all empty locations with a size of 1', (t) => {
   // -- setup
   const testMatrix = [

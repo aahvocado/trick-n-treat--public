@@ -33,6 +33,8 @@ export const HOME_BIOME_SETTINGS = {
   height: homeBiomeHeight,
   spawnPoint: homeSpawnPoint,
   connectingPoints: [homeSpawnPoint],
+
+  numHouses: 25,
 };
 /**
  * settings for Graveyard Biome
