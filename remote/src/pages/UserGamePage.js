@@ -21,6 +21,7 @@ import {
 import ButtonComponent from 'common-components/ButtonComponent';
 
 import TileMapComponent from 'components/TileMapComponent';
+import EncounterModalComponent from 'components/EncounterModalComponent';
 
 import {CLIENT_ACTIONS} from 'constants/clientActions';
 import {SOCKET_EVENTS} from 'constants/socketEvents';
@@ -34,7 +35,7 @@ import * as connectionManager from 'managers/connectionManager';
 import * as mapUtils from 'utilities/mapUtils.remote';
 
 /**
- * page to for the game
+ * remote page for the game
  */
 class UserGamePage extends PureComponent {
   static defaultProps = {
@@ -48,6 +49,8 @@ class UserGamePage extends PureComponent {
     myCharacter: undefined,
     /** @type {Object | undefined} */
     myUser: undefined,
+    /** @type {EncounterData | null} */
+    activeEncounter: null,
   };
   /** @override */
   constructor(props) {
@@ -58,11 +61,15 @@ class UserGamePage extends PureComponent {
     this.handleMoveToOnClick = this.handleMoveToOnClick.bind(this);
     this.handleTrickOnClick = this.handleTrickOnClick.bind(this);
     this.handleTreatOnClick = this.handleTreatOnClick.bind(this);
+    this.onClickEncounterAction = this.onClickEncounterAction.bind(this);
 
     this.onClickToggleZoom = this.onClickToggleZoom.bind(this);
     this.onClickToggleVisibility = this.onClickToggleVisibility.bind(this);
 
     this.state = {
+      /** @type {Boolean} */
+      showModal: false,
+
       /** @type {Boolean} */
       isFullyVisible: false,
       /** @type {Boolean} */
@@ -75,8 +82,19 @@ class UserGamePage extends PureComponent {
     }
   }
   /** @override */
+  componentDidUpdate(prevProps, prevState) {
+    const hasNewActiveEncounter = prevProps.activeEncounter === null && this.props.activeEncounter !== null;
+    if (hasNewActiveEncounter && this.state.selectedTilePos !== this.props.myCharacter.position) {
+      this.setState({
+        selectedTilePos: this.props.myCharacter.position,
+        selectedPath: [],
+      });
+    }
+  }
+  /** @override */
   render() {
     const {
+      activeEncounter,
       canUseActions,
       gamestate,
       myCharacter,
@@ -93,8 +111,21 @@ class UserGamePage extends PureComponent {
       return <div className='bg-secondary flex-grow pad-v-2 flex-centered flex-col width-full text-center'>(waiting for map data)</div>
     }
 
+    const hasActiveEncounter = activeEncounter !== null;
+
     return (
       <div className='bg-secondary flex-grow flex-centered flex-col width-full text-center'>
+        {/* Modal */}
+        <EncounterModalComponent
+          // -- modal props
+          active={hasActiveEncounter}
+
+          // -- encounter props
+          {...activeEncounter}
+          onClickAction={this.onClickEncounterAction}
+        />
+
+        {/* Stat Bar */}
         <div className='flex-row-centered pad-v-1'>
           <span className='sibling-mar-l-2'>
             <FontAwesomeIcon icon={faHeart} />
@@ -123,6 +154,7 @@ class UserGamePage extends PureComponent {
           </span>
         </div>
 
+        {/* Info Bar */}
         <div className='flex-row-centered bg-primary pad-v-1 color-tertiary'>
           <div className='flex-none sibling-mar-l-2'>
             <FontAwesomeIcon icon={canUseActions ? faPlay : faPause} />
@@ -131,6 +163,7 @@ class UserGamePage extends PureComponent {
           <div className='flex-none sibling-mar-l-2' >{`Round ${gamestate.round}`}</div>
         </div>
 
+        {/* Map */}
         <TileMapComponent
           isFullyVisible={isFullyVisible}
           isZoomedOut={isZoomedOut}
@@ -142,6 +175,7 @@ class UserGamePage extends PureComponent {
           tileSize={TILE_SIZE}
         />
 
+        {/* Action Menu */}
         <div className='flex-row-centered mar-b-4'>
           <FontAwesomeIcon className='sibling-mar-l-1 fsize-2 color-tertiary' icon={faCircle} />
 
@@ -153,6 +187,7 @@ class UserGamePage extends PureComponent {
           </ButtonComponent>
         </div>
 
+        {/* Debugging Tools */}
         { remoteAppState.get('isDevMode') &&
           <div className='flex-col-centered'>
             <span>Dev Tools</span>
@@ -313,6 +348,14 @@ class UserGamePage extends PureComponent {
   onClickToggleVisibility() {
     const { isFullyVisible } = this.state;
     this.setState({isFullyVisible: !isFullyVisible});
+  }
+  /**
+   * selected an action from the Encounter
+   *
+   * @param {ActionId} actionId
+   */
+  onClickEncounterAction(actionId) {
+    connectionManager.socket.emit(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, actionId);
   }
 }
 

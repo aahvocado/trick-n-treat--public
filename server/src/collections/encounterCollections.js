@@ -1,90 +1,37 @@
+import {ENCOUNTER_ACTION_IDS} from 'constants/encounterActions';
 import {ENCOUNTER_TYPES} from 'constants/encounterTypes';
 
-import EncounterModel from 'models/EncounterModel';
-
+/**
+ * generic encounter actions
+ */
+export const closeEncounterAction = {
+  actionId: ENCOUNTER_ACTION_IDS.CLOSE,
+  label: 'Close',
+};
 /**
  * just some Encounters
  */
-const addHealthEncounter = new EncounterModel({
+export const addCandyEncounterData = {
   typeId: ENCOUNTER_TYPES.LAWN,
-  onTrigger: (characterModel) => {
-    characterModel.set({health: characterModel.get('health') + 1});
+  encounterData: {
+    id: 'ADD-CANDY-ENCOUNTER-ID',
+    title: 'Candy on the Streets',
+    content: 'You got a single piece of candy!',
+    actions: [closeEncounterAction],
   },
-});
-const bigAddHealthEncounter = new EncounterModel({
-  typeId: ENCOUNTER_TYPES.LAWN,
-  onTrigger: (characterModel) => {
-    characterModel.set({health: characterModel.get('health') + 2});
-  },
-});
-const loseHealthEncounter = new EncounterModel({
-  typeId: ENCOUNTER_TYPES.LAWN,
-  onTrigger: (characterModel) => {
-    characterModel.set({health: characterModel.get('health') - 1});
-  },
-});
-const bigLoseHealthEncounter = new EncounterModel({
-  typeId: ENCOUNTER_TYPES.LAWN,
-  onTrigger: (characterModel) => {
-    characterModel.set({health: characterModel.get('health') - 2});
-  },
-});
-
-const addCandyEncounter = new EncounterModel({
-  typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
     characterModel.set({candies: characterModel.get('candies') + 1});
   },
-});
-const bigAddCandyEncounter = new EncounterModel({
+};
+export const loseCandyEncounterData = {
   typeId: ENCOUNTER_TYPES.LAWN,
-  onTrigger: (characterModel) => {
-    characterModel.set({candies: characterModel.get('candies') + 2});
+  encounterData: {
+    id: 'LOSE-CANDY-ENCOUNTER-ID',
+    title: 'Spooky in the Sheets',
+    content: 'You lost a candy',
+    actions: [closeEncounterAction],
   },
-});
-const loseCandyEncounter = new EncounterModel({
-  typeId: ENCOUNTER_TYPES.LAWN,
   onTrigger: (characterModel) => {
     characterModel.set({candies: characterModel.get('candies') - 1});
   },
-});
-const bigLoseCandyEncounter = new EncounterModel({
-  typeId: ENCOUNTER_TYPES.LAWN,
-  onTrigger: (characterModel) => {
-    characterModel.set({candies: characterModel.get('candies') - 2});
-  },
-});
-
-/** @type {Array<EventModel>} */
-const lawnEncountersCollection = [
-  addHealthEncounter,
-  bigAddHealthEncounter,
-  loseHealthEncounter,
-  bigLoseHealthEncounter,
-
-  addCandyEncounter,
-  bigAddCandyEncounter,
-  loseCandyEncounter,
-  bigLoseCandyEncounter,
-];
-/**
- * this should be a list of every possible Encounter
- *
- * @type {Array<EventModel>}
- */
-const allEncountersCollection = [
-  ...lawnEncountersCollection,
-];
-/**
- * @returns {Array<EventModel>}
- */
-export function getAllEncounters() {
-  return allEncountersCollection.slice();
-};
-
-/**
- * @returns {Array<EventModel>}
- */
-export function getAllLawnEncounters() {
-  return lawnEncountersCollection.slice();
 };

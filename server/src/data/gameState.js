@@ -309,8 +309,8 @@ export class GamestateModel extends Model {
   findEncounterAt(point) {
     const encounters = this.get('encounters').slice();
     return encounters.find((encounterModel) => {
-      const encounterPosition = encounterModel.get('position');
-      return point.equals(encounterPosition);
+      const encounterLocation = encounterModel.get('location');
+      return point.equals(encounterLocation);
     });
   }
   // -- House methods
@@ -323,8 +323,8 @@ export class GamestateModel extends Model {
   findHouseAt(point) {
     const houses = this.get('houses').slice();
     return houses.find((houseModel) => {
-      const housePosition = houseModel.get('position');
-      return point.equals(housePosition);
+      const houseLocation = houseModel.get('location');
+      return point.equals(houseLocation);
     });
   }
   /**

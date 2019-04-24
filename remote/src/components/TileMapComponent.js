@@ -2,7 +2,12 @@ import React, { Component, PureComponent } from 'react';
 import Point from '@studiomoniker/point';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faUser, faHome} from '@fortawesome/free-solid-svg-icons'
+import {
+  faComment,
+  // faCommentSlash,
+  faHome,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons'
 
 import {
   MAP_CONTAINER_HEIGHT,
@@ -216,27 +221,37 @@ export class TileItemComponent extends Component {
   renderEntityIcons() {
     const {
       charactersHere,
+      encounterHere,
       houseHere,
     } = this.props;
 
     const renderedEntities = [];
-    if (houseHere !== undefined) {
-      const entityIdx = renderedEntities.length;
+
+     if (encounterHere !== undefined) {
       renderedEntities.push(
         <MapEntityIconComponent
-          key={`entity-icon-${entityIdx}-key`}
-          entityIdx={entityIdx}
+          key={`entity-icon-${renderedEntities.length}-key`}
+          entityIdx={renderedEntities.length}
+          icon={faComment}
+        />
+      )
+    };
+
+    if (houseHere !== undefined) {
+      renderedEntities.push(
+        <MapEntityIconComponent
+          key={`entity-icon-${renderedEntities.length}-key`}
+          entityIdx={renderedEntities.length}
           icon={faHome}
         />
       )
     };
 
     charactersHere.forEach((character) => {
-      const entityIdx = renderedEntities.length;
       renderedEntities.push(
         <MapEntityIconComponent
           key={`entity-icon-${character.characterId}-key`}
-          entityIdx={entityIdx}
+          entityIdx={renderedEntities.length}
           icon={faUser}
         />
       )

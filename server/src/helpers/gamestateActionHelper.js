@@ -41,3 +41,15 @@ export async function resolveActionQueue() {
   sendUpdateToAllClients();
   logger.old('[[finished resolving ActionQueue]]');
 }
+/**
+ * immediately clear everything from the `actionQueue`
+ */
+export function clearActionQueue() {
+  const actionQueue = gameState.get('actionQueue').slice();
+  if (actionQueue.length <= 0) {
+    return;
+  }
+
+  gameState.set({actionQueue: []});
+  logger.old('[[cleared ActionQueue]]');
+}

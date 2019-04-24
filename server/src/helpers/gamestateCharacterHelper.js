@@ -3,6 +3,7 @@ import {POINTS, getPointFromString} from 'constants/points';
 
 import gameState from 'data/gameState';
 
+import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
 import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
@@ -57,16 +58,20 @@ export function updateCharacterPosition(characterModel, nextPosition) {
   characterModel.set({position: nextPosition});
   gameState.updateToVisibleAt(nextPosition, characterModel.get('vision'));
 
-  // check if there is an Encounter here
+  // check for encounter, done if none
   const encounterModelHere = gameState.findEncounterAt(nextPosition);
   if (encounterModelHere === undefined) {
     return;
   }
 
-  // if there is one, then we can add the Encounter Trigger to the `actionQueue`
+  // done if there is an Encounter here but this character can't trigger it
+  if (!encounterModelHere.canTrigger(characterModel)) {
+    return;
+  }
+
+  // if there is an Encounter then we can add the Trigger to the front of the `actionQueue`
   gameState.insertIntoActionQueue(() => {
-    logger.verbose(`(encounter at [x: ${nextPosition.x}, y: ${nextPosition.y}])`);
-    encounterModelHere.trigger(characterModel);
+    gamestateEncounterHelper.handleCharacterTriggerEncounter(characterModel, encounterModelHere);
   });
 }
 /**

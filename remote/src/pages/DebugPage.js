@@ -317,9 +317,9 @@ class EditorPanel extends PureComponent {
           width: '230px',
         }}
       >
-        {/* Modals */}
+        {/* Modal */}
         <ModalComponent
-          className='flex-col-centered bg-white pad-2'
+          className='flex-col-centered bg-white pad-2 mar-v-5'
           style={{
             width: '500px',
             height: '500px',

@@ -36,6 +36,8 @@ export class RemoteStateModel extends Model {
       myCharacter: undefined,
       /** @type {Object | undefined} */
       myUser: undefined,
+      /** @type {EncounterData| null} */
+      activeEncounter: null,
 
       // -- my client state - from the server
       /** @type {Boolean} */
@@ -74,6 +76,11 @@ export class RemoteStateModel extends Model {
             position: new Point(tileData.position.x, tileData.position.y),
           }))),
         },
+      });
+    });
+    socket.on(SOCKET_EVENTS.GAME.ENCOUNTER_TRIGGER, (data) => {
+      this.set({
+        activeEncounter: data,
       });
     });
     // -- client

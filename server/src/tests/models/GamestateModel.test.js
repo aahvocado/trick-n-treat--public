@@ -42,9 +42,9 @@ test.beforeEach((t) => {
   });
 
   const testEncounters = [
-    new EncounterModel({position: new Point(0, 0)}),
-    new EncounterModel({position: new Point(4, 0)}),
-    new EncounterModel({position: new Point(4, 4)}),
+    new EncounterModel({location: new Point(0, 0)}),
+    new EncounterModel({location: new Point(4, 0)}),
+    new EncounterModel({location: new Point(4, 4)}),
   ];
 
   const testGamestate = new GamestateModel({

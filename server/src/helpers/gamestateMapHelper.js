@@ -3,7 +3,10 @@ import {
   HOME_BIOME_SETTINGS,
   GRAVEYARD_BIOME_SETTINGS,
 } from 'constants/biomeSettings';
-import {TILE_TYPES} from 'constants/tileTypes';
+import {
+  TILE_TYPES,
+  isWalkableTile,
+} from 'constants/tileTypes';
 import {MAP_SETTINGS} from 'constants/mapSettings';
 
 import gameState from 'data/gameState';
@@ -33,11 +36,14 @@ export function generateNewMap(mapSettings = MAP_SETTINGS) {
 
   // -- home neighborhood biome
   const homeBiomeMapModel = mapGenerationUtils.createHomeBiomeModel(newTileMapModel, HOME_BIOME_SETTINGS);
-  const houseList = houseGenerationUtils.generateHouses(homeBiomeMapModel, HOME_BIOME_SETTINGS);
+  // const houseList = houseGenerationUtils.generateHouses(homeBiomeMapModel, HOME_BIOME_SETTINGS);
 
-  houseList.forEach((houseModel) => {
-    newTileMapModel.setTileAt(houseModel.get('position'), TILE_TYPES.HOUSE);
-  });
+  generateBasicEntities(homeBiomeMapModel);
+
+  // -- place houses
+  // houseList.forEach((houseModel) => {
+  //   newTileMapModel.setTileAt(houseModel.get('position'), TILE_TYPES.HOUSE);
+  // });
 
   newTileMapModel.mergeMatrixModel(homeBiomeMapModel);
 
@@ -63,8 +69,7 @@ export function generateNewMap(mapSettings = MAP_SETTINGS) {
   // finally, actually set the actual data onto the gamestate
   gameState.set({
     mode: GAME_MODES.ACTIVE,
-    houses: houseList,
-    // encounters: encounterList,
+    // houses: houseList,
   });
 
   // update Visibility for where Characters are located
@@ -74,5 +79,33 @@ export function generateNewMap(mapSettings = MAP_SETTINGS) {
 
   // start the first round, which will create a turn queue
   gameState.addToActionQueue(gameState.handleStartOfRound.bind(gameState));
+}
+/**
+ * determines what to generate on a specific tile
+ *
+ * @param {MapModel} mapModel
+ */
+export function generateBasicEntities(mapModel) {
+  const entities = [];
+  const encounterList = [];
+
+  mapModel.forEach((tileType, tilePoint) => {
+    // only want to add stuff to walkable tiles
+    if (!isWalkableTile(tileType)) {
+      return;
+    }
+
+    //
+    const encounterModel = encounterGenerationUtils.pickSidewalkEncounter(mapModel, tilePoint);
+    if (encounterModel === null) {
+      return;
+    }
+
+    encounterList.push(encounterModel);
+  });
+
+  gameState.set({
+    encounters: encounterList,
+  });
 }
 

@@ -1,5 +1,5 @@
 /**
- * @typedef {String | Number} EncounterType
+ * @typedef {String} EncounterType
  */
 export const ENCOUNTER_TYPES = {
   GENERIC: 'GENERIC-ENCOUNTER-TYPE',

@@ -82,7 +82,7 @@ export function generateHouses(mapModel, biomeSettings) {
  * determines where to place
  *
  * @param {MapModel} mapModel
- * @returns {Array<EncounterModel>}
+ * @returns {Point}
  */
 export function findValidHouseLocation(mapModel) {
   return mapModel.getRandomEmptyLocationNearWalkableTile(1, 1, 1);

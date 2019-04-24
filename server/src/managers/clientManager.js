@@ -71,6 +71,12 @@ function attachClientEvents(clientModel) {
   socket.on(SOCKET_EVENTS.GAME.MOVE_TO, (position) => {
     gamestateUserHelper.handleUserActionMoveTo(userId, position);
   });
+
+  // client chosen an action from the Encounter modal
+  socket.on(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, (actionId) => {
+    gamestateUserHelper.handleUserGameAction(userId, actionId);
+  });
+
   /**
    * disconnect
    */
@@ -143,6 +149,22 @@ export function sendUpdateToAllClients(clientModel) {
   clients.forEach((client) => {
     sendUpdateToClient(client);
   });
+}
+/**
+ * send updated data to show that the User needs to handle an Event
+ *
+ * @param {UserModel} userModel
+ * @param {EncounterData} encounterData
+ */
+export function sendEncounterToClientByUser(userModel, encounterData) {
+  const userId = userModel.get('userId');
+  const clientModel = serverState.findClientByUserId(userId);
+  if (clientModel === undefined) {
+    return;
+  };
+
+  logger.verbose(`. (sending encounter data to client "${clientModel.get('name')}")`);
+  clientModel.emit(SOCKET_EVENTS.GAME.ENCOUNTER_TRIGGER, encounterData);
 }
 /**
  * creates some State data for a Remote Client

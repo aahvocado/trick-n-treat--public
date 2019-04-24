@@ -35,7 +35,6 @@ export default observer(
               <UserGamePage
                 {...remoteAppState.export()}
                 canUseActions={remoteAppStateHelper.canUseActions()}
-
               />
             }
 

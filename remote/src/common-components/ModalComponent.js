@@ -8,7 +8,7 @@ import combineClassNames from 'utilities/combineClassNames';
 export class ModalComponent extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'cursor-auto mar-auto',
+    baseClassName: 'cursor-auto mar-h-auto borradius-2',
     /** @type {String} */
     className: '',
     /** @type {Boolean} */

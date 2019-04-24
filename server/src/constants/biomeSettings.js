@@ -35,6 +35,8 @@ export const HOME_BIOME_SETTINGS = {
   connectingPoints: [homeSpawnPoint],
 
   numHouses: 25,
+
+  numEncounters: 10,
 };
 /**
  * settings for Graveyard Biome

@@ -45,11 +45,11 @@ test('getFormattedMapData() - formats gamestate data into expected object', (t) 
     fogMapModel: new MapModel(),
 
     houses: [
-      new HouseModel({position: new Point(0, 1)}),
+      new HouseModel({location: new Point(0, 1)}),
     ],
     encounters: [
-      new EncounterModel({position: new Point(2, 2)}),
-      new EncounterModel({position: new Point(4, 0)}),
+      new EncounterModel({location: new Point(2, 2)}),
+      new EncounterModel({location: new Point(4, 0)}),
     ],
   });
 

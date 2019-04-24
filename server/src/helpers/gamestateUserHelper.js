@@ -4,6 +4,7 @@ import {FastCharacter} from 'collections/characterCollection';
 
 import {CLIENT_TYPES} from 'constants/clientTypes';
 import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
+import {ENCOUNTER_ACTION_IDS} from 'constants/encounterActions';
 import {GAME_MODES} from 'constants/gameModes';
 import {MAP_START} from 'constants/mapSettings';
 import {POINTS} from 'constants/points';
@@ -12,7 +13,10 @@ import gameState from 'data/gameState';
 
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 
-import {sendUpdateToClientByUser} from 'managers/clientManager';
+import {
+  sendEncounterToClientByUser,
+  sendUpdateToClientByUser,
+} from 'managers/clientManager';
 
 import UserModel from 'models/UserModel';
 
@@ -182,6 +186,13 @@ export function handleUserGameAction(userId, actionId) {
       handleUserActionTreat(userId);
     });
   }
+
+  // encounter
+  if (actionId === ENCOUNTER_ACTION_IDS.CLOSE) {
+    sendEncounterToClientByUser(activeUser, null);
+
+    onUserActionComplete(activeUser);
+  }
 }
 /**
  * user asked to move
@@ -295,9 +306,10 @@ export function handleUserActionMoveTo(userId, endPosition) {
  * @param {UserModel} userModel
  */
 export function onUserActionComplete(userModel) {
-  // a character's movement is now 0, end User's available actions
+  // check if character's movement is now 0
   const characterModel = gameState.findCharacterByUserId(userModel.get('userId'));
   if (!characterModel.canMove()) {
+    // end their turn
     gameState.addToActionQueue(() => {
       onUserTurnComplete(userModel);
     });
