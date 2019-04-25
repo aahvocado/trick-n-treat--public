@@ -154,7 +154,7 @@ export function sendUpdateToAllClients(clientModel) {
  * send updated data to show that the User needs to handle an Event
  *
  * @param {UserModel} userModel
- * @param {EncounterData} encounterData
+ * @param {Object} encounterData
  */
 export function sendEncounterToClientByUser(userModel, encounterData) {
   const userId = userModel.get('userId');

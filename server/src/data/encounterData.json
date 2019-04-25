@@ -1,0 +1,44 @@
+[
+  {
+    "id": "ADD_CANDY_BASIC-ENCOUNTER_ID",
+    "title": "Candy on the Streets",
+    "content": "You found a candy!",
+    "tags": [
+      "TAG.ENCOUNTER",
+      "TAG.SIDEWALK"
+    ],
+    "actions": [
+      {
+        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
+        "label": "Close"
+      }
+    ],
+    "triggerList": [
+      {
+        "triggerId": "ENCOUNTER_TRIGGER_ID.CANDY.ADD",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": "LOSE_CANDY_BASIC-ENCOUNTER_ID",
+    "title": "Spooky in the Sheets",
+    "content": "Oh no you lost a candy!",
+    "tags": [
+      "TAG.ENCOUNTER",
+      "TAG.SIDEWALK"
+    ],
+    "actions": [
+      {
+        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
+        "label": "Close"
+      }
+    ],
+    "triggerList": [
+      {
+        "triggerId": "ENCOUNTER_TRIGGER_ID.CANDY.SUBTRACT",
+        "value": 1
+      }
+    ]
+  }
+]
