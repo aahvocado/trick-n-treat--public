@@ -5,10 +5,10 @@ import combineClassNames from 'utilities/combineClassNames';
 /**
  *
  */
-export default class ButtonComponent extends PureComponent {
+export default class ClassicButtonComponent extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'text-center borradius-t-2 borradius-b-1 bor-2-fourth cursor-pointer pad-2',
+    baseClassName: 'text-center borradius-2 cursor-pointer bor-1-primary borradius-1 pad-2',
     /** @type {String} */
     className: '',
     /** @type {Boolean} */
@@ -25,14 +25,13 @@ export default class ButtonComponent extends PureComponent {
       ...otherProps
     } = this.props;
 
-    const baseTextClassName = 'color-primary bg-fifth hover:bg-fifth-lighter active:bg-fourth';
-    const disabledTextClassName = 'color-tertiary bg-secondary';
+    const baseTextClassName = 'color-white bg-secondary hover:bg-secondary-lighter';
+    const disabledTextClassName = 'color-grayer bg-secondary-darker';
     const finalTextClassName = disabled ? disabledTextClassName : baseTextClassName;
 
     return (
       <button
         className={combineClassNames(baseClassName, className, finalTextClassName)}
-        style={{borderBottomWidth: '8px'}}
         disabled={disabled}
         {...otherProps}
       />

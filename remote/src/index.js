@@ -27,3 +27,36 @@ remoteAppState.attachSocketListeners(socket);
 
 // render after everything
 ReactDOM.render(<App />, document.getElementById('root'));
+
+/**
+ * @todo - move this to a better place
+ */
+window.addEventListener('keypress', (e) => {
+  // only devs get super cool hotkeys
+  if (!remoteAppState.get('isDevMode')) {
+    e.preventDefault();
+    return;
+  }
+
+  // backquote
+  if (e.keyCode === 96) {
+    remoteAppState.set({isDebugMenuActive: !remoteAppState.get('isDebugMenuActive')});
+  }
+
+  // following codes only work if debug menu is open
+  if (!remoteAppState.get('isDebugMenuActive')) {
+    return;
+  }
+  // t
+  if (e.keyCode === 116) {
+    remoteAppState.set({isTileEditorMode: !remoteAppState.get('isTileEditorMode')});
+  }
+  // z
+  if (e.keyCode === 122) {
+    remoteAppState.set({useZoomedOutMap: !remoteAppState.get('useZoomedOutMap')});
+  }
+  // v
+  if (e.keyCode === 118) {
+    remoteAppState.set({useFullyVisibleMap: !remoteAppState.get('useFullyVisibleMap')});
+  }
+});

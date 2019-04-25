@@ -40,15 +40,15 @@ export class TileMapComponent extends Component {
     selectedPath: [],
 
     /** @type {Boolean} */
-    isFullyVisible: false,
+    useFullyVisibleMap: false,
     /** @type {Boolean} */
-    isZoomedOut: false,
+    useZoomedOutMap: false,
   };
   /** @override */
   render() {
     const {
-      isFullyVisible,
-      isZoomedOut,
+      useFullyVisibleMap,
+      useZoomedOutMap,
       mapData,
       myCharacter,
       onTileClick,
@@ -62,7 +62,7 @@ export class TileMapComponent extends Component {
       return <div className='width-full pad-2'>(waiting for map data)</div>
     }
 
-    const mapContainerTransform = isZoomedOut ?
+    const mapContainerTransform = useZoomedOutMap ?
       `translate(-${(mapData[0].length * 39) / 2}px, -${(mapData.length * 39.5) / 2}px) scale(${0.2}, ${0.2})` :
       `translate(${calculateMapXOffset(myCharacter.position.x)}px, ${calculateMapYOffset(myCharacter.position.y)}px)`;
 
@@ -101,7 +101,7 @@ export class TileMapComponent extends Component {
                     <TileItemComponent
                       key={`tile-item-${colIdx}-${rowIdx}-key`}
                       {...tileData}
-                      fogType={isFullyVisible ? FOG_TYPES.VISIBLE : tileData.fogType}
+                      fogType={useFullyVisibleMap ? FOG_TYPES.VISIBLE : tileData.fogType}
                       tileSize={tileSize}
                       position={tileData.position}
                       isSelected={isSelected}

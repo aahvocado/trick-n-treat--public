@@ -5,16 +5,18 @@ import combineClassNames from 'utilities/combineClassNames';
 /**
  *
  */
-export default class ModalComponent extends PureComponent {
+export default class FixedMenuComponent extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'cursor-auto mar-h-auto borradius-2',
+    baseClassName: 'bg-white height-full pad-2',
     /** @type {String} */
     className: '',
+
     /** @type {Boolean} */
     active: false,
-    /** @type {Object} */
-    style: {},
+
+    /** @type {Boolean} */
+    shouldUseOverlay: true,
     /** @type {Function} */
     onClickOverlay: () => {},
   };
@@ -22,7 +24,7 @@ export default class ModalComponent extends PureComponent {
   constructor(props) {
     super(props);
 
-    this.onClickModalContent = this.onClickModalContent.bind(this);
+    this.onClickContent = this.onClickContent.bind(this);
     this.onClickOverlay = this.onClickOverlay.bind(this);
 
     this.state = {
@@ -43,6 +45,7 @@ export default class ModalComponent extends PureComponent {
       active,
       baseClassName,
       className,
+      shouldUseOverlay,
       style,
     } = this.props;
 
@@ -52,23 +55,24 @@ export default class ModalComponent extends PureComponent {
       <div
         className='position-fixed flex-centered pos-0 zindex-10 pointer-cursor'
         style={{
-          transition: isDisabled ? 'none' : 'opacity 300ms',
-          backgroundColor: 'rgba(0, 0, 0, .33)',
+          transition: isDisabled ? 'none' : 'opacity 500ms',
+          backgroundColor: shouldUseOverlay ? 'rgba(0, 0, 0, .33)' : '',
           opacity: (isDisabled || !active) ? 0 : 1,
-          pointerEvents: !active ? 'none' : 'initial',
+          pointerEvents: (!active || (active && !shouldUseOverlay)) ? 'none' : 'initial',
         }}
         onClick={this.onClickOverlay}
       >
         <div
           className={combineClassNames(baseClassName, className)}
           style={{
-            transition: 'transform 300ms',
+            pointerEvents: 'initial',
+            transition: 'transform 300ms ease-out',
             transform: active ?
-              'translate3d(0px, 0px, 0px) scale3d(1, 1, 1)' :
-              'translate3d(0px, -30px, -50px) scale3d(0.9, 0.9, 0.9)',
+              'translateX(0px)':
+              'translateX(-100%)',
             ...style,
           }}
-          onClick={this.onClickModalContent}
+          onClick={this.onClickContent}
         >
           {this.props.children}
         </div>
@@ -80,13 +84,19 @@ export default class ModalComponent extends PureComponent {
    * @param {Event} e
    */
   onClickOverlay(e) {
+    const {shouldUseOverlay} = this.props;
+    if (!shouldUseOverlay) {
+      e.stopPropagation();
+      return;
+    }
+
     this.props.onClickOverlay();
   }
   /**
    * catches the clicking inside to prevent it from triggering `onClickOverlay()`
    * @param {Event} e
    */
-  onClickModalContent(e) {
+  onClickContent(e) {
     e.stopPropagation();
   }
 }

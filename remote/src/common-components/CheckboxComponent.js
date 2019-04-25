@@ -11,14 +11,6 @@ export default class CheckboxComponent extends PureComponent {
     baseClassName: 'flex-row',
     /** @type {String} */
     className: '',
-
-    // -- native props
-    /** @type {Boolean} */
-    disabled: false,
-    /** @type {Boolean} */
-    checked: false,
-    /** @type {Function} */
-    onChange: () => {},
   }
   /** @override */
   render() {
@@ -26,12 +18,14 @@ export default class CheckboxComponent extends PureComponent {
       baseClassName,
       children,
       className,
+      style,
       ...otherProps
     } = this.props;
 
     return (
       <label
         className={combineClassNames(baseClassName, className)}
+        style={style}
       >
         <input
           type='checkbox'

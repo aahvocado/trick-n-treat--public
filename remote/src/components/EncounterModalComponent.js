@@ -60,7 +60,7 @@ export default class EncounterModalComponent extends PureComponent {
           { content }
         </div>
 
-        <div className='flex-row mar-b-2 sibling-mar-t-2'>
+        <div className='flex-row sibling-mar-t-2'>
           { actions.map((encounterAction, idx) => {
             return (
               <EncounterActionButton

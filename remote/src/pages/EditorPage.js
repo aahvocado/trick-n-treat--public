@@ -6,7 +6,7 @@ import {
   faCircle,
 } from '@fortawesome/free-solid-svg-icons'
 
-import ButtonComponent from 'common-components/ButtonComponent';
+import ClassicButtonComponent from 'common-components/ClassicButtonComponent';
 import CheckboxComponent from 'common-components/CheckboxComponent';
 import InputFieldComponent from 'common-components/InputFieldComponent';
 import ModalComponent from 'common-components/ModalComponent';
@@ -31,7 +31,7 @@ import * as matrixUtils from 'utilities/matrixUtils.remote';
 /**
  * page for testing
  */
-export default class DebugPage extends Component {
+export default class EditorPage extends Component {
   /** @override */
   constructor(props) {
     super(props);
@@ -69,7 +69,7 @@ export default class DebugPage extends Component {
 
     return (
       <div className='flex-centered flex-col color-white bg-primary'>
-        <h1 className='flex-none fsize-8 olor-white mar-v-2 f-bold width-full text-center'>T&T Tile Editor</h1>
+        <h2 className='bg-secondary fsize-4 pad-v-1 width-full text-center'>Tile Editor</h2>
 
         <div className='flex-row height-full bg-primary-darker'>
           <EditorPanel
@@ -88,7 +88,7 @@ export default class DebugPage extends Component {
           />
 
           <div
-            className='flex-row-centered mar-auto'
+            className='flex-row-centered mar-h-auto mar-t-5'
           >
             <div
               className='flex-grow-1 flex-shrink-1 flex-col aitems-center position-relative bor-4-primary'
@@ -312,7 +312,7 @@ class EditorPanel extends PureComponent {
 
     return (
       <div
-        className='flex-col aitems-center color-white bg-secondary pad-2'
+        className='flex-col aitems-center color-white bg-primary pad-2'
         style={{
           width: '230px',
         }}
@@ -325,18 +325,20 @@ class EditorPanel extends PureComponent {
             height: '500px',
           }}
           active={showModal}
-          onOverlayClick={this.onClickModalOverlay}
+          onClickOverlay={this.onClickModalOverlay}
         >
           <ModalContent />
         </ModalComponent>
 
         {/* Tile options */}
         <form
-          className='sibling-mar-t-3 width-full flex-col'
+          className='sibling-mar-t-3 width-full flex-row'
+          style={{flexWrap: 'wrap'}}
           onSubmit={e => e.preventDefault()}
         >
           <CheckboxComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={useLitTiles}
             value='USE_LIT_CHECKBOX'
             onChange={this.onChangeUseLitTiles}
@@ -345,7 +347,8 @@ class EditorPanel extends PureComponent {
           </CheckboxComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'NULL_EDITOR_TILE'}
             value='NULL_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -354,7 +357,8 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'EMPTY_EDITOR_TILE'}
             value='EMPTY_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -363,7 +367,8 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'GRASS_EDITOR_TILE'}
             value='GRASS_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -372,7 +377,8 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'SIDEWALK_EDITOR_TILE'}
             value='SIDEWALK_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -381,7 +387,8 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'ROAD_EDITOR_TILE'}
             value='ROAD_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -390,7 +397,8 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'SWAMP_EDITOR_TILE'}
             value='SWAMP_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -399,7 +407,8 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'PLANKS_EDITOR_TILE'}
             value='PLANKS_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -408,7 +417,8 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'WOODS_EDITOR_TILE'}
             value='WOODS_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -417,7 +427,8 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'WATER_EDITOR_TILE'}
             value='WATER_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -426,7 +437,8 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 mar-t-1'
+            style={{flex: '1 1 50%'}}
             checked={selectedEditorTile === 'FOREST_EDITOR_TILE'}
             value='FOREST_EDITOR_TILE'
             onChange={this.onSelectTileEditorType}
@@ -489,12 +501,12 @@ class EditorPanel extends PureComponent {
             export with Tile Name
           </RadioButtonComponent>
 
-          <ButtonComponent
-            className='fsize-3 pad-1 f-bold sibling-mar-t-2'
+          <ClassicButtonComponent
+            className='sibling-mar-t-2'
             onClick={this.onExportClick}
           >
             Export
-          </ButtonComponent>
+          </ClassicButtonComponent>
         </form>
 
         <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
@@ -504,12 +516,12 @@ class EditorPanel extends PureComponent {
           className='sibling-mar-t-3 width-full flex-col'
           onSubmit={e => e.preventDefault()}
         >
-          <ButtonComponent
-            className='fsize-3 pad-1 f-bold sibling-mar-t-3'
+          <ClassicButtonComponent
+            className='sibling-mar-t-3'
             onClick={this.onImportClick}
           >
             Import
-          </ButtonComponent>
+          </ClassicButtonComponent>
         </form>
 
         <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
@@ -518,12 +530,12 @@ class EditorPanel extends PureComponent {
           className='sibling-mar-t-3 width-full flex-col'
           onSubmit={e => e.preventDefault()}
         >
-          <ButtonComponent
-            className='fsize-3 pad-1 f-bold sibling-mar-t-3'
+          <ClassicButtonComponent
+            className='sibling-mar-t-3'
             onClick={this.onClickSwitchToEditor}
           >
             Switch to Game
-          </ButtonComponent>
+          </ClassicButtonComponent>
         </form>
       </div>
     );
@@ -560,7 +572,11 @@ class EditorPanel extends PureComponent {
       exportString += '[';
 
       matrixRow.forEach((tileData, colIdx) => {
-        exportString += useTileName ? TILE_TYPES_NAME[tileData] : tileData;
+        if (tileData === undefined) {
+          exportString += null;
+        } else {
+          exportString += useTileName ? TILE_TYPES_NAME[tileData] : tileData;
+        }
 
         if (colIdx < matrixRow.length - 1) {
           exportString += ', ';
@@ -641,7 +657,7 @@ class EditorPanel extends PureComponent {
    *
    */
   onClickSwitchToEditor() {
-    remoteAppState.set({isDebugMode: false});
+    remoteAppState.set({isTileEditorMode: false});
   }
 }
 class ExportModal extends Component {
@@ -666,6 +682,15 @@ class ExportModal extends Component {
   }
 }
 class ImportModal extends Component {
+  /** @override */
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      value: undefined,
+    }
+  }
+  /** @override */
   render() {
     return (
       <Fragment>
@@ -680,12 +705,12 @@ class ImportModal extends Component {
           onChange={this.handleOnChangeTextarea.bind(this)}
         />
 
-        <ButtonComponent
-          className='fsize-3 pad-1 f-bold mar-t-2'
+        <ClassicButtonComponent
+          className='mar-t-2'
           onClick={this.onClickSubmit.bind(this)}
         >
           Submit
-        </ButtonComponent>
+        </ClassicButtonComponent>
       </Fragment>
     )
   }
@@ -700,7 +725,7 @@ class ImportModal extends Component {
    */
   onClickSubmit() {
     const {value} = this.state;
-    if (value === undefined && value === null) {
+    if (value === undefined || value === null || value === '') {
       return;
     }
 

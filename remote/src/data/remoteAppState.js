@@ -4,7 +4,10 @@ import {SOCKET_EVENTS} from 'constants/socketEvents';
 
 import Model from 'models/Model';
 
+import logger from 'utilities/logger.remote';
 import * as matrixUtils from 'utilities/matrixUtils.remote';
+
+const createDate = new Date();
 
 // TESTING
 const _name = (() => {
@@ -24,10 +27,10 @@ export class RemoteStateModel extends Model {
     super({
       // -- app session data
       /** @type {String} */
-      name: 'TEST-REMOTE-USER',
+      name: _name,
       /** @type {String} */
-      _userId: `${_name}-${Date.now()}`,
-      userId: 'TEST-REMOTE-USER',
+      _userId: `${_name}-${createDate.getTime()}`,
+      userId: 'TEST_REMOTE_USER',
 
       // -- gamestate - from the server
       /** @type {GamestateObject | undefined} */
@@ -38,6 +41,12 @@ export class RemoteStateModel extends Model {
       myUser: undefined,
       /** @type {EncounterData| null} */
       activeEncounter: null,
+
+      // -- tile map options
+      /** @type {Boolean} */
+      useFullyVisibleMap: false,
+      /** @type {Boolean} */
+      useZoomedOutMap: false,
 
       // -- my client state - from the server
       /** @type {Boolean} */
@@ -57,7 +66,11 @@ export class RemoteStateModel extends Model {
       /** @type {Boolean} */
       isDevMode: true,
       /** @type {Boolean} */
-      isDebugMode: false,
+      isTileEditorMode: false,
+      /** @type {Boolean} */
+      isDebugMenuActive: false,
+      /** @type {Array} */
+      appLog: [],
     });
   }
   /**
@@ -77,6 +90,8 @@ export class RemoteStateModel extends Model {
           }))),
         },
       });
+
+      logger.server('received GAME.UPDATE');
     });
     socket.on(SOCKET_EVENTS.GAME.ENCOUNTER_TRIGGER, (data) => {
       this.set({
@@ -96,6 +111,8 @@ export class RemoteStateModel extends Model {
         ...data,
         myCharacter: myCharacterData,
       });
+
+      logger.server('received CLIENT.UPDATE');
     });
 
     // -- connection stuff
@@ -104,6 +121,8 @@ export class RemoteStateModel extends Model {
         isConnected: true,
         isReconnecting: false,
       });
+
+      logger.server('connected to server');
     });
 
     socket.on('disconnect', () => {
@@ -111,6 +130,8 @@ export class RemoteStateModel extends Model {
         isConnected: false,
         isReconnecting: false,
       });
+
+      logger.server('disconnected to server');
     });
 
     socket.on('reconnect_failed', () => {

@@ -32,6 +32,7 @@ import * as gamestateHelper from 'helpers/gamestateHelper.remote';
 
 import * as connectionManager from 'managers/connectionManager';
 
+import logger from 'utilities/logger.remote';
 import * as mapUtils from 'utilities/mapUtils.remote';
 
 /**
@@ -51,6 +52,12 @@ class UserGamePage extends PureComponent {
     myUser: undefined,
     /** @type {EncounterData | null} */
     activeEncounter: null,
+
+    // -- appState level map configuration
+    /** @type {Boolean} */
+    useFullyVisibleMap: false,
+    /** @type {Boolean} */
+    useZoomedOutMap: false,
   };
   /** @override */
   constructor(props) {
@@ -63,18 +70,7 @@ class UserGamePage extends PureComponent {
     this.handleTreatOnClick = this.handleTreatOnClick.bind(this);
     this.onClickEncounterAction = this.onClickEncounterAction.bind(this);
 
-    this.onClickToggleZoom = this.onClickToggleZoom.bind(this);
-    this.onClickToggleVisibility = this.onClickToggleVisibility.bind(this);
-
     this.state = {
-      /** @type {Boolean} */
-      showModal: false,
-
-      /** @type {Boolean} */
-      isFullyVisible: false,
-      /** @type {Boolean} */
-      isZoomedOut: false,
-
       /** @type {Point} */
       selectedTilePos: props.myCharacter.position,
       /** @type {Path} */
@@ -98,11 +94,11 @@ class UserGamePage extends PureComponent {
       canUseActions,
       gamestate,
       myCharacter,
+      useZoomedOutMap,
+      useFullyVisibleMap,
     } = this.props;
 
     const {
-      isFullyVisible,
-      isZoomedOut,
       selectedTilePos,
       selectedPath,
     } = this.state;
@@ -165,18 +161,18 @@ class UserGamePage extends PureComponent {
 
         {/* Map */}
         <TileMapComponent
-          isFullyVisible={isFullyVisible}
-          isZoomedOut={isZoomedOut}
           mapData={gamestate.mapData}
           myCharacter={myCharacter}
           onTileClick={this.handleOnTileClick}
           selectedTilePos={selectedTilePos}
           selectedPath={selectedPath}
           tileSize={TILE_SIZE}
+          useFullyVisibleMap={useFullyVisibleMap}
+          useZoomedOutMap={useZoomedOutMap}
         />
 
         {/* Action Menu */}
-        <div className='flex-row-centered mar-b-4'>
+        <div className='flex-row-centered'>
           <FontAwesomeIcon className='sibling-mar-l-1 fsize-2 color-tertiary' icon={faCircle} />
 
           <ButtonComponent
@@ -189,39 +185,10 @@ class UserGamePage extends PureComponent {
 
         {/* Debugging Tools */}
         { remoteAppState.get('isDevMode') &&
-          <div className='flex-col-centered'>
-            <span>Dev Tools</span>
+          <div className='flex-row-centered pad-2'>
+            <span className='pad-h-2'>{`Selected Tile: (x: ${selectedTilePos.x}, y: ${selectedTilePos.y})`}</span>
 
-            <div className='flex-row-centered pad-2'>
-              <span>Selected Tile: </span>
-
-              <span className='pad-h-2'>{`( x: ${selectedTilePos.x}, y: ${selectedTilePos.y} )`}</span>
-
-              <span>{TILE_TYPES_NAME[gamestate.mapData[selectedTilePos.y][selectedTilePos.x].tileType]}</span>
-            </div>
-
-            <div className='flex-row-centered mar-b-4'>
-              <ButtonComponent
-                className='fsize-3 pad-2 sibling-mar-l-1'
-                onClick={this.onClickToggleZoom}
-              >
-                Toggle Zoom
-              </ButtonComponent>
-
-              <ButtonComponent
-                className='fsize-3 pad-2 sibling-mar-l-1'
-                onClick={this.onClickToggleVisibility}
-              >
-                Toggle Visibility
-              </ButtonComponent>
-
-              <ButtonComponent
-                className='fsize-3 pad-2 sibling-mar-l-1'
-                onClick={this.onClickSwitchToEditor}
-              >
-                Switch To Editor
-              </ButtonComponent>
-            </div>
+            <span>{TILE_TYPES_NAME[gamestate.mapData[selectedTilePos.y][selectedTilePos.x].tileType]}</span>
           </div>
         }
       </div>
@@ -318,6 +285,7 @@ class UserGamePage extends PureComponent {
    */
   handleTrickOnClick() {
     if (this.canTrick()) {
+      logger.user('user Tricked');
       connectionManager.socket.emit(SOCKET_EVENTS.GAME.ACTION, CLIENT_ACTIONS.TRICK);
     }
   }
@@ -326,28 +294,9 @@ class UserGamePage extends PureComponent {
    */
   handleTreatOnClick() {
     if (this.canTreat()) {
+      logger.user('user Treated');
       connectionManager.socket.emit(SOCKET_EVENTS.GAME.ACTION, CLIENT_ACTIONS.TREAT);
     }
-  }
-  /**
-   *
-   */
-  onClickToggleZoom() {
-    const { isZoomedOut } = this.state;
-    this.setState({isZoomedOut: !isZoomedOut});
-  }
-  /**
-   *
-   */
-  onClickSwitchToEditor() {
-    remoteAppState.set({isDebugMode: true});
-  }
-  /**
-   *
-   */
-  onClickToggleVisibility() {
-    const { isFullyVisible } = this.state;
-    this.setState({isFullyVisible: !isFullyVisible});
   }
   /**
    * selected an action from the Encounter
@@ -355,6 +304,7 @@ class UserGamePage extends PureComponent {
    * @param {ActionId} actionId
    */
   onClickEncounterAction(actionId) {
+    logger.user(`user took actionId "${actionId}" for an encounter`);
     connectionManager.socket.emit(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, actionId);
   }
 }

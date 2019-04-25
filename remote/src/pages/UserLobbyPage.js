@@ -11,7 +11,7 @@ import * as connectionManager from 'managers/connectionManager';
 /**
  *
  */
-export class UserLobbyPage extends PureComponent {
+export default class UserLobbyPage extends PureComponent {
   /** @override */
   constructor(props) {
     super(props);
@@ -108,7 +108,6 @@ export class UserLobbyPage extends PureComponent {
     connectionManager.socket.emit(SOCKET_EVENTS.LOBBY.START);
   }
 }
-export default UserLobbyPage;
 /**
  *
  */

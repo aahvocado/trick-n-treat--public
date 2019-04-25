@@ -5,10 +5,10 @@ import combineClassNames from 'utilities/combineClassNames';
 /**
  *
  */
-export default class InputFieldComponent extends PureComponent {
+export default class LetterIconComponent extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'flex-row fsize-3 aitems-center bg-secondary borradius-1 sibling-mar-t-2',
+    baseClassName: 'pad-v-1 pad-h-2 fsize-3 color-white bg-grayest bor-1-grayer borradius-1',
     /** @type {String} */
     className: '',
   }
@@ -16,22 +16,21 @@ export default class InputFieldComponent extends PureComponent {
   render() {
     const {
       baseClassName,
-      children,
       className,
       ...otherProps
     } = this.props;
 
     return (
-      <label
+      <i
         className={combineClassNames(baseClassName, className)}
-      >
-        {children}
-
-        <input
-          className='mar-h-1 flex-shrink-1 bor-l-1-tertiary pad-1 color-white width-full'
-          {...otherProps}
-        />
-      </label>
+        style={{
+          fontFamily: 'serif',
+          minWidth: '28px',
+          boxSizing: 'border-box',
+          display: 'inline-block',
+        }}
+        {...otherProps}
+      />
     )
   }
 }
