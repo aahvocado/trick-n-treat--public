@@ -2,25 +2,26 @@ import {
   TILE_TYPES,
   isWalkableType,
 } from 'constants/tileTypes';
+// import {ENCOUNTER_TYPES} from 'constants/encounterTypes';
 
 // import Point from '@studiomoniker/point';
 import EncounterModel from 'models/EncounterModel';
 
-import {getEncounterAttributes} from 'collections/encounterCollections';
+import * as encounterCollections from 'collections/encounterCollections';
 
 import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
 import * as mathUtils from 'utilities/mathUtils';
 
-const encounterChoiceList = [
+const sidewalkEncounterDataList = [
   {
+    weight: 3,
+    returns: encounterCollections.addCandyEncounterData,
+  }, {
+    weight: 1,
+    returns: encounterCollections.loseCandyEncounterData,
+  }, {
     weight: 10,
     returns: null,
-  }, {
-    weight: 3,
-    returns: 'ADD_CANDY_BASIC-ENCOUNTER_ID',
-  }, {
-    weight: 3,
-    returns: 'LOSE_CANDY_BASIC-ENCOUNTER_ID',
   },
 ];
 
@@ -34,14 +35,13 @@ const encounterChoiceList = [
  * @returns {EncounterModel | null}
  */
 export function pickSidewalkEncounter(mapModel, location) {
-  const encounterId = pickRandomWeightedChoice(encounterChoiceList);
-  if (encounterId === null) {
+  const encounterData = pickRandomWeightedChoice(sidewalkEncounterDataList);
+  if (encounterData === null) {
     return null;
   }
 
-  const encounterAttributes = getEncounterAttributes(encounterId);
   return new EncounterModel({
-    ...encounterAttributes,
+    ...encounterData,
     location: location,
   });
 }

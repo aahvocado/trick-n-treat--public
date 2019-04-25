@@ -19,7 +19,7 @@ export class Model {
    */
   constructor(newAttributes = {}) {
     /** @type {String} */
-    this.modelId = uuid();
+    this.id = uuid();
 
     this.attributes = observable(newAttributes);
   }

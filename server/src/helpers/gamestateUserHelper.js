@@ -4,7 +4,7 @@ import {FastCharacter} from 'collections/characterCollection';
 
 import {CLIENT_TYPES} from 'constants/clientTypes';
 import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
-import {ENCOUNTER_ACTION_ID} from 'constants/encounterConstants';
+import {ENCOUNTER_ACTION_IDS} from 'constants/encounterActions';
 import {GAME_MODES} from 'constants/gameModes';
 import {MAP_START} from 'constants/mapSettings';
 import {POINTS} from 'constants/points';
@@ -188,7 +188,7 @@ export function handleUserGameAction(userId, actionId) {
   }
 
   // encounter
-  if (actionId === ENCOUNTER_ACTION_ID.CONFIRM) {
+  if (actionId === ENCOUNTER_ACTION_IDS.CLOSE) {
     sendEncounterToClientByUser(activeUser, null);
 
     onUserActionComplete(activeUser);

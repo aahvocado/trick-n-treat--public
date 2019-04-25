@@ -1,41 +1,47 @@
 import Point from '@studiomoniker/point';
 
+import {ENCOUNTER_TYPES} from 'constants/encounterTypes';
+
 import Model from 'models/Model';
 
 /**
  * @typedef {Model} EncounterModel
  *
+ * @typedef {Object} EncounterData
+ * @property {String} EncounterData.id
+ * @property {String} EncounterData.title
+ * @property {String} EncounterData.content
+ * @property {Array<EncounterAction>} EncounterData.actions
+ *
  * @typedef {Object} EncounterAction
  * @property {String} EncounterAction.actionId
  * @property {String} EncounterAction.name
  */
-export default class EncounterModel extends Model {
+export class EncounterModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super({
-      // -- will be shared
-      /** @type {String} */
-      id: '',
-      /** @type {String} */
-      title: '',
-      /** @type {String} */
-      content: '',
-      /** @type {Array<EncounterAction>} */
-      actions: [],
-
-      // -- configure me
       /** @type {Point} */
       location: new Point(),
-      /** @type {Array<EncounterTag>} */
-      tagList: [],
-      /** @type {Array<EncounterTriggerData>} */
-      triggerList: [],
+      /** @type {Array<CharacterModel>} */
+      visitors: [],
 
-      // -- local data
+      /** @type {EncounterType} */
+      typeId: '',
+      /** @type {EncounterData} */
+      encounterData: {
+        id: undefined,
+        title: '',
+        content: '',
+        actions: [],
+      },
+
+      /** @type {Boolean} */
+      isActionable: false,
       /** @type {Number} */
       triggerCount: 0,
-       /** @type {Array<CharacterModel>} */
-      visitors: [],
+      /** @type {Function} */
+      onTrigger: () => {},
       //
       ...newAttributes,
     });
@@ -46,6 +52,10 @@ export default class EncounterModel extends Model {
    * @param {CharacterModel} characterModel
    */
   trigger(characterModel) {
+    const onTrigger = this.get('onTrigger');
+    onTrigger(characterModel);
+
+    // finally, update the count
     this.set({triggerCount: this.attributes.triggerCount + 1});
     this.addToArray('visitors', characterModel);
   }
@@ -71,27 +81,5 @@ export default class EncounterModel extends Model {
 
     return false;
   }
-  /**
-   * exports just the data that is relevant for the Remote/Screen
-   *
-   * @returns {Object}
-   */
-  exportEncounterData() {
-    const exportData = this.export();
-    const {
-      id,
-      location,
-      title,
-      content,
-      actions,
-    } = exportData;
-
-    return {
-      id,
-      location,
-      title,
-      content,
-      actions,
-    };
-  }
 }
+export default EncounterModel;
