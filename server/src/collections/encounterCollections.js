@@ -1,37 +1,47 @@
-import {ENCOUNTER_ACTION_IDS} from 'constants/encounterActions';
-import {ENCOUNTER_TYPES} from 'constants/encounterTypes';
+import {
+  ENCOUNTER_ACTION_ID,
+  ENCOUNTER_TRIGGER_ID,
+} from 'constants/encounterConstants';
+
+import encounterJsonList from 'data/encounterData.json';
+
+import logger from 'utilities/logger';
 
 /**
- * generic encounter actions
+ * parses the entire json list
+ * @todo - see if this is necessary in the future because it seems like node already parses json into objects
+ *
+ * @param {Array<JSON>} encounterJsonList
+ * @returns {Object}
  */
-export const closeEncounterAction = {
-  actionId: ENCOUNTER_ACTION_IDS.CLOSE,
-  label: 'Close',
-};
+function parseEncounterJsonList(encounterJsonList) {
+  return encounterJsonList;
+}
+/** @type {Array<Object>} */
+const parsedEncounterList = parseEncounterJsonList(encounterJsonList);
+/** @type {Object} */
+const parsedEncounterMapping = (() => {
+  const mapping = {};
+
+  parsedEncounterList.forEach((encounterData) => {
+    const {id} = encounterData;
+    if (mapping[id] !== undefined) {
+      logger.error(`Duplicate Encounter with ${id} found while mapping!`);
+      return;
+    }
+
+    mapping[id] = encounterData;
+  });
+
+  return mapping;
+})();
 /**
- * just some Encounters
+ * finds the data for a loaded encounter by its id
+ *
+ * @param {String} id
+ * @returns {Object}
  */
-export const addCandyEncounterData = {
-  typeId: ENCOUNTER_TYPES.LAWN,
-  encounterData: {
-    id: 'ADD-CANDY-ENCOUNTER-ID',
-    title: 'Candy on the Streets',
-    content: 'You got a single piece of candy!',
-    actions: [closeEncounterAction],
-  },
-  onTrigger: (characterModel) => {
-    characterModel.set({candies: characterModel.get('candies') + 1});
-  },
-};
-export const loseCandyEncounterData = {
-  typeId: ENCOUNTER_TYPES.LAWN,
-  encounterData: {
-    id: 'LOSE-CANDY-ENCOUNTER-ID',
-    title: 'Spooky in the Sheets',
-    content: 'You lost a candy',
-    actions: [closeEncounterAction],
-  },
-  onTrigger: (characterModel) => {
-    characterModel.set({candies: characterModel.get('candies') - 1});
-  },
-};
+export function getEncounterAttributes(id) {
+  const foundEncounterData = parsedEncounterMapping[id];
+  return foundEncounterData;
+}
