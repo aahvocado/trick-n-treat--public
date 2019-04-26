@@ -13,7 +13,7 @@ import {
 
 import {
   TILE_TYPES_NAME,
-} from 'constants/tileTypes';
+} from 'constants.shared/tileTypes';
 import {
   TILE_SIZE,
 } from 'constants/mapConstants';
@@ -23,8 +23,8 @@ import ButtonComponent from 'common-components/ButtonComponent';
 import TileMapComponent from 'components/TileMapComponent';
 import EncounterModalComponent from 'components/EncounterModalComponent';
 
-import {CLIENT_ACTIONS} from 'constants/clientActions';
-import {SOCKET_EVENTS} from 'constants/socketEvents';
+import {CLIENT_ACTIONS} from 'constants.shared/clientActions';
+import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
 import remoteAppState from 'data/remoteAppState';
 
@@ -33,7 +33,7 @@ import * as gamestateHelper from 'helpers/gamestateHelper.remote';
 import * as connectionManager from 'managers/connectionManager';
 
 import logger from 'utilities/logger.remote';
-import * as mapUtils from 'utilities/mapUtils.remote';
+import * as mapUtils from 'utilities.shared/mapUtils';
 
 /**
  * remote page for the game

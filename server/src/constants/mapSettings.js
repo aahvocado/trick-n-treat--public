@@ -1,6 +1,6 @@
 import Point from '@studiomoniker/point';
 
-import * as mathUtils from 'utilities/mathUtils';
+import * as mathUtils from 'utilities.shared/mathUtils';
 
 /**
  * number of Tiles vertically and horizontally

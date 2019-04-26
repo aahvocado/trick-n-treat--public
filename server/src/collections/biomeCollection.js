@@ -1,4 +1,4 @@
-import {TILE_TYPES} from 'constants/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 const {
   EMPTY,
   PATH,

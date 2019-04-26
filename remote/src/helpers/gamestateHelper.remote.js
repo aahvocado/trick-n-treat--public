@@ -1,12 +1,12 @@
 import {
   FOG_TYPES,
   isWalkableTile,
-} from 'constants/tileTypes';
+} from 'constants.shared/tileTypes';
 
 import remoteAppState from 'data/remoteAppState';
 
-import * as mapUtils from 'utilities/mapUtils.remote';
-import * as matrixUtils from 'utilities/matrixUtils.remote';
+import * as mapUtils from 'utilities.shared/mapUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  *

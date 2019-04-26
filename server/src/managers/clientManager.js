@@ -1,6 +1,6 @@
-import {CLIENT_TYPES} from 'constants/clientTypes';
-import {SERVER_MODES} from 'constants/gameModes';
-import {SOCKET_EVENTS} from 'constants/socketEvents';
+import {CLIENT_TYPES} from 'constants.shared/clientTypes';
+import {SERVER_MODES} from 'constants.shared/gameModes';
+import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
 import serverState from 'data/serverState';
 
@@ -9,7 +9,7 @@ import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
 import {SocketClientModel} from 'models/SocketClientModel';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 
 /**
  * acts as the middleman between Client connections and the Server state

@@ -1,11 +1,11 @@
 import {
   ENCOUNTER_ACTION_ID,
   ENCOUNTER_TRIGGER_ID,
-} from 'constants/encounterConstants';
+} from 'constants.shared/encounterConstants';
 
 import encounterJsonList from 'data/encounterData.json';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 
 /**
  * parses the entire json list

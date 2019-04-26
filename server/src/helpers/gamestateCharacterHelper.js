@@ -1,4 +1,3 @@
-// import {GAME_MODES} from 'constants/gameModes';
 import {POINTS, getPointFromString} from 'constants/points';
 
 import gameState from 'data/gameState';
@@ -6,9 +5,9 @@ import gameState from 'data/gameState';
 import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
-import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
-import logger from 'utilities/logger';
-import * as mapUtils from 'utilities/mapUtils';
+import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
+import logger from 'utilities/logger.game';
+import * as mapUtils from 'utilities.shared/mapUtils';
 
 /**
  * this Helper is for applying actions to Characters

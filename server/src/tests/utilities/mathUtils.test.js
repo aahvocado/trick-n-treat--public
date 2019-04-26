@@ -1,5 +1,5 @@
 import test from 'ava';
-import * as mathUtils from 'utilities/mathUtils';
+import * as mathUtils from 'utilities.shared/mathUtils';
 
 /**
  * feels silly to unit test randomness

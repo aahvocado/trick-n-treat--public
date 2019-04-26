@@ -1,8 +1,8 @@
 var path = require('path');
-var webpack = require('webpack');
 var nodeExternals = require('webpack-node-externals');
 
-const serverPath = path.resolve(__dirname, './src/');
+const srcPath = path.resolve(__dirname, './src/');
+const sharedPath = path.resolve('../shared/src');
 
 module.exports = {
   mode: 'development',
@@ -17,14 +17,17 @@ module.exports = {
   },
   resolve: {
     alias: {
-      collections: path.resolve(serverPath, 'collections'),
-      constants: path.resolve(serverPath, 'constants'),
-      data: path.resolve(serverPath, 'data'),
-      helpers: path.resolve(serverPath, 'helpers'),
-      managers: path.resolve(serverPath, 'managers'),
-      models: path.resolve(serverPath, 'models'),
-      tests: path.resolve(serverPath, 'tests'),
-      utilities: path.resolve(serverPath, 'utilities'),
+      collections: path.resolve(srcPath, 'collections'),
+      constants: path.resolve(srcPath, 'constants'),
+      data: path.resolve(srcPath, 'data'),
+      helpers: path.resolve(srcPath, 'helpers'),
+      managers: path.resolve(srcPath, 'managers'),
+      models: path.resolve(srcPath, 'models'),
+      tests: path.resolve(srcPath, 'tests'),
+      utilities: path.resolve(srcPath, 'utilities'),
+
+      'constants.shared': path.resolve(sharedPath, 'constants'),
+      'utilities.shared': path.resolve(sharedPath, 'utilities'),
     }
   },
   externals: [nodeExternals()],
@@ -32,6 +35,7 @@ module.exports = {
     rules: [
       {
         test: /\.m?js$/,
+        include: [srcPath, sharedPath],
         exclude: /(node_modules|bower_components)/,
         use: {
           loader: 'babel-loader',

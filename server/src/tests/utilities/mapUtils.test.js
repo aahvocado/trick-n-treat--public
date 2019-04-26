@@ -1,13 +1,13 @@
 import test from 'ava';
 import Point from '@studiomoniker/point';
 
-import {TILE_TYPES} from 'constants/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 const {
   EMPTY,
   PATH,
 } = TILE_TYPES;
 
-import * as mapUtils from 'utilities/mapUtils';
+import * as mapUtils from 'utilities.shared/mapUtils';
 
 test('getAStarPath() - finds the Path from one Point to another', (t) => {
   // -- setup

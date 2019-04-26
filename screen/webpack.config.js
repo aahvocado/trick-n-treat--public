@@ -3,6 +3,9 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 var { BUILD_PATH } = require('./app-paths.js');
 
+const srcPath = path.resolve(__dirname, './src/');
+const sharedPath = path.resolve('../shared/src');
+
 module.exports = {
   mode: 'development',
   target: 'web',
@@ -13,13 +16,16 @@ module.exports = {
   },
   resolve: {
     alias: {
-      constants: path.resolve('src/constants'),
-      geometry: path.resolve('src/geometry'),
-      common: path.resolve('src/common'),
-      components: path.resolve('src/components'),
-      data: path.resolve('src/data'),
-      helpers: path.resolve('src/helpers'),
-      managers: path.resolve('src/managers'),
+      constants: path.resolve(srcPath, 'constants'),
+      geometry: path.resolve(srcPath, 'geometry'),
+      common: path.resolve(srcPath, 'common'),
+      components: path.resolve(srcPath, 'components'),
+      data: path.resolve(srcPath, 'data'),
+      helpers: path.resolve(srcPath, 'helpers'),
+      managers: path.resolve(srcPath, 'managers'),
+
+      'constants.shared': path.resolve(sharedPath, 'constants'),
+      'utilities.shared': path.resolve(sharedPath, 'utilities'),
     }
   },
   devtool: 'source-map',
@@ -27,6 +33,7 @@ module.exports = {
     rules: [
       {
         test: /\.m?js$/,
+        include: [srcPath, sharedPath],
         exclude: /(node_modules|bower_components)/,
         use: {
           loader: 'babel-loader',

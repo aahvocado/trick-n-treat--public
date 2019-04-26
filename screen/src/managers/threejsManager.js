@@ -14,7 +14,7 @@ import {
   ANIMATION
 } from 'constants/three.js';
 import * as threeGeometry from 'geometry/threeGeometry.js';
-import { FOG_TYPES, TILE_TYPES, isWalkableTile } from 'constants/tileTypes';
+import { FOG_TYPES, TILE_TYPES, isWalkableTile } from 'constants.shared/tileTypes';
 import { initInput } from 'helpers/input';
 import * as connectionManager from 'managers/connectionManager';
 

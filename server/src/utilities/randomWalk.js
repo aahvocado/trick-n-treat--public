@@ -2,11 +2,11 @@ import Point from '@studiomoniker/point';
 
 import {
   TILE_TYPES,
-} from 'constants/tileTypes';
+} from 'constants.shared/tileTypes';
 import {POINTS} from 'constants/points';
 
-import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
-import * as matrixUtils from 'utilities/matrixUtils';
+import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * starts the Random Walk process to apply paths to a Map

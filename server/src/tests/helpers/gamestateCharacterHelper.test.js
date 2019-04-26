@@ -2,7 +2,7 @@ import test from 'ava';
 import Point from '@studiomoniker/point';
 
 import {POINTS} from 'constants/points';
-import {TILE_TYPES} from 'constants/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 const {
   EMPTY,
   HOUSE,
@@ -16,7 +16,7 @@ import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import CharacterModel from 'models/CharacterModel';
 import MapModel from 'models/MapModel';
 
-import * as matrixUtils from 'utilities/matrixUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 test.beforeEach((t) => {
   // reset the gamestate for each test

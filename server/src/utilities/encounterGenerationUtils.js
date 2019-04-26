@@ -1,15 +1,15 @@
 import {
   TILE_TYPES,
   isWalkableType,
-} from 'constants/tileTypes';
+} from 'constants.shared/tileTypes';
 
 // import Point from '@studiomoniker/point';
 import EncounterModel from 'models/EncounterModel';
 
 import {getEncounterAttributes} from 'collections/encounterCollections';
 
-import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
-import * as mathUtils from 'utilities/mathUtils';
+import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
+import * as mathUtils from 'utilities.shared/mathUtils';
 
 const encounterChoiceList = [
   {

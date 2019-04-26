@@ -1,10 +1,10 @@
-import {GAME_MODES} from 'constants/gameModes';
+import {GAME_MODES} from 'constants.shared/gameModes';
 
 import gameState from 'data/gameState';
 
 import {sendUpdateToAllClients} from 'managers/clientManager';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 
 /**
  * this Helper should try to manage the `actionQueue`

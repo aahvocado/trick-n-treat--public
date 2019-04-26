@@ -4,7 +4,7 @@ import { faDesktop, faMobileAlt } from '@fortawesome/free-solid-svg-icons'
 
 import ButtonComponent from 'common-components/ButtonComponent';
 
-import {SOCKET_EVENTS} from 'constants/socketEvents';
+import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
 import * as connectionManager from 'managers/connectionManager';
 

@@ -1,4 +1,4 @@
-import {GAME_MODES} from 'constants/gameModes';
+import {GAME_MODES} from 'constants.shared/gameModes';
 
 import remoteAppState from 'data/remoteAppState';
 

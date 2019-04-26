@@ -1,14 +1,14 @@
 import Point from '@studiomoniker/point';
 
-import {TILE_TYPES} from 'constants/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 import {MAP_SETTINGS} from 'constants/mapSettings';
 
 import HouseModel from 'models/HouseModel';
 
-import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
-import * as mathUtils from 'utilities/mathUtils';
-import * as matrixUtils from 'utilities/matrixUtils';
-import randomizeArray from 'utilities/randomizeArray';
+import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
+import * as mathUtils from 'utilities.shared/mathUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
+import randomizeArray from 'utilities.shared/randomizeArray';
 
 /**
  * chance of using generating one of these generic Houses

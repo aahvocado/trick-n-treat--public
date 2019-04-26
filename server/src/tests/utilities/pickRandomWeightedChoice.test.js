@@ -1,6 +1,6 @@
 import test from 'ava';
 
-import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
+import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
 
 test('pickRandomWeightedChoice() - returns the choice that is not 0', (t) => {
   const choiceList = [

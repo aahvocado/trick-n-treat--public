@@ -1,6 +1,4 @@
 /**
- * Server
- *
  * @typedef {String} SocketEvent - event names
  */
 export const SOCKET_EVENTS = {

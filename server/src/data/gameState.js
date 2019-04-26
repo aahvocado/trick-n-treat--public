@@ -1,8 +1,8 @@
 import seedrandom from 'seedrandom';
 import {extendObservable} from 'mobx';
 
-import {GAME_MODES} from 'constants/gameModes';
-import {FOG_TYPES, isWalkableTile} from 'constants/tileTypes';
+import {GAME_MODES} from 'constants.shared/gameModes';
+import {FOG_TYPES, isWalkableTile} from 'constants.shared/tileTypes';
 
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
@@ -12,10 +12,10 @@ import {sendUpdateToAllClients} from 'managers/clientManager';
 import Model from 'models/Model';
 import MapModel from 'models/MapModel';
 
-import * as fogUtils from 'utilities/fogUtils';
-import logger from 'utilities/logger';
-import * as mapUtils from 'utilities/mapUtils';
-import randomizeArray from 'utilities/randomizeArray';
+import * as fogUtils from 'utilities.shared/fogUtils';
+import logger from 'utilities/logger.game';
+import * as mapUtils from 'utilities.shared/mapUtils';
+import randomizeArray from 'utilities.shared/randomizeArray';
 
 // EXPERIMENTAL - number of actions we've ever created
 let actionCount = 0;

@@ -18,15 +18,15 @@ import {
   TILE_TYPES,
   TILE_TYPES_NAME,
   FOG_TYPES,
-} from 'constants/tileTypes';
-// import {SOCKET_EVENTS} from 'constants/socketEvents';
+} from 'constants.shared/tileTypes';
+// import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
 import remoteAppState from 'data/remoteAppState';
 
 // import * as connectionManager from 'managers/connectionManager';
 
 import debounce from 'utilities/debounce';
-import * as matrixUtils from 'utilities/matrixUtils.remote';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * page for testing

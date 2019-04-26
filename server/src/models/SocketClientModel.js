@@ -1,4 +1,4 @@
-import {CLIENT_TYPES} from 'constants/clientTypes';
+import {CLIENT_TYPES} from 'constants.shared/clientTypes';
 
 import Model from 'models/Model';
 

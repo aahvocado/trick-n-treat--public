@@ -1,14 +1,14 @@
 import {extendObservable} from 'mobx';
 
-import {CLIENT_TYPES} from 'constants/clientTypes';
-import {SERVER_MODES} from 'constants/gameModes';
+import {CLIENT_TYPES} from 'constants.shared/clientTypes';
+import {SERVER_MODES} from 'constants.shared/gameModes';
 
 import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
 import Model from 'models/Model';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 
 /**
  *

@@ -21,7 +21,7 @@ import {
   TILE_TYPES,
   isPartiallyVisibleFog,
   isWalkableTile,
-} from 'constants/tileTypes';
+} from 'constants.shared/tileTypes';
 
 /**
  * 2D matrix visualizer

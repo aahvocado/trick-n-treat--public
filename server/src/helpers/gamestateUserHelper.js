@@ -2,10 +2,10 @@ import Point from '@studiomoniker/point';
 
 import {FastCharacter} from 'collections/characterCollection';
 
-import {CLIENT_TYPES} from 'constants/clientTypes';
-import {CLIENT_ACTIONS, isMovementAction} from 'constants/clientActions';
-import {ENCOUNTER_ACTION_ID} from 'constants/encounterConstants';
-import {GAME_MODES} from 'constants/gameModes';
+import {CLIENT_TYPES} from 'constants.shared/clientTypes';
+import {CLIENT_ACTIONS, isMovementAction} from 'constants.shared/clientActions';
+import {ENCOUNTER_ACTION_ID} from 'constants.shared/encounterConstants';
+import {GAME_MODES} from 'constants.shared/gameModes';
 import {MAP_START} from 'constants/mapSettings';
 import {POINTS} from 'constants/points';
 
@@ -20,7 +20,7 @@ import {
 
 import UserModel from 'models/UserModel';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 
 /**
  * this Helper is for handling actions from the User

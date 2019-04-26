@@ -1,5 +1,5 @@
 import {TILE_SIZE} from 'constants/mapConstants';
-import {FOG_TYPES, TILE_TYPES} from 'constants/tileTypes';
+import {FOG_TYPES, TILE_TYPES} from 'constants.shared/tileTypes';
 
 export const TILE_STYLES = {
   [TILE_TYPES.EMPTY]: { backgroundColor: '#313131' },

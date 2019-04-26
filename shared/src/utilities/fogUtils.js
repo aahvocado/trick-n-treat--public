@@ -3,9 +3,9 @@ import {
   FOG_TYPES,
   isWalkableTile,
   isLessLit,
-} from 'constants/tileTypes';
+} from 'constants.shared/tileTypes';
 
-import * as matrixUtils from 'utilities/matrixUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * @todo - refactor

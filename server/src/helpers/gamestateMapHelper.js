@@ -1,4 +1,4 @@
-import {GAME_MODES} from 'constants/gameModes';
+import {GAME_MODES} from 'constants.shared/gameModes';
 import {
   HOME_BIOME_SETTINGS,
   GRAVEYARD_BIOME_SETTINGS,
@@ -6,15 +6,15 @@ import {
 import {
   TILE_TYPES,
   isWalkableTile,
-} from 'constants/tileTypes';
+} from 'constants.shared/tileTypes';
 import {MAP_SETTINGS} from 'constants/mapSettings';
 
 import gameState from 'data/gameState';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
 import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
-// import * as mapUtils from 'utilities/mapUtils';
+// import * as mapUtils from 'utilities.shared/mapUtils';
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
 
 /**

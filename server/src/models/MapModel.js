@@ -1,10 +1,10 @@
 import Point from '@studiomoniker/point';
 
-import {TILE_TYPES} from 'constants/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 import MatrixModel from 'models/MatrixModel';
 
-import * as mapUtils from 'utilities/mapUtils';
+import * as mapUtils from 'utilities.shared/mapUtils';
 
 /**
  * class for handling Map methods

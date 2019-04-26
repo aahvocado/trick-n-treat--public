@@ -1,6 +1,6 @@
 import {
   ENCOUNTER_TRIGGER_ID,
-} from 'constants/encounterConstants';
+} from 'constants.shared/encounterConstants';
 
 import gameState from 'data/gameState';
 
@@ -8,7 +8,7 @@ import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 
 import {sendEncounterToClientByUser} from 'managers/clientManager';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 
 /**
  * this Helper is for handling data for Encounters

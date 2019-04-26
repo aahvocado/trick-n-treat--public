@@ -1,7 +1,7 @@
 import test from 'ava';
 import Point from '@studiomoniker/point';
 
-import * as matrixUtils from 'utilities/matrixUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 test('forEach() - properly executes callback for each tile', (t) => {
   let tileCount = 0;

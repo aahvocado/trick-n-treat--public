@@ -7,7 +7,7 @@ import {
   HALF_MAP_HEIGHT,
 } from 'constants/mapSettings';
 
-import * as mathUtils from 'utilities/mathUtils';
+import * as mathUtils from 'utilities.shared/mathUtils';
 
 /**
  * @typedef {Object} BiomeSettings

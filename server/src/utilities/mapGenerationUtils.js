@@ -6,15 +6,15 @@ import {
   TILE_TYPES,
   FOG_TYPES,
   isLitTile,
-} from 'constants/tileTypes';
+} from 'constants.shared/tileTypes';
 
 import MapModel from 'models/MapModel';
 
-import pickRandomWeightedChoice from 'utilities/pickRandomWeightedChoice';
-import * as fogUtils from 'utilities/fogUtils';
-import * as mapUtils from 'utilities/mapUtils';
-import * as mathUtils from 'utilities/mathUtils';
-import * as matrixUtils from 'utilities/matrixUtils';
+import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
+import * as fogUtils from 'utilities.shared/fogUtils';
+import * as mapUtils from 'utilities.shared/mapUtils';
+import * as mathUtils from 'utilities.shared/mathUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 import randomWalk from 'utilities/randomWalk';
 
 /**

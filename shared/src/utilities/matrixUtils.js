@@ -1,6 +1,6 @@
 import Point from '@studiomoniker/point';
 
-import {TILE_TYPES} from 'constants/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 /**
  * Matrix represents 2D array

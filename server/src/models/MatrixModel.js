@@ -2,7 +2,7 @@ import Point from '@studiomoniker/point';
 
 import Model from 'models/Model';
 
-import * as matrixUtils from 'utilities/matrixUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * abstract helper for managing a 2D Array

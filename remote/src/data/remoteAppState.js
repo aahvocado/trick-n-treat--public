@@ -1,11 +1,11 @@
 import Point from '@studiomoniker/point';
 
-import {SOCKET_EVENTS} from 'constants/socketEvents';
+import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
 import Model from 'models/Model';
 
 import logger from 'utilities/logger.remote';
-import * as matrixUtils from 'utilities/matrixUtils.remote';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 const createDate = new Date();
 

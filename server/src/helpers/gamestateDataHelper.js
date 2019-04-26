@@ -1,6 +1,6 @@
 import gameState from 'data/gameState';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 
 /**
  * this Helper should try to organize the data (to be fleshed out later)

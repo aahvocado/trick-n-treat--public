@@ -4,10 +4,10 @@ import Point from '@studiomoniker/point';
 import {
   TILE_TYPES,
   isWalkableTile,
-} from 'constants/tileTypes';
+} from 'constants.shared/tileTypes';
 
-import * as mathUtils from 'utilities/mathUtils';
-import * as matrixUtils from 'utilities/matrixUtils';
+import * as mathUtils from 'utilities.shared/mathUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * @typedef {Array<Point>} Path

@@ -2,7 +2,7 @@ import SocketServer from 'socket.io';
 
 import * as clientManager from 'managers/clientManager';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 
 /** @type {socket.io-server} */
 let io;

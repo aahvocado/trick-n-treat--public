@@ -3,7 +3,7 @@ import http from 'http';
 
 import * as websocketInstance from 'managers/websocketInstance';
 
-import logger from 'utilities/logger';
+import logger from 'utilities/logger.game';
 
 let app;
 let server;
