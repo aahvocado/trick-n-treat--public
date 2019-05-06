@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import { observer } from 'mobx-react';
 
 import Point from '@studiomoniker/point';
@@ -74,6 +75,10 @@ export default observer(
     // }
     /** @override */
     render() {
+      if (!remoteAppState.get('isConnected')) {
+        remoteAppState.set({isInGame: false});
+        return <Redirect to='/' />
+      }
       const canUseActions = remoteAppState.get('canUseActions');
       const myCharacter = remoteAppState.get('myCharacter');
 
@@ -88,7 +93,7 @@ export default observer(
       } = this.state;
 
       if (gamestate === undefined) {
-        return <div className='bg-secondary flex-auto pad-v-2 flex-center flex-col width-full text-center'>(waiting for map data)</div>
+        return <div className='color-white bg-secondary flex-auto pad-v-2 flex-center flex-col width-full text-center'>(waiting for map data)</div>
       }
 
       const hasActiveEncounter = activeEncounter !== null;
@@ -106,7 +111,7 @@ export default observer(
           />
 
           {/* Stat Bar */}
-          <div className='flex-row-center pad-v-1'>
+          <div className='color-white flex-row-center pad-v-1'>
             <span className='sibling-mar-l-2'>
               <FontAwesomeIcon icon={faHeart} />
               <span className='fsize-5 mar-l-1'>{myCharacter.health}</span>
@@ -157,8 +162,6 @@ export default observer(
 
           {/* Action Menu */}
           <div className='flex-row-center'>
-            <FontAwesomeIcon className='sibling-mar-l-1 fsize-2 color-tertiary' icon={faCircle} />
-
             <ButtonComponent
               disabled={!this.canMove()}
               onClick={this.handleMoveToOnClick}
@@ -169,7 +172,7 @@ export default observer(
 
           {/* Debugging Tools */}
           { remoteAppState.get('isDevMode') &&
-            <div className='flex-row-center pad-2'>
+            <div className='color-white flex-row-center pad-2'>
               <span className='pad-h-2'>{`Selected Tile: (x: ${selectedTilePos.x}, y: ${selectedTilePos.y})`}</span>
 
               <span>{TILE_TYPES_NAME[gamestate.mapData[selectedTilePos.y][selectedTilePos.x].tileType]}</span>
@@ -283,9 +286,9 @@ export default observer(
      *
      * @param {ActionId} actionId
      */
-    onClickEncounterAction(actionId) {
-      logger.user(`user took actionId "${actionId}" for an encounter`);
-      connectionManager.socket.emit(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, actionId);
+    onClickEncounterAction(actionData) {
+      logger.user(`User selected "${actionData.actionId}" for EncounterAction`);
+      connectionManager.socket.emit(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, actionData);
     }
   }
 )

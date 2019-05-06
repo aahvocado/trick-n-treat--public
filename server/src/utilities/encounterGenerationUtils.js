@@ -1,47 +1,40 @@
-import {
-  TILE_TYPES,
-  isWalkableType,
-} from 'constants.shared/tileTypes';
+import {TAG_ID} from 'constants.shared/tagConstants';
+// import {
+//   TILE_TYPES,
+//   isWalkableType,
+// } from 'constants.shared/tileTypes';
 
-import { getEncounterAttributes } from 'helpers.shared/encounterDataHelper';
+import * as encounterDataHelper from 'helpers.shared/encounterDataHelper';
 
-// import Point from '@studiomoniker/point';
 import EncounterModel from 'models/EncounterModel';
 
-import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
 import * as mathUtils from 'utilities.shared/mathUtils';
 
-const encounterChoiceList = [
-  {
-    weight: 10,
-    returns: null,
-  }, {
-    weight: 3,
-    returns: 'ADD_CANDY_BASIC-ENCOUNTER_ID',
-  }, {
-    weight: 3,
-    returns: 'LOSE_CANDY_BASIC-ENCOUNTER_ID',
-  },
-];
-
-// -- Generators pick Encounters based on conditions
 /**
- * determines what type of encounter it should generate
- *  but can also choose to generate nothing
+ * generates a new EncounterModel of a random Encounter that fits criteria of given options
  *
- * @param {MapModel} mapModel
- * @param {Point} location
- * @returns {EncounterModel | null}
+ * @param {Object} options
+ * @property {Point} options.location
+ * @property {Array} [options.includeTags]
+ * @property {Array} [options.excludeTags]
+ * @returns {EncounterModel}
  */
-export function pickSidewalkEncounter(mapModel, location) {
-  const encounterId = pickRandomWeightedChoice(encounterChoiceList);
-  if (encounterId === null) {
-    return null;
-  }
+export function generateRandomEncounter(options) {
+  const {
+    location,
 
-  const encounterAttributes = getEncounterAttributes(encounterId);
+    ...searchOptions
+  } = options;
+
+  const potentialEncounters = encounterDataHelper.findEncounterData(searchOptions);
+
+  // then choose one randomly from the potential list
+  const chosenEncounterIdx = mathUtils.getRandomIntInclusive(0, potentialEncounters.length - 1);
+  const chosenEncounterData = potentialEncounters[chosenEncounterIdx];
+
+  // create and return the encounter
   return new EncounterModel({
-    ...encounterAttributes,
+    ...chosenEncounterData,
     location: location,
   });
 }

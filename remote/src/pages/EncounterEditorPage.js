@@ -796,7 +796,7 @@ class ViewerPanel extends Component {
                 onChangeValue={(e) => {
                   onChangeTriggerItem({
                     ...trigger,
-                    value: e.target.value,
+                    value: parseInt(e.target.value),
                   }, idx)
                 }}
               />
@@ -970,7 +970,9 @@ const ViewerTriggerItem = (props) => (
       children={props.label}
     />
 
-    <input className='bor-h-1-gray pad-h-2'
+    <input
+      className='bor-h-1-gray pad-h-2'
+      type='number'
       value={props.value}
       onChange={props.onChangeValue}
     />

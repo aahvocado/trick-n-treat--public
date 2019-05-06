@@ -1,21 +1,23 @@
 import {GAME_MODES} from 'constants.shared/gameModes';
 import {
   HOME_BIOME_SETTINGS,
-  GRAVEYARD_BIOME_SETTINGS,
+  // GRAVEYARD_BIOME_SETTINGS,
 } from 'constants/biomeSettings';
 import {
-  TILE_TYPES,
+  // TILE_TYPES,
   isWalkableTile,
 } from 'constants.shared/tileTypes';
 import {MAP_SETTINGS} from 'constants/mapSettings';
+import {TAG_ID} from 'constants.shared/tagConstants';
 
 import gameState from 'data/gameState';
 
 import logger from 'utilities/logger.game';
 import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
-import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
+// import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
 // import * as mapUtils from 'utilities.shared/mapUtils';
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
+import * as mathUtils from 'utilities.shared/mathUtils';
 
 /**
  * this Helper should try to organize the data (to be fleshed out later)
@@ -86,7 +88,7 @@ export function generateNewMap(mapSettings = MAP_SETTINGS) {
  * @param {MapModel} mapModel
  */
 export function generateBasicEntities(mapModel) {
-  const entities = [];
+  // const entities = [];
   const encounterList = [];
 
   mapModel.forEach((tileType, tilePoint) => {
@@ -95,12 +97,17 @@ export function generateBasicEntities(mapModel) {
       return;
     }
 
-    //
-    const encounterModel = encounterGenerationUtils.pickSidewalkEncounter(mapModel, tilePoint);
-    if (encounterModel === null) {
+    // chance to generate nothing
+    const nullChance = 70;
+    if (mathUtils.getRandomIntInclusive(0, 100) <= nullChance) {
       return;
     }
 
+    // generate one
+    const encounterModel = encounterGenerationUtils.generateRandomEncounter({
+      location: tilePoint,
+      includeTags: [TAG_ID.SIDEWALK],
+    });
     encounterList.push(encounterModel);
   });
 

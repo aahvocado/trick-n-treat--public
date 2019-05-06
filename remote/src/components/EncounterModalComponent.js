@@ -62,11 +62,11 @@ export default class EncounterModalComponent extends PureComponent {
         </div>
 
         <div className='flex-row sibling-mar-t-2'>
-          { actionList.map((encounterAction, idx) => {
+          { actionList.map((actionData, idx) => {
             return (
               <EncounterActionButton
-                {...encounterAction}
-                key={`encounter-modal-action-button-${encounterAction.actionId}-${idx}-key`}
+                key={`encounter-modal-action-button-${actionData.actionId}-${idx}-key`}
+                actionData={actionData}
                 onClick={this.onClickAction}
               />
             )
@@ -86,10 +86,9 @@ export default class EncounterModalComponent extends PureComponent {
 class EncounterActionButton extends PureComponent {
   /** @override */
   static defaultProps = {
-    /** @type {String} */
-    label: '',
-    /** @type {String} */
-    actionId: '',
+    /** @type {ActionData} */
+    actionData: undefined,
+
     /** @type {Function} */
     onClick: () => {},
   };
@@ -97,12 +96,15 @@ class EncounterActionButton extends PureComponent {
   /** @override */
   render() {
     const {
-      label,
-      actionId,
-      gotoId,
-
+      actionData,
       ...otherProps
     } = this.props;
+
+    const {
+      actionId,
+      // gotoId,
+      label,
+    } = actionData;
 
     return (
       <ButtonComponent
@@ -119,7 +121,6 @@ class EncounterActionButton extends PureComponent {
    *
    */
   onClickButton() {
-    const {actionId} = this.props;
-    this.props.onClick(actionId);
+    this.props.onClick(this.props.actionData);
   }
 }

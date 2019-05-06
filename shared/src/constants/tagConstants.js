@@ -9,13 +9,17 @@ import convertObjectToArray from 'utilities.shared/convertObjectToArray';
  * @typedef {String} TagId
  */
 export const TAG_ID = {
+  // -- descriptors
   ENCOUNTER: 'TAG_ID.ENCOUNTER',
   HOUSE: 'TAG_ID.HOUSE',
   CANDY: 'TAG_ID.CANDY',
   SANITY: 'TAG_ID.SANITY',
 
-  // --
+  // -- tile types
   SIDEWALK: 'TAG_ID.SIDEWALK',
+
+  // -- debugging?
+  DEBUG: 'TAG_ID.DEBUG',
 };
 /**
  * caches an array of the all the TagIds

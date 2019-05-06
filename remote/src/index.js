@@ -33,7 +33,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 /**
  * @todo - move this to a better place
  */
-window.addEventListener('keypress', (e) => {
+window.addEventListener('keydown', (e) => {
   // only devs get super cool hotkeys
   if (!remoteAppState.get('isDevMode')) {
     e.preventDefault();
@@ -41,8 +41,12 @@ window.addEventListener('keypress', (e) => {
   }
 
   // backquote
-  if (e.keyCode === 96) {
+  if (e.keyCode === 192) {
     remoteAppState.set({isDebugMenuActive: !remoteAppState.get('isDebugMenuActive')});
+  }
+  // r
+  if (e.keyCode === 82) {
+    connectionManager.reconnect();
   }
 
   // following codes only work if debug menu is open
@@ -50,15 +54,15 @@ window.addEventListener('keypress', (e) => {
     return;
   }
   // t
-  if (e.keyCode === 116) {
+  if (e.keyCode === 84) {
     // remoteAppState.set({isEditorMode: !remoteAppState.get('isEditorMode')});
   }
   // z
-  if (e.keyCode === 122) {
+  if (e.keyCode === 90) {
     remoteGameState.set({useZoomedOutMap: !remoteGameState.get('useZoomedOutMap')});
   }
   // v
-  if (e.keyCode === 118) {
+  if (e.keyCode === 86) {
     remoteGameState.set({useFullyVisibleMap: !remoteGameState.get('useFullyVisibleMap')});
   }
 });

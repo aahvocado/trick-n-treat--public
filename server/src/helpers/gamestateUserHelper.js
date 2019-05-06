@@ -12,6 +12,7 @@ import {POINTS} from 'constants/points';
 import gameState from 'data/gameState';
 
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
+import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 
 import {
   sendEncounterToClientByUser,
@@ -186,13 +187,6 @@ export function handleUserGameAction(userId, actionId) {
       handleUserActionTreat(userId);
     });
   }
-
-  // encounter
-  if (actionId === ENCOUNTER_ACTION_ID.CONFIRM) {
-    sendEncounterToClientByUser(activeUser, null);
-
-    onUserActionComplete(activeUser);
-  }
 }
 /**
  * user asked to move
@@ -299,6 +293,36 @@ export function handleUserActionMoveTo(userId, endPosition) {
   const characterModel = gameState.findCharacterByUserId(userId);
   const endPoint = new Point(endPosition.x, endPosition.y);
   gamestateCharacterHelper.handleMoveCharacterTo(characterModel, endPoint);
+}
+/**
+ * User did something
+ *
+ * @param {String} userId
+ * @param {ActionData} actionData
+ */
+export function handleUserEncounterAction(userId, actionData) {
+  // check if it is the Turn of the user who clicked
+  const userModel = gameState.get('activeUser');
+  if (userModel.get('userId') !== userId) {
+    return;
+  }
+
+  const {
+    actionId,
+    gotoId,
+  } = actionData;
+
+  // just a basic confirmation to close the `Encounter`
+  if (actionId === ENCOUNTER_ACTION_ID.CONFIRM) {
+    sendEncounterToClientByUser(userModel, null);
+
+    onUserActionComplete(userModel);
+  }
+
+  // this goes to another `Encounter`
+  if (actionId === ENCOUNTER_ACTION_ID.GOTO) {
+    gamestateEncounterHelper.sendEncounterToUser(userModel, gotoId);
+  }
 }
 /**
  * a User's Action was finished
