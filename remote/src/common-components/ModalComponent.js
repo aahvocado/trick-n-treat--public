@@ -50,7 +50,7 @@ export default class ModalComponent extends PureComponent {
 
     return (
       <div
-        className='position-fixed flex-centered pos-0 zindex-10 pointer-cursor'
+        className='position-fixed flex-center pos-0 zindex-10 pointer-cursor'
         style={{
           transition: isDisabled ? 'none' : 'opacity 300ms',
           backgroundColor: 'rgba(0, 0, 0, .33)',

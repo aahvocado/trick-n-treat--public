@@ -1,4 +1,4 @@
-import remoteAppState from 'data/remoteAppState';
+import remoteAppState from 'state/remoteAppState';
 
 /**
  * this helps track things happening on the Remote

@@ -1,6 +1,4 @@
-import {
-  ENCOUNTER_TRIGGER_ID,
-} from 'constants.shared/encounterConstants';
+import { ENCOUNTER_TRIGGER_ID } from 'constants.shared/encounterTriggers';
 
 import gameState from 'data/gameState';
 

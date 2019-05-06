@@ -264,7 +264,7 @@ module.exports = function(webpackEnv) {
         'common-components': path.resolve(paths.appSrc, 'common-components'),
         components: path.resolve(paths.appSrc, 'components'),
         constants: path.resolve(paths.appSrc, 'constants'),
-        data: path.resolve(paths.appSrc, 'data'),
+        state: path.resolve(paths.appSrc, 'state'),
         helpers: path.resolve(paths.appSrc, 'helpers'),
         managers: path.resolve(paths.appSrc, 'managers'),
         models: path.resolve(paths.appSrc, 'models'),
@@ -273,6 +273,8 @@ module.exports = function(webpackEnv) {
         utilities: path.resolve(paths.appSrc, 'utilities'),
 
         'constants.shared': path.resolve(paths.sharedPath, 'constants'),
+        'data.shared': path.resolve(paths.sharedPath, 'data'),
+        'helpers.shared': path.resolve(paths.sharedPath, 'helpers'),
         'utilities.shared': path.resolve(paths.sharedPath, 'utilities'),
 
         '@studiomoniker/point': path.resolve(paths.appNodeModules, '@studiomoniker/point'),

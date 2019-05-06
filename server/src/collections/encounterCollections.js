@@ -1,9 +1,7 @@
-import {
-  ENCOUNTER_ACTION_ID,
-  ENCOUNTER_TRIGGER_ID,
-} from 'constants.shared/encounterConstants';
+import { ENCOUNTER_ACTION_ID } from 'constants.shared/encounterActions';
+import { ENCOUNTER_TRIGGER_ID } from 'constants.shared/encounterTriggers';
 
-import encounterJsonList from 'data/encounterData.json';
+import encounterJsonList from 'data.shared/encounterData.json';
 
 import logger from 'utilities/logger.game';
 

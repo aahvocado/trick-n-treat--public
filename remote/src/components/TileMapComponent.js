@@ -68,7 +68,7 @@ export class TileMapComponent extends Component {
 
     return (
       <div
-        className='flex-col-centered position-relative mar-v-2 mar-h-auto bor-4-primary'
+        className='flex-col-center position-relative mar-v-2 mar-h-auto bor-4-primary'
         style={{
           overflow: 'hidden',
           backgroundColor: '#252525',
@@ -194,11 +194,10 @@ export class TileItemComponent extends Component {
 
     return (
       <div
-        className='position-relative'
+        className='position-relative box-sizing-border'
         style={{
           width: `${tileSize}px`,
           height: `${tileSize}px`,
-          boxSizing: 'border-box',
           ...modifierStyles,
         }}
         onMouseEnter={this.handleOnMouseEnter}

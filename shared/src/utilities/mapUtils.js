@@ -211,7 +211,9 @@ export function getValidEmptyLocations(matrix, width = 1, height = 1) {
     }
 
     // will this fit?
-    const submatrix = matrixUtils.getSubmatrixSquare(matrix, new Point(tilePoint.x, tilePoint.y), new Point(tilePoint.x + width - 1, tilePoint.y + height - 1));
+    const topLeftPoint = new Point(tilePoint.x, tilePoint.y);
+    const bottomRightPoint = new Point(tilePoint.x + width - 1, tilePoint.y + height - 1);
+    const submatrix = matrixUtils.getSubmatrixSquare(matrix, topLeftPoint, bottomRightPoint);
     if (submatrix === undefined || matrixUtils.getHeight(submatrix) < height || matrixUtils.getWidth(submatrix) < width) {
       return;
     }

@@ -1,14 +1,16 @@
 import React, { Component, Fragment, PureComponent } from 'react';
-import Point from '@studiomoniker/point';
+import { Redirect } from 'react-router-dom';
+import { observer } from 'mobx-react';
 
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import Point from '@studiomoniker/point';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCircle,
 } from '@fortawesome/free-solid-svg-icons'
 
 import ClassicButtonComponent from 'common-components/ClassicButtonComponent';
 import CheckboxComponent from 'common-components/CheckboxComponent';
-import InputFieldComponent from 'common-components/InputFieldComponent';
+import TextInputComponent from 'common-components/TextInputComponent';
 import ModalComponent from 'common-components/ModalComponent';
 import RadioButtonComponent from 'common-components/RadioButtonComponent';
 
@@ -19,239 +21,248 @@ import {
   TILE_TYPES_NAME,
   FOG_TYPES,
 } from 'constants.shared/tileTypes';
-// import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
-import remoteAppState from 'data/remoteAppState';
-
-// import * as connectionManager from 'managers/connectionManager';
+import remoteAppState from 'state/remoteAppState';
 
 import debounce from 'utilities/debounce';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
- * page for testing
+ * page for tile editing
  */
-export default class EditorPage extends Component {
-  /** @override */
-  constructor(props) {
-    super(props);
+export default observer(
+  class TileEditorPage extends Component {
+    /** @override */
+    constructor(props) {
+      super(props);
 
-    this.handleOnChangeHeightValue = this.handleOnChangeHeightValue.bind(this);
-    this.handleOnChangeWidthValue = this.handleOnChangeWidthValue.bind(this);
-    this.handleOnChangeTileSizeValue = this.handleOnChangeTileSizeValue.bind(this);
-    this.handleNewMatrix = this.handleNewMatrix.bind(this);
-    this.updateMatrix = debounce(this.updateMatrix.bind(this), 350);
+      this.handleOnChangeHeightValue = this.handleOnChangeHeightValue.bind(this);
+      this.handleOnChangeWidthValue = this.handleOnChangeWidthValue.bind(this);
+      this.handleOnChangeTileSizeValue = this.handleOnChangeTileSizeValue.bind(this);
+      this.handleNewMatrix = this.handleNewMatrix.bind(this);
+      this.updateMatrix = debounce(this.updateMatrix.bind(this), 350);
 
-    this.handleOnClickTile = this.handleOnClickTile.bind(this);
-    this.handleOnHoverTile = this.handleOnHoverTile.bind(this);
-    this.handleOnLeaveTile = this.handleOnLeaveTile.bind(this);
-    this.handleOnChangeEditorTile = this.handleOnChangeEditorTile.bind(this);
+      this.handleOnClickTile = this.handleOnClickTile.bind(this);
+      this.handleOnHoverTile = this.handleOnHoverTile.bind(this);
+      this.handleOnLeaveTile = this.handleOnLeaveTile.bind(this);
+      this.handleOnChangeEditorTile = this.handleOnChangeEditorTile.bind(this);
 
-    this.state = {
-      selectedEditorTile: 'GRASS_EDITOR_TILE',
-      focusedTile: new Point(-1, -1),
-      mapMatrix: matrixUtils.createMatrix(10, 10, null),
-      mapWidth: 10,
-      mapHeight: 10,
-      tileSize: 40,
+      this.state = {
+        selectedEditorTile: 'GRASS_EDITOR_TILE',
+        focusedTile: new Point(-1, -1),
+        mapMatrix: matrixUtils.createMatrix(10, 10, null),
+        mapWidth: 10,
+        mapHeight: 10,
+        tileSize: 40,
+      }
     }
-  }
-  /** @override */
-  render() {
-    const {
-      focusedTile,
-      mapMatrix,
-      mapWidth,
-      mapHeight,
-      selectedEditorTile,
-      tileSize,
-    } = this.state;
+    /** @override */
+    render() {
+      if (!remoteAppState.get('isEditorMode')) {
+        if (remoteAppState.get('isInLobby')) {
+          return <Redirect to='/lobby' />
+        }
 
-    return (
-      <div className='flex-centered flex-col color-white bg-primary'>
-        <h2 className='bg-secondary fsize-4 pad-v-1 width-full text-center'>Tile Editor</h2>
+        if (remoteAppState.get('isInGame')) {
+          return <Redirect to='/game' />
+        }
+      }
 
-        <div className='flex-row height-full bg-primary-darker'>
-          <EditorPanel
-            mapMatrix={mapMatrix}
-            mapWidth={mapWidth}
-            mapHeight={mapHeight}
-            tileSize={tileSize}
-            selectedEditorTile={selectedEditorTile}
+      const {
+        focusedTile,
+        mapMatrix,
+        mapWidth,
+        mapHeight,
+        selectedEditorTile,
+        tileSize,
+      } = this.state;
 
-            onChangeHeightValue={this.handleOnChangeHeightValue}
-            onChangeWidthValue={this.handleOnChangeWidthValue}
-            onChangeTileSizeValue={this.handleOnChangeTileSizeValue}
-            onChangeEditorTile={this.handleOnChangeEditorTile}
+      return (
+        <div className='flex-center flex-col color-white bg-primary'>
+          <h2 className='bg-secondary fsize-4 pad-v-1 width-full text-center'>Tile Editor</h2>
 
-            onNewMatrix={this.handleNewMatrix}
-          />
+          <div className='flex-row height-full bg-primary-darker'>
+            <EditorPanel
+              mapMatrix={mapMatrix}
+              mapWidth={mapWidth}
+              mapHeight={mapHeight}
+              tileSize={tileSize}
+              selectedEditorTile={selectedEditorTile}
 
-          <div
-            className='flex-row-centered mar-h-auto mar-t-5'
-          >
+              onChangeHeightValue={this.handleOnChangeHeightValue}
+              onChangeWidthValue={this.handleOnChangeWidthValue}
+              onChangeTileSizeValue={this.handleOnChangeTileSizeValue}
+              onChangeEditorTile={this.handleOnChangeEditorTile}
+
+              onNewMatrix={this.handleNewMatrix}
+            />
+
             <div
-              className='flex-grow-1 flex-shrink-1 flex-col aitems-center position-relative bor-4-primary'
-              style={{
-                overflow: 'hidden',
-                backgroundColor: '#d2d2d2',
-              }}
+              className='flex-row-center mar-h-auto mar-t-5'
             >
-              { mapMatrix.map((mapRowData, rowIdx) => {
-                return (
-                  <div className='flex-row flex-shrink-0' key={`tile-map-row-${rowIdx}-key`} >
-                    { mapRowData.map((tileData, colIdx) => {
-                      const position = new Point(colIdx, rowIdx);
+              <div
+                className='flex-auto flex-col aitems-center position-relative bor-4-primary'
+                style={{
+                  overflow: 'hidden',
+                  backgroundColor: '#d2d2d2',
+                }}
+              >
+                { mapMatrix.map((mapRowData, rowIdx) => {
+                  return (
+                    <div className='flex-row flex-grow-only' key={`tile-map-row-${rowIdx}-key`} >
+                      { mapRowData.map((tileData, colIdx) => {
+                        const position = new Point(colIdx, rowIdx);
 
-                      return (
-                        <TileItemComponent
-                          key={`tile-item-${colIdx}-${rowIdx}-key`}
-                          {...tileData}
-                          tileSize={tileSize}
-                          position={position}
-                          tileType={tileData}
-                          fogType={FOG_TYPES.VISIBLE}
-                          isSelected={focusedTile.equals(position)}
+                        return (
+                          <TileItemComponent
+                            key={`tile-item-${colIdx}-${rowIdx}-key`}
+                            {...tileData}
+                            tileSize={tileSize}
+                            position={position}
+                            tileType={tileData}
+                            fogType={FOG_TYPES.VISIBLE}
+                            isSelected={focusedTile.equals(position)}
 
 
-                          onTileClick={this.handleOnClickTile}
-                          onTileHover={this.handleOnHoverTile}
-                          onTileLeave={this.handleOnLeaveTile}
-                        />
-                      )
-                    })}
-                  </div>
-                )})
-              }
+                            onTileClick={this.handleOnClickTile}
+                            onTileHover={this.handleOnHoverTile}
+                            onTileLeave={this.handleOnLeaveTile}
+                          />
+                        )
+                      })}
+                    </div>
+                  )})
+                }
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-  /**
-   * @param {Point} point
-   */
-  handleOnClickTile(point) {
-    const {
-      selectedEditorTile,
-      mapMatrix,
-    } = this.state;
+      );
+    }
+    /**
+     * @param {Point} point
+     */
+    handleOnClickTile(point) {
+      const {
+        selectedEditorTile,
+        mapMatrix,
+      } = this.state;
 
-    const translatedEditorTile = (() => {
-      switch(selectedEditorTile) {
-        case 'EMPTY_EDITOR_TILE':
-          return TILE_TYPES.EMPTY;
-        case 'GRASS_EDITOR_TILE':
-          return TILE_TYPES.GRASS;
-        case 'SIDEWALK_EDITOR_TILE':
-          return TILE_TYPES.SIDEWALK;
-        case 'ROAD_EDITOR_TILE':
-          return TILE_TYPES.ROAD;
-        case 'SWAMP_EDITOR_TILE':
-          return TILE_TYPES.SWAMP;
-        case 'PLANKS_EDITOR_TILE':
-          return TILE_TYPES.PLANKS;
-        case 'WOODS_EDITOR_TILE':
-          return TILE_TYPES.WOODS;
-        case 'WATER_EDITOR_TILE':
-          return TILE_TYPES.WATER;
-        case 'FOREST_EDITOR_TILE':
-          return TILE_TYPES.FOREST;
-        case 'NULL_EDITOR_TILE':
-        default:
-          return null;
-      }
-    })();
+      const translatedEditorTile = (() => {
+        switch(selectedEditorTile) {
+          case 'EMPTY_EDITOR_TILE':
+            return TILE_TYPES.EMPTY;
+          case 'GRASS_EDITOR_TILE':
+            return TILE_TYPES.GRASS;
+          case 'SIDEWALK_EDITOR_TILE':
+            return TILE_TYPES.SIDEWALK;
+          case 'ROAD_EDITOR_TILE':
+            return TILE_TYPES.ROAD;
+          case 'SWAMP_EDITOR_TILE':
+            return TILE_TYPES.SWAMP;
+          case 'PLANKS_EDITOR_TILE':
+            return TILE_TYPES.PLANKS;
+          case 'WOODS_EDITOR_TILE':
+            return TILE_TYPES.WOODS;
+          case 'WATER_EDITOR_TILE':
+            return TILE_TYPES.WATER;
+          case 'FOREST_EDITOR_TILE':
+            return TILE_TYPES.FOREST;
+          case 'NULL_EDITOR_TILE':
+          default:
+            return null;
+        }
+      })();
 
-    // look at what's existing, if we're about to use the same type on a tile, then make it empty
-    const existingTileType = matrixUtils.getTileAt(mapMatrix, point);
-    const isIdentitical = existingTileType === translatedEditorTile;
-    const nextTileType = !isIdentitical ? translatedEditorTile : TILE_TYPES.EMPTY;
+      // look at what's existing, if we're about to use the same type on a tile, then make it empty
+      const existingTileType = matrixUtils.getTileAt(mapMatrix, point);
+      const isIdentitical = existingTileType === translatedEditorTile;
+      const nextTileType = !isIdentitical ? translatedEditorTile : TILE_TYPES.EMPTY;
 
-    // update that tile
-    matrixUtils.setTileAt(mapMatrix, point, nextTileType);
-    this.setState({mapMatrix: mapMatrix});
-  }
-  /**
-   *
-   */
-  handleOnHoverTile(position) {
-    this.setState({focusedTile: position});
-  }
-  /**
-   *
-   */
-  handleOnLeaveTile(position) {
+      // update that tile
+      matrixUtils.setTileAt(mapMatrix, point, nextTileType);
+      this.setState({mapMatrix: mapMatrix});
+    }
+    /**
+     *
+     */
+    handleOnHoverTile(position) {
+      this.setState({focusedTile: position});
+    }
+    /**
+     *
+     */
+    handleOnLeaveTile(position) {
 
-  }
-  /**
-   *
-   */
-  handleOnChangeHeightValue(newHeight) {
-    this.setState({mapHeight: newHeight}, () => {
-      this.updateMatrix();
-    });
-  }
-  /**
-   *
-   */
-  handleOnChangeWidthValue(newWidth) {
-    this.setState({mapWidth: newWidth}, () => {
-      this.updateMatrix();
-    });
-  }
-  /**
-   *
-   */
-  handleNewMatrix(newMatrix) {
-    const newHeight = newMatrix[0].length;
-    const newWidth = newMatrix.length;
+    }
+    /**
+     *
+     */
+    handleOnChangeHeightValue(newHeight) {
+      this.setState({mapHeight: newHeight}, () => {
+        this.updateMatrix();
+      });
+    }
+    /**
+     *
+     */
+    handleOnChangeWidthValue(newWidth) {
+      this.setState({mapWidth: newWidth}, () => {
+        this.updateMatrix();
+      });
+    }
+    /**
+     *
+     */
+    handleNewMatrix(newMatrix) {
+      const newHeight = newMatrix[0].length;
+      const newWidth = newMatrix.length;
 
-    this.setState({
-      mapMatrix: newMatrix,
-      mapHeight: newHeight,
-      mapWidth: newWidth,
-    });
-  }
-  /**
-   *
-   */
-  updateMatrix() {
-    const oldMatrix = this.state.mapMatrix;
-    const newHeight = this.state.mapHeight;
-    const newWidth = this.state.mapWidth;
+      this.setState({
+        mapMatrix: newMatrix,
+        mapHeight: newHeight,
+        mapWidth: newWidth,
+      });
+    }
+    /**
+     *
+     */
+    updateMatrix() {
+      const oldMatrix = this.state.mapMatrix;
+      const newHeight = this.state.mapHeight;
+      const newWidth = this.state.mapWidth;
 
-    // go through and assign old data
-    const newMatrix = matrixUtils.createMatrix(newWidth, newHeight, null);
-    matrixUtils.forEach(newMatrix, (tile, position) => {
-      const oldTileData = oldMatrix[position.y] && oldMatrix[position.y][position.x];
-      if (oldTileData === null || oldTileData === undefined) {
-        return;
-      }
+      // go through and assign old data
+      const newMatrix = matrixUtils.createMatrix(newWidth, newHeight, null);
+      matrixUtils.forEach(newMatrix, (tile, position) => {
+        const oldTileData = oldMatrix[position.y] && oldMatrix[position.y][position.x];
+        if (oldTileData === null || oldTileData === undefined) {
+          return;
+        }
 
-      newMatrix[position.y][position.x] = oldTileData;
-    });
+        newMatrix[position.y][position.x] = oldTileData;
+      });
 
-    this.setState({
-      mapMatrix: newMatrix,
-      mapHeight: newHeight,
-      mapWidth: newWidth,
-    });
+      this.setState({
+        mapMatrix: newMatrix,
+        mapHeight: newHeight,
+        mapWidth: newWidth,
+      });
+    }
+    /**
+     *
+     */
+    handleOnChangeTileSizeValue(newValue) {
+      this.setState({tileSize: newValue});
+    }
+    /**
+     * @param {String} newValue
+     */
+    handleOnChangeEditorTile(newValue) {
+      this.setState({selectedEditorTile: newValue});
+    }
   }
-  /**
-   *
-   */
-  handleOnChangeTileSizeValue(newValue) {
-    this.setState({tileSize: newValue});
-  }
-  /**
-   * @param {String} newValue
-   */
-  handleOnChangeEditorTile(newValue) {
-    this.setState({selectedEditorTile: newValue});
-  }
-}
+)
 /**
  *
  */
@@ -272,7 +283,6 @@ class EditorPanel extends PureComponent {
     this.onExportClick = this.onExportClick.bind(this);
     this.onImportClick = this.onImportClick.bind(this);
     this.onClickModalOverlay = this.onClickModalOverlay.bind(this);
-    this.onClickSwitchToEditor = this.onClickSwitchToEditor.bind(this);
 
     this.onChangeExportType = this.onChangeExportType.bind(this);
     this.onChangeWidthValue = this.onChangeWidthValue.bind(this);
@@ -319,7 +329,7 @@ class EditorPanel extends PureComponent {
       >
         {/* Modal */}
         <ModalComponent
-          className='flex-col-centered bg-white pad-2 mar-v-5'
+          className='flex-col-center bg-white pad-2 mar-v-5'
           style={{
             width: '500px',
             height: '500px',
@@ -332,8 +342,7 @@ class EditorPanel extends PureComponent {
 
         {/* Tile options */}
         <form
-          className='sibling-mar-t-3 width-full flex-row'
-          style={{flexWrap: 'wrap'}}
+          className='sibling-mar-t-3 width-full flex-row flex-wrap-yes'
           onSubmit={e => e.preventDefault()}
         >
           <CheckboxComponent
@@ -454,26 +463,26 @@ class EditorPanel extends PureComponent {
           className='sibling-mar-t-3 width-full flex-col'
           onSubmit={e => e.preventDefault()}
         >
-          <InputFieldComponent
+          <TextInputComponent
             value={mapWidth}
             onChange={this.onChangeWidthValue}
           >
-            <span className='mar-h-1 flex-shrink-0 color-white opacity-7'>Width</span>
-          </InputFieldComponent>
+            <span className='mar-h-1 flex-grow-only color-white opacity-7'>Width</span>
+          </TextInputComponent>
 
-          <InputFieldComponent
+          <TextInputComponent
             value={mapHeight}
             onChange={this.onChangeHeightValue}
           >
-            <span className='mar-h-1 flex-shrink-0 color-white opacity-7'>Height</span>
-          </InputFieldComponent>
+            <span className='mar-h-1 flex-grow-only color-white opacity-7'>Height</span>
+          </TextInputComponent>
 
-          <InputFieldComponent
+          <TextInputComponent
             value={tileSize}
             onChange={this.onChangeTileSizeValue}
           >
-            <span className='mar-h-1 flex-shrink-0 color-white opacity-7'>Tile Size</span>
-          </InputFieldComponent>
+            <span className='mar-h-1 flex-grow-only color-white opacity-7'>Tile Size</span>
+          </TextInputComponent>
         </form>
 
         <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
@@ -521,20 +530,6 @@ class EditorPanel extends PureComponent {
             onClick={this.onImportClick}
           >
             Import
-          </ClassicButtonComponent>
-        </form>
-
-        <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
-
-        <form
-          className='sibling-mar-t-3 width-full flex-col'
-          onSubmit={e => e.preventDefault()}
-        >
-          <ClassicButtonComponent
-            className='sibling-mar-t-3'
-            onClick={this.onClickSwitchToEditor}
-          >
-            Switch to Game
           </ClassicButtonComponent>
         </form>
       </div>
@@ -653,12 +648,6 @@ class EditorPanel extends PureComponent {
     const value = e.target.value;
     this.props.onChangeEditorTile(value);
   }
-  /**
-   *
-   */
-  onClickSwitchToEditor() {
-    remoteAppState.set({isTileEditorMode: false});
-  }
 }
 class ExportModal extends Component {
   render() {
@@ -670,11 +659,7 @@ class ExportModal extends Component {
       <Fragment>
         <span className='color-black fsize-4'>Export Result</span>
         <textarea
-          className='color-black pad-2 width-full height-full'
-          style={{
-            border: '1px solid lightgray',
-            boxSizing: 'border-box',
-          }}
+          className='color-black pad-2 width-full height-full box-sizing-border bor-1-gray'
           defaultValue={value}
         />
       </Fragment>
@@ -696,11 +681,7 @@ class ImportModal extends Component {
       <Fragment>
         <span className='color-black fsize-4'>Import</span>
         <textarea
-          className='color-black pad-2 width-full height-full'
-          style={{
-            border: '1px solid lightgray',
-            boxSizing: 'border-box',
-          }}
+          className='color-black pad-2 width-full height-full box-sizing-border bor-1-gray'
           placeholder='I want a Matrix'
           onChange={this.handleOnChangeTextarea.bind(this)}
         />

@@ -89,9 +89,10 @@ textarea
     vertical-align:middle;
     white-space:normal;
     background:none;
-    line-height:1;
-
-    /* Browsers have different default form fonts */
+    /*line-height:1;*/
     font-size: inherit;
-    font-family:Arial;
+    font-family: inherit;
+}
+a {
+    text-decoration: none;
 }

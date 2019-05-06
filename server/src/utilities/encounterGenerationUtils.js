@@ -3,10 +3,10 @@ import {
   isWalkableType,
 } from 'constants.shared/tileTypes';
 
+import { getEncounterAttributes } from 'helpers.shared/encounterDataHelper';
+
 // import Point from '@studiomoniker/point';
 import EncounterModel from 'models/EncounterModel';
-
-import {getEncounterAttributes} from 'collections/encounterCollections';
 
 import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
 import * as mathUtils from 'utilities.shared/mathUtils';

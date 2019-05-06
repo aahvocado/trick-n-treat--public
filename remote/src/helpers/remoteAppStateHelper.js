@@ -1,6 +1,7 @@
 import {GAME_MODES} from 'constants.shared/gameModes';
 
-import remoteAppState from 'data/remoteAppState';
+import remoteAppState from 'state/remoteAppState';
+import remoteGameState from 'state/remoteGameState';
 
 /**
  *
@@ -16,7 +17,7 @@ export function isMyTurn() {
  * @returns {Boolean}
  */
 export function canUseActions() {
-  const gamestate = remoteAppState.get('gamestate');
+  const gamestate = remoteGameState.get('gamestate');
   if (gamestate === undefined) {
     return false;
   }

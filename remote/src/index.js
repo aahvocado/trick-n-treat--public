@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import remoteAppState from 'data/remoteAppState';
+import remoteAppState from 'state/remoteAppState';
+import remoteGameState from 'state/remoteGameState';
 
 // services
 import * as serviceWorker from './serviceWorker';
@@ -24,6 +25,7 @@ const socket = connectionManager.connect();
 
 // after connecting, add some events to our state
 remoteAppState.attachSocketListeners(socket);
+remoteGameState.attachSocketListeners(socket);
 
 // render after everything
 ReactDOM.render(<App />, document.getElementById('root'));
@@ -49,14 +51,14 @@ window.addEventListener('keypress', (e) => {
   }
   // t
   if (e.keyCode === 116) {
-    remoteAppState.set({isTileEditorMode: !remoteAppState.get('isTileEditorMode')});
+    // remoteAppState.set({isEditorMode: !remoteAppState.get('isEditorMode')});
   }
   // z
   if (e.keyCode === 122) {
-    remoteAppState.set({useZoomedOutMap: !remoteAppState.get('useZoomedOutMap')});
+    remoteGameState.set({useZoomedOutMap: !remoteGameState.get('useZoomedOutMap')});
   }
   // v
   if (e.keyCode === 118) {
-    remoteAppState.set({useFullyVisibleMap: !remoteAppState.get('useFullyVisibleMap')});
+    remoteGameState.set({useFullyVisibleMap: !remoteGameState.get('useFullyVisibleMap')});
   }
 });

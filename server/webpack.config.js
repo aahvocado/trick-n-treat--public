@@ -27,6 +27,8 @@ module.exports = {
       utilities: path.resolve(srcPath, 'utilities'),
 
       'constants.shared': path.resolve(sharedPath, 'constants'),
+      'data.shared': path.resolve(sharedPath, 'data'),
+      'helpers.shared': path.resolve(sharedPath, 'helpers'),
       'utilities.shared': path.resolve(sharedPath, 'utilities'),
     }
   },

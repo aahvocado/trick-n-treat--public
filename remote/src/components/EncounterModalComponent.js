@@ -18,8 +18,8 @@ export default class EncounterModalComponent extends PureComponent {
     active: false,
 
     // -- encounter props
-    /** @type {EncounterData.actions} */
-    actions: [],
+    /** @type {EncounterData.actionList} */
+    actionList: [],
     /** @type {EncounterData.title} */
     title: 'default title',
     /** @type {EncounterData.content} */
@@ -37,9 +37,10 @@ export default class EncounterModalComponent extends PureComponent {
   /** @override */
   render() {
     const {
-      actions,
+      actionList,
       content,
       title,
+
       ...otherProps
     } = this.props;
 
@@ -55,13 +56,13 @@ export default class EncounterModalComponent extends PureComponent {
         <h2 className='color-white sibling-mar-t-2'>{ title }</h2>
 
         <div
-          className='fsize-5 flex-col-centered color-white bg-primary-darker flex-grow-1 width-full mar-h-2 sibling-mar-t-2'
+          className='fsize-5 flex-col-center flex-grow-only pad-3 box-sizing-border color-white bg-primary-darker width-full mar-h-2 sibling-mar-t-2'
         >
           { content }
         </div>
 
         <div className='flex-row sibling-mar-t-2'>
-          { actions.map((encounterAction, idx) => {
+          { actionList.map((encounterAction, idx) => {
             return (
               <EncounterActionButton
                 {...encounterAction}
@@ -98,6 +99,8 @@ class EncounterActionButton extends PureComponent {
     const {
       label,
       actionId,
+      gotoId,
+
       ...otherProps
     } = this.props;
 

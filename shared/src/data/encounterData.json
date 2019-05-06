@@ -1,0 +1,61 @@
+[
+  {
+    "id": "ADD_CANDY_BASIC.ENCOUNTER_ID",
+    "title": "Candy on the Streets",
+    "content": "You found a candy!",
+    "tagList": [
+      "TAG_ID.ENCOUNTER",
+      "TAG_ID.SIDEWALK"
+    ],
+    "actionList": [
+      {
+        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
+        "label": "Close"
+      }
+    ],
+    "triggerList": [
+      {
+        "triggerId": "ENCOUNTER_TRIGGER_ID.CANDY.ADD",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": "LOSE_CANDY_BASIC.ENCOUNTER_ID",
+    "title": "Spooky in the Sheets",
+    "content": "Oh no you lost a candy!",
+    "tagList": [
+      "TAG_ID.ENCOUNTER",
+      "TAG_ID.SIDEWALK"
+    ],
+    "actionList": [
+      {
+        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
+        "label": "Close"
+      }
+    ],
+    "triggerList": [
+      {
+        "triggerId": "ENCOUNTER_TRIGGER_ID.CANDY.SUBTRACT",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": "GOTO_LOSE_CANDY_BASIC.ENCOUNTER_ID",
+    "title": "Standing there Menancingly",
+    "content": "There is a silhoutte of a little boy under a flickering streetlight...",
+    "tagList": [
+      "TAG_ID.ENCOUNTER",
+      "TAG_ID.SIDEWALK"
+    ],
+    "actionList": [
+      {
+        "actionId": "ENCOUNTER_ACTION_ID.GOTO",
+        "label": "Take a closer look...",
+        "gotoId": "LOSE_CANDY_BASIC.ENCOUNTER_ID"
+      }
+    ],
+    "triggerList": []
+  }
+]

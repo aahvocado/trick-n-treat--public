@@ -21,7 +21,7 @@ export default class EncounterModel extends Model {
       /** @type {String} */
       content: '',
       /** @type {Array<EncounterAction>} */
-      actions: [],
+      actionList: [],
 
       // -- configure me
       /** @type {Point} */
@@ -83,7 +83,7 @@ export default class EncounterModel extends Model {
       location,
       title,
       content,
-      actions,
+      actionList,
     } = exportData;
 
     return {
@@ -91,7 +91,7 @@ export default class EncounterModel extends Model {
       location,
       title,
       content,
-      actions,
+      actionList,
     };
   }
 }

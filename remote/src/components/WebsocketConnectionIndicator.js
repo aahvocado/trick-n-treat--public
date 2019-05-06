@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import {observer} from "mobx-react";
 
-import remoteAppState from 'data/remoteAppState';
+import remoteAppState from 'state/remoteAppState';
 
 import * as connectionManager from 'managers/connectionManager';
 

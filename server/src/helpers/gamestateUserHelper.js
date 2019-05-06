@@ -4,7 +4,7 @@ import {FastCharacter} from 'collections/characterCollection';
 
 import {CLIENT_TYPES} from 'constants.shared/clientTypes';
 import {CLIENT_ACTIONS, isMovementAction} from 'constants.shared/clientActions';
-import {ENCOUNTER_ACTION_ID} from 'constants.shared/encounterConstants';
+import {ENCOUNTER_ACTION_ID} from 'constants.shared/encounterActions';
 import {GAME_MODES} from 'constants.shared/gameModes';
 import {MAP_START} from 'constants/mapSettings';
 import {POINTS} from 'constants/points';

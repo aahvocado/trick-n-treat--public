@@ -1,6 +1,6 @@
 import io from 'socket.io-client';
 
-import remoteAppState from 'data/remoteAppState';
+import remoteAppState from 'state/remoteAppState';
 
 const SERVER_URL = 'localhost:666';
 

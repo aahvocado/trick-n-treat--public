@@ -46,7 +46,7 @@ export class CharacterMenuComponent extends PureComponent {
   render() {
 
     return (
-      <div className='flex-row-centered mar-b-3'>
+      <div className='flex-row-center mar-b-3'>
         <CharacterButtonComponent>
           Inventory
         </CharacterButtonComponent>
@@ -122,7 +122,7 @@ export class InventoryItemComponent extends PureComponent {
   render() {
     return (
       <div
-        className='mar-1 borradius-2 bg-secondary-lighter boxshadow-b-1-primary cursor-pointer flex-row-centered'
+        className='mar-1 borradius-2 bg-secondary-lighter boxshadow-b-1-primary cursor-pointer flex-row-center'
         style={{
           height: '100px',
           width: '100px',

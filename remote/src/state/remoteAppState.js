@@ -5,7 +5,6 @@ import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 import Model from 'models/Model';
 
 import logger from 'utilities/logger.remote';
-import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 const createDate = new Date();
 
@@ -32,29 +31,21 @@ export class RemoteStateModel extends Model {
       _userId: `${_name}-${createDate.getTime()}`,
       userId: 'TEST_REMOTE_USER',
 
-      // -- gamestate - from the server
-      /** @type {GamestateObject | undefined} */
-      gamestate: undefined,
+      // -- my client state - from the server
+      /** @type {Boolean} */
+      isInLobby: false,
+      /** @type {Boolean} */
+      isInGame: false,
+      /** @type {Boolean} */
+      isGameInProgress: false,
+      /** @type {Array<String>} */
+      lobbyData: [],
+
+      // -- my player's specific gamestate stuff
       /** @type {Object | undefined} */
       myCharacter: undefined,
       /** @type {Object | undefined} */
       myUser: undefined,
-      /** @type {EncounterData| null} */
-      activeEncounter: null,
-
-      // -- tile map options
-      /** @type {Boolean} */
-      useFullyVisibleMap: false,
-      /** @type {Boolean} */
-      useZoomedOutMap: false,
-
-      // -- my client state - from the server
-      /** @type {Boolean} */
-      isInLobby: true,
-      /** @type {Boolean} */
-      isInGame: false,
-      /** @type {Array<String>} */
-      lobbyData: [],
 
       // -- websocket connection status
       /** @type {Boolean} */
@@ -66,39 +57,19 @@ export class RemoteStateModel extends Model {
       /** @type {Boolean} */
       isDevMode: true,
       /** @type {Boolean} */
-      isTileEditorMode: false,
+      isEditorMode: false,
       /** @type {Boolean} */
       isDebugMenuActive: false,
       /** @type {Array} */
       appLog: [],
+      //
+      ...newAttributes,
     });
   }
   /**
    * attach listeners to the websocket
    */
   attachSocketListeners(socket) {
-    // received new Gamestate from Server
-    socket.on(SOCKET_EVENTS.GAME.UPDATE, (data) => {
-      // convert positional Coordinates into points
-      // @todo - fix this ugly
-      this.set({
-        gamestate: {
-          ...data,
-          mapData: matrixUtils.map(data.mapData, ((tileData) => ({
-            ...tileData,
-            position: new Point(tileData.position.x, tileData.position.y),
-          }))),
-        },
-      });
-
-      logger.server('received GAME.UPDATE');
-    });
-    socket.on(SOCKET_EVENTS.GAME.ENCOUNTER_TRIGGER, (data) => {
-      this.set({
-        activeEncounter: data,
-      });
-    });
-    // -- client
     socket.on(SOCKET_EVENTS.CLIENT.UPDATE, (data) => {
       // convert positional Coordinates into points
       // @todo - fix this ugly
@@ -114,7 +85,6 @@ export class RemoteStateModel extends Model {
 
       logger.server('received CLIENT.UPDATE');
     });
-
     // -- connection stuff
     socket.on('connect', () => {
       this.set({
@@ -142,10 +112,17 @@ export class RemoteStateModel extends Model {
     });
   }
 }
+// prepare default state based on current path
+const currentPath = window.location.pathname;
+const isPathEditorMode = currentPath === '/encounter_editor' || currentPath === '/tile_editor';
 /**
  * Remote App State Singleton
  *
  * @type {RemoteStateModel}
  */
-const remoteAppState = new RemoteStateModel();
+const remoteAppState = new RemoteStateModel({
+  isInLobby: currentPath === '/lobby',
+  isInGame: currentPath === '/game',
+  isEditorMode: isPathEditorMode,
+});
 export default remoteAppState;
