@@ -146,6 +146,19 @@ export function findPoints(matrix, callback) {
   return points;
 }
 /**
+ * finds if there is a TileType that is within path distance
+ *
+ * @param {Matrix} matrix
+ * @param {Point} startPoint
+ * @param {TileType} tileType
+ * @param {Number} distance
+ * @returns {Boolean}
+ */
+export function hasTypeNearbyOnPath(matrix, startPoint, tileType, distance) {
+  const nearbyPoints = getPointOfNearestWalkableType(matrix, startPoint, distance);
+  return nearbyPoints.some((point) => (matrixUtils.isTileEqualTo(matrix, point, tileType)));
+}
+/**
  * iterates through each point and returns anything that fulfils the given callback with condition
  *
  * @param {Matrix} matrix

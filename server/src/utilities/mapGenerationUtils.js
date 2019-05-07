@@ -155,7 +155,7 @@ export function createGraveyardBiomeModel(tileMapModel, biomeSettings) {
 export function createSmallWoodsBiomeModel(tileMapModel) {
   const biomeWidth = mathUtils.getRandomIntInclusive(5, 8);
   const biomeHeight = mathUtils.getRandomIntInclusive(5, 8);
-  const spawnPoint = tileMapModel.getRandomEmptyLocationNearWalkableTile(biomeWidth, biomeHeight, 3);
+  const spawnPoint = tileMapModel.getRandomEmptyLocationNearWalkableTile(biomeWidth, biomeHeight, 2);
 
   // create the basic model
   // the Woods is small

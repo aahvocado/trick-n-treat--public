@@ -61,7 +61,6 @@ export function sendEncounterToUser(userModel, encounterId) {
 
   handleCharacterTriggerEncounter(userModel, newEncounterModel);
 };
-
 /**
  * handles each of the triggers in an encounter
  * @todo - I intentionally separated these into separate functions even though they are a simple +/- in anticipation

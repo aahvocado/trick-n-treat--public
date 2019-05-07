@@ -12,12 +12,13 @@ import * as mathUtils from 'utilities.shared/mathUtils';
 
 /**
  * generates a new EncounterModel of a random Encounter that fits criteria of given options
+ * - returns `null` if there are none that match search options
  *
  * @param {Object} options
  * @property {Point} options.location
  * @property {Array} [options.includeTags]
  * @property {Array} [options.excludeTags]
- * @returns {EncounterModel}
+ * @returns {EncounterModel | null}
  */
 export function generateRandomEncounter(options) {
   const {
@@ -31,6 +32,10 @@ export function generateRandomEncounter(options) {
   // then choose one randomly from the potential list
   const chosenEncounterIdx = mathUtils.getRandomIntInclusive(0, potentialEncounters.length - 1);
   const chosenEncounterData = potentialEncounters[chosenEncounterIdx];
+
+  if (chosenEncounterData === undefined) {
+    return null;
+  }
 
   // create and return the encounter
   return new EncounterModel({

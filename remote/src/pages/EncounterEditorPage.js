@@ -259,11 +259,14 @@ class EncounterEditorPage extends Component {
    */
   createNew() {
     const blankEncounterData = {
-      id: `NEW_ENCOUNTER.${Date.now()}`,
+      id: 'ENCOUNTER_ID.NEW',
       title: '',
       content: '',
       tagList: [],
-      actionList: [],
+      actionList: [{
+        label: "Okay",
+        actionId: "ENCOUNTER_ACTION_ID.CONFIRM"
+      }],
       triggerList: [],
     };
 
@@ -411,7 +414,7 @@ class EncounterEditorPage extends Component {
     // add it
     triggerList.push({
       triggerId: triggerId,
-      value: 0,
+      value: 1,
     });
 
     // update the data
@@ -619,7 +622,7 @@ class InterfacePanel extends Component {
           <ClassicButtonComponent
             className='sibling-mar-t-2'
             onClick={onClickSave}
-            disabled={!hasChanges}
+            disabled={!hasChanges || activeEncounterData.id === 'ENCOUNTER_ID.NEW' || activeEncounterData.id === ''}
           >
             {`Save ${isNewEncounter ? 'New' : ''}`}
           </ClassicButtonComponent>
@@ -627,6 +630,7 @@ class InterfacePanel extends Component {
           <ClassicButtonComponent
             className='sibling-mar-t-2'
             onClick={onClickDelete}
+            disabled={isNewEncounter}
           >
             Delete
           </ClassicButtonComponent>

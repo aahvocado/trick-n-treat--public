@@ -45,7 +45,9 @@ export function findEncounterData(options) {
     excludeTags = [],
   } = options;
 
-  return ENCOUNTER_DATA.filter((encounter) =>
-    arrayContainsArray(encounter.tagList, includeTags) && !arrayContainsArray(encounter.tagList, excludeTags)
-  );
+  return ENCOUNTER_DATA.filter((encounter) => {
+    const doesIncludeTags = arrayContainsArray(encounter.tagList, includeTags);
+    const doesExcludeTags = !arrayContainsArray(encounter.tagList, excludeTags);
+    return doesIncludeTags && doesExcludeTags;
+  });
 }

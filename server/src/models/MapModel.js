@@ -53,6 +53,17 @@ export class MapModel extends MatrixModel {
     return mapUtils.getAStarPath(this.getMatrix(), startPoint, endPoint);
   }
   /**
+   * finds if there is a TileType that is within path distance
+   *
+   * @param {Point} startPoint
+   * @param {TileType} tileType
+   * @param {Number} distance
+   * @returns {Boolean}
+   */
+  hasTypeNearbyOnPath(startPoint, tileType, distance) {
+    return mapUtils.hasTypeNearbyOnPath(this.getMatrix(), startPoint, tileType, distance);
+  }
+  /**
    * finds a path and then applies it using given `tileType`
    *
    * @param {Point} startPoint

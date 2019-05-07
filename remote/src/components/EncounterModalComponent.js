@@ -56,7 +56,7 @@ export default class EncounterModalComponent extends PureComponent {
         <h2 className='color-white sibling-mar-t-2'>{ title }</h2>
 
         <div
-          className='fsize-5 flex-col-center flex-grow-only pad-3 box-sizing-border color-white bg-primary-darker width-full mar-h-2 sibling-mar-t-2'
+          className='fsize-5 text-center flex-col-center flex-grow-only pad-3 box-sizing-border color-white bg-primary-darker width-full mar-h-2 sibling-mar-t-2'
         >
           { content }
         </div>

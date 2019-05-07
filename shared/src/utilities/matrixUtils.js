@@ -295,18 +295,23 @@ export function getTypeCountsAdjacentTo(matrix, centerPoint, distance = 1) {
  * @returns {Matrix | undefined}
  */
 export function getSubmatrixSquare(matrix, topLeftPoint, bottomRightPoint) {
-  // if either points are out of bounds, then not possible
-  if (getTileAt(matrix, topLeftPoint) === undefined || getTileAt(matrix, bottomRightPoint) === undefined) {
+  const width = getWidth(matrix);
+  const height = getHeight(matrix);
+
+  // not possible if either points are out of bounds
+  const isXOutOfBounds = topLeftPoint.x < 0 || topLeftPoint.x >= width || bottomRightPoint.x < 0 || bottomRightPoint.x >= width;
+  const isYOutOfBounds = topLeftPoint.y < 0 || topLeftPoint.y >= height || bottomRightPoint.y < 0 || bottomRightPoint.y >= height;
+  if (isXOutOfBounds || isYOutOfBounds) {
     return undefined;
   }
 
-  // find the width and height of the points, we add 1 because it needs to be inclusive of 0
+  // find the distance between the points, we add 1 because it needs to be inclusive of 0
   //  eg. [0, 1] has width of 2, despite 1 - 0 equalling 1
-  const width = bottomRightPoint.x - topLeftPoint.x + 1;
-  const height = bottomRightPoint.y - topLeftPoint.y + 1;
+  const xDistance = bottomRightPoint.x + 1 - topLeftPoint.x;
+  const yDistance = bottomRightPoint.y + 1 - topLeftPoint.y;
 
-  // if width is too small or too big, then no submatrix is possible
-  if (width <= 0 || height <= 0 || width > getWidth(matrix) || height > getHeight(matrix)) {
+  // we can't do anything if size of expected submatrix is smaller or larger than our parent matrix
+  if (xDistance <= 0 || yDistance <= 0 || xDistance > width || yDistance > height) {
     return undefined;
   }
 
