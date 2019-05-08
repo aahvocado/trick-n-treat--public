@@ -91,6 +91,18 @@ export function handleJoinGame(clientModel) {
   });
 
   sendUpdateToClientByUser(existingUser);
+
+  // check if the user rejoined and it is actually their turn
+  const activeUser = gameState.get('activeUser');
+  const isActiveUser = activeUser.get('userId') === userId;
+
+  // check if there is an `activeEncounter` to send them to finish
+  const activeEncounter = gameState.get('activeEncounter');
+  if (isActiveUser && activeEncounter !== null) {
+    const activeCharacter = gameState.get('activeCharacter');
+    const evaluatedEncounterData = gamestateEncounterHelper.createEvaluatedEncounterData(activeCharacter, activeEncounter);
+    sendEncounterToClientByUser(activeUser, evaluatedEncounterData);
+  }
 }
 /**
  * @param {String} userId
@@ -333,14 +345,16 @@ export function handleUserEncounterAction(userId, encounterId, actionData) {
 
   // just a basic confirmation to close the `Encounter`
   if (actionId === ENCOUNTER_ACTION_ID.CONFIRM) {
+    // tell the client their encounter is now null
     sendEncounterToClientByUser(activeUserModel, null);
 
+    // action is complete
     onUserActionComplete(activeUserModel);
   }
 
   // this goes to another `Encounter`
   if (actionId === ENCOUNTER_ACTION_ID.GOTO) {
-    gamestateEncounterHelper.sendEncounterToUser(activeUserModel, gotoId);
+    gamestateEncounterHelper.handleEncounterActionGoTo(activeUserModel, gotoId);
   }
 }
 /**

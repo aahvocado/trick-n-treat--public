@@ -1,5 +1,3 @@
-import Point from '@studiomoniker/point';
-
 import {ENCOUNTER_TRIGGER_ID} from 'constants.shared/encounterTriggers';
 
 import gameState from 'data/gameState';
@@ -55,18 +53,22 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
   sendEncounterToClientByUser(userModel, evaluatedEncounterData);
 }
 /**
- *
+ * the Action that was chosen takes User to another Encounter
  *
  * @param {UserModel} userModel
  * @param {EncounterId} encounterId
  */
-export function sendEncounterToUser(userModel, encounterId) {
-  logger.verbose(`(directly sending encounter to ${userModel.get('name')})`);
+export function handleEncounterActionGoTo(userModel, encounterId) {
+  const userId = userModel.get('userId');
+  const characterModel = gameState.findCharacterByUserId(userId);
 
+  // find the data and create the next Encounter to go to
   const encounterData = getEncounterDataById(encounterId);
   const newEncounterModel = new EncounterModel(encounterData);
 
-  handleCharacterTriggerEncounter(userModel, newEncounterModel);
+  // trigger the Encounter
+  logger.verbose(`(encounter action goes to ${newEncounterModel.get('id')})`);
+  handleCharacterTriggerEncounter(characterModel, newEncounterModel);
 };
 /**
  * handles each of the triggers in an encounter
@@ -91,7 +93,6 @@ export function resolveTriggerList(encounterModel, characterModel) {
  *
  * @param {EncounterTriggerData} encounterTriggerData
  * @param {CharacterModel} characterModel
- * @returns {Boolean}
  */
 export function resolveTrigger(encounterTriggerData, characterModel) {
   const conditionList = encounterDataUtils.getTriggerConditionList(encounterTriggerData);
@@ -177,8 +178,8 @@ export function resolveTrigger(encounterTriggerData, characterModel) {
  * - looks for any Actions or Triggers that have a Condition,
  *  then adds a `_doesMeetConditions: Boolean` for if the Character meets the condition
  *
- * @param {CharacterModel}
- * @param {EncounterModel}
+ * @param {CharacterModel} characterModel
+ * @param {EncounterModel} encounterModel
  * @returns {Object} - should return a structure similar to EncounterData
  */
 export function createEvaluatedEncounterData(characterModel, encounterModel) {

@@ -38,8 +38,8 @@ export class MapModel extends MatrixModel {
   mergeMapModel(mergingMapModel) {
     this.mergeMatrixModel(mergingMapModel);
 
-    const myEncounters = this.get('encounters');
-    const newEncounters = mergingMapModel.get('encounters');
+    // const myEncounters = this.get('encounters');
+    // const newEncounters = mergingMapModel.get('encounters');
   }
   // -- class methods
   /**

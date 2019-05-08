@@ -32,7 +32,7 @@ export default class EncounterModel extends Model {
       // -- instance data
       /** @type {Number} */
       triggerCount: 0,
-       /** @type {Array<CharacterModel>} */
+      /** @type {Array<CharacterModel>} */
       visitors: [],
       //
       ...newAttributes,

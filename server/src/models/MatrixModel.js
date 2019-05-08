@@ -182,8 +182,8 @@ export class MatrixModel extends Model {
    * @param {TileType} tileType
    * @returns {Boolean}
    */
-  containsTileType(tileData) {
-    return matrixUtils.containsTileType(this.getMatrix(), tileData);
+  containsTileType(tileType) {
+    return matrixUtils.containsTileType(this.getMatrix(), tileType);
   }
   /**
    * finds if there are any tiles of given Type in a Matrix

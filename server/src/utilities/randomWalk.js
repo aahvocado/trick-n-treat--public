@@ -17,7 +17,6 @@ import * as matrixUtils from 'utilities.shared/matrixUtils';
  * @param {Number} remainingSteps
  * @param {Number} stepSize
  * @param {TileType} [stepType]
- * @returns {Path}
  */
 export default function randomWalk(matrix, currentPoint, remainingSteps, stepSize, stepType = TILE_TYPES.SIDEWALK) {
   // pick a direction for the next step
