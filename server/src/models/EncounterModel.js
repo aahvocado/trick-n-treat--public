@@ -2,36 +2,34 @@ import Point from '@studiomoniker/point';
 
 import Model from 'models/Model';
 
+import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
+
 /**
  * @typedef {Model} EncounterModel
- *
- * @typedef {Object} EncounterAction
- * @property {String} EncounterAction.actionId
- * @property {String} EncounterAction.name
  */
 export default class EncounterModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super({
-      // -- will be shared
+      // -- existing data
       /** @type {String} */
       id: '',
       /** @type {String} */
       title: '',
       /** @type {String} */
       content: '',
-      /** @type {Array<EncounterAction>} */
+      /** @type {Array<EncounterActionData>} */
       actionList: [],
-
-      // -- configure me
-      /** @type {Point} */
-      location: new Point(),
-      /** @type {Array<EncounterTag>} */
+      /** @type {Array<TagId>} */
       tagList: [],
       /** @type {Array<EncounterTriggerData>} */
       triggerList: [],
 
-      // -- local data
+      // -- configured
+      /** @type {Point} */
+      location: new Point(),
+
+      // -- instance data
       /** @type {Number} */
       triggerCount: 0,
        /** @type {Array<CharacterModel>} */
@@ -40,6 +38,7 @@ export default class EncounterModel extends Model {
       ...newAttributes,
     });
   }
+  // -- instance methods
   /**
    * base function that will be called when a character gets on this
    *
@@ -79,19 +78,92 @@ export default class EncounterModel extends Model {
   exportEncounterData() {
     const exportData = this.export();
     const {
-      id,
-      location,
-      title,
-      content,
       actionList,
+      id,
+      content,
+      location,
+      tagList,
+      title,
+      triggerList,
     } = exportData;
 
     return {
-      id,
-      location,
-      title,
-      content,
       actionList,
+      id,
+      content,
+      location,
+      tagList,
+      title,
+      triggerList,
     };
+  }
+  // -- utilities
+  /**
+   * @returns {String}
+   */
+  getId() {
+    return encounterDataUtils.getId(this.attributes);
+  }
+  /**
+   * @returns {Array<EncounterActionData>}
+   */
+  getActionList() {
+    return encounterDataUtils.getActionList(this.attributes);
+  }
+  /**
+   * @param {Number} idx
+   * @returns {EncounterActionData}
+   */
+  getActionAt(idx) {
+    return encounterDataUtils.getActionAt(this.attributes, idx);
+  }
+  /**
+   * @returns {Array<EncounterTriggerData>}
+   */
+  getTriggerList() {
+    return encounterDataUtils.getTriggerList(this.attributes);
+  }
+  /**
+   * @param {Number} idx
+   * @returns {EncounterTriggerData}
+   */
+  getTriggerAt(idx) {
+    return encounterDataUtils.getTriggerAt(this.attributes);
+  }
+  /**
+   * @param {EncounterTriggerData} encounterTriggerData
+   * @returns {TriggerId}
+   */
+  getTriggerId(encounterTriggerData) {
+    return encounterDataUtils.getTriggerAt(encounterTriggerData);
+  }
+  /**
+   * @param {EncounterTriggerData} encounterTriggerData
+   * @returns {Array<ConditionData>}
+   */
+  getTriggerConditionList(encounterTriggerData) {
+    return encounterDataUtils.getTriggerAt(encounterTriggerData);
+  }
+  /**
+   * @param {EncounterTriggerData} encounterTriggerData
+   * @param {Number} idx
+   * @returns {Array<ConditionData>}
+   */
+  getTriggerConditionAt(encounterTriggerData, idx) {
+    return encounterDataUtils.getTriggerAt(encounterTriggerData, idx);
+  }
+  /**
+   * @param {ConditionData} conditionData
+   * @returns {ConditionId}
+   */
+  getTriggerConditionId(conditionData) {
+    return encounterDataUtils.getTriggerAt(conditionData);
+  }
+  /**
+   * @param {ConditionData} conditionData
+   * @returns {ConditionId}
+   */
+  getTriggerConditionTargetId(conditionData) {
+    return encounterDataUtils.getTriggerAt(conditionData);
   }
 }

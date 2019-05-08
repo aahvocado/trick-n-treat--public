@@ -287,8 +287,10 @@ export default observer(
      * @param {ActionId} actionId
      */
     onClickEncounterAction(actionData) {
-      logger.user(`User selected "${actionData.actionId}" for EncounterAction`);
-      connectionManager.socket.emit(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, actionData);
+      const activeEncounter = remoteGameState.get('activeEncounter');
+
+      logger.user(`User selected "${actionData.actionId}" for encounter "${activeEncounter.id}"`);
+      connectionManager.socket.emit(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, activeEncounter.id, actionData);
     }
   }
 )

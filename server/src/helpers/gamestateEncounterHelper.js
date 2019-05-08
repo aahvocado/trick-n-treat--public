@@ -7,12 +7,15 @@ import gameState from 'data/gameState';
 import EncounterModel from 'models/EncounterModel';
 
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
-import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import {getEncounterDataById} from 'helpers.shared/encounterDataHelper';
 
 import {sendEncounterToClientByUser} from 'managers/clientManager';
 
 import logger from 'utilities/logger.game';
+import * as encounterConditionUtils from 'utilities/encounterConditionUtils';
+import * as encounterTriggerUtils from 'utilities/encounterTriggerUtils';
+
+import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
 
 /**
  * this Helper is for handling data for Encounters
@@ -33,6 +36,9 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
     return;
   }
 
+  // cache the `activeEncounter`
+  gameState.set({activeEncounter: encounterModel});
+
   // clear the actionQueue because we have to handle this immediately
   //  this might cause issues and skip events, so we need to keep an eye on this
   gamestateActionHelper.clearActionQueue();
@@ -44,8 +50,9 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
   encounterModel.trigger(characterModel);
 
   // send the client the data of the Encounter they triggered
+  const evaluatedEncounterData = createEvaluatedEncounterData(characterModel, encounterModel);
   const userModel = gameState.findUserByCharacterId(characterModel.get('characterId'));
-  sendEncounterToClientByUser(userModel, encounterModel.exportEncounterData());
+  sendEncounterToClientByUser(userModel, evaluatedEncounterData);
 }
 /**
  *
@@ -63,269 +70,131 @@ export function sendEncounterToUser(userModel, encounterId) {
 };
 /**
  * handles each of the triggers in an encounter
- * @todo - I intentionally separated these into separate functions even though they are a simple +/- in anticipation
- *  of different side effects needing to be handled in the future
  *
  * @param {EncounterModel} encounterModel
  * @param {CharacterModel} characterModel
  */
 export function resolveTriggerList(encounterModel, characterModel) {
-  logger.new(`[[resolving Triggers in "${encounterModel.get('id')}"]]`)
+  logger.new(`[[resolving Triggers in "${encounterModel.get('id')}"]]`);
+
   const triggerList = encounterModel.get('triggerList');
-  triggerList.forEach((triggerData) => {
-    const {triggerId} = triggerData;
-    logger.verbose(`. [[resolving trigger '${triggerId}']]`);
-
-    // Add Candy
-    if (triggerId === ENCOUNTER_TRIGGER_ID.CANDY.ADD) {
-      handleAddCandyTrigger(characterModel, triggerData);
-    }
-    // Lose Candy
-    if (triggerId === ENCOUNTER_TRIGGER_ID.CANDY.SUBTRACT) {
-      handleLoseCandyTrigger(characterModel, triggerData);
-    }
-
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.HEALTH.ADD) {
-      handleAddHealthTrigger(characterModel, triggerData);
-    }
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.HEALTH.SUBTRACT) {
-      handleLoseHealthTrigger(characterModel, triggerData);
-    }
-
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.MOVEMENT.ADD) {
-      handleAddMovementTrigger(characterModel, triggerData);
-    }
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.MOVEMENT.SUBTRACT) {
-      handleLoseMovementTrigger(characterModel, triggerData);
-    }
-
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.SANITY.ADD) {
-      handleAddSanityTrigger(characterModel, triggerData);
-    }
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.SANITY.SUBTRACT) {
-      handleLoseSanityTrigger(characterModel, triggerData);
-    }
-
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.VISION.ADD) {
-      handleAddVisionTrigger(characterModel, triggerData);
-    }
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.VISION.SUBTRACT) {
-      handleLoseVisionTrigger(characterModel, triggerData);
-    }
-
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.LUCK.ADD) {
-      handleAddLuckTrigger(characterModel, triggerData);
-    }
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.LUCK.SUBTRACT) {
-      handleLoseLuckTrigger(characterModel, triggerData);
-    }
-
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.GREED.ADD) {
-      handleAddGreedTrigger(characterModel, triggerData);
-    }
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.GREED.SUBTRACT) {
-      handleLoseGreedTrigger(characterModel, triggerData);
-    }
-
-    //
-    if (triggerId === ENCOUNTER_TRIGGER_ID.CHANGE_POSITION) {
-      handleChangePositionTrigger(characterModel, triggerData);
-    }
+  triggerList.forEach((encounterTriggerData) => {
+    resolveTrigger(encounterTriggerData, characterModel);
   });
 
   logger.old(`[[done resolving Triggers]]`);
 }
 /**
- * handles the basic Encounter Trigger of adding candy
+ * resolves an individual TriggerData for the character
+ * @todo - I intentionally separated these into separate functions even though they are a simple +/- in anticipation
+ *  of different side effects needing to be handled in the future
  *
+ * @param {EncounterTriggerData} encounterTriggerData
  * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
+ * @returns {Boolean}
  */
-export function handleAddCandyTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
+export function resolveTrigger(encounterTriggerData, characterModel) {
+  const conditionList = encounterDataUtils.getTriggerConditionList(encounterTriggerData);
+  if (!encounterConditionUtils.doesMeetAllConditions(characterModel, conditionList)) {
+    return;
+  }
 
-  const prevCandyCount = characterModel.get('candies');
-  characterModel.set({candies: prevCandyCount + value});
-};
+  const triggerId = encounterDataUtils.getTriggerId(encounterTriggerData);
+
+  logger.verbose(`. [[resolving trigger '${triggerId}']]`);
+
+  // Add Candy
+  if (triggerId === ENCOUNTER_TRIGGER_ID.CANDY.ADD) {
+    encounterTriggerUtils.handleAddCandyTrigger(characterModel, encounterTriggerData);
+  }
+  // Lose Candy
+  if (triggerId === ENCOUNTER_TRIGGER_ID.CANDY.SUBTRACT) {
+    encounterTriggerUtils.handleLoseCandyTrigger(characterModel, encounterTriggerData);
+  }
+
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.HEALTH.ADD) {
+    encounterTriggerUtils.handleAddHealthTrigger(characterModel, encounterTriggerData);
+  }
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.HEALTH.SUBTRACT) {
+    encounterTriggerUtils.handleLoseHealthTrigger(characterModel, encounterTriggerData);
+  }
+
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.MOVEMENT.ADD) {
+    encounterTriggerUtils.handleAddMovementTrigger(characterModel, encounterTriggerData);
+  }
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.MOVEMENT.SUBTRACT) {
+    encounterTriggerUtils.handleLoseMovementTrigger(characterModel, encounterTriggerData);
+  }
+
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.SANITY.ADD) {
+    encounterTriggerUtils.handleAddSanityTrigger(characterModel, encounterTriggerData);
+  }
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.SANITY.SUBTRACT) {
+    encounterTriggerUtils.handleLoseSanityTrigger(characterModel, encounterTriggerData);
+  }
+
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.VISION.ADD) {
+    encounterTriggerUtils.handleAddVisionTrigger(characterModel, encounterTriggerData);
+  }
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.VISION.SUBTRACT) {
+    encounterTriggerUtils.handleLoseVisionTrigger(characterModel, encounterTriggerData);
+  }
+
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.LUCK.ADD) {
+    encounterTriggerUtils.handleAddLuckTrigger(characterModel, encounterTriggerData);
+  }
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.LUCK.SUBTRACT) {
+    encounterTriggerUtils.handleLoseLuckTrigger(characterModel, encounterTriggerData);
+  }
+
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.GREED.ADD) {
+    encounterTriggerUtils.handleAddGreedTrigger(characterModel, encounterTriggerData);
+  }
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.GREED.SUBTRACT) {
+    encounterTriggerUtils.handleLoseGreedTrigger(characterModel, encounterTriggerData);
+  }
+
+  //
+  if (triggerId === ENCOUNTER_TRIGGER_ID.CHANGE_POSITION) {
+    encounterTriggerUtils.handleChangePositionTrigger(characterModel, encounterTriggerData);
+  }
+}
 /**
- * handles the basic Encounter Trigger of subtracting candy
+ * formats an EncounterModel's data with some extra properties for sending out
  *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
+ * - looks for any Actions or Triggers that have a Condition,
+ *  then adds a `_doesMeetConditions: Boolean` for if the Character meets the condition
+ *
+ * @param {CharacterModel}
+ * @param {EncounterModel}
+ * @returns {Object} - should return a structure similar to EncounterData
  */
-export function handleLoseCandyTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
+export function createEvaluatedEncounterData(characterModel, encounterModel) {
+  const baseEncounterData = encounterModel.exportEncounterData();
 
-  const prevCandyCount = characterModel.get('candies');
-  characterModel.set({candies: prevCandyCount - value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleAddHealthTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
+  return {
+    ...baseEncounterData,
 
-  const prevValue = characterModel.get('health');
-  characterModel.set({health: prevValue + value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleLoseHealthTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
+    actionList: baseEncounterData.actionList.map((actionData) => ({
+      ...actionData,
+      _doesMeetConditions: encounterConditionUtils.doesMeetAllConditions(characterModel, encounterDataUtils.getActionConditionList(actionData)),
+    })),
 
-  const prevValue = characterModel.get('health');
-  characterModel.set({health: prevValue - value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleAddMovementTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('movement');
-  characterModel.set({movement: prevValue + value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleLoseMovementTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('movement');
-  characterModel.set({movement: prevValue - value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleAddSanityTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('sanity');
-  characterModel.set({sanity: prevValue + value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleLoseSanityTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('sanity');
-  characterModel.set({sanity: prevValue - value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleAddVisionTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('vision');
-  characterModel.set({vision: prevValue + value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleLoseVisionTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('vision');
-  characterModel.set({vision: prevValue - value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleAddLuckTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('luck');
-  characterModel.set({luck: prevValue + value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleLoseLuckTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('luck');
-  characterModel.set({luck: prevValue - value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleAddGreedTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('greed');
-  characterModel.set({greed: prevValue + value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleLoseGreedTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('greed');
-  characterModel.set({greed: prevValue - value});
-};
-/**
- *
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterTriggerData} triggerData
- */
-export function handleChangePositionTrigger(characterModel, triggerData) {
-  const {value} = triggerData;
-  const nextPoint = new Point(value.x, value.y);
-
-  // gameState.addToActionQueue(() => {
-  gamestateCharacterHelper.updateCharacterPosition(characterModel, nextPoint);
-  // })
-};
+    triggerList: baseEncounterData.triggerList.map((triggerData) => ({
+      ...triggerData,
+      _doesMeetConditions: encounterConditionUtils.doesMeetAllConditions(characterModel, encounterDataUtils.getTriggerConditionList(triggerData)),
+    })),
+  };
+}

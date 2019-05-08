@@ -22,6 +22,9 @@ import {
 import UserModel from 'models/UserModel';
 
 import logger from 'utilities/logger.game';
+import * as encounterConditionUtils from 'utilities/encounterConditionUtils';
+
+import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
 
 /**
  * this Helper is for handling actions from the User
@@ -298,15 +301,31 @@ export function handleUserActionMoveTo(userId, endPosition) {
  * User did something
  *
  * @param {String} userId
+ * @param {EncounterId} encounterId
  * @param {ActionData} actionData
  */
-export function handleUserEncounterAction(userId, actionData) {
+export function handleUserEncounterAction(userId, encounterId, actionData) {
   // check if it is the Turn of the user who clicked
-  const userModel = gameState.get('activeUser');
-  if (userModel.get('userId') !== userId) {
+  const activeUserModel = gameState.get('activeUser');
+  const activeUserId = activeUserModel.get('userId');
+  if (activeUserId !== userId) {
     return;
   }
 
+  // check if the encounter they clicked on actually is the current one
+  const activeEncounter = gameState.get('activeEncounter');
+  if (activeEncounter.get('id') !== encounterId) {
+    return;
+  }
+
+  // check if character was allowed to take this action
+  const activeCharacter = gameState.get('activeCharacter');
+  const conditionList = encounterDataUtils.getActionConditionList(actionData);
+  if (!encounterConditionUtils.doesMeetAllConditions(activeCharacter, conditionList)) {
+    return;
+  }
+
+  // finally, we can handle the action
   const {
     actionId,
     gotoId,
@@ -314,14 +333,14 @@ export function handleUserEncounterAction(userId, actionData) {
 
   // just a basic confirmation to close the `Encounter`
   if (actionId === ENCOUNTER_ACTION_ID.CONFIRM) {
-    sendEncounterToClientByUser(userModel, null);
+    sendEncounterToClientByUser(activeUserModel, null);
 
-    onUserActionComplete(userModel);
+    onUserActionComplete(activeUserModel);
   }
 
   // this goes to another `Encounter`
   if (actionId === ENCOUNTER_ACTION_ID.GOTO) {
-    gamestateEncounterHelper.sendEncounterToUser(userModel, gotoId);
+    gamestateEncounterHelper.sendEncounterToUser(activeUserModel, gotoId);
   }
 }
 /**
@@ -330,6 +349,9 @@ export function handleUserEncounterAction(userId, actionData) {
  * @param {UserModel} userModel
  */
 export function onUserActionComplete(userModel) {
+  // clear the `activeEncounter`
+  gameState.set({activeEncounter: null});
+
   // check if character's movement is now 0
   const characterModel = gameState.findCharacterByUserId(userModel.get('userId'));
   if (!characterModel.canMove()) {

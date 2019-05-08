@@ -67,6 +67,7 @@ export default class EncounterModalComponent extends PureComponent {
               <EncounterActionButton
                 key={`encounter-modal-action-button-${actionData.actionId}-${idx}-key`}
                 actionData={actionData}
+                disabled={!actionData._doesMeetConditions}
                 onClick={this.onClickAction}
               />
             )

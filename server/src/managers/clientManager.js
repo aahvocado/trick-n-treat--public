@@ -73,8 +73,8 @@ function attachClientEvents(clientModel) {
   });
 
   // client chosen an action from the Encounter modal
-  socket.on(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, (actionData) => {
-    gamestateUserHelper.handleUserEncounterAction(userId, actionData);
+  socket.on(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, (encounterId, actionData) => {
+    gamestateUserHelper.handleUserEncounterAction(userId, encounterId, actionData);
   });
 
   /**

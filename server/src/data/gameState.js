@@ -40,6 +40,8 @@ export class GamestateModel extends Model {
       actionQueue: [],
       /** @type {GameAction | null} */
       activeAction: null,
+      /** @type {EncounterModel | null} */
+      activeEncounter: null,
 
       /** @type {Number} */
       round: 0,
