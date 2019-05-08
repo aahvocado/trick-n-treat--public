@@ -25,7 +25,7 @@ import ENCOUNTER_DATA from 'data.shared/encounterData.json';
 
 import remoteAppState from 'state/remoteAppState';
 
-// import debounce from 'utilities/debounce';
+import l10n from 'utilities.shared/l10n';
 
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -779,28 +779,28 @@ class ViewerPanel extends Component {
         <ViewerRow>
           <ViewerHeader>Triggers</ViewerHeader>
 
-          <DropdownComponent
-            value={{id: undefined}}
+          <TriggerListDropdown
             placeholder='New Trigger...'
-            options={ENCOUNTER_TRIGGER_ID_LIST.map((item) => ({
-              data: item,
-              id: item,
-              label: item,
-            }))}
             onSelect={onSelectNewTrigger}
           />
 
-          <div className='fsize-3 flex-row flex-wrap-yes sibling-mar-t-2'>
+          <div className='fsize-3 flex-col sibling-mar-t-2'>
             { triggerList.map((trigger, idx) => (
               <ViewerTriggerItem
                 key={`trigger-item-${trigger.triggerId}-${idx}-key`}
-                label={trigger.triggerId}
+                label={l10n(trigger.triggerId)}
                 value={trigger.value}
                 onRemoveClick={() => { onRemoveTriggerItem(trigger, idx) }}
                 onChangeValue={(e) => {
                   onChangeTriggerItem({
                     ...trigger,
                     value: parseInt(e.target.value),
+                  }, idx)
+                }}
+                onChangeType={(data) => {
+                  onChangeTriggerItem({
+                    ...trigger,
+                    triggerId: data,
                   }, idx)
                 }}
               />
@@ -863,12 +863,11 @@ class ViewerPanel extends Component {
           <ViewerHeader>Tags</ViewerHeader>
 
           <DropdownComponent
-            value={{id: undefined}}
             placeholder='New Tag...'
-            options={TAG_ID_LIST.map((item) => ({
-              data: item,
-              id: item,
-              label: item,
+            options={TAG_ID_LIST.map((tagId) => ({
+              data: tagId,
+              id: tagId,
+              label: l10n(tagId),
             }))}
             onSelect={onSelectNewTag}
           />
@@ -877,7 +876,7 @@ class ViewerPanel extends Component {
             { tagList.map((tagId, idx) => (
               <ViewerTagItem
                 key={`viewer-tag-item-${tagId}-${idx}-key`}
-                label={tagId}
+                label={l10n(tagId)}
                 onRemoveClick={() => { onClickRemoveTagItem(tagId) }}
               />
             ))}
@@ -967,22 +966,22 @@ const ViewerActionItem = (props) => (
  *
  */
 const ViewerTriggerItem = (props) => (
-  <div className='bg-white borradius-1 bor-1-gray sibling-mar-t-2 flex-row-center'>
-    <ClassicButtonComponent
-      className='pad-1 bor-0-transparent'
-      activeClassName='cursor-pointer color-black hover:color-tertiary'
-      children={props.label}
+  <div className='bg-white borradius-1 bor-1-gray sibling-mar-t-2 flex-row'>
+    <TriggerListDropdown
+      className='bor-1-transparent'
+      value={props.label}
+      onSelect={props.onChangeType}
     />
 
     <input
-      className='bor-h-1-gray pad-h-2'
+      className='flex-auto bor-h-1-gray pad-h-2'
       type='number'
       value={props.value}
       onChange={props.onChangeValue}
     />
 
     <IconButtonComponent
-      className='bor-0-transparent'
+      className='flex-none bor-0-transparent'
       icon={faTimes}
       onClick={props.onRemoveClick}
     />
@@ -1011,13 +1010,26 @@ const ExportModal = (props) => (
 const ActionListDropdown = (props) => (
   <DropdownComponent
     className='fsize-3'
-    value={props.value}
     options={ENCOUNTER_ACTION_ID_LIST.map((item) => ({
       data: item,
       id: item,
-      label: item,
+      label: l10n(item),
     }))}
-    onSelect={props.onSelect}
+    {...props}
+  />
+)
+/**
+ *
+ */
+const TriggerListDropdown = (props) => (
+  <DropdownComponent
+    className='fsize-3'
+    options={ENCOUNTER_TRIGGER_ID_LIST.map((item) => ({
+      data: item,
+      id: item,
+      label: l10n(item),
+    }))}
+    {...props}
   />
 )
 

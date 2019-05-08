@@ -11,15 +11,15 @@ import combineClassNames from 'utilities/combineClassNames';
 export default class DropdownComponent extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'flex-col position-relative sibling-mar-t-2',
+    baseClassName: 'bor-1-gray flex-col position-relative sibling-mar-t-2',
     /** @type {String} */
     className: 'fsize-3',
-
     /** @type {Number} */
     maxHeight: 200,
 
-    /** @type {Boolean} */
-    active: false,
+    /** @type {Number | null} */
+    defaultFocusIdx: null,
+
     /** @type {Function} */
     onSelect: () => {},
     /** @type {Array} */
@@ -32,7 +32,11 @@ export default class DropdownComponent extends PureComponent {
     super(props);
 
     this.containerRef = React.createRef();
+    this.listRef = React.createRef();
+
     this.onClickDocument = this.onClickDocument.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.onChangeFocusIdx = this.onChangeFocusIdx.bind(this);
 
     this.onClickControl = this.onClickControl.bind(this);
     this.onSelectHandler = this.onSelectHandler.bind(this);
@@ -40,24 +44,27 @@ export default class DropdownComponent extends PureComponent {
 
     this.state = {
       /** @type {Boolean} */
-      showDropdown: props.active,
+      isOpen: props.active,
 
       /** @type {Number} */
-      focusedIdx: 0,
+      focusedIdx: props.defaultFocusIdx,
     }
   }
   /** @override */
   componentDidMount() {
     document.addEventListener('mousedown', this.onClickDocument);
+
+    document.addEventListener('keydown', this.handleKeyDown);
   }
   /** @override */
   componentWillUnmount() {
     document.removeEventListener('mousedown', this.onClickDocument);
+
+    document.removeEventListener('keydown', this.handleKeyDown);
   }
   /** @override */
   render() {
     const {
-      // active,
       baseClassName,
       className,
       maxHeight,
@@ -69,13 +76,13 @@ export default class DropdownComponent extends PureComponent {
     } = this.props;
 
     const {
-      showDropdown,
+      isOpen,
     } = this.state;
 
-    const controlClassName = showDropdown ? 'color-grayest' : 'color-black';
+    const controlClassName = isOpen ? 'color-grayest' : 'color-black';
 
     // search for the option in the list to display the `label` text
-    const matchingOption = options.find((item) => (item && item.id === value.id));
+    const matchingOption = options.find((item) => (item && value && (item.id === value.id || item.label === value)));
     const displayLabel = (matchingOption && matchingOption.label) || placeholder || 'Select...';
 
     return (
@@ -85,37 +92,40 @@ export default class DropdownComponent extends PureComponent {
       >
         {/* Control display */}
         <button
-          className={combineClassNames('bor-1-gray pad-1 borradius-1 bg-white hover:color-tertiary flex-row-center cursor-pointer', controlClassName)}
+          className={combineClassNames('pad-1 bg-white hover:color-tertiary flex-row-center cursor-pointer', controlClassName)}
           onClick={this.onClickControl}
           aria-haspopup="listbox"
         >
           <div className='flex-auto text-ellipsis'>{ displayLabel }</div>
 
-          <FontAwesomeIcon className='flex-none fsize-3' icon={faChevronDown} />
+          <FontAwesomeIcon className='mar-l-1 color-grayest flex-none fsize-3' icon={faChevronDown} />
         </button>
 
         {/* Options List Menu */}
-        <ul
-          className={combineClassNames('position-absolute width-full bg-white zindex-9', showDropdown ? '' : 'display-none')}
+        <div
+          className={combineClassNames('position-absolute bor-1-gray box-sizing-border width-full bg-white zindex-9', isOpen ? 'flex-col' : 'display-none')}
           style={{
-            top: '35px',
+            top: '30px',
             boxShadow: 'rgba(0, 0, 0, 0.4) 0px 3px 3px 0',
             maxHeight: `${maxHeight}px`,
+            minWidth: '200px',
             overflow: 'auto',
           }}
           role='listbox'
+          ref={this.listRef}
         >
           { options.map((item, idx) => (
             <DropdownItem
               key={`dropdown-component-item-${item.id}-${idx}-key`}
-              isSelected={value.id === item.id}
+              isSelected={matchingOption && matchingOption.id === item.id}
+              isOpen={isOpen}
               onClick={() => {
                 this.onSelectHandler(item);
               }}
               {...item}
             />
           ))}
-        </ul>
+        </div>
       </div>
     )
   }
@@ -126,12 +136,8 @@ export default class DropdownComponent extends PureComponent {
    * @param {Boolean} [shouldShow]
    */
   toggleDropdown(shouldShow) {
-    if (shouldShow === undefined) {
-      this.setState({showDropdown: !this.state.showDropdown});
-      return;
-    }
-
-    this.setState({showDropdown: shouldShow});
+    const toVisible = shouldShow !== undefined ? shouldShow : !this.state.isOpen;
+    this.setState({isOpen: toVisible});
   }
   // --
   /**
@@ -162,6 +168,97 @@ export default class DropdownComponent extends PureComponent {
     this.props.onSelect(item.data);
     this.toggleDropdown();
   }
+  /**
+   * keydown
+   *
+   * @param {Event} e
+   */
+  handleKeyDown(e) {
+    // do nothing if dropdown is not open
+    if (!this.state.isOpen) {
+      return;
+    }
+
+    // esc
+    if (e.keyCode === 27) {
+      e.preventDefault();
+      this.setState({isOpen: false});
+    }
+    // enter
+    if (e.keyCode === 13) {
+      // e.preventDefault();
+      // this.onSelectHandler(this.getFocusedItem());
+    }
+
+    const {focusedIdx} = this.state;
+
+    // up
+    if (e.keyCode === 38) {
+      e.preventDefault();
+
+      if (focusedIdx === null) {
+        this.onChangeFocusIdx(this.props.options.length - 1);
+      } else {
+        this.onChangeFocusIdx(focusedIdx - 1);
+      }
+    }
+    // down
+    if (e.keyCode === 40) {
+      e.preventDefault();
+
+      if (focusedIdx === null) {
+        this.onChangeFocusIdx(0);
+      } else {
+        this.onChangeFocusIdx(focusedIdx + 1);
+      }
+    }
+    // left
+    if (e.keyCode === 37) {
+      // e.preventDefault();
+    }
+    // right
+    if (e.keyCode === 37) {
+      // e.preventDefault();
+    }
+  }
+  /**
+   * @param {Number} idx
+   */
+  onChangeFocusIdx(idx) {
+    const {options} = this.props;
+
+    const highestIdx = options.length - 1;
+
+    // handle going too low
+    if (idx < 0) {
+      return this.onChangeFocusIdx(highestIdx);
+    }
+
+    // handle going too high
+    if (idx > highestIdx) {
+      return this.onChangeFocusIdx(0);
+    }
+
+    // focus that element
+    const itemElement = this.listRef.current.children[idx];
+    if (itemElement !== undefined) {
+      itemElement.focus();
+    }
+
+    // valid, set it
+    this.setState({focusedIdx: idx});
+  }
+  /**
+   * gets the data of whatever is currently focused
+   *
+   * @returns {*}
+   */
+  getFocusedItem() {
+    const {options} = this.props;
+    const {focusedIdx} = this.state;
+
+    return options[focusedIdx];
+  }
 }
 /**
  *
@@ -169,7 +266,7 @@ export default class DropdownComponent extends PureComponent {
 class DropdownItem extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'pad-h-1 pad-v-2 bg-white color-black hover:color-fourth cursor-pointer',
+    baseClassName: 'sibling-mar-t-1 pad-h-1 pad-v-2 bg-white color-black hover:color-fourth cursor-pointer',
     /** @type {String} */
     className: '',
 
@@ -185,22 +282,25 @@ class DropdownItem extends PureComponent {
       label,
       options,
 
+      id,
+      isOpen,
+
       ...otherProps
     } = this.props;
 
     return (
-      <li
+      <button
         className={combineClassNames(baseClassName, className)}
         style={{
           backgroundColor: isSelected ? '#cde3ea' : undefined,
         }}
         role='option'
         aria-selected={isSelected ? true : false}
-        tabIndex={-1}
+        tabIndex={isOpen ? 0 : -1}
         {...otherProps}
       >
         { label }
-      </li>
+      </button>
     )
   }
 }
