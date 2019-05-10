@@ -79,7 +79,7 @@ export default observer(
 
       return (
         <div className='flex-center flex-col color-white bg-primary'>
-          <h2 className='bg-secondary fsize-4 pad-v-1 width-full text-center'>Tile Editor</h2>
+          <h2 className='bg-secondary fsize-4 pad-v-1 width-full talign-center'>Tile Editor</h2>
 
           <div className='flex-row height-full bg-primary-darker'>
             <EditorPanel
@@ -101,11 +101,7 @@ export default observer(
               className='flex-row-center mar-h-auto mar-t-5'
             >
               <div
-                className='flex-auto flex-col aitems-center position-relative bor-4-primary'
-                style={{
-                  overflow: 'hidden',
-                  backgroundColor: '#d2d2d2',
-                }}
+                className='overflow-hidden flex-auto flex-col aitems-center position-relative bor-4-primary bg-gray'
               >
                 { mapMatrix.map((mapRowData, rowIdx) => {
                   return (
@@ -342,7 +338,7 @@ class EditorPanel extends PureComponent {
 
         {/* Tile options */}
         <form
-          className='sibling-mar-t-3 width-full flex-row flex-wrap-yes'
+          className='adjacent-mar-t-3 width-full flex-row flexwrap-yes'
           onSubmit={e => e.preventDefault()}
         >
           <CheckboxComponent
@@ -456,44 +452,41 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
         </form>
 
-        <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
+        <FontAwesomeIcon className='adjacent-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
 
         {/* Map options */}
         <form
-          className='sibling-mar-t-3 width-full flex-col'
+          className='adjacent-mar-t-3 width-full flex-col'
           onSubmit={e => e.preventDefault()}
         >
           <TextInputComponent
             value={mapWidth}
             onChange={this.onChangeWidthValue}
-          >
-            <span className='mar-h-1 flex-grow-only color-white opacity-7'>Width</span>
-          </TextInputComponent>
+            label='Width'
+          />
 
           <TextInputComponent
             value={mapHeight}
             onChange={this.onChangeHeightValue}
-          >
-            <span className='mar-h-1 flex-grow-only color-white opacity-7'>Height</span>
-          </TextInputComponent>
+            label='Height'
+          />
 
           <TextInputComponent
             value={tileSize}
             onChange={this.onChangeTileSizeValue}
-          >
-            <span className='mar-h-1 flex-grow-only color-white opacity-7'>Tile Size</span>
-          </TextInputComponent>
+            label='Tile Size'
+          />
         </form>
 
-        <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
+        <FontAwesomeIcon className='adjacent-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
 
         {/* Export options */}
         <form
-          className='sibling-mar-t-3 width-full flex-col'
+          className='adjacent-mar-t-3 width-full flex-col'
           onSubmit={e => e.preventDefault()}
         >
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 adjacent-mar-t-2'
             checked={selectedExportType === 'EXPORT_TILE_ID'}
             value='EXPORT_TILE_ID'
             onChange={this.onChangeExportType}
@@ -502,7 +495,7 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <RadioButtonComponent
-            className='fsize-3 sibling-mar-t-2'
+            className='fsize-3 adjacent-mar-t-2'
             checked={selectedExportType === 'EXPORT_TILE_STRING'}
             value='EXPORT_TILE_STRING'
             onChange={this.onChangeExportType}
@@ -511,22 +504,22 @@ class EditorPanel extends PureComponent {
           </RadioButtonComponent>
 
           <ClassicButtonComponent
-            className='sibling-mar-t-2'
+            className='adjacent-mar-t-2'
             onClick={this.onExportClick}
           >
             Export
           </ClassicButtonComponent>
         </form>
 
-        <FontAwesomeIcon className='sibling-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
+        <FontAwesomeIcon className='adjacent-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
 
         {/* Import options */}
         <form
-          className='sibling-mar-t-3 width-full flex-col'
+          className='adjacent-mar-t-3 width-full flex-col'
           onSubmit={e => e.preventDefault()}
         >
           <ClassicButtonComponent
-            className='sibling-mar-t-3'
+            className='adjacent-mar-t-3'
             onClick={this.onImportClick}
           >
             Import
@@ -659,7 +652,7 @@ class ExportModal extends Component {
       <Fragment>
         <span className='color-black fsize-4'>Export Result</span>
         <textarea
-          className='color-black pad-2 width-full height-full box-sizing-border bor-1-gray'
+          className='color-black pad-2 width-full height-full boxsizing-border bor-1-gray'
           defaultValue={value}
         />
       </Fragment>
@@ -681,7 +674,7 @@ class ImportModal extends Component {
       <Fragment>
         <span className='color-black fsize-4'>Import</span>
         <textarea
-          className='color-black pad-2 width-full height-full box-sizing-border bor-1-gray'
+          className='color-black pad-2 width-full height-full boxsizing-border bor-1-gray'
           placeholder='I want a Matrix'
           onChange={this.handleOnChangeTextarea.bind(this)}
         />

@@ -2,13 +2,24 @@ import React, { PureComponent } from 'react';
 
 import combineClassNames from 'utilities/combineClassNames';
 
+export const BUTTON_THEME = {
+  WHITE: {
+    base: 'color-black bg-white hover:color-fourth focus:color-fourth cursor-pointer',
+    disabled: 'color-grayer bg-gray',
+  },
+  PURPLE: {
+    base: 'color-white bg-secondary borradius-1 bor-1-primary hover:bg-secondary-lighter focus:bg-secondary-lighter cursor-pointer',
+    disabled: 'color-grayer bg-secondary-darker',
+  },
+}
+
 /**
  *
  */
 export default class ClassicButtonComponent extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'text-center borradius-2 bor-1-primary borradius-1 pad-2',
+    baseClassName: 'talign-center pad-2',
     /** @type {String} */
     className: '',
     /** @type {Boolean} */
@@ -16,10 +27,8 @@ export default class ClassicButtonComponent extends PureComponent {
     /** @type {Function} */
     onClick: () => {},
 
-    /** @type {String} */
-    activeClassName: 'color-white bg-secondary hover:bg-secondary-lighter cursor-pointer',
-    /** @type {String} */
-    disabledClassName: 'color-grayer bg-secondary-darker',
+    /** @type {Object} */
+    theme: BUTTON_THEME.PURPLE,
   }
   /** @override */
   render() {
@@ -27,12 +36,11 @@ export default class ClassicButtonComponent extends PureComponent {
       baseClassName,
       className,
       disabled,
-      disabledClassName,
-      activeClassName,
+      theme,
       ...otherProps
     } = this.props;
 
-    const modifiedClassName = disabled ? disabledClassName : activeClassName;
+    const modifiedClassName = disabled ? theme.disabled : theme.base;
 
     return (
       <button

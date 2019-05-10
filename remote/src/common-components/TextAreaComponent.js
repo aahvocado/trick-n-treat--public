@@ -5,10 +5,10 @@ import combineClassNames from 'utilities/combineClassNames';
 /**
  *
  */
-export default class TextInputComponent extends PureComponent {
+export default class TextAreaComponent extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'pad-1 flex-auto borradius-1',
+    baseClassName: 'pad-1 boxsizing-border borradius-1 whitespace-pre-line',
     /** @type {String} */
     className: '',
     /** @type {String} */
@@ -17,7 +17,7 @@ export default class TextInputComponent extends PureComponent {
     disabled: false,
     /** @type {String} */
     label: '',
-  };
+  }
   /** @override */
   render() {
     const {
@@ -40,9 +40,8 @@ export default class TextInputComponent extends PureComponent {
       >
         {label}
 
-        <input
+        <textarea
           className={combineClassNames(baseClassName, className, modifierClassNames)}
-          type='text'
           disabled={disabled}
           {...otherProps}
         />

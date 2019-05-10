@@ -53,7 +53,7 @@ export default class FixedMenuComponent extends PureComponent {
 
     return (
       <div
-        className='position-fixed flex-center pos-0 zindex-10 pointer-cursor'
+        className='position-fixed flex-center pos-t-0 pos-b-0 zindex-10 pointer-cursor'
         style={{
           transition: isDisabled ? 'none' : 'opacity 500ms',
           backgroundColor: shouldUseOverlay ? 'rgba(0, 0, 0, .33)' : '',

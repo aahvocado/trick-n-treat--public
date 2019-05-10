@@ -90,6 +90,7 @@ textarea
     white-space:normal;
     background:none;
     /*line-height:1;*/
+    color: inherit;
     font-size: inherit;
     font-family: inherit;
 }

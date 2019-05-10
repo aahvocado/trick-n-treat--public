@@ -32,7 +32,7 @@ export class CharacterNameComponent extends PureComponent {
     const { name } = this.props;
 
     return (
-      <div className='position-absolute pos-l-0 pos-t-0 pad-2 bg-fourth fsize-6 color-primary text-center f-bold borradius-r-2 bor-1-primary'>
+      <div className='position-absolute pos-l-0 pos-t-0 pad-2 bg-fourth fsize-6 color-primary talign-center f-bold borradius-r-2 bor-1-primary'>
         { name }
       </div>
     )
@@ -75,7 +75,7 @@ export class CharacterButtonComponent extends PureComponent {
 
     return (
       <button
-        className='fsize-4 color-primary text-center f-bold borradius-2 bg-fifth boxshadow-b-2-fourth pad-2 sibling-mar-l-1 cursor-pointer'
+        className='fsize-4 color-primary talign-center f-bold borradius-2 bg-fifth boxshadow-b-2-fourth pad-2 adjacent-mar-l-1 cursor-pointer'
         style={{
           height: '120px',
           width: '100px',

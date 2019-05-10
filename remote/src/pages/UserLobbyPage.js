@@ -41,7 +41,7 @@ class UserLobbyPage extends Component {
     const inLobbyClients = lobbyData.filter((client) => (client.isInLobby));
 
     return (
-      <div className='bg-secondary pad-h-2 flex-auto flex-center flex-col text-center'>
+      <div className='bg-secondary pad-h-2 flex-auto flex-center flex-col talign-center'>
         <ButtonComponent
           className='fsize-4 pad-2 f-bold mar-t-2 flex-col'
           disabled={!isConnected}
@@ -127,7 +127,7 @@ class LobbyListRow extends PureComponent {
     } = this.props;
 
     return (
-      <li className={`color-white sibling-mar-t-1 ${isLocalUser ? 'f-bold' : ''} flex-row-center`}>
+      <li className={`color-white adjacent-mar-t-1 ${isLocalUser ? 'f-bold' : ''} flex-row-center`}>
         <FontAwesomeIcon className='mar-r-2' icon={clientType === 'SCREEN-CLIENT-TYPE' ? faDesktop : faMobileAlt} />
         <span>{ name }</span>
       </li>

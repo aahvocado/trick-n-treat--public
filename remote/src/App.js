@@ -57,13 +57,13 @@ export default observer(
               className='position-fixed pad-1 mar-1 flex-row aitems-center'
               style={{bottom: 0, right: 0}}
             >
-              <div className='sibling-mar-l-2 color-gray'>{remoteAppState.get('name')}</div>
+              <div className='adjacent-mar-l-2 color-gray'>{remoteAppState.get('name')}</div>
 
               {/* Debug Menu */}
               { remoteAppState.get('isDevMode') &&
                 <ClassicButtonComponent
-                  className='pad-2 sibling-mar-l-2'
-                  onClick={() => { remoteAppState.set({isDebugMenuActive: true}); }}
+                  className='pad-2 adjacent-mar-l-2'
+                  onClick={() => { remoteAppState.set({isDebugMenuActive: !remoteAppState.get('isDebugMenuActive')}); }}
                 >
                   <LetterIconComponent className='mar-r-1' children='`' /> Debugger
                 </ClassicButtonComponent>
@@ -80,7 +80,7 @@ export default observer(
  */
 const TitleRouteButton = withRouter(({history}) => (
   <h1
-    className='flex-none color-white fsize-8 olor-white pad-v-2 f-bold width-full text-center cursor-pointer'
+    className='flex-none color-white fsize-8 pad-v-2 f-bold width-full talign-center cursor-pointer'
     onClick={() => {
       remoteAppState.set({
         isDebugMenuActive: false,

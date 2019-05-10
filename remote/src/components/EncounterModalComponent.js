@@ -53,15 +53,15 @@ export default class EncounterModalComponent extends PureComponent {
         }}
         {...otherProps}
       >
-        <h2 className='color-white sibling-mar-t-2'>{ title }</h2>
+        <h2 className='color-white adjacent-mar-t-2'>{ title }</h2>
 
         <div
-          className='fsize-5 text-center flex-col-center flex-grow-only pad-3 box-sizing-border color-white bg-primary-darker width-full mar-h-2 sibling-mar-t-2'
+          className='fsize-5 talign-center flex-col-center flex-grow-only pad-3 boxsizing-border color-white bg-primary-darker width-full mar-h-2 adjacent-mar-t-2'
         >
           { content }
         </div>
 
-        <div className='flex-row sibling-mar-t-2'>
+        <div className='flex-row adjacent-mar-t-2'>
           { actionList.map((actionData, idx) => {
             return (
               <EncounterActionButton
@@ -110,7 +110,7 @@ class EncounterActionButton extends PureComponent {
     return (
       <ButtonComponent
         {...otherProps}
-        className='fsize-4 pad-2 f-bold sibling-mar-l-2'
+        className='fsize-4 pad-2 f-bold adjacent-mar-l-2'
         id={actionId}
         onClick={this.onClickButton.bind(this)}
       >

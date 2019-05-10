@@ -10,7 +10,14 @@
     "actionList": [
       {
         "label": "Okay",
-        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
+        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
+        "conditionList": [
+          {
+            "conditionId": "CONDITION_ID.GREATER_THAN",
+            "conditionTargetId": "CONDITION_TARGET_ID.STAT.SANITY",
+            "value": 1
+          }
+        ]
       }
     ],
     "triggerList": [
@@ -19,7 +26,7 @@
         "value": 1,
         "conditionList": [
           {
-            "conditionId": "ENCOUNTER_CONDITION_ID.LESS_THAN",
+            "conditionId": "CONDITION_ID.LESS_THAN",
             "conditionTargetId": "CONDITION_TARGET_ID.STAT.HEALTH",
             "value": 2
           }
@@ -216,7 +223,7 @@
         "gotoId": "ENCOUNTER_ID.FASHION_ADVICE_3",
         "conditionList": [
           {
-            "conditionId": "ENCOUNTER_CONDITION_ID.GREATER_THAN",
+            "conditionId": "CONDITION_ID.GREATER_THAN",
             "conditionTargetId": "CONDITION_TARGET_ID.STAT.SANITY",
             "value": 6
           }

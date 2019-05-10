@@ -93,13 +93,13 @@ export default observer(
       } = this.state;
 
       if (gamestate === undefined) {
-        return <div className='color-white bg-secondary flex-auto pad-v-2 flex-center flex-col width-full text-center'>(waiting for map data)</div>
+        return <div className='color-white bg-secondary flex-auto pad-v-2 flex-center flex-col width-full talign-center'>(waiting for map data)</div>
       }
 
       const hasActiveEncounter = activeEncounter !== null;
 
       return (
-        <div className='bg-secondary flex-auto flex-center flex-col width-full text-center'>
+        <div className='bg-secondary flex-auto flex-center flex-col width-full talign-center'>
           {/* Modal */}
           <EncounterModalComponent
             // -- modal props
@@ -112,28 +112,28 @@ export default observer(
 
           {/* Stat Bar */}
           <div className='color-white flex-row-center pad-v-1'>
-            <span className='sibling-mar-l-2'>
+            <span className='adjacent-mar-l-2'>
               <FontAwesomeIcon icon={faHeart} />
               <span className='fsize-5 mar-l-1'>{myCharacter.health}</span>
             </span>
 
-            <FontAwesomeIcon className='sibling-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
+            <FontAwesomeIcon className='adjacent-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
 
-            <span className='sibling-mar-l-2'>
+            <span className='adjacent-mar-l-2'>
               <FontAwesomeIcon icon={faRunning} />
               <span className='fsize-5 mar-l-1'>{myCharacter.movement}</span>
             </span>
 
-            <FontAwesomeIcon className='sibling-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
+            <FontAwesomeIcon className='adjacent-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
 
-            <span className='sibling-mar-l-2'>
+            <span className='adjacent-mar-l-2'>
               <FontAwesomeIcon icon={faBacon} />
               <span className='fsize-5 mar-l-1'>{myCharacter.candies}</span>
             </span>
 
-            <FontAwesomeIcon className='sibling-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
+            <FontAwesomeIcon className='adjacent-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
 
-            <span className='sibling-mar-l-2'>
+            <span className='adjacent-mar-l-2'>
               <FontAwesomeIcon icon={faDove} />
               <span className='fsize-5 mar-l-1'>{myCharacter.sanity}</span>
             </span>
@@ -141,11 +141,11 @@ export default observer(
 
           {/* Info Bar */}
           <div className='flex-row-center bg-primary pad-v-1 color-tertiary'>
-            <div className='flex-none sibling-mar-l-2'>
+            <div className='flex-none adjacent-mar-l-2'>
               <FontAwesomeIcon icon={canUseActions ? faPlay : faPause} />
             </div>
 
-            <div className='flex-none sibling-mar-l-2' >{`Round ${gamestate.round}`}</div>
+            <div className='flex-none adjacent-mar-l-2' >{`Round ${gamestate.round}`}</div>
           </div>
 
           {/* Map */}

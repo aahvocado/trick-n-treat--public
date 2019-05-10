@@ -68,22 +68,22 @@ export class TileMapComponent extends Component {
 
     return (
       <div
-        className='flex-col-center position-relative mar-v-2 mar-h-auto bor-4-primary'
+        className='overflow-hidden flex-none flex-col-center position-relative mar-v-2 mar-h-auto bor-4-primary'
         style={{
-          overflow: 'hidden',
           backgroundColor: '#252525',
           height: `${MAP_CONTAINER_HEIGHT}px`,
           width: `${MAP_CONTAINER_WIDTH}px`,
-          flex: '0 0 auto',
         }}
       >
-        <div style={{
-          position: 'absolute',
-          top: '0',
-          left: '0',
-          transition: 'transform 400ms',
-          transform: mapContainerTransform,
-        }}>
+        <div
+          className='position-absolute'
+          style={{
+            top: '0',
+            left: '0',
+            transition: 'transform 400ms',
+            transform: mapContainerTransform,
+          }}
+        >
           { mapData.map((mapRowData, rowIdx) => {
             return (
               <div className='flex-row' key={`tile-map-row-${rowIdx}-key`} >
@@ -194,7 +194,7 @@ export class TileItemComponent extends Component {
 
     return (
       <div
-        className='position-relative box-sizing-border'
+        className='position-relative boxsizing-border'
         style={{
           width: `${tileSize}px`,
           height: `${tileSize}px`,

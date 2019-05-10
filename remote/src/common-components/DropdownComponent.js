@@ -3,6 +3,8 @@ import React, { PureComponent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 
+import ClassicButtonComponent, { BUTTON_THEME } from 'common-components/ClassicButtonComponent';
+
 import combineClassNames from 'utilities/combineClassNames';
 
 /**
@@ -11,21 +13,30 @@ import combineClassNames from 'utilities/combineClassNames';
 export default class DropdownComponent extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'bor-1-gray flex-col position-relative sibling-mar-t-2',
+    baseClassName: 'color-black bg-white boxsizing-content flex-col position-relative',
     /** @type {String} */
-    className: 'fsize-3',
+    className: 'fsize-3 bor-1-gray',
     /** @type {Number} */
     maxHeight: 200,
+    /** @type {Number} */
+    inputSize: 10,
 
-    /** @type {Number | null} */
-    defaultFocusIdx: null,
-
-    /** @type {Function} */
-    onSelect: () => {},
     /** @type {Array} */
     options: [],
-    /** @type {* | null} */
-    value: null,
+    /** @type {Number | null} */
+    selectedIdx: null,
+    /** @type {Object | null} */
+    selectedOption: null,
+
+    /** @type {Boolean} */
+    canSearch: false,
+    /** @type {Boolean} */
+    showButton: true,
+
+    /** @type {Function} */
+    onChange: () => {},
+    /** @type {Function} */
+    onSelect: () => {},
   };
   /** @override */
   constructor(props) {
@@ -36,18 +47,31 @@ export default class DropdownComponent extends PureComponent {
 
     this.onClickDocument = this.onClickDocument.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.onChangeFocusIdx = this.onChangeFocusIdx.bind(this);
 
-    this.onClickControl = this.onClickControl.bind(this);
-    this.onSelectHandler = this.onSelectHandler.bind(this);
     this.toggleDropdown = this.toggleDropdown.bind(this);
+    this.moveFocusDown = this.moveFocusDown.bind(this);
+    this.moveFocusUp = this.moveFocusUp.bind(this);
+
+    this.onBlurControl = this.onBlurControl.bind(this);
+    this.onClickControl = this.onClickControl.bind(this);
+    this.onFocusControl = this.onFocusControl.bind(this);
+    this.onChangeHandler = this.onChangeHandler.bind(this);
+    this.onSelectHandler = this.onSelectHandler.bind(this);
+
+    const selectedOptionIdx = props.selectedOption !== null ? props.options.findIndex((option) => {
+      return option.id === props.selectedOption.id || option.label === props.selectedOption;
+    }) : undefined;
 
     this.state = {
       /** @type {Boolean} */
       isOpen: props.active,
+      /** @type {Boolean} */
+      isFocused: false,
 
+      /** @type {String} */
+      searchValue: '',
       /** @type {Number} */
-      focusedIdx: props.defaultFocusIdx,
+      focusedIdx: props.selectedIdx || selectedOptionIdx,
     }
   }
   /** @override */
@@ -55,6 +79,9 @@ export default class DropdownComponent extends PureComponent {
     document.addEventListener('mousedown', this.onClickDocument);
 
     document.addEventListener('keydown', this.handleKeyDown);
+
+    // search for the option in the list to display the `label` text
+    this.resetSearchValue();
   }
   /** @override */
   componentWillUnmount() {
@@ -63,62 +90,67 @@ export default class DropdownComponent extends PureComponent {
     document.removeEventListener('keydown', this.handleKeyDown);
   }
   /** @override */
+  componentDidUpdate(prevProps, prevState) {
+    // if this received new props that define the value of the control, update to that
+    if (prevProps.selectedIdx !== this.props.selectedIdx || prevProps.selectedOption !== this.props.selectedOption) {
+      this.resetSearchValue();
+    }
+  }
+  /** @override */
   render() {
     const {
       baseClassName,
       className,
+      canSearch,
+      inputSize,
       maxHeight,
-      options,
       placeholder,
-      value,
-
-      // ...otherProps
+      showButton,
     } = this.props;
 
     const {
+      focusedIdx,
       isOpen,
+      searchValue,
     } = this.state;
 
-    const controlClassName = isOpen ? 'color-grayest' : 'color-black';
-
-    // search for the option in the list to display the `label` text
-    const matchingOption = options.find((item) => (item && value && (item.id === value.id || item.label === value)));
-    const displayLabel = (matchingOption && matchingOption.label) || placeholder || 'Select...';
+    const filteredOptions = this.getFilteredOptions();
 
     return (
       <div
         ref={this.containerRef}
         className={combineClassNames(baseClassName, className)}
+        aria-haspopup="listbox"
       >
-        {/* Control display */}
-        <button
-          className={combineClassNames('pad-1 bg-white hover:color-tertiary flex-row-center cursor-pointer', controlClassName)}
+        <DropdownControl
+          value={searchValue}
           onClick={this.onClickControl}
-          aria-haspopup="listbox"
-        >
-          <div className='flex-auto text-ellipsis'>{ displayLabel }</div>
-
-          <FontAwesomeIcon className='mar-l-1 color-grayest flex-none fsize-3' icon={faChevronDown} />
-        </button>
+          onFocus={this.onFocusControl}
+          onBlur={this.onBlurControl}
+          onChange={this.onChangeHandler}
+          readOnly={!canSearch}
+          showButton={showButton}
+          placeholder={placeholder || 'Select...'}
+          size={inputSize}
+        />
 
         {/* Options List Menu */}
         <div
-          className={combineClassNames('position-absolute bor-1-gray box-sizing-border width-full bg-white zindex-9', isOpen ? 'flex-col' : 'display-none')}
+          className={combineClassNames('position-absolute bor-1-gray boxsizing-border width-full bg-white zindex-9 overflow-auto', isOpen ? 'flex-col' : 'display-none')}
           style={{
-            top: '30px',
-            boxShadow: 'rgba(0, 0, 0, 0.4) 0px 3px 3px 0',
+            ...this.calculateDropdownPositionStyle(),
+            boxShadow: 'rgba(0, 0, 0, 0.4) 0px 0px 3px 0',
             maxHeight: `${maxHeight}px`,
             minWidth: '200px',
-            overflow: 'auto',
           }}
           role='listbox'
           ref={this.listRef}
         >
-          { options.map((item, idx) => (
+          { filteredOptions.map((item, idx) => (
             <DropdownItem
               key={`dropdown-component-item-${item.id}-${idx}-key`}
-              isSelected={matchingOption && matchingOption.id === item.id}
               isOpen={isOpen}
+              isSelected={focusedIdx === idx}
               onClick={() => {
                 this.onSelectHandler(item);
               }}
@@ -129,7 +161,6 @@ export default class DropdownComponent extends PureComponent {
       </div>
     )
   }
-  // -- local control
   /**
    * clicked the always visible Control
    *
@@ -137,9 +168,18 @@ export default class DropdownComponent extends PureComponent {
    */
   toggleDropdown(shouldShow) {
     const toVisible = shouldShow !== undefined ? shouldShow : !this.state.isOpen;
-    this.setState({isOpen: toVisible});
+
+    // if we're closing the dropdown, reset the search field
+    if (!toVisible) {
+      this.setState({isOpen: false}, () => {
+        this.resetSearchValue();
+      });
+      return;
+    }
+
+    // if opening the dropdown, focus to the currently selected option
+    this.setState({isOpen: true});
   }
-  // --
   /**
    * clicked outside of Dropdown
    *
@@ -155,8 +195,34 @@ export default class DropdownComponent extends PureComponent {
    * clicked the always visible Control
    */
   onClickControl() {
-    // this.props.onClickControl();
+    // this.props.onClickControl()
     this.toggleDropdown();
+  }
+  /**
+   *
+   */
+  onBlurControl() {
+    this.setState({
+      isFocused: false,
+    });
+  }
+  /**
+   *
+   */
+  onFocusControl() {
+    this.setState({isFocused: true});
+  }
+  /**
+   * the input field value changed
+   *
+   * @param {SyntheticEvent) e
+   */
+  onChangeHandler(e) {
+    this.props.onChange(e);
+    this.setState({
+      isOpen: true,
+      searchValue: e.target.value,
+    });
   }
   /**
    * clicked an Option
@@ -174,6 +240,15 @@ export default class DropdownComponent extends PureComponent {
    * @param {Event} e
    */
   handleKeyDown(e) {
+    // enter
+    if (e.keyCode === 13) {
+      // if this is focused, we can open this if it is focused
+      if (this.state.isFocused) {
+        e.preventDefault();
+        this.toggleDropdown();
+      }
+    }
+
     // do nothing if dropdown is not open
     if (!this.state.isOpen) {
       return;
@@ -184,11 +259,6 @@ export default class DropdownComponent extends PureComponent {
       e.preventDefault();
       this.setState({isOpen: false});
     }
-    // enter
-    if (e.keyCode === 13) {
-      // e.preventDefault();
-      // this.onSelectHandler(this.getFocusedItem());
-    }
 
     const {focusedIdx} = this.state;
 
@@ -197,9 +267,9 @@ export default class DropdownComponent extends PureComponent {
       e.preventDefault();
 
       if (focusedIdx === null) {
-        this.onChangeFocusIdx(this.props.options.length - 1);
+        this.moveFocusUp(this.props.options.length - 1);
       } else {
-        this.onChangeFocusIdx(focusedIdx - 1);
+        this.moveFocusUp(focusedIdx - 1);
       }
     }
     // down
@@ -207,9 +277,9 @@ export default class DropdownComponent extends PureComponent {
       e.preventDefault();
 
       if (focusedIdx === null) {
-        this.onChangeFocusIdx(0);
+        this.moveFocusDown(0);
       } else {
-        this.onChangeFocusIdx(focusedIdx + 1);
+        this.moveFocusDown(focusedIdx + 1);
       }
     }
     // left
@@ -224,26 +294,45 @@ export default class DropdownComponent extends PureComponent {
   /**
    * @param {Number} idx
    */
-  onChangeFocusIdx(idx) {
-    const {options} = this.props;
-
-    const highestIdx = options.length - 1;
+  moveFocusUp(idx) {
+    const filteredOptions = this.getFilteredOptions();
+    const highestIdx = filteredOptions.length - 1;
 
     // handle going too low
     if (idx < 0) {
-      return this.onChangeFocusIdx(highestIdx);
+      return this.moveFocusUp(highestIdx);
     }
 
     // handle going too high
     if (idx > highestIdx) {
-      return this.onChangeFocusIdx(0);
+      return this.moveFocusUp(0);
     }
 
     // focus that element
-    const itemElement = this.listRef.current.children[idx];
-    if (itemElement !== undefined) {
-      itemElement.focus();
+    this.focusOption(idx);
+
+    // valid, set it
+    this.setState({focusedIdx: idx});
+  }
+  /**
+   * @param {Number} idx
+   */
+  moveFocusDown(idx) {
+    const filteredOptions = this.getFilteredOptions();
+    const highestIdx = filteredOptions.length - 1;
+
+    // handle going too low
+    if (idx < 0) {
+      return this.moveFocusDown(highestIdx);
     }
+
+    // handle going too high
+    if (idx > highestIdx) {
+      return this.moveFocusDown(0);
+    }
+
+    // focus that element
+    this.focusOption(idx);
 
     // valid, set it
     this.setState({focusedIdx: idx});
@@ -259,14 +348,234 @@ export default class DropdownComponent extends PureComponent {
 
     return options[focusedIdx];
   }
+  /**
+   * finds the index of an option
+   *
+   * @param {Object} optionData
+   * @returns {Number}
+   */
+  getIndexOfOption(optionData) {
+    const {options} = this.props;
+    return options.findIndex((option) => (option.id === optionData.id));
+  }
+  /**
+   * @param {Number} idx
+   */
+  focusOption(idx) {
+    const itemElement = this.listRef.current.children[idx];
+    if (itemElement !== undefined) {
+      itemElement.focus();
+    }
+  }
+  /**
+   * handles finding the `optionData` of using data of the currently selected
+   *
+   * @returns {Object | null}
+   */
+  findSelectedOption() {
+    const {
+      selectedIdx,
+      selectedOption,
+    } = this.props;
+
+    if (selectedOption !== null && selectedOption !== undefined) {
+      return this.findOptionHandler(selectedOption);
+    }
+
+    if (selectedIdx !== null && selectedIdx !== undefined) {
+      return this.findOptionHandler(selectedIdx);
+    }
+
+    // nothing selected
+    return null;
+  }
+  /**
+   * handles determining which method to use to find the optionData
+   *
+   * @param {String | Object| Number} findParam
+   * @returns {Object | null}
+   */
+  findOptionHandler(findParam) {
+    if (typeof findParam === 'string') {
+      return this.findOptionByLabel(findParam);
+    }
+
+    if (typeof findParam === 'number') {
+      return this.findOptionByIndex(findParam);
+    }
+
+    if (typeof findParam === 'object') {
+      return this.findOptionByData(findParam);
+    }
+
+    // invalid way to find
+    return null;
+  }
+  /**
+   * @param {Object} optionData
+   * @returns {*}
+   */
+  findOptionByData(optionData) {
+    if (optionData === null) {
+      return null;
+    }
+
+    const {options} = this.props;
+    const foundOption = options.find((option) => (option.id === optionData.id));
+    return foundOption;
+  }
+  /**
+   * @param {Number} idx
+   * @returns {*}
+   */
+  findOptionByIndex(idx) {
+    if (idx === null) {
+      return null;
+    }
+
+    const {options} = this.props;
+    return options[idx];
+  }
+  /**
+   * @param {String} label
+   * @returns {*}
+   */
+  findOptionByLabel(label) {
+    if (label === null) {
+      return null;
+    }
+
+    const {options} = this.props;
+    const foundOption = options.find((option) => (option.label === label));
+    return foundOption;
+  }
+  /**
+   * @param {Object | null} optionData
+   * @returns {String | undefined}
+   */
+  findLabelOfOption(optionData) {
+    if (optionData === null || optionData === undefined) {
+      return undefined;
+    }
+
+    return optionData.label;
+  }
+  /**
+   * @returns {Array}
+   */
+  getFilteredOptions() {
+    const {
+      options,
+    } = this.props;
+
+    const {
+      searchValue,
+    } = this.state;
+
+    const selectedOption = this.findSelectedOption();
+    const useAllOptions = selectedOption && selectedOption.label === searchValue;
+    const filteredOptions = useAllOptions ? options : options.filter((option) => {
+      const optionString = option.label.toLowerCase();
+      const searchString = searchValue.toLowerCase();
+      return optionString.includes(searchString);
+    });
+
+    return filteredOptions;
+  }
+  /**
+   * find the y position to not obscure the dropdown
+   *
+   * @returns {Object}
+   */
+  calculateDropdownPositionStyle() {
+    if (this.containerRef.current === null) {
+      return undefined;
+    }
+
+    const dropdownOffset = this.containerRef.current.clientHeight + 5;
+
+    const {maxHeight} = this.props;
+    const containerRect = this.containerRef.current.getBoundingClientRect();
+
+    // if list will be below the visible area of the window
+    if (containerRect.bottom + maxHeight > window.innerHeight) {
+      return {
+        bottom: dropdownOffset,
+      };
+    }
+
+    return {
+      top: dropdownOffset,
+    };
+  }
+  /**
+   * sets the search value back to the selected value
+   */
+  resetSearchValue() {
+    const selectedOption = this.findSelectedOption();
+    const selectedOptionLabel = this.findLabelOfOption(selectedOption);
+
+    const {options} = this.props;
+    const selectedOptionIdx = (selectedOption !== null && selectedOption !== undefined) ? options.findIndex((option) => {
+      return option.label === selectedOption || option.id === selectedOption.id;
+    }) : undefined;
+
+    this.setState({
+      searchValue: selectedOptionLabel || '',
+      focusedIdx: selectedOptionIdx || 0,
+  });
+  }
 }
 /**
- *
+ * the visible input/button
+ */
+class DropdownControl extends PureComponent {
+  static defaultProps = {
+    /** @type {Boolean} */
+    readOnly: false,
+    /** @type {Boolean} */
+    showButton: false,
+    /** @type {Function} */
+    onClick: () => {},
+  };
+  /** @override */
+  render() {
+    const {
+      onClick,
+      readOnly,
+      showButton,
+      ...otherProps
+    } = this.props;
+
+    return (
+      <div className='flex-row'>
+        <input
+          className={combineClassNames('flex-auto pad-1 text-ellipsis hover:color-fourth', readOnly ? 'cursor-pointer' : '')}
+          readOnly={readOnly}
+          onClick={onClick}
+          {...otherProps}
+        />
+
+        { showButton &&
+          <ClassicButtonComponent
+            className='fsize-3 flex-none pad-h-2 pad-v-1 bor-l-1-gray color-grayer hover:color-fourth'
+            theme={BUTTON_THEME.WHITE}
+            onClick={onClick}
+          >
+            <FontAwesomeIcon icon={faChevronDown} />
+          </ClassicButtonComponent>
+        }
+      </div>
+    )
+  }
+}
+/**
+ * item in the list
  */
 class DropdownItem extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'sibling-mar-t-1 pad-h-1 pad-v-2 bg-white color-black hover:color-fourth cursor-pointer',
+    baseClassName: 'bor-t-1-light-gray pad-2 color-black hover:color-fourth focus:color-fourth cursor-pointer',
     /** @type {String} */
     className: '',
 
@@ -288,12 +597,13 @@ class DropdownItem extends PureComponent {
       ...otherProps
     } = this.props;
 
+    const modifierClassNames = [
+      isSelected ? 'bg-light-blue' : 'bg-white',
+    ];
+
     return (
       <button
-        className={combineClassNames(baseClassName, className)}
-        style={{
-          backgroundColor: isSelected ? '#cde3ea' : undefined,
-        }}
+        className={combineClassNames(baseClassName, className, ...modifierClassNames)}
         role='option'
         aria-selected={isSelected ? true : false}
         tabIndex={isOpen ? 0 : -1}

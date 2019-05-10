@@ -29,6 +29,45 @@
  * @property {Number | Point} ConditionData.value
  */
 
+// -- formatters
+/**
+ * removes the `ENCOUNTER_ID` prefix
+ *
+ * @param {String} encounterIdString
+ * @returns {String}
+ */
+export function snipEncounterId(encounterIdString) {
+  // if it doesn't have the prefix we don't have to remove it
+  const split = encounterIdString.split('.');
+  if (split[0] !== 'ENCOUNTER_ID') {
+    return encounterIdString;
+  }
+
+  split.splice(0, 1);
+  return split.join();
+}
+/**
+ * formats the given id string
+ * - no white space
+ * - all uppercase
+ *
+ * @param {String} encounterIdString
+ * @returns {String}
+ */
+export function formatEncounterId(encounterIdString) {
+  // remove white space and set to uppercase
+  const formattedString = encounterIdString.replace(/ /g,'').toUpperCase();
+
+  // return formatted string if it already has the prefix
+  const split = formattedString.split('.');
+  if (split[0] === 'ENCOUNTER_ID') {
+    return formattedString;
+  }
+
+  // need to add the prefix
+  return 'ENCOUNTER_ID.' + formattedString;
+}
+// -- getters
 /**
  * @param {EncounterData} encounterData
  * @returns {String}
