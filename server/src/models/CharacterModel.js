@@ -2,11 +2,11 @@ import Point from '@studiomoniker/point';
 import Model from 'models/Model';
 
 /**
- * character class
+ * Character data
  *
  * @typedef {Model} CharacterModel
  */
-export class CharacterModel extends Model {
+export default class CharacterModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super({
@@ -34,6 +34,10 @@ export class CharacterModel extends Model {
       luck: 0,
       /** @type {Number} */
       greed: 0,
+
+      /** @type {Array<ItemModel>} */
+      inventory: [],
+
       //
       ...newAttributes,
     });
@@ -86,5 +90,3 @@ export class CharacterModel extends Model {
     });
   }
 }
-
-export default CharacterModel;

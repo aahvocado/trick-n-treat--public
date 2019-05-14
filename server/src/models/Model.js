@@ -115,7 +115,7 @@ export class Model {
       const attributeValue = get(this.attributes, attributeName);
 
       // if value is a Model then use that Model's export
-      if (attributeValue instanceof Model) {
+      if (attributeValue.export !== undefined) {
         exportObject[attributeName] = attributeValue.export();
         return;
       }
@@ -129,7 +129,7 @@ export class Model {
         }
 
         // export array of models using their own export()
-        const isArrayOfModels = attributeValue[0] instanceof Model;
+        const isArrayOfModels = attributeValue[0].export !== undefined;
         if (isArrayOfModels) {
           exportObject[attributeName] = attributeValue.map((model) => (model.export()));
           return;

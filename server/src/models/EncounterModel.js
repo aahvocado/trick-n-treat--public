@@ -22,7 +22,7 @@ export default class EncounterModel extends Model {
       actionList: [],
       /** @type {Array<TagId>} */
       tagList: [],
-      /** @type {Array<EncounterTriggerData>} */
+      /** @type {Array<TriggerData>} */
       triggerList: [],
 
       // -- configured
@@ -118,39 +118,39 @@ export default class EncounterModel extends Model {
     return encounterDataUtils.getActionAt(this.attributes, idx);
   }
   /**
-   * @returns {Array<EncounterTriggerData>}
+   * @returns {Array<TriggerData>}
    */
   getTriggerList() {
     return encounterDataUtils.getTriggerList(this.attributes);
   }
   /**
    * @param {Number} idx
-   * @returns {EncounterTriggerData}
+   * @returns {TriggerData}
    */
   getTriggerAt(idx) {
     return encounterDataUtils.getTriggerAt(this.attributes);
   }
   /**
-   * @param {EncounterTriggerData} encounterTriggerData
+   * @param {TriggerData} triggerData
    * @returns {TriggerId}
    */
-  getTriggerId(encounterTriggerData) {
-    return encounterDataUtils.getTriggerAt(encounterTriggerData);
+  getTriggerId(triggerData) {
+    return encounterDataUtils.getTriggerAt(triggerData);
   }
   /**
-   * @param {EncounterTriggerData} encounterTriggerData
+   * @param {TriggerData} triggerData
    * @returns {Array<ConditionData>}
    */
-  getTriggerConditionList(encounterTriggerData) {
-    return encounterDataUtils.getTriggerAt(encounterTriggerData);
+  getTriggerConditionList(triggerData) {
+    return encounterDataUtils.getTriggerAt(triggerData);
   }
   /**
-   * @param {EncounterTriggerData} encounterTriggerData
+   * @param {TriggerData} triggerData
    * @param {Number} idx
    * @returns {Array<ConditionData>}
    */
-  getTriggerConditionAt(encounterTriggerData, idx) {
-    return encounterDataUtils.getTriggerAt(encounterTriggerData, idx);
+  getTriggerConditionAt(triggerData, idx) {
+    return encounterDataUtils.getTriggerAt(triggerData, idx);
   }
   /**
    * @param {ConditionData} conditionData

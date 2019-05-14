@@ -33,7 +33,7 @@ export class RemoteGamestateModel extends Model {
    */
   attachSocketListeners(socket) {
     // received new Gamestate from Server
-    socket.on(SOCKET_EVENTS.GAME.UPDATE, (data) => {
+    socket.on(SOCKET_EVENTS.UPDATE.GAME, (data) => {
       // convert positional Coordinates into points
       // @todo - fix this ugly
       this.set({
@@ -46,10 +46,10 @@ export class RemoteGamestateModel extends Model {
         },
       });
 
-      logger.server('received GAME.UPDATE');
+      logger.server('SOCKET_EVENTS.UPDATE.GAME');
     });
 
-    socket.on(SOCKET_EVENTS.GAME.ENCOUNTER_TRIGGER, (data) => {
+    socket.on(SOCKET_EVENTS.GAME.ENCOUNTER, (data) => {
       this.set({
         activeEncounter: data,
       });

@@ -3,6 +3,8 @@ import {extendObservable} from 'mobx';
 import {CLIENT_TYPES} from 'constants.shared/clientTypes';
 import {SERVER_MODES} from 'constants.shared/gameModes';
 
+import gameState from 'data/gameState';
+
 import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
@@ -50,12 +52,39 @@ export class ServerStateModel extends Model {
   }
   // --
   /**
+   * all the `findClient` methods use this
+   *
    * @param {String} userId
    * @returns {SocketClientModel | undefined}
    */
   findClientByUserId(userId) {
     const clients = this.get('clients');
     return clients.find((clientModel) => (clientModel.get('userId') === userId));
+  }
+  /**
+   * @param {UserModel} userModel
+   * @returns {SocketClientModel | undefined}
+   */
+  findClientByUser(userModel) {
+    const userId = userModel.get('userId');
+    const clientModel = this.findClientByUserId(userId);
+    return clientModel;
+  }
+  /**
+   * @param {String} characterId
+   * @returns {SocketClientModel | undefined}
+   */
+  findClientByCharacterId(characterId) {
+    const userModel = gameState.findUserByCharacterId(characterId);
+    return this.findClientByUser(userModel);
+  }
+  /**
+   * @param {CharacterModel} characterModel
+   * @returns {SocketClientModel | undefined}
+   */
+  findClientByCharacter(characterModel) {
+    const characterId = characterModel.get('characterId');
+    return this.findClientByCharacterId(characterId);
   }
   // -- Actions for the Server state
   /**

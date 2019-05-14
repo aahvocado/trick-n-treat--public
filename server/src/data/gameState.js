@@ -4,10 +4,9 @@ import {extendObservable} from 'mobx';
 import {GAME_MODES} from 'constants.shared/gameModes';
 import {FOG_TYPES, isWalkableTile} from 'constants.shared/tileTypes';
 
+import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
-
-import {sendUpdateToAllClients} from 'managers/clientManager';
 
 import Model from 'models/Model';
 import MapModel from 'models/MapModel';
@@ -424,7 +423,7 @@ export class GamestateModel extends Model {
     }
 
     // send update
-    this.addToActionQueue(sendUpdateToAllClients);
+    this.addToActionQueue(clientEventHelper.sendUpdateToAllClients);
 
     const activeCharacter = this.get('activeCharacter');
     logger.game(`. Turn for: "${activeCharacter.get('name')}"`);
@@ -446,7 +445,7 @@ export class GamestateModel extends Model {
     oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
 
     // send update
-    this.addToActionQueue(sendUpdateToAllClients);
+    this.addToActionQueue(clientEventHelper.sendUpdateToAllClients);
   }
   /**
    * round

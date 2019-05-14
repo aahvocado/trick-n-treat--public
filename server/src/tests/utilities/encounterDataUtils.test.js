@@ -25,7 +25,7 @@ test.beforeEach((t) => {
     ],
     'triggerList': [
       {
-        'triggerId': 'ENCOUNTER_TRIGGER_ID.HEALTH.ADD',
+        'triggerId': 'TRIGGER_ID.HEALTH.ADD',
         'value': 1,
         'conditionList': [
           {
@@ -61,14 +61,14 @@ test('getTriggerList()', (t) => {
 
 test('getTriggerAt()', (t) => {
   const encounterTriggerData = encounterDataUtils.getTriggerAt(testEncounterData, 0);
-  t.is(encounterTriggerData.triggerId, 'ENCOUNTER_TRIGGER_ID.HEALTH.ADD');
+  t.is(encounterTriggerData.triggerId, 'TRIGGER_ID.HEALTH.ADD');
   t.is(encounterTriggerData.value, 1);
 });
 
 test('getTriggerId()', (t) => {
   const encounterTriggerData = encounterDataUtils.getTriggerAt(testEncounterData, 0);
   const triggerId = encounterDataUtils.getTriggerId(encounterTriggerData);
-  t.is(triggerId, 'ENCOUNTER_TRIGGER_ID.HEALTH.ADD');
+  t.is(triggerId, 'TRIGGER_ID.HEALTH.ADD');
 });
 
 test('getTriggerConditionList()', (t) => {

@@ -2,7 +2,7 @@ import {GAME_MODES} from 'constants.shared/gameModes';
 
 import gameState from 'data/gameState';
 
-import {sendUpdateToAllClients} from 'managers/clientManager';
+import * as clientEventHelper from 'helpers/clientEventHelper';
 
 import logger from 'utilities/logger.game';
 
@@ -38,7 +38,7 @@ export async function resolveActionQueue() {
   }
 
   gameState.set({mode: GAME_MODES.ACTIVE});
-  sendUpdateToAllClients();
+  clientEventHelper.sendUpdateToAllClients();
   logger.old('[[finished resolving ActionQueue]]');
 }
 /**

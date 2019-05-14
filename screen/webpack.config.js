@@ -27,6 +27,7 @@ module.exports = {
       'constants.shared': path.resolve(sharedPath, 'constants'),
       'data.shared': path.resolve(sharedPath, 'data'),
       'helpers.shared': path.resolve(sharedPath, 'helpers'),
+      'models.shared': path.resolve(sharedPath, 'models'),
       'utilities.shared': path.resolve(sharedPath, 'utilities'),
     }
   },

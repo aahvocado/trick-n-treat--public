@@ -22,9 +22,13 @@ import {
 } from 'constants/mapConstants';
 
 import ButtonComponent from 'common-components/ButtonComponent';
+import ModalComponent from 'common-components/ModalComponent';
 
+import InventoryComponent from 'components/InventoryComponent';
 import TileMapComponent from 'components/TileMapComponent';
 import EncounterModalComponent from 'components/EncounterModalComponent';
+
+import {MAP_CONTAINER_WIDTH} from 'constants/mapConstants';
 
 import {CLIENT_ACTIONS} from 'constants.shared/clientActions';
 import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
@@ -49,6 +53,9 @@ export default observer(
     constructor(props) {
       super(props);
 
+      this.toggleItemModal = this.toggleItemModal.bind(this);
+      this.onClickUseItem = this.onClickUseItem.bind(this);
+
       this.handleOnTileClick = this.handleOnTileClick.bind(this);
 
       this.handleMoveToOnClick = this.handleMoveToOnClick.bind(this);
@@ -61,6 +68,9 @@ export default observer(
         selectedTilePos: new Point(0, 0),
         /** @type {Path} */
         selectedPath: [],
+
+        /** @type {Boolean} */
+        showModal: false,
       }
     }
     // /** @override */
@@ -90,6 +100,7 @@ export default observer(
       const {
         selectedTilePos,
         selectedPath,
+        showModal,
       } = this.state;
 
       if (gamestate === undefined) {
@@ -101,6 +112,22 @@ export default observer(
       return (
         <div className='bg-secondary flex-auto flex-center flex-col width-full talign-center'>
           {/* Modal */}
+          <ModalComponent
+            className='flex-col-center color-black bg-white pad-2 mar-v-5'
+            style={{
+              width: `${MAP_CONTAINER_WIDTH}px`,
+              height: '300px',
+            }}
+            active={showModal}
+            onClickOverlay={() => { this.toggleItemModal(false); }}
+          >
+            <InventoryComponent
+              inventory={myCharacter.inventory}
+              onClickUseItem={this.onClickUseItem}
+            />
+          </ModalComponent>
+
+          {/* Encounter Modal */}
           <EncounterModalComponent
             // -- modal props
             active={hasActiveEncounter}
@@ -163,6 +190,14 @@ export default observer(
           {/* Action Menu */}
           <div className='flex-row-center'>
             <ButtonComponent
+              className='adjacent-mar-l-2'
+              onClick={() => { this.toggleItemModal(true); }}
+            >
+              Items
+            </ButtonComponent>
+
+            <ButtonComponent
+              className='adjacent-mar-l-2'
               disabled={!this.canMove()}
               onClick={this.handleMoveToOnClick}
             >
@@ -259,7 +294,7 @@ export default observer(
       }
 
       const {selectedTilePos} = this.state;
-      connectionManager.socket.emit(SOCKET_EVENTS.GAME.MOVE_TO, selectedTilePos);
+      connectionManager.socket.emit(CLIENT_ACTIONS.MOVE.TO, selectedTilePos);
 
       this.setState({selectedPath: []});
     }
@@ -290,7 +325,31 @@ export default observer(
       const activeEncounter = remoteGameState.get('activeEncounter');
 
       logger.user(`User selected "${actionData.actionId}" for encounter "${activeEncounter.id}"`);
-      connectionManager.socket.emit(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, activeEncounter.id, actionData);
+      connectionManager.socket.emit(CLIENT_ACTIONS.CHOICE, activeEncounter.id, actionData);
+    }
+    /**
+     * toggles visibility of the Modal
+     *
+     * @param {Boolean} [shouldShow]
+     */
+    toggleItemModal(shouldShow) {
+      if (shouldShow !== undefined) {
+        this.setState({showModal: shouldShow});
+        return;
+      }
+
+      this.setState({showModal: !this.state.showModal});
+    }
+    /**
+     * use item
+     *
+     * @param {ItemData} itemData
+     */
+    onClickUseItem(itemData) {
+      this.setState({showModal: false});
+
+      logger.user(`user used ${itemData.name}`);
+      connectionManager.socket.emit(CLIENT_ACTIONS.USE_ITEM, itemData);
     }
   }
 )

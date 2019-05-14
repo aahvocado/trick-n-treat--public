@@ -23,7 +23,7 @@ export default class ButtonComponent extends PureComponent {
       ...otherProps
     } = this.props;
 
-    const baseTextClassName = 'color-primary bg-fifth hover:bg-secondary-lighter focus:bg-secondary-lighter active:bg-fourth cursor-pointer';
+    const baseTextClassName = 'color-primary bg-fifth hover:color-secondary focus:color-secondary active:color-secondary cursor-pointer';
     const disabledTextClassName = 'color-tertiary bg-secondary';
     const finalTextClassName = disabled ? disabledTextClassName : baseTextClassName;
 

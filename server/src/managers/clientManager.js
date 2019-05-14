@@ -1,13 +1,14 @@
+import {CLIENT_ACTIONS} from 'constants.shared/clientActions';
 import {CLIENT_TYPES} from 'constants.shared/clientTypes';
 import {SERVER_MODES} from 'constants.shared/gameModes';
 import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
 import serverState from 'data/serverState';
 
-import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
 import {SocketClientModel} from 'models/SocketClientModel';
+import ItemModel from 'models.shared/ItemModel';
 
 import logger from 'utilities/logger.game';
 
@@ -29,7 +30,7 @@ export function init(io) {
    */
   serverState.onChange('lobbyClients', (lobbyClients) => {
     lobbyClients.forEach((client) => {
-      client.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientLobbyData(client));
+      client.emit(SOCKET_EVENTS.UPDATE.CLIENT, generateClientLobbyData(client));
     });
   });
 }
@@ -68,13 +69,19 @@ function attachClientEvents(clientModel) {
   });
 
   // direct move path action
-  socket.on(SOCKET_EVENTS.GAME.MOVE_TO, (position) => {
+  socket.on(CLIENT_ACTIONS.MOVE.TO, (position) => {
     gamestateUserHelper.handleUserActionMoveTo(userId, position);
   });
 
   // client chosen an action from the Encounter modal
-  socket.on(SOCKET_EVENTS.GAME.ENCOUNTER_ACTION_CHOICE, (encounterId, actionData) => {
+  socket.on(CLIENT_ACTIONS.CHOICE, (encounterId, actionData) => {
     gamestateUserHelper.handleUserEncounterAction(userId, encounterId, actionData);
+  });
+
+  // client used an Item
+  socket.on(CLIENT_ACTIONS.USE_ITEM, (itemData) => {
+    const itemModel = new ItemModel(itemData);
+    gamestateUserHelper.handleUserUseItem(userId, itemModel);
   });
 
   /**
@@ -113,59 +120,6 @@ function handleCreatingNewSocketClient(socket) {
   logger.new(`+ Client "${newClient.get('name')}" connected`);
   return newClient;
 }
-// -- individual Client functions
-/**
- * sends data to a User by finding its associated Client
- *
- * @param {UserModel} userModel
- */
-export function sendUpdateToClientByUser(userModel) {
-  const userId = userModel.get('userId');
-  const clientModel = serverState.findClientByUserId(userId);
-  if (clientModel === undefined) {
-    return;
-  };
-
-  sendUpdateToClient(clientModel);
-}
-/**
- * sends data to a User by finding its associated Client
- *
- * @param {SocketClientModel} clientModel
- */
-export function sendUpdateToClient(clientModel) {
-  logger.verbose(`. (sending update to client "${clientModel.get('name')}")`);
-  clientModel.emit(SOCKET_EVENTS.CLIENT.UPDATE, generateClientGameData(clientModel));
-  clientModel.emit(SOCKET_EVENTS.GAME.UPDATE, gamestateDataHelper.getFormattedGamestateData());
-}
-/**
- * sends data to all Clients
- *
- * @param {SocketClientModel} clientModel
- */
-export function sendUpdateToAllClients(clientModel) {
-  const clients = serverState.get('clients');
-  logger.lifecycle(`(sending updates to all ${clients.length} clients)`);
-  clients.forEach((client) => {
-    sendUpdateToClient(client);
-  });
-}
-/**
- * send updated data to show that the User needs to handle an Event
- *
- * @param {UserModel} userModel
- * @param {Object} encounterData
- */
-export function sendEncounterToClientByUser(userModel, encounterData) {
-  const userId = userModel.get('userId');
-  const clientModel = serverState.findClientByUserId(userId);
-  if (clientModel === undefined) {
-    return;
-  };
-
-  logger.verbose(`. (sending encounter data to client "${clientModel.get('name')}")`);
-  clientModel.emit(SOCKET_EVENTS.GAME.ENCOUNTER_TRIGGER, encounterData);
-}
 /**
  * creates some State data for a Remote Client
  *
@@ -190,18 +144,5 @@ function generateClientLobbyData(clientModel) {
     isInGame: clientModel.get('isInGame'),
     isGameInProgress: serverState.get('mode') === SERVER_MODES.GAME,
     lobbyData: lobbyData,
-  };
-}
-/**
- * creates some State data for a Remote Client
- *
- * @param {SocketClientModel} clientModel
- * @returns {Object} - for the Remote
- */
-function generateClientGameData(clientModel) {
-  return {
-    isInLobby: clientModel.get('isInLobby'),
-    isInGame: clientModel.get('isInGame'),
-    ...gamestateUserHelper.getClientUserAndCharacter(clientModel.get('userId')),
   };
 }

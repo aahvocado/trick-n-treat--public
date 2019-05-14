@@ -22,7 +22,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.HEALTH.ADD",
+        "triggerId": "TRIGGER_ID.HEALTH.ADD",
         "value": 1,
         "conditionList": [
           {
@@ -50,7 +50,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.HEALTH.SUBTRACT",
+        "triggerId": "TRIGGER_ID.HEALTH.SUBTRACT",
         "value": 1
       }
     ]
@@ -71,7 +71,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.SANITY.SUBTRACT",
+        "triggerId": "TRIGGER_ID.SANITY.SUBTRACT",
         "value": 1
       }
     ]
@@ -92,7 +92,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.SANITY.ADD",
+        "triggerId": "TRIGGER_ID.SANITY.ADD",
         "value": 1
       }
     ]
@@ -131,7 +131,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.CANDY.ADD",
+        "triggerId": "TRIGGER_ID.CANDY.ADD",
         "value": 1
       }
     ]
@@ -153,7 +153,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.CANDY.SUBTRACT",
+        "triggerId": "TRIGGER_ID.CANDY.SUBTRACT",
         "value": 1
       }
     ]
@@ -175,7 +175,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.LUCK.ADD",
+        "triggerId": "TRIGGER_ID.LUCK.ADD",
         "value": 1
       }
     ]
@@ -197,7 +197,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.LUCK.SUBTRACT",
+        "triggerId": "TRIGGER_ID.LUCK.SUBTRACT",
         "value": 2
       }
     ]
@@ -245,7 +245,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.HEALTH.ADD",
+        "triggerId": "TRIGGER_ID.HEALTH.ADD",
         "value": 1
       }
     ]
@@ -263,7 +263,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.SANITY.ADD",
+        "triggerId": "TRIGGER_ID.SANITY.ADD",
         "value": 1
       }
     ]
@@ -286,7 +286,12 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.SANITY.SUBTRACT",
+        "triggerId": "TRIGGER_ID.SANITY.SUBTRACT",
+        "value": 1
+      },
+      {
+        "triggerId": "TRIGGER_ID.GIVE_ITEM",
+        "itemId": "ITEM_ID.GUMMY_VIAL",
         "value": 1
       }
     ]
@@ -309,7 +314,7 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.LUCK.SUBTRACT",
+        "triggerId": "TRIGGER_ID.LUCK.SUBTRACT",
         "value": 2
       }
     ]
@@ -331,8 +336,13 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.CANDY.ADD",
+        "triggerId": "TRIGGER_ID.CANDY.ADD",
         "value": 1
+      },
+      {
+        "triggerId": "TRIGGER_ID.GIVE_ITEM",
+        "itemId": "ITEM_ID.GUMMY_VIAL",
+        "value": 3
       }
     ]
   },
@@ -351,7 +361,12 @@
     ],
     "triggerList": [
       {
-        "triggerId": "ENCOUNTER_TRIGGER_ID.CANDY.ADD",
+        "triggerId": "TRIGGER_ID.CANDY.ADD",
+        "value": 1
+      },
+      {
+        "triggerId": "TRIGGER_ID.GIVE_ITEM",
+        "itemId": "ITEM_ID.GUMMY_VIAL",
         "value": 1
       }
     ]

@@ -10,19 +10,17 @@ import {MAP_START} from 'constants/mapSettings';
 import {POINTS} from 'constants/points';
 
 import gameState from 'data/gameState';
+import serverState from 'data/serverState';
 
+import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
-
-import {
-  sendEncounterToClientByUser,
-  sendUpdateToClientByUser,
-} from 'managers/clientManager';
 
 import UserModel from 'models/UserModel';
 
 import logger from 'utilities/logger.game';
 import * as encounterConditionUtils from 'utilities/encounterConditionUtils';
+import * as triggerUtils from 'utilities/triggerUtils';
 
 import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
 
@@ -90,7 +88,8 @@ export function handleJoinGame(clientModel) {
     isInGame: true,
   });
 
-  sendUpdateToClientByUser(existingUser);
+  // give updates to the client
+  clientEventHelper.sendUpdateToClient(clientModel);
 
   // check if the user rejoined and it is actually their turn
   const activeUser = gameState.get('activeUser');
@@ -99,27 +98,8 @@ export function handleJoinGame(clientModel) {
   // check if there is an `activeEncounter` to send them to finish
   const activeEncounter = gameState.get('activeEncounter');
   if (isActiveUser && activeEncounter !== null) {
-    const activeCharacter = gameState.get('activeCharacter');
-    const evaluatedEncounterData = gamestateEncounterHelper.createEvaluatedEncounterData(activeCharacter, activeEncounter);
-    sendEncounterToClientByUser(activeUser, evaluatedEncounterData);
+    clientEventHelper.sendEncounterToClient(clientModel, activeEncounter);
   }
-}
-/**
- * @param {String} userId
- * @returns {Object}
- */
-export function getClientUserAndCharacter(userId) {
-  const characterModel = gameState.findCharacterByUserId(userId);
-  const userModel = gameState.findUserById(userId);
-
-  if (characterModel === undefined || userModel === undefined) {
-    return;
-  }
-
-  return {
-    myCharacter: characterModel.export(),
-    myUser: userModel.export(),
-  };
 }
 /**
  * updates every User's actions
@@ -168,6 +148,43 @@ export function updateLocationActionsForUser(userModel) {
   userModel.set({
     canTrick: houseModelHere.isTrickable(characterModel),
     canTreat: houseModelHere.isTreatable(characterModel),
+  });
+}
+/**
+ * a User's Action was finished
+ *
+ * @param {UserModel} userModel
+ */
+export function onUserActionComplete(userModel) {
+  // clear the `activeEncounter`
+  gameState.set({activeEncounter: null});
+
+  // check if character's movement is now 0
+  const characterModel = gameState.findCharacterByUserId(userModel.get('userId'));
+  if (!characterModel.canMove()) {
+    // end their turn
+    gameState.addToActionQueue(() => {
+      onUserTurnComplete(userModel);
+    });
+  }
+
+  // after they finish an action, we should update the Client
+  const clientModel = serverState.findClientByUser(userModel);
+  clientEventHelper.sendUpdateToClient(clientModel);
+}
+/**
+ * a User's Turn finished
+ *
+ * @param {UserModel} userModel
+ */
+export function onUserTurnComplete(userModel) {
+  userModel.set({
+    isUserTurn: false,
+  });
+
+  // next turn
+  gameState.addToActionQueue(() => {
+    gameState.handleEndOfTurn();
   });
 }
 /**
@@ -310,7 +327,7 @@ export function handleUserActionMoveTo(userId, endPosition) {
   gamestateCharacterHelper.handleMoveCharacterTo(characterModel, endPoint);
 }
 /**
- * User did something
+ * User chosen an Action
  *
  * @param {String} userId
  * @param {EncounterId} encounterId
@@ -346,7 +363,8 @@ export function handleUserEncounterAction(userId, encounterId, actionData) {
   // just a basic confirmation to close the `Encounter`
   if (actionId === ENCOUNTER_ACTION_ID.CONFIRM) {
     // tell the client their encounter is now null
-    sendEncounterToClientByUser(activeUserModel, null);
+    const clientModel = serverState.findClientByCharacter(activeCharacter);
+    clientEventHelper.sendEncounterToClient(clientModel, null);
 
     // action is complete
     onUserActionComplete(activeUserModel);
@@ -358,38 +376,32 @@ export function handleUserEncounterAction(userId, encounterId, actionData) {
   }
 }
 /**
- * a User's Action was finished
+ * User used Item
  *
- * @param {UserModel} userModel
+ * @param {String} userId
+ * @param {ItemModel} itemModel
  */
-export function onUserActionComplete(userModel) {
-  // clear the `activeEncounter`
-  gameState.set({activeEncounter: null});
+export function handleUserUseItem(userId, itemModel) {
+  const characterModel = gameState.findCharacterByUserId(userId);
 
-  // check if character's movement is now 0
-  const characterModel = gameState.findCharacterByUserId(userModel.get('userId'));
-  if (!characterModel.canMove()) {
-    // end their turn
-    gameState.addToActionQueue(() => {
-      onUserTurnComplete(userModel);
-    });
+  // remove item if consumable
+  if (itemModel.get('isConsumable')) {
+    const inventory = characterModel.get('inventory');
+    const foundItemIdx = inventory.findIndex((inventoryItem) => (inventoryItem.get('id') === itemModel.get('id')));
+    if (foundItemIdx >= 0) {
+      inventory.splice(foundItemIdx, 1);
+      characterModel.set({inventory: inventory});
+    }
   }
 
-  // after they finish an action, we should update the Client
-  sendUpdateToClientByUser(userModel);
-}
-/**
- * a User's Turn finished
- *
- * @param {UserModel} userModel
- */
-export function onUserTurnComplete(userModel) {
-  userModel.set({
-    isUserTurn: false,
+  // resolve all triggers for an item
+  const triggerList = itemModel.get('triggerList');
+  triggerList.forEach((triggerData) => {
+    triggerUtils.resolveTrigger(triggerData, characterModel);
   });
 
-  // next turn
-  gameState.addToActionQueue(() => {
-    gameState.handleEndOfTurn();
-  });
+  // send the client the data of the Encounter they triggered
+  const clientModel = serverState.findClientByCharacter(characterModel);
+  clientEventHelper.sendUpdateToClient(clientModel);
 }
+

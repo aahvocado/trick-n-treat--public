@@ -70,7 +70,7 @@ export class RemoteStateModel extends Model {
    * attach listeners to the websocket
    */
   attachSocketListeners(socket) {
-    socket.on(SOCKET_EVENTS.CLIENT.UPDATE, (data) => {
+    socket.on(SOCKET_EVENTS.UPDATE.CLIENT, (data) => {
       // convert positional Coordinates into points
       // @todo - fix this ugly
       const myCharacterData = data.myCharacter ? {
@@ -83,8 +83,23 @@ export class RemoteStateModel extends Model {
         myCharacter: myCharacterData,
       });
 
-      logger.server('received CLIENT.UPDATE');
+      logger.server('SOCKET_EVENTS.UPDATE.CLIENT');
     });
+
+    // update just for character
+    socket.on(SOCKET_EVENTS.UPDATE.MY_CHARACTER, (characterAttributes) => {
+      const formattedCharacterData = {
+        ...characterAttributes,
+        position: new Point(characterAttributes.position.x, characterAttributes.position.y),
+      };
+
+      this.set({
+        myCharacter: formattedCharacterData,
+      });
+
+      logger.server('SOCKET_EVENTS.UPDATE.MY_CHARACTER');
+    });
+
     // -- connection stuff
     socket.on('connect', () => {
       this.set({

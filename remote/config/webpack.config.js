@@ -275,6 +275,7 @@ module.exports = function(webpackEnv) {
         'constants.shared': path.resolve(paths.sharedPath, 'constants'),
         'data.shared': path.resolve(paths.sharedPath, 'data'),
         'helpers.shared': path.resolve(paths.sharedPath, 'helpers'),
+        'models.shared': path.resolve(paths.sharedPath, 'models'),
         'utilities.shared': path.resolve(paths.sharedPath, 'utilities'),
 
         '@studiomoniker/point': path.resolve(paths.appNodeModules, '@studiomoniker/point'),

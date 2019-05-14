@@ -1,0 +1,15 @@
+[
+  {
+    "id": "ITEM_ID.GUMMY_VIAL",
+    "isConsumable": true,
+    "name": "Gummy Vial",
+    "description": "This is a gummy candy in the shape of test tube. Gee, Lycanshire Candy Co sure are trying hard to get kids into science.",
+    "triggerList": [
+      {
+        "triggerId": "TRIGGER_ID.HEALTH.ADD",
+        "value": 1
+      }
+    ],
+    "tagList": []
+  }
+]
