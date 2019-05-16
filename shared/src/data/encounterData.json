@@ -1,208 +1,57 @@
 [
   {
-    "id": "ENCOUNTER_ID.TEST_ADD_HEALTH",
-    "title": "Test Adding Health",
-    "content": "You got 1 health",
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.DEBUG_ENCOUNTER",
+    "title": "Developer Encounter",
+    "content": "This is the first Encounter in the list and we use it to mess around.",
     "tagList": [
-      "TAG_ID.SIDEWALK",
       "TAG_ID.DEBUG"
     ],
     "actionList": [
       {
-        "label": "Okay",
-        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
-        "conditionList": [
-          {
-            "conditionId": "CONDITION_ID.GREATER_THAN",
-            "conditionTargetId": "CONDITION_TARGET_ID.STAT.SANITY",
-            "value": 1
-          }
-        ]
-      }
-    ],
-    "triggerList": [
-      {
-        "triggerId": "TRIGGER_ID.HEALTH.ADD",
-        "value": 1,
-        "conditionList": [
-          {
-            "conditionId": "CONDITION_ID.LESS_THAN",
-            "conditionTargetId": "CONDITION_TARGET_ID.STAT.HEALTH",
-            "value": 2
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "ENCOUNTER_ID.TEST_LOSE_HEALTH",
-    "title": "Test Losing Health",
-    "content": "You lose 1 health",
-    "tagList": [
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.DEBUG"
-    ],
-    "actionList": [
-      {
-        "label": "Okay",
-        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
-      }
-    ],
-    "triggerList": [
-      {
-        "triggerId": "TRIGGER_ID.HEALTH.SUBTRACT",
-        "value": 1
-      }
-    ]
-  },
-  {
-    "id": "ENCOUNTER_ID.TEST_LOSE_SANITY",
-    "title": "Test Losing Sanity",
-    "content": "You lost 1 Sanity",
-    "tagList": [
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.DEBUG"
-    ],
-    "actionList": [
-      {
-        "label": "Okay",
-        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
-      }
-    ],
-    "triggerList": [
-      {
-        "triggerId": "TRIGGER_ID.SANITY.SUBTRACT",
-        "value": 1
-      }
-    ]
-  },
-  {
-    "id": "ENCOUNTER_ID.TEST_ADD_SANITY",
-    "title": "Test Adding Sanity",
-    "content": "You got 1 Sanity",
-    "tagList": [
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.DEBUG"
-    ],
-    "actionList": [
-      {
-        "label": "Okay",
-        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
-      }
-    ],
-    "triggerList": [
-      {
-        "triggerId": "TRIGGER_ID.SANITY.ADD",
-        "value": 1
-      }
-    ]
-  },
-  {
-    "id": "ENCOUNTER_ID.TEST_GOTO",
-    "title": "Test Go To Action",
-    "content": "This will take you to a spoooooooky place",
-    "tagList": [
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.DEBUG"
-    ],
-    "actionList": [
-      {
+        "dataType": "DATA_TYPE.ACTION",
         "actionId": "ENCOUNTER_ACTION_ID.GOTO",
-        "label": "Oh no",
-        "gotoId": "ENCOUNTER_ID.TEST_LOSE_SANITY"
-      }
-    ],
-    "triggerList": []
-  },
-  {
-    "id": "ENCOUNTER_ID.TEST_ADD_CANDY",
-    "title": "Test Adding Candy",
-    "content": "You got 1 Candy!",
-    "tagList": [
-      "TAG_ID.ENCOUNTER",
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.DEBUG"
-    ],
-    "actionList": [
+        "label": "Go to get Free Candy",
+        "gotoId": "ENCOUNTER_ID.FREE_TAFFY",
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "value": 1,
+            "conditionTargetId": "CONDITION_TARGET_ID.STAT.SANITY",
+            "conditionId": "CONDITION_ID.GREATER_THAN"
+          }
+        ]
+      },
       {
+        "dataType": "DATA_TYPE.ACTION",
         "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
         "label": "Okay"
       }
     ],
     "triggerList": [
       {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerId": "TRIGGER_ID.GIVE_ITEM",
+        "itemId": "ITEM_ID.GUMMY_VIAL",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
         "triggerId": "TRIGGER_ID.CANDY.ADD",
-        "value": 1
+        "value": 100,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "value": 40,
+            "conditionTargetId": "CONDITION_TARGET_ID.STAT.CANDIES",
+            "conditionId": "CONDITION_ID.LESS_THAN"
+          }
+        ]
       }
     ]
   },
   {
-    "id": "ENCOUNTER_ID.TEST_LOSE_CANDY",
-    "title": "Test Losing Candy",
-    "content": "You lost 1 Candy",
-    "tagList": [
-      "TAG_ID.ENCOUNTER",
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.DEBUG"
-    ],
-    "actionList": [
-      {
-        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
-        "label": "Okay"
-      }
-    ],
-    "triggerList": [
-      {
-        "triggerId": "TRIGGER_ID.CANDY.SUBTRACT",
-        "value": 1
-      }
-    ]
-  },
-  {
-    "id": "ENCOUNTER_ID.TEST_ADD_LUCK",
-    "title": "Test Adding Luck",
-    "content": "You got 1 Luck",
-    "tagList": [
-      "TAG_ID.ENCOUNTER",
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.DEBUG"
-    ],
-    "actionList": [
-      {
-        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
-        "label": "Okay"
-      }
-    ],
-    "triggerList": [
-      {
-        "triggerId": "TRIGGER_ID.LUCK.ADD",
-        "value": 1
-      }
-    ]
-  },
-  {
-    "id": "ENCOUNTER_ID.TEST_LOSE_LUCK",
-    "title": "Test Losing Luck",
-    "content": "You lost 2 Luck",
-    "tagList": [
-      "TAG_ID.ENCOUNTER",
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.DEBUG"
-    ],
-    "actionList": [
-      {
-        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM",
-        "label": "Okay"
-      }
-    ],
-    "triggerList": [
-      {
-        "triggerId": "TRIGGER_ID.LUCK.SUBTRACT",
-        "value": 2
-      }
-    ]
-  },
-  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.FASHION_ADVICE",
     "title": "Graveyard Fashion Advice (1)",
     "content": "You see a nearby patch of dirt rumble... and out pops a skeleton with round, purple frames. She rattles and gives some advice, \"You would look really good wearing orange at the Sternum Ball.\"",
@@ -213,16 +62,19 @@
     ],
     "actionList": [
       {
+        "dataType": "DATA_TYPE.ACTION",
         "label": "Thank her for her suggestion.",
         "actionId": "ENCOUNTER_ACTION_ID.GOTO",
         "gotoId": "ENCOUNTER_ID.FASHION_ADVICE_2"
       },
       {
+        "dataType": "DATA_TYPE.ACTION",
         "label": "Oh no, she needs help getting back in her grave!",
         "actionId": "ENCOUNTER_ACTION_ID.GOTO",
         "gotoId": "ENCOUNTER_ID.FASHION_ADVICE_3",
         "conditionList": [
           {
+            "dataType": "DATA_TYPE.CONDITION",
             "conditionId": "CONDITION_ID.GREATER_THAN",
             "conditionTargetId": "CONDITION_TARGET_ID.STAT.SANITY",
             "value": 6
@@ -233,70 +85,49 @@
     "triggerList": []
   },
   {
+    "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.FASHION_ADVICE_2",
     "title": "Graveyard Fashion Advice (2)",
     "content": "She giggles really excitedly and it makes a rattle so joyful that you giggle, too! You both giggle until you have to wipe the tears from your face.",
     "tagList": [],
     "actionList": [
       {
+        "dataType": "DATA_TYPE.ACTION",
         "label": "Whew!",
         "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
       }
     ],
     "triggerList": [
       {
+        "dataType": "DATA_TYPE.TRIGGER",
         "triggerId": "TRIGGER_ID.HEALTH.ADD",
         "value": 1
       }
     ]
   },
   {
+    "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.FASHION_ADVICE_3",
     "title": "Graveyard Fashion Advice (3)",
     "content": "You caress her and slowly help her lay back on her dirt bed. All while she's telling how cute you look and that orange really would suit you. I bet you're totally blushing. ",
     "tagList": [],
     "actionList": [
       {
+        "dataType": "DATA_TYPE.ACTION",
         "label": "Blush",
         "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
       }
     ],
     "triggerList": [
       {
+        "dataType": "DATA_TYPE.TRIGGER",
         "triggerId": "TRIGGER_ID.SANITY.ADD",
         "value": 1
       }
     ]
   },
   {
-    "id": "ENCOUNTER_ID.SCOOTERS",
-    "title": "Scooters on Dirt",
-    "content": "There's a bunch of scooters just laying around making annoying beeping noises and it's driving you mad! Which group of kids rides scooters on dirt?",
-    "tagList": [
-      "TAG_ID.ENCOUNTER",
-      "TAG_ID.PATH",
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.GRASS"
-    ],
-    "actionList": [
-      {
-        "label": "Okay",
-        "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
-      }
-    ],
-    "triggerList": [
-      {
-        "triggerId": "TRIGGER_ID.SANITY.SUBTRACT",
-        "value": 1
-      },
-      {
-        "triggerId": "TRIGGER_ID.GIVE_ITEM",
-        "itemId": "ITEM_ID.GUMMY_VIAL",
-        "value": 1
-      }
-    ]
-  },
-  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.BLACK_CAT",
     "title": "The Darkness Meows",
     "content": "Oh no.. it can't be... it couldn't... not now...! A black cat with sparkling blue eyes crosses your path on the worse night imaginable! Fate has it in for you... You feel so unlucky.",
@@ -308,18 +139,21 @@
     ],
     "actionList": [
       {
+        "dataType": "DATA_TYPE.ACTION",
         "label": "Okay",
         "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
       }
     ],
     "triggerList": [
       {
+        "dataType": "DATA_TYPE.TRIGGER",
         "triggerId": "TRIGGER_ID.LUCK.SUBTRACT",
         "value": 2
       }
     ]
   },
   {
+    "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.CANDY_FAIRY",
     "title": "Blessed by the Fairy",
     "content": "You see a little glowing thing pass by in front of you. Upon closer inspection, its a fairy who's carrying a piece of candy about her size! She sees you and gives it to you and says \"I really like your costume!\"",
@@ -330,16 +164,19 @@
     ],
     "actionList": [
       {
+        "dataType": "DATA_TYPE.ACTION",
         "label": "Okay",
         "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
       }
     ],
     "triggerList": [
       {
+        "dataType": "DATA_TYPE.TRIGGER",
         "triggerId": "TRIGGER_ID.CANDY.ADD",
         "value": 1
       },
       {
+        "dataType": "DATA_TYPE.TRIGGER",
         "triggerId": "TRIGGER_ID.GIVE_ITEM",
         "itemId": "ITEM_ID.GUMMY_VIAL",
         "value": 3
@@ -347,6 +184,7 @@
     ]
   },
   {
+    "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.FREE_TAFFY",
     "title": "Free Naffy Taffy?",
     "content": "\"Hey, I'm not a big fan of Naffy Taffy so you can have it.\"",
@@ -355,16 +193,19 @@
     ],
     "actionList": [
       {
+        "dataType": "DATA_TYPE.ACTION",
         "label": "Okay",
         "actionId": "ENCOUNTER_ACTION_ID.CONFIRM"
       }
     ],
     "triggerList": [
       {
+        "dataType": "DATA_TYPE.TRIGGER",
         "triggerId": "TRIGGER_ID.CANDY.ADD",
         "value": 1
       },
       {
+        "dataType": "DATA_TYPE.TRIGGER",
         "triggerId": "TRIGGER_ID.GIVE_ITEM",
         "itemId": "ITEM_ID.GUMMY_VIAL",
         "value": 1

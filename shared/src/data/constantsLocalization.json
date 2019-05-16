@@ -2,8 +2,9 @@
   "CONDITION_ID.EQUALS": "Equals",
   "CONDITION_ID.LESS_THAN": "Less Than",
   "CONDITION_ID.GREATER_THAN": "Greater Than",
-  "CONDITION_ID.AT_LOCATION": "At Location",
-  "CONDITION_ID.ON_TILE_TYPE": "On Tile",
+  "CONDITION_ID.AT_LOCATION": "Character at Location",
+  "CONDITION_ID.ON_TILE_TYPE": "Character on Tile",
+  "CONDITION_ID.HAS_ITEM": "Character has Item",
 
   "CONDITION_TARGET_ID.STAT.HEALTH": "Health",
   "CONDITION_TARGET_ID.STAT.MOVEMENT": "Movement",
@@ -31,7 +32,9 @@
   "TRIGGER_ID.LUCK.SUBTRACT": "Subtract Luck",
   "TRIGGER_ID.GREED.ADD": "Gain Greed",
   "TRIGGER_ID.GREED.SUBTRACT": "Subtract Greed",
-  "TRIGGER_ID.CHANGE_POSITION": "Change Position",
+  "TRIGGER_ID.CHANGE_LOCATION": "Change Location",
+  "TRIGGER_ID.GIVE_ITEM": "Give Item",
+  "TRIGGER_ID.TAKE_ITEM": "Take Item",
 
   "TAG_ID.ENCOUNTER": "Encounter",
   "TAG_ID.HOUSE": "House",
@@ -45,6 +48,11 @@
   "TAG_ID.PLANKS": "Planks",
   "TAG_ID.WOODS": "Woods",
   "TAG_ID.DEBUG": "Debug",
+  "TAG_ID.QUEST": "Quest",
+  "TAG_ID.ITEM": "Item",
+  "TAG_ID.CONSUMABLE": "Consumable",
+  "TAG_ID.MOVEMENT": "Movement",
+  "TAG_ID.HEALTH": "Health",
 
   "undefined": "undefined"
 }

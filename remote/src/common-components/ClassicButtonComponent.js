@@ -8,8 +8,8 @@ export const BUTTON_THEME = {
     disabled: 'color-grayer bg-gray',
   },
   PURPLE: {
-    base: 'color-white bg-secondary borradius-1 bor-1-primary hover:bg-secondary-lighter focus:bg-secondary-lighter cursor-pointer',
-    disabled: 'color-grayer bg-secondary-darker',
+    base: 'color-white bg-secondary borradius-1 borcolor-primary hover:bg-secondary-lighter focus:bg-secondary-lighter cursor-pointer',
+    disabled: 'color-grayer borradius-1 bg-secondary-darker',
   },
 }
 
@@ -19,7 +19,7 @@ export const BUTTON_THEME = {
 export default class ClassicButtonComponent extends PureComponent {
   static defaultProps = {
     /** @type {String} */
-    baseClassName: 'talign-center pad-2',
+    baseClassName: 'borwidth-1 talign-center pad-2',
     /** @type {String} */
     className: '',
     /** @type {Boolean} */

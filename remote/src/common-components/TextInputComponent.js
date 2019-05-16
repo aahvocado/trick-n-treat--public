@@ -31,7 +31,7 @@ export default class TextInputComponent extends PureComponent {
     } = this.props;
 
     const modifierClassNames = [
-      disabled ? 'bg-light-gray bor-1-gray resize-none' : 'bg-white bor-1-gray hover:borcolor-fourth',
+      disabled ? 'color-black bg-light-gray bor-1-gray resize-none' : 'bg-white color-black bor-1-gray hover:borcolor-fourth',
     ];
 
     return (

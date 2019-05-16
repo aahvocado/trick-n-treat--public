@@ -1,34 +1,31 @@
 import {DATA_TYPE} from 'constants.shared/dataTypes';
-import {ENCOUNTER_ACTION_ID} from 'constants.shared/encounterActions'
 
 /**
  * @todo - json validation
  *
- * @typedef {Object} EncounterData
- * @property {String} EncounterData.id
- * @property {String} EncounterData.title
- * @property {String} EncounterData.content
- * @property {Array<TagData>} EncounterData.tagList
- * @property {Array<ActionData>} EncounterData.actionList
- * @property {Array<TriggerData>} EncounterData.tagList
+ * @typedef {Object} ItemData
+ * @property {String} ItemData.dataType
+ * @property {String} ItemData.id
+ * @property {String} ItemData.title
+ * @property {String} ItemData.content
+ * @property {Array<TagData>} ItemData.tagList
+ * @property {Array<TriggerData>} ItemData.tagList
  */
 
-const idPrefix = 'ENCOUNTER_ID';
+const idPrefix = 'ITEM_ID';
 
 /**
  * @returns {ItemData}
  */
 export function getBlankTemplate() {
   return {
-    dataType: DATA_TYPE.ENCOUNTER,
+    dataType: DATA_TYPE.ITEM,
     id: `${idPrefix}.NEW`,
-    title: '',
-    content: '',
+    isConsumable: false,
+    isKeyItem: false,
+    name: '',
+    description: '',
     tagList: [],
-    actionList: [{
-      label: 'Okay',
-      actionId: ENCOUNTER_ACTION_ID.CONFIRM
-    }],
     triggerList: [],
   }
 }

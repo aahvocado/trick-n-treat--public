@@ -3,10 +3,10 @@ import convertObjectToArray from 'utilities.shared/convertObjectToArray';
 /**
  * @typedef {String} TriggerId
  */
-
 export const TRIGGER_ID = {
   // -- items
   GIVE_ITEM: 'TRIGGER_ID.GIVE_ITEM',
+  TAKE_ITEM: 'TRIGGER_ID.TAKE_ITEM',
 
   // -- stats
   CANDY: {
@@ -45,6 +45,38 @@ export const TRIGGER_ID = {
   },
 
   // -- locational
-  CHANGE_POSITION: 'TRIGGER_ID.CHANGE_POSITION',
+  CHANGE_LOCATION: 'TRIGGER_ID.CHANGE_LOCATION',
 };
 export const TRIGGER_ID_LIST = convertObjectToArray(TRIGGER_ID);
+/**
+ * list of all triggers that utilize a Point
+ */
+export const ITEM_TRIGGER_ID_LIST = [
+  TRIGGER_ID.GIVE_ITEM,
+  TRIGGER_ID.TAKE_ITEM,
+];
+/**
+ * list of all triggers that utilize a Number
+ */
+export const NUMBER_TRIGGER_ID_LIST = [
+  TRIGGER_ID.CANDY.ADD,
+  TRIGGER_ID.CANDY.SUBTRACT,
+  TRIGGER_ID.HEALTH.ADD,
+  TRIGGER_ID.HEALTH.SUBTRACT,
+  TRIGGER_ID.MOVEMENT.ADD,
+  TRIGGER_ID.MOVEMENT.SUBTRACT,
+  TRIGGER_ID.SANITY.ADD,
+  TRIGGER_ID.SANITY.SUBTRACT,
+  TRIGGER_ID.VISION.ADD,
+  TRIGGER_ID.VISION.SUBTRACT,
+  TRIGGER_ID.LUCK.ADD,
+  TRIGGER_ID.LUCK.SUBTRACT,
+  TRIGGER_ID.GREED.ADD,
+  TRIGGER_ID.GREED.SUBTRACT,
+];
+/**
+ * list of all triggers that utilize a Point
+ */
+export const POINT_TRIGGER_ID_LIST = [
+  TRIGGER_ID.CHANGE_LOCATION,
+];

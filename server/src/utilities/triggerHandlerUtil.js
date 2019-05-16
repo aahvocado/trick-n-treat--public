@@ -1,4 +1,4 @@
-import {TRIGGER_ID} from 'constants.shared/triggerConstants';
+import { TRIGGER_ID } from 'constants.shared/triggerIds';
 
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import * as itemDataHelper from 'helpers.shared/itemDataHelper';
@@ -7,8 +7,8 @@ import ItemModel from 'models.shared/ItemModel';
 
 import logger from 'utilities/logger.game';
 
-import * as encounterConditionUtils from 'utilities/encounterConditionUtils';
-import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
+import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
+import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
 
 /**
  * resolves an individual TriggerData for the character
@@ -19,12 +19,13 @@ import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
  * @param {CharacterModel} characterModel
  */
 export function resolveTrigger(triggerData, characterModel) {
-  const conditionList = encounterDataUtils.getTriggerConditionList(triggerData);
-  if (!encounterConditionUtils.doesMeetAllConditions(characterModel, conditionList)) {
+  // first check if this character meets the condition for this Trigger
+  const conditionList = jsonDataUtils.getConditionList(triggerData);
+  if (!conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList)) {
     return;
   }
 
-  const triggerId = encounterDataUtils.getTriggerId(triggerData);
+  const {triggerId} = triggerData;
   logger.verbose(`. [[resolving trigger '${triggerId}']]`);
 
   //
@@ -95,8 +96,8 @@ export function resolveTrigger(triggerData, characterModel) {
   }
 
   //
-  if (triggerId === TRIGGER_ID.CHANGE_POSITION) {
-    handleChangePositionTrigger(triggerData, characterModel);
+  if (triggerId === TRIGGER_ID.CHANGE_LOCATION) {
+    handleChangeLocationTrigger(triggerData, characterModel);
   }
 }
 /**
@@ -297,7 +298,7 @@ export function handleLoseGreedTrigger(triggerData, characterModel) {
  * @param {TriggerData} triggerData
  * @param {CharacterModel} characterModel
  */
-export function handleChangePositionTrigger(triggerData, characterModel) {
+export function handleChangeLocationTrigger(triggerData, characterModel) {
   const {value} = triggerData;
   const nextPoint = new Point(value.x, value.y);
 

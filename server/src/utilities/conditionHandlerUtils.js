@@ -1,9 +1,7 @@
 import {
   CONDITION_ID,
   CONDITION_TARGET_ID,
-} from 'constants.shared/conditionConstants';
-
-import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
+} from 'constants.shared/conditionIds';
 
 /**
  * checks is a given character meets list of Conditions
@@ -31,11 +29,13 @@ export function doesMeetAllConditions(characterModel, conditionList) {
  * @returns {Boolean}
  */
 export function doesMeetCondition(characterModel, conditionData) {
-  const conditionTargetId = encounterDataUtils.getTriggerConditionTargetId(conditionData);
-  const targetValue = getCharacterConditionTargetValue(characterModel, conditionTargetId);
+  const {
+    conditionId,
+    conditionTargetId,
+  } = conditionData;
 
-  // dtermine which function we're going to use to check if they meet condition
-  const conditionId = encounterDataUtils.getTriggerConditionId(conditionData);
+  // find what Stat is being targetted
+  const targetValue = getCharacterConditionTargetValue(characterModel, conditionTargetId);
 
   if (conditionId === CONDITION_ID.EQUALS) {
     return doesMeetConditionOfEquals(targetValue, conditionData);
@@ -51,6 +51,10 @@ export function doesMeetCondition(characterModel, conditionData) {
 
   if (conditionId === CONDITION_ID.AT_LOCATION) {
     return doesMeetConditionOfAtLocation(targetValue, conditionData);
+  }
+
+  if (conditionId === CONDITION_ID.HAS_ITEM) {
+    return doesMeetConditionOfHasItem(characterModel, conditionData);
   }
 
   // if (conditionId === CONDITION_ID.ON_TILE_TYPE) {
@@ -104,7 +108,7 @@ export function getCharacterConditionTargetValue(characterModel, conditionTarget
  * @returns {Boolean}
  */
 export function doesMeetConditionOfEquals(targetValue, conditionData) {
-  const conditionValue = encounterDataUtils.getTriggerConditionValue(conditionData);
+  const conditionValue = conditionData.value;
   return targetValue === conditionValue;
 };
 /**
@@ -114,7 +118,7 @@ export function doesMeetConditionOfEquals(targetValue, conditionData) {
  * @returns {Boolean}
  */
 export function doesMeetConditionOfLessThan(targetValue, conditionData) {
-  const conditionValue = encounterDataUtils.getTriggerConditionValue(conditionData);
+  const conditionValue = conditionData.value;
   return targetValue < conditionValue;
 };
 /**
@@ -124,7 +128,7 @@ export function doesMeetConditionOfLessThan(targetValue, conditionData) {
  * @returns {Boolean}
  */
 export function doesMeetConditionOfGreaterThan(targetValue, conditionData) {
-  const conditionValue = encounterDataUtils.getTriggerConditionValue(conditionData);
+  const conditionValue = conditionData.value;
   return targetValue > conditionValue;
 };
 /**
@@ -135,8 +139,22 @@ export function doesMeetConditionOfGreaterThan(targetValue, conditionData) {
  * @returns {Boolean}
  */
 export function doesMeetConditionOfAtLocation(targetValue, conditionData) {
-  const conditionValue = encounterDataUtils.getTriggerConditionValue(conditionData);
+  const conditionValue = conditionData.value;
   return targetValue.x === conditionValue.x && targetValue.y === conditionValue.y;
+};
+/**
+ * @todo - not sure how useful this is, since being at a specific location is near impossible
+ *
+ * @param {CharacterModel} characterModel
+ * @param {ConditionData} conditionData
+ * @returns {Boolean}
+ */
+export function doesMeetConditionOfHasItem(characterModel, conditionData) {
+  const inventory = characterModel.get('inventory');
+  const itemId = conditionData.itemId;
+
+  const matchingItem = inventory.find((item) => (item.get('id') === itemId));
+  return matchingItem !== undefined;
 };
 // /**
 //  * @todo - implement another time
@@ -146,6 +164,6 @@ export function doesMeetConditionOfAtLocation(targetValue, conditionData) {
 //  * @returns {Boolean}
 //  */
 // export function doesMeetConditionOfOnTileType(targetValue, conditionData) {
-//   const conditionValue = encounterDataUtils.getTriggerConditionValue(conditionData);
+//   const conditionValue = conditionData.value;
 //   return false;
 // };

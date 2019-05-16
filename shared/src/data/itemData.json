@@ -1,15 +1,79 @@
 [
   {
+    "id": "ITEM_ID.DEBUG_ITEM",
+    "isConsumable": false,
+    "isKeyItem": true,
+    "name": "Developer Item",
+    "description": "This is the first item so you can play around with it.",
+    "tagList": [
+      "TAG_ID.DEBUG"
+    ],
+    "triggerList": [
+      {
+        "triggerId": "TRIGGER_ID.GIVE_ITEM",
+        "value": 1,
+        "itemId": "ITEM_ID.GUMMY_VIAL"
+      },
+      {
+        "triggerId": "TRIGGER_ID.CANDY.ADD",
+        "value": 100,
+        "conditionList": [
+          {
+            "value": 3,
+            "conditionTargetId": "CONDITION_TARGET_ID.STAT.GREED",
+            "conditionId": "CONDITION_ID.LESS_THAN"
+          },
+          {
+            "value": 1,
+            "conditionTargetId": "CONDITION_TARGET_ID.STAT.LUCK",
+            "conditionId": "CONDITION_ID.GREATER_THAN"
+          }
+        ]
+      },
+      {
+        "triggerId": "TRIGGER_ID.GREED.ADD",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.GUMMY_VIAL",
     "isConsumable": true,
+    "isKeyItem": false,
     "name": "Gummy Vial",
     "description": "This is a gummy candy in the shape of test tube. Gee, Lycanshire Candy Co sure are trying hard to get kids into science.",
     "triggerList": [
       {
+        "dataType": "DATA_TYPE.TRIGGER",
         "triggerId": "TRIGGER_ID.HEALTH.ADD",
         "value": 1
       }
     ],
-    "tagList": []
+    "tagList": [
+      "TAG_ID.ITEM",
+      "TAG_ID.CONSUMABLE",
+      "TAG_ID.HEALTH"
+    ]
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.BRAIN_FOOD",
+    "isConsumable": true,
+    "isKeyItem": false,
+    "name": "Brain Food",
+    "description": "Oh no! What kind of crazy person gives out healthy food good for developing brains low on sanity on Halloween?",
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerId": "TRIGGER_ID.SANITY.ADD",
+        "value": 1
+      }
+    ],
+    "tagList": [
+      "TAG_ID.ITEM",
+      "TAG_ID.CONSUMABLE",
+      "TAG_ID.SANITY"
+    ]
   }
 ]

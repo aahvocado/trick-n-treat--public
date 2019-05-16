@@ -2,8 +2,6 @@ import Point from '@studiomoniker/point';
 
 import Model from 'models/Model';
 
-import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
-
 /**
  * @typedef {Model} EncounterModel
  */
@@ -18,7 +16,7 @@ export default class EncounterModel extends Model {
       title: '',
       /** @type {String} */
       content: '',
-      /** @type {Array<EncounterActionData>} */
+      /** @type {Array<ActionData>} */
       actionList: [],
       /** @type {Array<TagId>} */
       tagList: [],
@@ -96,74 +94,5 @@ export default class EncounterModel extends Model {
       title,
       triggerList,
     };
-  }
-  // -- utilities
-  /**
-   * @returns {String}
-   */
-  getId() {
-    return encounterDataUtils.getId(this.attributes);
-  }
-  /**
-   * @returns {Array<EncounterActionData>}
-   */
-  getActionList() {
-    return encounterDataUtils.getActionList(this.attributes);
-  }
-  /**
-   * @param {Number} idx
-   * @returns {EncounterActionData}
-   */
-  getActionAt(idx) {
-    return encounterDataUtils.getActionAt(this.attributes, idx);
-  }
-  /**
-   * @returns {Array<TriggerData>}
-   */
-  getTriggerList() {
-    return encounterDataUtils.getTriggerList(this.attributes);
-  }
-  /**
-   * @param {Number} idx
-   * @returns {TriggerData}
-   */
-  getTriggerAt(idx) {
-    return encounterDataUtils.getTriggerAt(this.attributes);
-  }
-  /**
-   * @param {TriggerData} triggerData
-   * @returns {TriggerId}
-   */
-  getTriggerId(triggerData) {
-    return encounterDataUtils.getTriggerAt(triggerData);
-  }
-  /**
-   * @param {TriggerData} triggerData
-   * @returns {Array<ConditionData>}
-   */
-  getTriggerConditionList(triggerData) {
-    return encounterDataUtils.getTriggerAt(triggerData);
-  }
-  /**
-   * @param {TriggerData} triggerData
-   * @param {Number} idx
-   * @returns {Array<ConditionData>}
-   */
-  getTriggerConditionAt(triggerData, idx) {
-    return encounterDataUtils.getTriggerAt(triggerData, idx);
-  }
-  /**
-   * @param {ConditionData} conditionData
-   * @returns {ConditionId}
-   */
-  getTriggerConditionId(conditionData) {
-    return encounterDataUtils.getTriggerAt(conditionData);
-  }
-  /**
-   * @param {ConditionData} conditionData
-   * @returns {ConditionId}
-   */
-  getTriggerConditionTargetId(conditionData) {
-    return encounterDataUtils.getTriggerAt(conditionData);
   }
 }

@@ -72,6 +72,8 @@ export default observer(
 
             <RouteToEncounterEditorButton label='Open Encounter Editor' />
 
+            <RouteToItemEditorButton label='Open Item Editor' />
+
             <RouteToTileEditorButton label='Open Tile Editor' />
           </div>
 
@@ -131,7 +133,11 @@ export default observer(
 const CloseMenuButton = withRouter(({label, history}) => (
   <ClassicButtonComponent
     className='width-full flex-row aitems-center adjacent-mar-t-2'
-    disabled={history.location.pathname !== '/encounter_editor' && history.location.pathname !== '/tile_editor'}
+    disabled={
+      history.location.pathname !== '/encounter_editor' &&
+      history.location.pathname !== '/item_editor' &&
+      history.location.pathname !== '/tile_editor'
+    }
     onClick={() => {
       remoteAppState.set({
         isDebugMenuActive: false,
@@ -156,6 +162,24 @@ const RouteToEncounterEditorButton = withRouter(({label, history}) => (
         isEditorMode: true,
       });
       history.push('/encounter_editor');
+    }}
+  >
+    { label }
+  </ClassicButtonComponent>
+));
+/**
+ *
+ */
+const RouteToItemEditorButton = withRouter(({label, history}) => (
+  <ClassicButtonComponent
+    className='width-full flex-row aitems-center adjacent-mar-t-2'
+    disabled={history.location.pathname === '/item_editor'}
+    onClick={() => {
+      remoteAppState.set({
+        isDebugMenuActive: false,
+        isEditorMode: true,
+      });
+      history.push('/item_editor');
     }}
   >
     { label }

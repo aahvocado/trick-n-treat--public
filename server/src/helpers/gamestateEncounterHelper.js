@@ -9,7 +9,7 @@ import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 import {getEncounterDataById} from 'helpers.shared/encounterDataHelper';
 
 import logger from 'utilities/logger.game';
-import * as triggerUtils from 'utilities/triggerUtils';
+import * as triggerHandlerUtil from 'utilities/triggerHandlerUtil';
 
 /**
  * this Helper is for handling data for Encounters
@@ -76,7 +76,7 @@ export function resolveTriggerList(encounterModel, characterModel) {
 
   const triggerList = encounterModel.get('triggerList');
   triggerList.forEach((triggerData) => {
-    triggerUtils.resolveTrigger(triggerData, characterModel);
+    triggerHandlerUtil.resolveTrigger(triggerData, characterModel);
   });
 
   logger.old(`[[done resolving Triggers]]`);

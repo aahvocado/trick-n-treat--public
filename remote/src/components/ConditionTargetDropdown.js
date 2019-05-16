@@ -2,7 +2,7 @@ import React from 'react';
 
 import DropdownComponent from 'common-components/DropdownComponent';
 
-import { CONDITION_TARGET_ID_LIST } from 'constants.shared/conditionConstants';
+import { CONDITION_TARGET_ID_LIST } from 'constants.shared/conditionIds';
 
 import l10n from 'utilities.shared/l10n';
 

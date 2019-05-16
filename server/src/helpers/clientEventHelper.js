@@ -7,8 +7,8 @@ import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 
 import logger from 'utilities/logger.game';
 
-import * as encounterConditionUtils from 'utilities/encounterConditionUtils';
-import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
+import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
+import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
 
 /**
  * creates some State data for a Remote Client
@@ -108,12 +108,12 @@ function createFormattedEncounterData(encounterModel, characterModel) {
 
     actionList: baseEncounterData.actionList.map((actionData) => ({
       ...actionData,
-      _doesMeetConditions: encounterConditionUtils.doesMeetAllConditions(characterModel, encounterDataUtils.getActionConditionList(actionData)),
+      _doesMeetConditions: conditionHandlerUtils.doesMeetAllConditions(characterModel, jsonDataUtils.getConditionList(actionData)),
     })),
 
     triggerList: baseEncounterData.triggerList.map((triggerData) => ({
       ...triggerData,
-      _doesMeetConditions: encounterConditionUtils.doesMeetAllConditions(characterModel, encounterDataUtils.getTriggerConditionList(triggerData)),
+      _doesMeetConditions: conditionHandlerUtils.doesMeetAllConditions(characterModel, jsonDataUtils.getConditionList(triggerData)),
     })),
   };
 }

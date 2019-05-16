@@ -16,6 +16,7 @@ import DebugMenu from 'components/DebugMenu';
 import WebsocketConnectionIndicator from 'components/WebsocketConnectionIndicator';
 
 import EncounterEditorPage from 'pages/EncounterEditorPage';
+import ItemEditorPage from 'pages/ItemEditorPage';
 import TileEditorPage from 'pages/TileEditorPage';
 import UserGamePage from 'pages/UserGamePage';
 import UserLobbyPage from 'pages/UserLobbyPage';
@@ -49,6 +50,8 @@ export default observer(
             <Route path="/game" component={UserGamePage} />
 
             <Route path="/encounter_editor" component={EncounterEditorPage} />
+
+            <Route path="/item_editor" component={ItemEditorPage} />
 
             <Route path="/tile_editor" component={TileEditorPage} />
 

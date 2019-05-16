@@ -2,7 +2,7 @@ import React from 'react';
 
 import DropdownComponent from 'common-components/DropdownComponent';
 
-import { TRIGGER_ID_LIST } from 'constants.shared/triggerConstants';
+import { TRIGGER_ID_LIST } from 'constants.shared/triggerIds';
 
 import l10n from 'utilities.shared/l10n';
 

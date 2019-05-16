@@ -19,10 +19,10 @@ import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 import UserModel from 'models/UserModel';
 
 import logger from 'utilities/logger.game';
-import * as encounterConditionUtils from 'utilities/encounterConditionUtils';
-import * as triggerUtils from 'utilities/triggerUtils';
+import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
+import * as triggerHandlerUtil from 'utilities/triggerHandlerUtil';
 
-import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
+import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
 
 /**
  * this Helper is for handling actions from the User
@@ -349,8 +349,8 @@ export function handleUserEncounterAction(userId, encounterId, actionData) {
 
   // check if character was allowed to take this action
   const activeCharacter = gameState.get('activeCharacter');
-  const conditionList = encounterDataUtils.getActionConditionList(actionData);
-  if (!encounterConditionUtils.doesMeetAllConditions(activeCharacter, conditionList)) {
+  const conditionList = jsonDataUtils.getConditionList(actionData);
+  if (!conditionHandlerUtils.doesMeetAllConditions(activeCharacter, conditionList)) {
     return;
   }
 
@@ -397,7 +397,7 @@ export function handleUserUseItem(userId, itemModel) {
   // resolve all triggers for an item
   const triggerList = itemModel.get('triggerList');
   triggerList.forEach((triggerData) => {
-    triggerUtils.resolveTrigger(triggerData, characterModel);
+    triggerHandlerUtil.resolveTrigger(triggerData, characterModel);
   });
 
   // send the client the data of the Encounter they triggered

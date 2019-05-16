@@ -106,6 +106,7 @@ export default class DropdownComponent extends PureComponent {
       maxHeight,
       placeholder,
       showButton,
+      style,
     } = this.props;
 
     const {
@@ -115,11 +116,13 @@ export default class DropdownComponent extends PureComponent {
     } = this.state;
 
     const filteredOptions = this.getFilteredOptions();
+    const isOptionsEmpty = filteredOptions.length === 0;
 
     return (
       <div
         ref={this.containerRef}
         className={combineClassNames(baseClassName, className)}
+        style={style}
         aria-haspopup="listbox"
       >
         <DropdownControl
@@ -157,6 +160,10 @@ export default class DropdownComponent extends PureComponent {
               {...item}
             />
           ))}
+
+          { isOptionsEmpty &&
+            <div className='bor-t-1-light-gray pad-2'>Nothing Here 🥺</div>
+          }
         </div>
       </div>
     )
@@ -370,7 +377,7 @@ export default class DropdownComponent extends PureComponent {
   /**
    * handles finding the `optionData` of using data of the currently selected
    *
-   * @returns {Object | null}
+   * @returns {Object | null | undefined}
    */
   findSelectedOption() {
     const {
@@ -393,7 +400,7 @@ export default class DropdownComponent extends PureComponent {
    * handles determining which method to use to find the optionData
    *
    * @param {String | Object| Number} findParam
-   * @returns {Object | null}
+   * @returns {Object | null | undefined} - null means there was no way to find it, undefined means it was not found
    */
   findOptionHandler(findParam) {
     if (typeof findParam === 'string') {
@@ -472,9 +479,20 @@ export default class DropdownComponent extends PureComponent {
       searchValue,
     } = this.state;
 
+    // find the selected option, which could be through many different ways
+    //  check if none was found or the current option is invalid
     const selectedOption = this.findSelectedOption();
-    const useAllOptions = selectedOption && selectedOption.label === searchValue;
-    const filteredOptions = useAllOptions ? options : options.filter((option) => {
+    const hasSelectedOption = selectedOption !== null && selectedOption !== undefined;
+
+    // do not filter at all if nothing is typed
+    //  or if the input value is the same as the selected option
+    const useAllOptions = !hasSelectedOption ? false : selectedOption.label === searchValue;
+    if (useAllOptions) {
+      return options;
+    }
+
+    // we can filter by seeing if item's label contains the search value
+    const filteredOptions = options.filter((option) => {
       const optionString = option.label.toLowerCase();
       const searchString = searchValue.toLowerCase();
       return optionString.includes(searchString);
@@ -522,7 +540,7 @@ export default class DropdownComponent extends PureComponent {
 
     this.setState({
       searchValue: selectedOptionLabel || '',
-      focusedIdx: selectedOptionIdx || 0,
+      focusedIdx: selectedOptionIdx || undefined,
   });
   }
 }
@@ -558,7 +576,7 @@ class DropdownControl extends PureComponent {
 
         { showButton &&
           <ClassicButtonComponent
-            className='fsize-3 flex-none pad-h-2 pad-v-1 bor-l-1-gray color-grayer hover:color-fourth'
+            className='borcolor-transparent fsize-3 flex-none pad-h-2 pad-v-1 bor-l-1-gray color-grayer hover:color-fourth'
             theme={BUTTON_THEME.WHITE}
             onClick={onClick}
           >
