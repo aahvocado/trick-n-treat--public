@@ -25,6 +25,7 @@ export function getBlankTemplate() {
     isKeyItem: false,
     name: '',
     description: '',
+    conditionList: [],
     tagList: [],
     triggerList: [],
   }

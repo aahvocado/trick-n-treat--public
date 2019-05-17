@@ -100,6 +100,7 @@ export default class TriggerEditorComponent extends PureComponent {
         { conditionList.map((conditionData, idx) => (
           <ConditionEditorComponent
             key={`viewer-trigger-item-condition-row-${idx}-key`}
+            className='bor-h-1-gray bor-b-1-gray'
             data={conditionData}
             onEdit={(updatedData) => {
               this.onChangeConditionData(updatedData, idx);

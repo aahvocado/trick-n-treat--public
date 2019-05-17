@@ -8,6 +8,8 @@ import ConditionIdDropdown from 'components/ConditionIdDropdown';
 import ConditionTargetDropdown from 'components/ConditionTargetDropdown';
 import ItemListDropdown from 'components/ItemListDropdown';
 
+import combineClassNames from 'utilities/combineClassNames';
+
 import * as conditionUtils from 'utilities.shared/conditionUtils'
 
 /**
@@ -15,6 +17,11 @@ import * as conditionUtils from 'utilities.shared/conditionUtils'
  */
 export default class ConditionEditorComponent extends PureComponent {
   static defaultProps = {
+    /** @type {String} */
+    baseClassName: 'bg-white flex-row-center',
+    /** @type {String} */
+    className: '',
+
     /** @type {ConditionData} */
     data: {},
     /** @type {Function} */
@@ -34,6 +41,8 @@ export default class ConditionEditorComponent extends PureComponent {
   /** @override */
   render() {
     const {
+      baseClassName,
+      className,
       data,
       onClickRemove,
     } = this.props;
@@ -46,7 +55,7 @@ export default class ConditionEditorComponent extends PureComponent {
     } = data;
 
     return (
-      <div className='bg-white flex-row-center bor-h-1-gray bor-b-1-gray'>
+      <div className={combineClassNames(baseClassName, className)}>
         <div className='flex-none pad-1 bor-r-1-gray color-grayer'>
           Condition:
         </div>

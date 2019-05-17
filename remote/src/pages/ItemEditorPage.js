@@ -12,6 +12,8 @@ import ClassicButtonComponent from 'common-components/ClassicButtonComponent';
 import TextAreaComponent from 'common-components/TextAreaComponent';
 import TextInputComponent from 'common-components/TextInputComponent';
 
+import ConditionEditorComponent from 'components/ConditionEditorComponent';
+import ConditionIdDropdown from 'components/ConditionIdDropdown';
 import ItemListDropdown from 'components/ItemListDropdown';
 import TagEditorComponent from 'components/TagEditorComponent';
 import TagListDropdown from 'components/TagListDropdown';
@@ -53,6 +55,10 @@ class ItemEditorPage extends Component {
     this.onChangeDescription = this.onChangeDescription.bind(this);
     this.onChangeId = this.onChangeId.bind(this);
     this.onChangeName = this.onChangeName.bind(this);
+
+    this.onChangeConditionData = this.onChangeConditionData.bind(this);
+    this.onRemoveCondition = this.onRemoveCondition.bind(this);
+    this.addCondition = this.addCondition.bind(this);
 
     this.addTrigger = this.addTrigger.bind(this);
     this.removeTrigger = this.removeTrigger.bind(this);
@@ -126,6 +132,10 @@ class ItemEditorPage extends Component {
 
             onToggleConsumable={this.onToggleConsumable}
             onToggleKeyItem={this.onToggleKeyItem}
+
+            onChangeConditionData={this.onChangeConditionData}
+            onRemoveCondition={this.onRemoveCondition}
+            onSelectNewCondition={this.addCondition}
 
             onChangeTriggerData={this.updateTrigger}
             onClickRemoveTrigger={this.removeTrigger}
@@ -340,6 +350,58 @@ class ItemEditorPage extends Component {
 
     // change the data
     activeData.isKeyItem = !activeData.isKeyItem;
+
+    // update the data
+    this.setState({
+      activeData: deepClone(activeData),
+      hasChanges: true,
+    });
+  }
+  /**
+   * adds a new Condition to the active Data
+   *
+   * @param {ConditionId} conditionId
+   */
+  addCondition(conditionId) {
+    const { activeData } = this.state;
+    const { conditionList } = activeData;
+
+    // add it
+    conditionList.push({
+      conditionId: conditionId,
+      conditionTargetId: undefined,
+    });
+
+    // update the data
+    this.setState({
+      activeData: deepClone(activeData),
+      hasChanges: true,
+    });
+  }
+  /**
+   *
+   */
+  onChangeConditionData(conditionData, conditionIdx) {
+    const { activeData } = this.state;
+
+    // change the data
+   activeData.conditionList[conditionIdx] = conditionData;
+
+    // update the data
+    this.setState({
+      activeData: deepClone(activeData),
+      hasChanges: true,
+    });
+  }
+  /**
+   *
+   */
+  onRemoveCondition(idx) {
+    const { activeData } = this.state;
+
+    // change the data
+    const conditionList = activeData.conditionList || [];
+    conditionList.splice(idx, 1);
 
     // update the data
     this.setState({
@@ -618,6 +680,10 @@ class ItemEditorViewer extends Component {
       onToggleConsumable,
       onToggleKeyItem,
 
+      onChangeConditionData,
+      onRemoveCondition,
+      onSelectNewCondition,
+
       onChangeTriggerData,
       onClickRemoveTrigger,
       onSelectNewTrigger,
@@ -633,6 +699,7 @@ class ItemEditorViewer extends Component {
       isConsumable,
       isKeyItem,
       name,
+      conditionList,
       description,
       tagList,
       triggerList,
@@ -690,6 +757,35 @@ class ItemEditorViewer extends Component {
             onChange={onToggleKeyItem}
           />
         </ViewerRow>
+
+        <ViewerDivider />
+
+        {/* Condition List */}
+        <ViewerRow>
+          <ViewerHeader>Use Conditions</ViewerHeader>
+
+          <ConditionIdDropdown
+            className='flex-auto bor-1-gray adjacent-mar-t-2'
+            placeholder='Add New Use Condition...'
+            onSelect={onSelectNewCondition}
+          />
+
+          { conditionList.map((conditionData, idx) => (
+            <ConditionEditorComponent
+              key={`viewer-trigger-item-condition-row-${idx}-key`}
+              className='bor-1-gray adjacent-mar-t-2'
+              data={conditionData}
+              onEdit={(updatedData) => {
+                onChangeConditionData(updatedData, idx);
+              }}
+              onClickRemove={() => {
+                onRemoveCondition(idx);
+              }}
+            />
+          ))}
+        </ViewerRow>
+
+        <ViewerDivider />
 
         <ViewerDivider />
 

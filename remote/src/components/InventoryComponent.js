@@ -51,6 +51,7 @@ export class InventoryItem extends PureComponent {
       id,
       name,
       onClick,
+      _doesMeetConditions,
     } = this.props;
 
     return (
@@ -65,6 +66,7 @@ export class InventoryItem extends PureComponent {
 
           <ClassicButtonComponent
             className='flex-none'
+            disabled={!_doesMeetConditions}
             onClick={onClick}
           >
             use

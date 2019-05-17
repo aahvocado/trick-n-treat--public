@@ -5,6 +5,13 @@
     "isKeyItem": true,
     "name": "Developer Item",
     "description": "This is the first item so you can play around with it.",
+    "conditionList": [
+      {
+        "value": 5,
+        "conditionTargetId": "CONDITION_TARGET_ID.STAT.LUCK",
+        "conditionId": "CONDITION_ID.GREATER_THAN"
+      }
+    ],
     "tagList": [
       "TAG_ID.DEBUG"
     ],
@@ -43,6 +50,7 @@
     "isKeyItem": false,
     "name": "Gummy Vial",
     "description": "This is a gummy candy in the shape of test tube. Gee, Lycanshire Candy Co sure are trying hard to get kids into science.",
+    "conditionList": [],
     "triggerList": [
       {
         "dataType": "DATA_TYPE.TRIGGER",
@@ -63,6 +71,7 @@
     "isKeyItem": false,
     "name": "Brain Food",
     "description": "Oh no! What kind of crazy person gives out healthy food good for developing brains low on sanity on Halloween?",
+    "conditionList": [],
     "triggerList": [
       {
         "dataType": "DATA_TYPE.TRIGGER",
@@ -75,5 +84,19 @@
       "TAG_ID.CONSUMABLE",
       "TAG_ID.SANITY"
     ]
+  },
+  {
+    "id": "ITEM_ID.MOUSETRAP",
+    "isConsumable": true,
+    "isKeyItem": false,
+    "name": "Mouse Trap",
+    "description": "Now that you've picked up a random mouse trap from on the street you can set a trap for any mice you come across.",
+    "conditionList": [],
+    "tagList": [
+      "TAG_ID.QUEST",
+      "TAG_ID.ITEM",
+      "TAG_ID.SIDEWALK"
+    ],
+    "triggerList": []
   }
 ]

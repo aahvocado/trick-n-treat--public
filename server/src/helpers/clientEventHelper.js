@@ -17,10 +17,15 @@ import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
  * @returns {Object} - for the Remote
  */
 function generateClientGameData(clientModel) {
+  const userId = clientModel.get('userId');
+  const characterModel = gameState.findCharacterByUserId(userId);
+  const userModel = gameState.findUserById(userId);
+
   return {
     isInLobby: clientModel.get('isInLobby'),
     isInGame: clientModel.get('isInGame'),
-    ...getClientUserAndCharacter(clientModel.get('userId')),
+    myCharacter: createFormattedCharacterData(characterModel),
+    myUser: createFormattedUserData(userModel),
   };
 }
 /**
@@ -74,23 +79,6 @@ export function sendMyCharacter(clientModel) {
   clientModel.emit(SOCKET_EVENTS.UPDATE.MY_CHARACTER, clientModel.export());
 }
 /**
- * @param {String} userId
- * @returns {Object}
- */
-function getClientUserAndCharacter(userId) {
-  const characterModel = gameState.findCharacterByUserId(userId);
-  const userModel = gameState.findUserById(userId);
-
-  if (characterModel === undefined || userModel === undefined) {
-    return;
-  }
-
-  return {
-    myCharacter: characterModel.export(),
-    myUser: userModel.export(),
-  };
-}
-/**
  * formats an EncounterModel's data with some extra properties for sending out
  *
  * - looks for any Actions or Triggers that have a Condition,
@@ -115,5 +103,63 @@ function createFormattedEncounterData(encounterModel, characterModel) {
       ...triggerData,
       _doesMeetConditions: conditionHandlerUtils.doesMeetAllConditions(characterModel, jsonDataUtils.getConditionList(triggerData)),
     })),
+  };
+}
+/**
+ * formats an CharacterModel's data with some extra properties for sending out
+ *
+ * - looks at character's inventory and determines if the character can use it
+ *  by adding `_doesMeetConditions: Boolean`
+ *
+ * @param {CharacterModel} characterModel
+ * @returns {Object}
+ */
+function createFormattedCharacterData(characterModel) {
+  if (characterModel === undefined) {
+    return;
+  }
+
+  // format each item
+  const inventory = characterModel.get('inventory');
+  const formattedInventory = inventory.map((itemModel) => {
+    return createFormattedItemData(itemModel, characterModel);
+  });
+
+  return {
+    ...characterModel.export(),
+    inventory: formattedInventory,
+  };
+}
+/**
+ * formats an UserModel's data
+ * @todo
+ *
+ * @param {UserModel} userModel
+ * @returns {Object}
+ */
+function createFormattedUserData(userModel) {
+  if (userModel === undefined) {
+    return;
+  }
+
+  return userModel.export();
+}
+/**
+ * formats an ItemModel's data
+ * @todo
+ *
+ * @param {ItemModel} itemModel
+ * @param {CharacterModel} characterModel
+ * @returns {Object}
+ */
+function createFormattedItemData(itemModel, characterModel) {
+  if (itemModel === undefined) {
+    return;
+  }
+
+  const conditionList = itemModel.get('conditionList');
+  return {
+    ...itemModel.export(),
+    _doesMeetConditions: conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList),
   };
 }

@@ -16,6 +16,8 @@ export default class ItemModel extends Model {
       /** @type {String} */
       description: '',
       /** @type {Array<TriggerData>} */
+      conditionList: [],
+      /** @type {Array<TriggerData>} */
       triggerList: [],
 
       /** @type {Boolean} */

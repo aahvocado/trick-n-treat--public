@@ -335,8 +335,8 @@ export function handleUserActionMoveTo(userId, endPosition) {
  */
 export function handleUserEncounterAction(userId, encounterId, actionData) {
   // check if it is the Turn of the user who clicked
-  const activeUserModel = gameState.get('activeUser');
-  const activeUserId = activeUserModel.get('userId');
+  const userModel = gameState.get('activeUser');
+  const activeUserId = userModel.get('userId');
   if (activeUserId !== userId) {
     return;
   }
@@ -344,13 +344,15 @@ export function handleUserEncounterAction(userId, encounterId, actionData) {
   // check if the encounter they clicked on actually is the current one
   const activeEncounter = gameState.get('activeEncounter');
   if (activeEncounter.get('id') !== encounterId) {
+    logger.warning(`"${characterModel.get('name')}" clicked on an action that was not in the Active Encounter`);
     return;
   }
 
   // check if character was allowed to take this action
-  const activeCharacter = gameState.get('activeCharacter');
+  const characterModel = gameState.get('activeCharacter');
   const conditionList = jsonDataUtils.getConditionList(actionData);
-  if (!conditionHandlerUtils.doesMeetAllConditions(activeCharacter, conditionList)) {
+  if (!conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList)) {
+    logger.warning(`"${characterModel.get('name')}" used an action in "${activeEncounter.get('title')}" but did not meet conditions`);
     return;
   }
 
@@ -363,16 +365,16 @@ export function handleUserEncounterAction(userId, encounterId, actionData) {
   // just a basic confirmation to close the `Encounter`
   if (actionId === ENCOUNTER_ACTION_ID.CONFIRM) {
     // tell the client their encounter is now null
-    const clientModel = serverState.findClientByCharacter(activeCharacter);
+    const clientModel = serverState.findClientByCharacter(characterModel);
     clientEventHelper.sendEncounterToClient(clientModel, null);
 
     // action is complete
-    onUserActionComplete(activeUserModel);
+    onUserActionComplete(userModel);
   }
 
   // this goes to another `Encounter`
   if (actionId === ENCOUNTER_ACTION_ID.GOTO) {
-    gamestateEncounterHelper.handleEncounterActionGoTo(activeUserModel, gotoId);
+    gamestateEncounterHelper.handleEncounterActionGoTo(userModel, gotoId);
   }
 }
 /**
@@ -392,6 +394,13 @@ export function handleUserUseItem(userId, itemModel) {
       inventory.splice(foundItemIdx, 1);
       characterModel.set({inventory: inventory});
     }
+  }
+
+  // check if character was allowed to use this item
+  const conditionList = itemModel.get('conditionList');
+  if (!conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList)) {
+    logger.warning(`"${characterModel.get('name')}" attempted to use "${itemModel.get('name')}" but did not meet use conditions`);
+    return;
   }
 
   // resolve all triggers for an item

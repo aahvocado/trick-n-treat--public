@@ -1,12 +1,9 @@
 import React, { PureComponent } from 'react';
 
-// import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-// import {
-//   faCircle,
-// } from '@fortawesome/free-solid-svg-icons'
-
 import ButtonComponent from 'common-components/ButtonComponent';
 import ModalComponent from 'common-components/ModalComponent';
+
+import TriggerDisplayComponent from 'components/TriggerDisplayComponent';
 
 /**
  *
@@ -20,6 +17,8 @@ export default class EncounterModalComponent extends PureComponent {
     // -- encounter props
     /** @type {EncounterData.actionList} */
     actionList: [],
+    /** @type {EncounterData.triggerList} */
+    triggerList: [],
     /** @type {EncounterData.title} */
     title: 'default title',
     /** @type {EncounterData.content} */
@@ -40,23 +39,40 @@ export default class EncounterModalComponent extends PureComponent {
       actionList,
       content,
       title,
+      triggerList,
 
       ...otherProps
     } = this.props;
 
+    const hasTriggers = triggerList.length > 0;
+
     return (
       <ModalComponent
-        className='flex-col aitems-center bg-secondary bor-5-white pad-2 mar-v-5'
+        className='color-white flex-col aitems-center bg-secondary bor-5-white pad-2 mar-v-5'
         style={{
           width: '300px',
           height: '80%',
         }}
         {...otherProps}
       >
-        <h2 className='color-white adjacent-mar-t-2'>{ title }</h2>
+        <h2 className='adjacent-mar-t-2'>{ title }</h2>
 
+        {/* trigger display */}
+        { hasTriggers &&
+          <div className='flex-col-center boxsizing-border bg-primary-darker width-full pad-3 mar-h-2 adjacent-mar-t-2'>
+            { triggerList.map((triggerData, idx) => (
+              <TriggerDisplayComponent
+                key={`encounter-modal-trigger-list-${idx}-key`}
+                className='adjacent-mar-t-1'
+                data={triggerData}
+              />
+            ))}
+          </div>
+        }
+
+        {/* narrative text */}
         <div
-          className='fsize-5 talign-center flex-col-center flex-grow-only pad-3 boxsizing-border color-white bg-primary-darker width-full mar-h-2 adjacent-mar-t-2'
+          className='fsize-5 talign-center flex-col-center flex-grow-only pad-3 boxsizing-border bg-primary-darker width-full mar-h-2 adjacent-mar-t-2'
         >
           { content }
         </div>

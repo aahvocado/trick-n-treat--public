@@ -112,16 +112,6 @@ export class GamestateModel extends Model {
         gamestateUserHelper.updateActionsForAllUsers();
       });
     });
-    /**
-     * `turnQueue` changes
-     */
-    this.onChange('turnQueue', (turnQueue) => {
-      // empty `turnQueue` means end of round
-      if (turnQueue.length <= 0) {
-        // this.handleEndOfRound();
-        this.addToActionQueue(this.handleEndOfRound.bind(this));
-      }
-    });
 
     logger.lifecycle(`Gamestate instantiated - (Seed "${seed}")`);
   }
@@ -444,7 +434,13 @@ export class GamestateModel extends Model {
     // reset the old Character's movement
     oldActiveCharacter.set({movement: oldActiveCharacter.get('baseMovement')});
 
-    // send update
+    // check if its time to end the round
+    if (currentTurnQueue.length <= 0) {
+      this.addToActionQueue(this.handleEndOfRound.bind(this));
+      return;
+    }
+
+    // send update to everyone
     this.addToActionQueue(clientEventHelper.sendUpdateToAllClients);
   }
   /**
@@ -467,7 +463,6 @@ export class GamestateModel extends Model {
   handleEndOfRound() {
     logger.lifecycle('(handleEndOfRound)');
 
-    // this.handleStartOfRound();
     this.addToActionQueue(this.handleStartOfRound.bind(this));
   }
   // -- Fog methods

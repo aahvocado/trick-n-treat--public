@@ -1026,6 +1026,7 @@ const ViewerActionItem = (props) => (
     { props.conditionList.map((conditionData, idx) => (
       <ConditionEditorComponent
         key={`viewer-action-item-condition-row-${idx}-key`}
+        className='bor-h-1-gray bor-b-1-gray'
         data={conditionData}
         onEdit={(updatedData) => {
           props.onChangeConditionData(updatedData, idx);
