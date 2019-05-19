@@ -16,7 +16,7 @@ import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 
-import UserModel from 'models/UserModel';
+import UserModel from 'models.shared/UserModel';
 
 import logger from 'utilities/logger.game';
 import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';

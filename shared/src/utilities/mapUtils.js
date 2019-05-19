@@ -6,6 +6,8 @@ import {
   isWalkableTile,
 } from 'constants.shared/tileTypes';
 
+import MatrixModel from 'models.shared/MatrixModel';
+
 import * as mathUtils from 'utilities.shared/mathUtils';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
 
@@ -285,4 +287,62 @@ export function getRandomEmptyLocationNearWalkableTile(matrix, width = 1, height
   // pick one of the valid nearby tiles
   const randomPotentialIndex = mathUtils.getRandomIntInclusive(0, nearbyPotentialLocations.length - 1);
   return nearbyPotentialLocations[randomPotentialIndex];
+}
+/**
+ * checks if given point is the border in a map
+ *
+ * determined by looking at each point's neighbor,
+ *  if they are surrounded by all walkable tiles, then it is not a border
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @returns {Boolean}
+ */
+export function isBorderPoint(matrix, point) {
+  const matrixModel = new MatrixModel({matrix: matrix});
+
+  // if this tile is not walkable, we don't need to do any other checks
+  const tileType = matrixModel.getTileAt(point);
+  if (!isWalkableTile(tileType)) {
+    return;
+  }
+
+  // check if surrounding tiles are walkable
+  //  and account for being at a corner/edge of the matrix
+  const leftTile = matrixModel.getTileLeft(point);
+  const hasLeftWalkable = isWalkableTile(leftTile) && leftTile !== undefined;
+
+  const rightTile = matrixModel.getTileRight(point);
+  const hasRightWalkable = isWalkableTile(rightTile) && rightTile !== undefined;
+
+  const aboveTile = matrixModel.getTileAbove(point);
+  const hasAboveWalkable = isWalkableTile(aboveTile) && aboveTile !== undefined;
+
+  const belowTile = matrixModel.getTileBelow(point);
+  const hasBelowWalkable = isWalkableTile(belowTile) && belowTile !== undefined;
+
+  // not a border if landlocked by the nature of neighbors being walkable
+  if (hasLeftWalkable && hasRightWalkable && hasAboveWalkable && hasBelowWalkable) {
+    return false;
+  }
+
+  return true;
+}
+/**
+ * finds Path points that surround the map
+ *
+ * @param {Matrix} matrix
+ * @returns {Array<Point>}
+ */
+export function getBorderPoints(matrix) {
+  let borderPointsList = [];
+
+  const matrixModel = new MatrixModel({matrix: matrix});
+  matrixModel.forEach((tileType, tilePoint) => {
+    if (isBorderPoint(matrix, tilePoint)) {
+      borderPointsList.push(tilePoint);
+    }
+  });
+
+  return borderPointsList;
 }

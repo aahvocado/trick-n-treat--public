@@ -5,7 +5,7 @@ const {
   LIT_PATH,
 } = TILE_TYPES;
 
-import MatrixModel from 'models/MatrixModel';
+import MatrixModel from 'models.shared/MatrixModel';
 
 /**
  * Biomes are unique map areas

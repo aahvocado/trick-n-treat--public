@@ -8,7 +8,7 @@ import gameState from 'data/gameState';
 import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
-import Model from 'models/Model';
+import Model from 'models.shared/Model';
 
 import logger from 'utilities/logger.game';
 
@@ -131,12 +131,12 @@ export class ServerStateModel extends Model {
 
     if (this.get('clients').length <= 0) {
       logger.error('. There is no one here!');
-      return false;
+      // return false;
     }
 
     if (this.get('lobbyClients').length <= 0) {
       logger.error('. There are no players!');
-      return false;
+      // return false;
     }
 
     if (this.get('screenClient') === null) {

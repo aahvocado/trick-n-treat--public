@@ -115,3 +115,19 @@ test('getValidEmptyLocations() - handles finding an available location with a si
   const validLocationsList = mapUtils.getValidEmptyLocations(testMatrix, 1, 3);
   t.is(validLocationsList.length, 3);
 });
+
+test('getBorderPoints() - correctly finds the border of a basic matrix', (t) => {
+  // -- setup
+  const testMatrix = [
+    [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, PATH, PATH],
+    [EMPTY, EMPTY, EMPTY, EMPTY, PATH, PATH, PATH],
+    [EMPTY, EMPTY, PATH, PATH, PATH, PATH, PATH],
+    [EMPTY, EMPTY, PATH, PATH, PATH, PATH, PATH],
+    [EMPTY, PATH, PATH, PATH, PATH, PATH, PATH],
+    [EMPTY, PATH, PATH, PATH, PATH, PATH, PATH],
+    [EMPTY, PATH, PATH, PATH, PATH, PATH, PATH],
+  ];
+
+  const borderPointsList = mapUtils.getBorderPoints(testMatrix);
+  t.is(borderPointsList.length, 19);
+});

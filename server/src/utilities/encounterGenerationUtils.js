@@ -6,7 +6,7 @@
 
 import * as encounterDataHelper from 'helpers.shared/encounterDataHelper';
 
-import EncounterModel from 'models/EncounterModel';
+import EncounterModel from 'models.shared/EncounterModel';
 
 import * as mathUtils from 'utilities.shared/mathUtils';
 

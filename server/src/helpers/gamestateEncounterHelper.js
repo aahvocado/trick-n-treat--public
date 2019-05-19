@@ -1,7 +1,7 @@
 import gameState from 'data/gameState';
 import serverState from 'data/serverState';
 
-import EncounterModel from 'models/EncounterModel';
+import EncounterModel from 'models.shared/EncounterModel';
 
 import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';

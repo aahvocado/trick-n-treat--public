@@ -54,13 +54,13 @@ export function generateNewMap(mapSettings = MAP_SETTINGS) {
   const woodsMapModel = mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel);
   newTileMapModel.mergeMatrixModel(woodsMapModel);
 
-  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
+  // newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
+  // newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
+  // newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
-  newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
+  // newTileMapModel.mergeMatrixModel(mapGenerationUtils.createSmallWoodsBiomeModel(newTileMapModel));
 
   // place entities based on the entire map
   handlePlacingEntities(newTileMapModel);

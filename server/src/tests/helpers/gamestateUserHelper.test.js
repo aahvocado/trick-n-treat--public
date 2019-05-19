@@ -12,10 +12,9 @@ import gameState from 'data/gameState';
 
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
-import CharacterModel from 'models/CharacterModel';
-// import EncounterModel from 'models/EncounterModel';
-import MapModel from 'models/MapModel';
-import UserModel from 'models/UserModel';
+import CharacterModel from 'models.shared/CharacterModel';
+import MapModel from 'models.shared/MapModel';
+import UserModel from 'models.shared/UserModel';
 
 test.beforeEach((t) => {
   // reset the gamestate for each test

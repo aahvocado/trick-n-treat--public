@@ -1,5 +1,6 @@
 import Point from '@studiomoniker/point';
-import Model from 'models/Model';
+
+import Model from 'models.shared/Model';
 
 /**
  * Character data

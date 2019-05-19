@@ -58,6 +58,40 @@ export function getCenter(matrix) {
   );
 }
 /**
+ * is X is out of bounds from the matrix
+ * - could be too far left or too far right
+ *
+ * @param {Matrix} matrix
+ * @param {Number} x
+ * @returns {Boolean}
+ */
+export function isXOutOfBounds(matrix, x) {
+  const width = getWidth(matrix);
+  return x < 0 || x >= width;
+}
+/**
+ * is Y is out of bounds from the matrix
+ * - could be too far up or too far down
+ *
+ * @param {Matrix} matrix
+ * @param {Number} y
+ * @returns {Boolean}
+ */
+export function isYOutOfBounds(matrix, y) {
+  const height = getHeight(matrix);
+  return y < 0 || y >= height;
+}
+/**
+ * is given point out of bounds
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @returns {Boolean}
+ */
+export function isPointOutOfBounds(matrix, point) {
+  return isXOutOfBounds(matrix, point.x) || isYOutOfBounds(matrix, point.y);
+}
+/**
  * helper function to iterate through each tile
  *
  * @param {Matrix} matrix
@@ -154,10 +188,9 @@ export function mergeMatrices(parentMatrix, childMatrix, point = new Point(0, 0)
  * @returns {TileData | undefined}
  */
 export function getTileAt(matrix, point) {
-  // check for out of bounds
-  if (matrix[point.y] === undefined) {
-    return undefined;
-  };
+  if (isPointOutOfBounds(matrix, point)) {
+    return;
+  }
 
   return matrix[point.y][point.x];
 }
@@ -169,6 +202,11 @@ export function getTileAt(matrix, point) {
  */
 export function getTileLeft(matrix, point, distance = 1) {
   const newPoint = point.clone().subtractX(distance);
+
+  if (isPointOutOfBounds(matrix, newPoint)) {
+    return;
+  }
+
   return getTileAt(matrix, newPoint);
 }
 /**
@@ -179,6 +217,11 @@ export function getTileLeft(matrix, point, distance = 1) {
  */
 export function getTileRight(matrix, point, distance = 1) {
   const newPoint = point.clone().addX(distance);
+
+  if (isPointOutOfBounds(matrix, newPoint)) {
+    return;
+  }
+
   return getTileAt(matrix, newPoint);
 }
 /**
@@ -189,6 +232,11 @@ export function getTileRight(matrix, point, distance = 1) {
  */
 export function getTileAbove(matrix, point, distance = 1) {
   const newPoint = point.clone().addY(distance);
+
+  if (isPointOutOfBounds(matrix, newPoint)) {
+    return;
+  }
+
   return getTileAt(matrix, newPoint);
 }
 /**
@@ -199,6 +247,11 @@ export function getTileAbove(matrix, point, distance = 1) {
  */
 export function getTileBelow(matrix, point, distance = 1) {
   const newPoint = point.clone().subtractY(distance);
+
+  if (isPointOutOfBounds(matrix, newPoint)) {
+    return;
+  }
+
   return getTileAt(matrix, newPoint);
 }
 /**
@@ -299,9 +352,7 @@ export function getSubmatrixSquare(matrix, topLeftPoint, bottomRightPoint) {
   const height = getHeight(matrix);
 
   // not possible if either points are out of bounds
-  const isXOutOfBounds = topLeftPoint.x < 0 || topLeftPoint.x >= width || bottomRightPoint.x < 0 || bottomRightPoint.x >= width;
-  const isYOutOfBounds = topLeftPoint.y < 0 || topLeftPoint.y >= height || bottomRightPoint.y < 0 || bottomRightPoint.y >= height;
-  if (isXOutOfBounds || isYOutOfBounds) {
+  if (isPointOutOfBounds(matrix, bottomRightPoint) || isPointOutOfBounds(matrix, bottomRightPoint)) {
     return undefined;
   }
 

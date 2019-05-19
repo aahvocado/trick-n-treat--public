@@ -1,4 +1,4 @@
-import CharacterModel from 'models/CharacterModel';
+import CharacterModel from 'models.shared/CharacterModel';
 
 /**
  *

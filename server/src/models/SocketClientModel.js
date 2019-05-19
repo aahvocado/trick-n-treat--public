@@ -1,6 +1,6 @@
 import {CLIENT_TYPES} from 'constants.shared/clientTypes';
 
-import Model from 'models/Model';
+import Model from 'models.shared/Model';
 
 /**
  * class for a Websocket Client

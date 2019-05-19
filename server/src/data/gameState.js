@@ -8,8 +8,8 @@ import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
-import Model from 'models/Model';
-import MapModel from 'models/MapModel';
+import Model from 'models.shared/Model';
+import MapModel from 'models.shared/MapModel';
 
 import * as fogUtils from 'utilities.shared/fogUtils';
 import logger from 'utilities/logger.game';

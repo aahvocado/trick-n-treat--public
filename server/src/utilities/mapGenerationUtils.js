@@ -8,13 +8,15 @@ import {
   isLitTile,
 } from 'constants.shared/tileTypes';
 
-import MapModel from 'models/MapModel';
+import MapModel from 'models.shared/MapModel';
 
 import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
+import randomizeArray from 'utilities.shared/randomizeArray';
 import * as fogUtils from 'utilities.shared/fogUtils';
 import * as mapUtils from 'utilities.shared/mapUtils';
 import * as mathUtils from 'utilities.shared/mathUtils';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
+
 import randomWalk from 'utilities/randomWalk';
 
 /**
@@ -158,7 +160,6 @@ export function createSmallWoodsBiomeModel(tileMapModel) {
   const spawnPoint = tileMapModel.getRandomEmptyLocationNearWalkableTile(biomeWidth, biomeHeight, 2);
 
   // create the basic model
-  // the Woods is small
   const woodsBiomeModel = new MapModel({
     start: spawnPoint,
     baseWidth: biomeWidth,
@@ -171,8 +172,13 @@ export function createSmallWoodsBiomeModel(tileMapModel) {
     spawnPoint.y + Math.floor(biomeHeight / 2),
   );
 
-  // randomly generate a path
-  randomWalk(woodsBiomeModel.get('matrix'), connectingPoint, 25, 2, TILE_TYPES.WOODS);
+  // randomly generate a path - this becomes the actual walkable map
+  const mapMatrix = woodsBiomeModel.get('matrix');
+  randomWalk(mapMatrix, connectingPoint, 25, 2, TILE_TYPES.WOODS);
+
+  // pick a couple border points to be connecting points
+  const borderPointsList = randomizeArray(woodsBiomeModel.getBorderPoints());
+  woodsBiomeModel.set({connectingPointList: borderPointsList.slice(0, 2)});
 
   // add some decor
   woodsBiomeModel.forEach((tileType, tilePoint) => {
@@ -213,23 +219,8 @@ export function createSmallWoodsBiomeModel(tileMapModel) {
     woodsBiomeModel.setTileAt(tilePoint, decorTileType);
   });
 
-  // create a MapModel using the base map's dimensions
-  const fullBiomeMapModel = new MapModel({
-    baseWidth: tileMapModel.getWidth(),
-    baseHeight: tileMapModel.getHeight(),
-  });
-
-  // set our Biome matrix at the spawn point
-  fullBiomeMapModel.mergeMatrixModel(woodsBiomeModel, spawnPoint);
-
-  // create the path that takes us from this Biome to the nearest walkable Tile
-  const nearestPathPoint = tileMapModel.getPointOfNearestWalkableType(spawnPoint, 10);
-  const walkableMatrix = matrixUtils.createMatrix(fullBiomeMapModel.getWidth(), fullBiomeMapModel.getHeight(), TILE_TYPES.PATH);
-  const connectingPath = mapUtils.getAStarPath(walkableMatrix, connectingPoint, nearestPathPoint);
-  fullBiomeMapModel.setTileList(connectingPath, TILE_TYPES.WOODS);
-
   // done
-  return fullBiomeMapModel;
+  return woodsBiomeModel;
 }
 /**
  * generates potential encounter tiles

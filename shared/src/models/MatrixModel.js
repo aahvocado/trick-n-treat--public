@@ -1,6 +1,6 @@
 import Point from '@studiomoniker/point';
 
-import Model from 'models/Model';
+import Model from 'models.shared/Model';
 
 import * as matrixUtils from 'utilities.shared/matrixUtils';
 
@@ -90,6 +90,35 @@ export class MatrixModel extends Model {
    */
   getCenter() {
     return matrixUtils.getCenter(this.getMatrix());
+  }
+  /**
+   * is X is out of bounds
+   * - could be too far left or too far right
+   *
+   * @param {Number} x
+   * @returns {Boolean}
+   */
+  isXOutOfBounds(x) {
+    return matrixUtils.isXOutOfBounds(this.getMatrix(), x);
+  }
+  /**
+   * is Y is out of bounds
+   * - could be too far up or too far down
+   *
+   * @param {Number} y
+   * @returns {Boolean}
+   */
+  isYOutOfBounds(y) {
+    return matrixUtils.isYOutOfBounds(this.getMatrix(), y);
+  }
+  /**
+   * is given point out of bounds
+   *
+   * @param {Point} point
+   * @returns {Boolean}
+   */
+  isPointOutOfBounds(point) {
+    return matrixUtils.isPointOutOfBounds(this.getMatrix(), point);
   }
   /**
    * @param {Function} callback

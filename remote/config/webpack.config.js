@@ -280,6 +280,8 @@ module.exports = function(webpackEnv) {
 
         '@studiomoniker/point': path.resolve(paths.appNodeModules, '@studiomoniker/point'),
         'pathfinding': path.resolve(paths.appNodeModules, 'pathfinding'),
+        'mobx': path.resolve(paths.appNodeModules, 'mobx'),
+        'uuid': path.resolve(paths.appNodeModules, 'uuid'),
 
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/

@@ -1,4 +1,4 @@
-import HouseModel from 'models/HouseModel';
+import HouseModel from 'models.shared/HouseModel';
 
 import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
 import * as mathUtils from 'utilities.shared/mathUtils';

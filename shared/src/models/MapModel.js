@@ -2,7 +2,7 @@ import Point from '@studiomoniker/point';
 
 import {TILE_TYPES} from 'constants.shared/tileTypes';
 
-import MatrixModel from 'models/MatrixModel';
+import MatrixModel from 'models.shared/MatrixModel';
 
 import * as mapUtils from 'utilities.shared/mapUtils';
 
@@ -21,9 +21,9 @@ export class MapModel extends MatrixModel {
       mapSettings: undefined,
       /** @type {Point} */
       start: new Point(),
+      /** @type {Array<Point>} */
+      connectingPointList: [],
 
-      /** @type {Array} */
-      encounters: [],
       // other
       ...newAttributes,
     });
@@ -134,6 +134,26 @@ export class MapModel extends MatrixModel {
    */
   getRandomEmptyLocationNearWalkableTile(width = 1, height = 1, distance = 3) {
     return mapUtils.getRandomEmptyLocationNearWalkableTile(this.getMatrix(), width, height, distance);
+  }
+  /**
+   * checks if given point is the border in a map
+   *
+   * @param {Point} point
+   * @returns {Boolean}
+   */
+  isBorderPoint(point) {
+    return mapUtils.isBorderPoint(this.getMatrix(), point);
+  }
+  /**
+   * finds Path points that surround the map
+   *
+   * determined by looking at each tile's neighbor,
+   *  if they are surrounded by all walkable tiles, then it is not walkable
+   *
+   * @returns {Array<Point>}
+   */
+  getBorderPoints() {
+    return mapUtils.getBorderPoints(this.getMatrix());
   }
 }
 

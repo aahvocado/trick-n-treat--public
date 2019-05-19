@@ -1,4 +1,4 @@
-import Model from 'models/Model';
+import Model from 'models.shared/Model';
 
 /**
  * user class
