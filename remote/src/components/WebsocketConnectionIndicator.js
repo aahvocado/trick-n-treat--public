@@ -45,9 +45,9 @@ class WebsocketConnectionIndicator extends PureComponent {
    * clicking on this button makes an attempt to reconnect
    */
   handleStatusOnClick() {
-    const { isConnected, isReconnecting } = this.props;
+    const { isConnected } = this.props;
 
-    if (!isConnected && !isReconnecting) {
+    if (!isConnected) {
       connectionManager.reconnect();
     }
   }

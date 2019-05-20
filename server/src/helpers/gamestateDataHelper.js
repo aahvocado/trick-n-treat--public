@@ -41,7 +41,6 @@ export function getFormattedGamestateData() {
  * @property {Point} TileData.position - {x, y}
  * @property {Number} TileData.tileType
  * @property {Array<CharacterModel.export>} TileData.charactersHere
- * @property {HouseModel.export} TileData.houseHere
  * @property {EncounterModel.export} TileData.encounterHere
  *
  * @returns {Matrix<TileData>}
@@ -60,7 +59,6 @@ export function getFormattedMapData() {
       tileType: tileData,
       fogType: fogMapModel.getTileAt(tilePoint),
       charactersHere: charactersHere,
-      houseHere: houseHere && houseHere.export(),
       encounterHere: encounterHere && encounterHere.export(),
     };
   });

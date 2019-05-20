@@ -51,7 +51,7 @@ window.addEventListener('keydown', (e) => {
 
   // following codes only work if debug menu is open
   if (!remoteAppState.get('isDebugMenuActive')) {
-    return;
+    // return;
   }
   // t
   if (e.keyCode === 84) {

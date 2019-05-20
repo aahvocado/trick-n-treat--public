@@ -16,13 +16,13 @@ export const CONDITION_ID = {
 };
 export const CONDITION_ID_LIST = convertObjectToArray(CONDITION_ID);
 /**
- * list of all triggers that utilize an Item
+ * list of all triggers that utilize an "itemId" property
  */
 export const ITEM_CONDITION_ID_LIST = [
   CONDITION_ID.HAS_ITEM,
 ];
 /**
- * list of all triggers that utilize a Number
+ * list of all triggers that utilize the numerical "value" property
  */
 export const NUMBER_CONDITION_ID_LIST = [
   CONDITION_ID.EQUALS,
@@ -30,13 +30,13 @@ export const NUMBER_CONDITION_ID_LIST = [
   CONDITION_ID.GREATER_THAN,
 ];
 /**
- * list of all triggers that utilize a Point
+ * list of all triggers that utilize a "location" property
  */
 export const POINT_CONDITION_ID_LIST = [
   CONDITION_ID.AT_LOCATION,
 ];
 /**
- * list of all triggers that utilize a TileType
+ * list of all triggers that utilize a "tileType" property
  */
 export const TILETYPE_CONDITION_ID_LIST = [
   CONDITION_ID.ON_TILE_TYPE,
@@ -54,6 +54,8 @@ export const CONDITION_TARGET_ID = {
     LUCK: 'CONDITION_TARGET_ID.STAT.LUCK',
     GREED: 'CONDITION_TARGET_ID.STAT.GREED',
   },
+
+  VISIT_COUNT: 'CONDITION_TARGET_ID.VISIT_COUNT',
 
   LOCATION: 'CONDITION_TARGET_ID.LOCATION',
 };

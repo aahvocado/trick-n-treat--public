@@ -1,6 +1,6 @@
 import Point from '@studiomoniker/point';
 
-import {graveyardBiomeBaseModel} from 'collections/biomeCollection';
+import {graveyardBiomeBaseMatrix} from 'collections/biomeCollection';
 
 import {
   TILE_TYPES,
@@ -125,28 +125,13 @@ export function createGraveyardBiomeModel(tileMapModel, biomeSettings) {
     spawnPoint,
   } = biomeSettings;
 
-  // create an empty MapModel
-  const fullBiomeMapModel = new MapModel({
-    baseWidth: tileMapModel.getWidth(),
-    baseHeight: tileMapModel.getHeight(),
+  const biomeMapModel = new MapModel({
+    matrix: graveyardBiomeBaseMatrix,
+    start: spawnPoint,
+    connectingPointList: connectingPoints,
   });
 
-  // set our Biome matrix at the spawn point
-  fullBiomeMapModel.mergeMatrixModel(graveyardBiomeBaseModel, spawnPoint);
-
-  // use the base Map to find the Point of the nearest walkable tile
-  const chosenConnectingPoint = connectingPoints[0].clone();
-  const nearestPathPoint = tileMapModel.getPointOfNearestWalkableType(chosenConnectingPoint, 10);
-
-  // find a path that takes us from the graveyard to the nearest path
-  const walkableMatrix = matrixUtils.createMatrix(fullBiomeMapModel.getWidth(), fullBiomeMapModel.getHeight(), TILE_TYPES.PATH);
-  const connectingPath = mapUtils.getAStarPath(walkableMatrix, chosenConnectingPoint, nearestPathPoint);
-
-  // connect them together on our new Biome MapModel
-  fullBiomeMapModel.setTileList(connectingPath, TILE_TYPES.PATH);
-
-  // done
-  return fullBiomeMapModel;
+  return biomeMapModel;
 }
 /**
  * idea: there can be many kinds of woods of different sizes and shapes

@@ -268,25 +268,38 @@ export function getRandomEmptyLocation(matrix, width = 1, height = 1) {
  * @param {Number} [distance]
  * @returns {Point}
  */
-export function getRandomEmptyLocationNearWalkableTile(matrix, width = 1, height = 1, distance = 3) {
+export function getPointsAdjacentToWalkableTile(matrix, width = 1, height = 1, distance = 3) {
   const potentialLocations = getValidEmptyLocations(matrix, width, height);
 
   // find the center point of the potential area
   const adjustedCenter = new Point(Math.floor((width - 1) / 2), Math.floor((height - 1) / 2));
 
   // find those who are close to a Walkable Tile
-  const nearbyPotentialLocations = potentialLocations.filter((potentialPoint) => {
+  const pointsAdjacentToWalkableTileList = potentialLocations.filter((potentialPoint) => {
     const adjustedPoint = potentialPoint.clone().add(adjustedCenter.clone());
     const adjustedDistance = adjustedCenter.x > adjustedCenter.y ? (adjustedCenter.clone().x + distance) : (adjustedCenter.clone().y + distance);
 
     const nearbyPoint = getPointOfNearestWalkableType(matrix, adjustedPoint, adjustedDistance);
-    // console.log('chosen nearbyPoint is', nearbyPoint, 'for adjusted', adjustedPoint);
     return nearbyPoint !== undefined;
   });
 
+  return pointsAdjacentToWalkableTileList;
+}
+/**
+ * tries to finds a random location and near a given TileType
+ *
+ * @param {Matrix} matrix
+ * @param {Number} [width]
+ * @param {Number} [height]
+ * @param {Number} [distance]
+ * @returns {Point}
+ */
+export function getRandomEmptyLocationNearWalkableTile(matrix, width = 1, height = 1, distance = 3) {
+  const pointsAdjacentToWalkableTileList = getPointsAdjacentToWalkableTile(matrix, width, height, distance);
+
   // pick one of the valid nearby tiles
-  const randomPotentialIndex = mathUtils.getRandomIntInclusive(0, nearbyPotentialLocations.length - 1);
-  return nearbyPotentialLocations[randomPotentialIndex];
+  const randomPotentialIndex = mathUtils.getRandomIntInclusive(0, pointsAdjacentToWalkableTileList.length - 1);
+  return pointsAdjacentToWalkableTileList[randomPotentialIndex];
 }
 /**
  * checks if given point is the border in a map

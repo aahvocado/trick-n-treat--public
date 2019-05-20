@@ -14,7 +14,6 @@ import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 
 import CharacterModel from 'models.shared/CharacterModel';
 import EncounterModel from 'models.shared/EncounterModel';
-import HouseModel from 'models.shared/HouseModel';
 import MapModel from 'models.shared/MapModel';
 import UserModel from 'models.shared/UserModel';
 
@@ -43,10 +42,6 @@ test('getFormattedMapData() - formats gamestate data into expected object', (t) 
   gameState.set({
     tileMapModel: testMap,
     fogMapModel: new MapModel(),
-
-    houses: [
-      new HouseModel({location: new Point(0, 1)}),
-    ],
     encounters: [
       new EncounterModel({location: new Point(2, 2)}),
       new EncounterModel({location: new Point(4, 0)}),

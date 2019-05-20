@@ -35,17 +35,19 @@ export class GamestateModel extends Model {
     super({
       /** @type {GameMode} */
       mode: GAME_MODES.INACTIVE,
+
       /** @type {Array<GameAction>} */
       actionQueue: [],
       /** @type {GameAction | null} */
       activeAction: null,
-      /** @type {EncounterModel | null} */
-      activeEncounter: null,
 
-      /** @type {Number} */
-      round: 0,
       /** @type {Array<CharacterModel>} */
       turnQueue: [],
+
+      /** @type {EncounterModel | null} */
+      activeEncounter: null,
+      /** @type {Number} */
+      round: 0,
 
       /** @type {Array<UserModel>} */
       users: [],
@@ -59,6 +61,9 @@ export class GamestateModel extends Model {
       tileMapModel: MapModel,
       /** @type {MapModel} */
       fogMapModel: MapModel,
+
+      /** @type {Array<MapModel>} */
+      biomeList: [],
       //
       ...newAttributes,
     });

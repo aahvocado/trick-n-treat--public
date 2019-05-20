@@ -1,53 +1,13 @@
-import HouseModel from 'models.shared/HouseModel';
+import {TAG_ID} from 'constants.shared/tagIds';
+import {
+  TILE_TYPES,
+} from 'constants.shared/tileTypes';
+
+import EncounterModel from 'models.shared/EncounterModel';
 
 import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
+import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
 import * as mathUtils from 'utilities.shared/mathUtils';
-
-/**
- * chance of using generating one of these generic Houses
- */
-const genericHouseDataList = [
-  {
-    // normal house
-    weight: 70,
-    returns: {
-      onTrick: (houseModel, characterModel) => {
-        const randomAddCandy = mathUtils.getRandomIntInclusive(3, 5);
-        characterModel.modifyStat('candies', randomAddCandy);
-      },
-      onTreat: (houseModel, characterModel) => {
-        const randomAddCandy = mathUtils.getRandomIntInclusive(1, 4);
-        characterModel.modifyStat('candies', randomAddCandy);
-      },
-    },
-  }, {
-    // lame house
-    weight: 33,
-    returns: {
-      checkCanTrick: () => true,
-      onTrick: (houseModel, characterModel) => {
-        characterModel.modifyStat('candies', 1);
-      },
-      checkCanTreat: () => true,
-      onTreat: (houseModel, characterModel) => {
-        characterModel.modifyStat('candies', 1);
-      },
-    },
-  }, {
-    // super sweet house
-    weight: 1,
-    returns: {
-      onTrick: (houseModel, characterModel) => {
-        const numberTrickers = houseModel.get('trickers').length;
-        const randomAddCandy = mathUtils.getRandomIntInclusive(8 - numberTrickers, 12 - numberTrickers);
-        characterModel.modifyStat('candies', randomAddCandy);
-      },
-      onTreat: (houseModel, characterModel) => {
-        characterModel.modifyStat('candies', 10);
-      },
-    },
-  },
-];
 
 // -- primary
 /**
@@ -55,52 +15,46 @@ const genericHouseDataList = [
  *
  * @param {MapModel} mapModel
  * @param {BiomeSettings} biomeSettings
- * @returns {Array<HouseModel>}
+ * @returns {Array<EncounterModel>}
  */
 export function generateHouses(mapModel, biomeSettings) {
   const {
     numHouses,
   } = biomeSettings;
 
+  const validLocations = mapModel.getPointsAdjacentToWalkableTile(1, 1, 1);
+
   const newHousesList = [];
   for (let i=0; i<numHouses; i++) {
-    const newHouseModel = createNewGenericHouse(mapModel);
-    newHousesList.push(newHouseModel);
+    const randomLocationIdx = mathUtils.getRandomIntInclusive(0, validLocations.length - 1);
+    const houseLocation = validLocations.splice(randomLocationIdx, 1)[0];
+
+    const newEncounterModel = createHouseEncounter(mapModel, houseLocation);
+    newHousesList.push(newEncounterModel);
   }
 
   return newHousesList;
 }
-// -- find
 /**
- * determines where to place
+ * picks an Encounter that is meant for houses
  *
  * @param {MapModel} mapModel
- * @returns {Point}
+ * @param {Point} location
+ * @returns {EncounterModel}
  */
-export function findValidHouseLocation(mapModel) {
-  return mapModel.getRandomEmptyLocationNearWalkableTile(1, 1, 1);
-}
-// -- place
-/**
- * does the entire House creating process
- * - picks a place to put it
- * - changes the tile to a house
- * - generates a House model
- *
- * returns the HouseModel that was created
- *
- * @param {MapModel} mapModel
- * @returns {HouseModel}
- */
-export function createNewGenericHouse(mapModel) {
-  const houseLocation = findValidHouseLocation(mapModel);
-  // mapModel.setTileAt(houseLocation, TILE_TYPES.HOUSE);
+export function createHouseEncounter(mapModel, location) {
+  const tagsToSearch = [TAG_ID.HOUSE];
 
-  const houseData = pickRandomWeightedChoice(genericHouseDataList);
-  const newHouseModel = new HouseModel({
-    ...houseData,
-    position: houseLocation,
+  const encounterModel = encounterGenerationUtils.generateRandomEncounter({
+    location: location,
+    includeTags: tagsToSearch,
+    excludeTags: [TAG_ID.DEBUG],
   });
 
-  return newHouseModel;
+  // there are no matches if we get `null`
+  if (encounterModel === null) {
+    return;
+  }
+
+  return encounterModel;
 }

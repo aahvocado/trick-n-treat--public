@@ -132,6 +132,17 @@ export class MapModel extends MatrixModel {
    * @param {Number} [distance]
    * @returns {Point}
    */
+  getPointsAdjacentToWalkableTile(width = 1, height = 1, distance = 3) {
+    return mapUtils.getPointsAdjacentToWalkableTile(this.getMatrix(), width, height, distance);
+  }
+  /**
+   * tries to finds a random location and near a given TileType
+   *
+   * @param {Number} [width]
+   * @param {Number} [height]
+   * @param {Number} [distance]
+   * @returns {Point}
+   */
   getRandomEmptyLocationNearWalkableTile(width = 1, height = 1, distance = 3) {
     return mapUtils.getRandomEmptyLocationNearWalkableTile(this.getMatrix(), width, height, distance);
   }

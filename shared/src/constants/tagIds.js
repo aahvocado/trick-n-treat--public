@@ -14,6 +14,7 @@ export const TAG_ID = {
   QUEST: 'TAG_ID.QUEST',
   ITEM: 'TAG_ID.ITEM',
   CONSUMABLE: 'TAG_ID.CONSUMABLE',
+  HOUSE: 'TAG_ID.HOUSE',
 
   // -- descriptors
   CANDY: 'TAG_ID.CANDY',
@@ -29,7 +30,6 @@ export const TAG_ID = {
   SWAMP: 'TAG_ID.SWAMP',
   PLANKS: 'TAG_ID.PLANKS',
   WOODS: 'TAG_ID.WOODS',
-  HOUSE: 'TAG_ID.HOUSE',
 
   // -- debugging?
   DEBUG: 'TAG_ID.DEBUG',

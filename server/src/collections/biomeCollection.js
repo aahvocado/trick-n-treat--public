@@ -5,8 +5,6 @@ const {
   LIT_PATH,
 } = TILE_TYPES;
 
-import MatrixModel from 'models.shared/MatrixModel';
-
 /**
  * Biomes are unique map areas
  *
@@ -25,7 +23,7 @@ import MatrixModel from 'models.shared/MatrixModel';
 /**
  * Graveyard Biome
  */
-const graveyardBiomeBaseMatrix = [
+export const graveyardBiomeBaseMatrix = [
   [null, PATH, PATH, PATH, PATH, LIT_PATH, PATH, PATH, PATH, PATH, null],
   [PATH, PATH, PATH, EMPTY, PATH, PATH, PATH, EMPTY, PATH, PATH, PATH],
   [PATH, EMPTY, PATH, PATH, PATH, EMPTY, PATH, EMPTY, PATH, EMPTY, PATH],
@@ -37,6 +35,3 @@ const graveyardBiomeBaseMatrix = [
   [null, null, null, PATH, LIT_PATH, EMPTY, LIT_PATH, PATH, null, null, null],
   [null, null, null, null, PATH, PATH, PATH, null, null, null, null],
 ];
-export const graveyardBiomeBaseModel = new MatrixModel({
-  matrix: graveyardBiomeBaseMatrix,
-});

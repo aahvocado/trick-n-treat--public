@@ -2,7 +2,7 @@ import React from 'react';
 
 import DropdownComponent from 'common-components/DropdownComponent';
 
-import { TAG_ID_LIST } from 'constants.shared/tagConstants';
+import { TAG_ID_LIST } from 'constants.shared/tagIds';
 
 import l10n from 'utilities.shared/l10n';
 

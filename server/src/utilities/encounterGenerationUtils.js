@@ -1,4 +1,4 @@
-// import {TAG_ID} from 'constants.shared/tagConstants';
+// import {TAG_ID} from 'constants.shared/tagIds';
 // import {
 //   TILE_TYPES,
 //   isWalkableType,
