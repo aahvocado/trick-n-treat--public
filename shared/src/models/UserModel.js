@@ -15,8 +15,6 @@ export class UserModel extends Model {
       canMoveRight: false,
       canMoveUp: false,
       canMoveDown: false,
-      canTrick: false,
-      canTreat: false,
       ...newAttributes,
     });
   }

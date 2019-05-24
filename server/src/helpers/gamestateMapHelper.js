@@ -7,10 +7,8 @@ import {
   TILE_TYPES,
   isWalkableTile,
 } from 'constants.shared/tileTypes';
-import {MAP_SETTINGS} from 'constants/mapSettings';
+import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
 import {TAG_ID} from 'constants.shared/tagIds';
-
-import MapModel from 'models.shared/MapModel';
 
 import gameState from 'state/gameState';
 
@@ -38,12 +36,7 @@ export function generateNewMap() {
   tileMapModel.set({mapHistory: []}); // reset mapHistory
 
   // generate base tileMap
-  const {
-    height,
-    width,
-    startPoint,
-  } = MAP_SETTINGS;
-  tileMapModel.generateMatrix(width, height, TILE_TYPES.EMPTY);
+  tileMapModel.generateMatrix(MAP_WIDTH, MAP_HEIGHT, TILE_TYPES.EMPTY);
 
   // generate the Home neighborhood
   generateHomeBiome();
@@ -69,12 +62,12 @@ export function generateNewMap() {
   gameState.addToActionQueue(gameState.handleStartOfRound.bind(gameState));
 }
 /**
- *
+ * @returns {MapModel}
  */
 export function generateFogMap() {
   logger.game('. Generating Fog Map');
   const tileMapModel = gameState.get('tileMapModel');
-  const fogMapModel = mapGenerationUtils.createFogMapModel(tileMapModel, MAP_SETTINGS);
+  const fogMapModel = mapGenerationUtils.createFogMapModel(tileMapModel);
   gameState.set({fogMapModel: fogMapModel});
 
   // update Visibility for where Characters are located
@@ -87,7 +80,7 @@ export function generateFogMap() {
   return fogMapModel;
 }
 /**
- *
+ * @returns {MapModel}
  */
 export function generateHomeBiome() {
   logger.game('. Generating Home Biome');
@@ -107,7 +100,7 @@ export function generateHomeBiome() {
   return biomeMapModel;
 }
 /**
- *
+ * @returns {MapModel}
  */
 export function generateGraveyard() {
   logger.game('. Generating Graveyard Biome');
@@ -135,7 +128,7 @@ export function generateGraveyard() {
   return biomeMapModel;
 }
 /**
- *
+ * @returns {MapModel}
  */
 export function generateSmallWoods() {
   logger.game('. Generating Small Woods Biome');

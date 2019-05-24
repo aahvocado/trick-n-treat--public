@@ -31,7 +31,6 @@ import EncounterModalComponent from 'components/EncounterModalComponent';
 import {MAP_CONTAINER_WIDTH} from 'constants/mapConstants';
 
 import {CLIENT_ACTIONS} from 'constants.shared/clientActions';
-import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
 import remoteAppState from 'state/remoteAppState';
 import remoteGameState from 'state/remoteGameState';
@@ -59,8 +58,6 @@ export default observer(
       this.handleOnTileClick = this.handleOnTileClick.bind(this);
 
       this.handleMoveToOnClick = this.handleMoveToOnClick.bind(this);
-      this.handleTrickOnClick = this.handleTrickOnClick.bind(this);
-      this.handleTreatOnClick = this.handleTreatOnClick.bind(this);
       this.onClickEncounterAction = this.onClickEncounterAction.bind(this);
 
       this.state = {
@@ -224,7 +221,8 @@ export default observer(
     handleOnTileClick(tilePosition) {
       const myCharacter = remoteAppState.get('myCharacter');
 
-      const aStarPath = mapUtils.getAStarPath(gamestateHelper.getVisibileTileMapData(), myCharacter.position, tilePosition);
+      const grid = mapUtils.createGridForPathfinding(gamestateHelper.getVisibileTileMapData());
+      const aStarPath = mapUtils.getAStarPath(grid, myCharacter.position, tilePosition);
 
       this.setState({
         selectedTilePos: tilePosition,
@@ -258,36 +256,6 @@ export default observer(
       return myCharacter.position.equals(selectedTilePos);
     }
     /**
-     * @returns {Boolean}
-     */
-    canTrick() {
-      if (!remoteAppStateHelper.canUseActions()) {
-        return false;
-      }
-
-      // can only action when on the Tile
-      if (!this.isOnSelectedTile()) {
-        return false;
-      }
-
-      return gamestateHelper.canMyUserTrick();
-    }
-    /**
-     * @returns {Boolean}
-     */
-    canTreat() {
-      if (!remoteAppStateHelper.canUseActions()) {
-        return false;
-      }
-
-      // can only action when on the Tile
-      if (!this.isOnSelectedTile()) {
-        return false;
-      }
-
-      return gamestateHelper.canMyUserTreat();
-    }
-    /**
      * Move action
      */
     handleMoveToOnClick() {
@@ -299,24 +267,6 @@ export default observer(
       connectionManager.socket.emit(CLIENT_ACTIONS.MOVE.TO, selectedTilePos);
 
       this.setState({selectedPath: []});
-    }
-    /**
-     * Trick
-     */
-    handleTrickOnClick() {
-      if (this.canTrick()) {
-        logger.user('user Tricked');
-        connectionManager.socket.emit(SOCKET_EVENTS.GAME.ACTION, CLIENT_ACTIONS.TRICK);
-      }
-    }
-    /**
-     * Treat
-     */
-    handleTreatOnClick() {
-      if (this.canTreat()) {
-        logger.user('user Treated');
-        connectionManager.socket.emit(SOCKET_EVENTS.GAME.ACTION, CLIENT_ACTIONS.TREAT);
-      }
     }
     /**
      * selected an action from the Encounter

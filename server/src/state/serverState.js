@@ -1,7 +1,6 @@
 import {extendObservable} from 'mobx';
 
 import {CLIENT_TYPES} from 'constants.shared/clientTypes';
-import {GAME_MODES} from 'constants.shared/gameModes';
 import {SERVER_MODES} from 'constants.shared/gameModes';
 
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';

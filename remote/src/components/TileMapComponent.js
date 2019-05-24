@@ -4,8 +4,6 @@ import Point from '@studiomoniker/point';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {
   faComment,
-  // faCommentSlash,
-  faHome,
   faUser,
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -129,8 +127,6 @@ export class TileItemComponent extends Component {
     charactersHere: [],
     /** @type {EncounterModel.export} */
     encounterHere: undefined,
-    /** @type {HouseModel.export} */
-    houseHere: undefined,
     /** @type {Point} */
     position: new Point(),
 
@@ -221,7 +217,6 @@ export class TileItemComponent extends Component {
     const {
       charactersHere,
       encounterHere,
-      houseHere,
     } = this.props;
 
     const renderedEntities = [];
@@ -232,16 +227,6 @@ export class TileItemComponent extends Component {
           key={`entity-icon-${renderedEntities.length}-key`}
           entityIdx={renderedEntities.length}
           icon={faComment}
-        />
-      )
-    };
-
-    if (houseHere !== undefined) {
-      renderedEntities.push(
-        <MapEntityIconComponent
-          key={`entity-icon-${renderedEntities.length}-key`}
-          entityIdx={renderedEntities.length}
-          icon={faHome}
         />
       )
     };

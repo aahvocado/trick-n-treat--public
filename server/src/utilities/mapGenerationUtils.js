@@ -10,10 +10,7 @@ import {
 
 import MapModel from 'models.shared/MapModel';
 
-import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
-import randomizeArray from 'utilities.shared/randomizeArray';
 import * as fogUtils from 'utilities.shared/fogUtils';
-import * as mapUtils from 'utilities.shared/mapUtils';
 import * as mathUtils from 'utilities.shared/mathUtils';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
 
@@ -23,14 +20,11 @@ import randomWalk from 'utilities/randomWalk';
  * creates the Model for the Fog Matrix
  *
  * @param {MapModel} tileMapModel
- * @param {Object} mapSettings
  * @returns {MapModel}
  */
-export function createFogMapModel(tileMapModel, mapSettings) {
-  const startPoint = mapSettings.startPoint.clone();
-
+export function createFogMapModel(tileMapModel) {
   // we're going to keep track of lit tiles so we can create the gradation afterwords
-  const pointsWithLight = [startPoint];
+  const pointsWithLight = [];
 
   // create a matrix with lit and hidden tiles
   const baseMatrix = tileMapModel.map((tileData, tilePoint) => {
@@ -45,13 +39,9 @@ export function createFogMapModel(tileMapModel, mapSettings) {
 
   // create the Model
   const newFogMapModel = new MapModel({
-    start: startPoint,
+    start: new Point(),
     matrix: baseMatrix,
-    mapSettings: mapSettings,
   });
-
-  // starting point is Visible
-  newFogMapModel.setTileAt(startPoint, FOG_TYPES.VISIBLE);
 
   // update slowly dimming visibility to those
   pointsWithLight.forEach((lightPoint) => {

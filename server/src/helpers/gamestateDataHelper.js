@@ -51,7 +51,6 @@ export function getFormattedMapData() {
 
   const formattedMapData = tileMapModel.map((tileData, tilePoint) => {
     const charactersHere = gameState.getCharactersAt(tilePoint).map((character) => (character.export()));
-    const houseHere = gameState.findHouseAt(tilePoint);
     const encounterHere = gameState.findEncounterAt(tilePoint);
 
     return {

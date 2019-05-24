@@ -107,7 +107,6 @@ export function handleJoinGame(clientModel) {
 export function updateActionsForAllUsers() {
   gameState.get('users').forEach((userModel) => {
     updateMovementActionsForUser(userModel);
-    updateLocationActionsForUser(userModel);
   });
 }
 /**
@@ -124,30 +123,6 @@ export function updateMovementActionsForUser(userModel) {
     canMoveRight: gameState.isWalkableAt(characterModel.getPotentialPosition(POINTS.RIGHT)),
     canMoveUp: gameState.isWalkableAt(characterModel.getPotentialPosition(POINTS.UP)),
     canMoveDown: gameState.isWalkableAt(characterModel.getPotentialPosition(POINTS.DOWN)),
-  });
-}
-/**
- * updates `canTrick` and `canTreat` attributes in a given user
- *
- * @param {UserModel} userModel
- */
-export function updateLocationActionsForUser(userModel) {
-  const characterId = userModel.get('characterId');
-  const characterModel = gameState.findCharacterById(characterId);
-  const characterPosition = characterModel.get('position');
-
-  const houseModelHere = gameState.findHouseAt(characterPosition);
-  if (houseModelHere === undefined) {
-    userModel.set({
-      canTrick: false,
-      canTreat: false,
-    });
-    return;
-  };
-
-  userModel.set({
-    canTrick: houseModelHere.isTrickable(characterModel),
-    canTreat: houseModelHere.isTreatable(characterModel),
   });
 }
 /**
@@ -207,18 +182,6 @@ export function handleUserGameAction(userId, actionId) {
     });
     return;
   }
-
-  //
-  if (actionId === CLIENT_ACTIONS.TRICK) {
-    gameState.addToActionQueue(() => {
-      handleUserActionTrick(userId);
-    });
-  }
-  if (actionId === CLIENT_ACTIONS.TREAT) {
-    gameState.addToActionQueue(() => {
-      handleUserActionTreat(userId);
-    });
-  }
 }
 /**
  * user asked to move
@@ -250,64 +213,6 @@ export function handleUserActionMove(userId, actionId) {
 
   // after the move, they lose a movement
   characterModel.modifyStat('movement', -1);
-
-  // action complete
-  const userModel = gameState.findUserById(userId);
-  gameState.addToActionQueue(() => {
-    onUserActionComplete(userModel);
-  });
-}
-/**
- * user wants to Treat
- *
- * @param {String} userId
- */
-export function handleUserActionTreat(userId) {
-  const characterModel = gameState.findCharacterByUserId(userId);
-  const characterPosition = characterModel.get('position');
-
-  // are you doing this at a house?
-  const houseModelHere = gameState.findHouseAt(characterPosition);
-  if (houseModelHere === undefined) {
-    return;
-  }
-
-  // are you allowed to do this here?
-  if (!houseModelHere.isTreatable(characterModel)) {
-    return;
-  }
-
-  // ok cool
-  houseModelHere.triggerTreat(characterModel);
-
-  // action complete
-  const userModel = gameState.findUserById(userId);
-  gameState.addToActionQueue(() => {
-    onUserActionComplete(userModel);
-  });
-}
-/**
- * user wants to Trick
- *
- * @param {String} userId
- */
-export function handleUserActionTrick(userId) {
-  const characterModel = gameState.findCharacterByUserId(userId);
-  const characterPosition = characterModel.get('position');
-
-  // are you doing this at a house?
-  const houseModelHere = gameState.findHouseAt(characterPosition);
-  if (houseModelHere === undefined) {
-    return;
-  }
-
-  // are you allowed to do this here?
-  if (!houseModelHere.isTrickable(characterModel)) {
-    return;
-  }
-
-  // ok cool
-  houseModelHere.triggerTrick(characterModel);
 
   // action complete
   const userModel = gameState.findUserById(userId);

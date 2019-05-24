@@ -23,7 +23,6 @@ test.beforeEach((t) => {
     users: [],
     characters: [],
     tileMapModel: new MapModel(),
-    houses: [],
     encounters: [],
   });
 });
@@ -72,6 +71,5 @@ test('getFormattedMapData() - formats gamestate data into expected object', (t) 
   t.true(firstTile.position.equals(new Point(0, 0)));
   t.is(firstTile.tileType, PATH);
   t.is(firstTile.charactersHere[0].name, 'TEST-CHAR-1');
-  t.is(firstTile.houseHere, undefined);
   t.is(firstTile.encounterHere, undefined);
 });

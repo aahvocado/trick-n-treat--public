@@ -1,11 +1,5 @@
 import {TAG_ID} from 'constants.shared/tagIds';
-import {
-  TILE_TYPES,
-} from 'constants.shared/tileTypes';
 
-import EncounterModel from 'models.shared/EncounterModel';
-
-import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
 import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
 import * as mathUtils from 'utilities.shared/mathUtils';
 

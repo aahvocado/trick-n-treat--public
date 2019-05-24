@@ -98,7 +98,8 @@ export function handleMoveCharacterTo(characterModel, endPoint) {
 
   // make the potential path the Character will walk,
   const characterPos = characterModel.get('position');
-  const movePath = mapUtils.getAStarPath(gameState.get('tileMapModel').get('matrix'), characterPos, endPoint);
+  const grid = mapUtils.createGridForPathfinding(gameState.get('tileMapModel').get('matrix'));
+  const movePath = mapUtils.getAStarPath(grid, characterPos, endPoint);
   movePath.shift(); // remove the first Point, which is the one the Character is on
 
   // check if destination is too far away

@@ -19,14 +19,3 @@ export const HALF_MAP_HEIGHT = Math.floor(MAP_HEIGHT / 2);
 const startX = mathUtils.getRandomIntInclusive(Math.floor(HALF_MAP_WIDTH * 0.8), Math.floor(HALF_MAP_WIDTH * 1.2));
 const startY = mathUtils.getRandomIntInclusive(Math.floor(HALF_MAP_HEIGHT * 0.8), Math.floor(HALF_MAP_HEIGHT * 1.2));
 export const MAP_START = new Point(startX, startY);
-/**
- * Base settings for the generating a Map
- */
-export const MAP_SETTINGS = {
-  width: MAP_WIDTH,
-  height: MAP_HEIGHT,
-  startPoint: MAP_START.clone(),
-
-  numSteps: 200,
-  stepSize: 3,
-};

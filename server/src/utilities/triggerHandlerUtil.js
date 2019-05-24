@@ -1,4 +1,4 @@
-import { TRIGGER_ID } from 'constants.shared/triggerIds';
+import {TRIGGER_ID} from 'constants.shared/triggerIds';
 
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import * as itemDataHelper from 'helpers.shared/itemDataHelper';

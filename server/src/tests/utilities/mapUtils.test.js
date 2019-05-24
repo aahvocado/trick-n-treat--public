@@ -24,7 +24,8 @@ test('getAStarPath() - finds the Path from one Point to another', (t) => {
   const pointOne = new Point(3, 3);
   const pointTwo = new Point(6, 6);
 
-  const testResult = mapUtils.getAStarPath(testMatrix, pointOne, pointTwo);
+  const grid = mapUtils.createGridForPathfinding(testMatrix);
+  const testResult = mapUtils.getAStarPath(grid, pointOne, pointTwo);
   t.is(testResult.length, 7);
 });
 

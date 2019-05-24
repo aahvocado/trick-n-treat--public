@@ -54,8 +54,6 @@ export class GamestateModel extends Model {
       users: [],
       /** @type {Array<CharacterModel>} */
       characters: [],
-      /** @type {Array<HouseModel>} */
-      houses: [],
       /** @type {Array<EncounterModel>} */
       encounters: [],
       /** @type {MapModel} */
@@ -122,7 +120,7 @@ export class GamestateModel extends Model {
     logger.lifecycle(`Gamestate instantiated - (Seed "${seed}")`);
   }
   // -- Game methods
-   /**
+  /**
    * set up the start of a new game
    */
   handleStartGame() {
@@ -133,7 +131,6 @@ export class GamestateModel extends Model {
       actionQueue: [],
       turnQueue: [],
       round: 0,
-      houses: [],
       encounters: [],
       biomeList: [],
     });
@@ -355,39 +352,6 @@ export class GamestateModel extends Model {
       const encounterLocation = encounterModel.get('location');
       return point.equals(encounterLocation);
     });
-  }
-  // -- House methods
-  /**
-   * gets the House if there is one at given point
-   *
-   * @param {Point} point
-   * @returns {HouseModel | undefined}
-   */
-  findHouseAt(point) {
-    const houses = this.get('houses').slice();
-    return houses.find((houseModel) => {
-      const houseLocation = houseModel.get('location');
-      return point.equals(houseLocation);
-    });
-  }
-  /**
-   * gets all Entities at a given position
-   * EXPERIMENTAL - this is potentially bad since it's list of mixed types
-   *
-   * @param {Point} point
-   * @returns {Array<Model>}
-   */
-  getEntitiesAt(point) {
-    // singular entities
-    const foundHouse = this.findHouseAt(point);
-    const foundEncounter = this.findEncounterAt(point);
-
-    // arrays
-    const foundCharacters = this.getCharactersAt(point);
-    const foundUsers = this.getUsersAt(point);
-
-    // this part puts everything together and removes anything that is undefined/null (falsey)
-    return [foundHouse, foundEncounter, ...foundCharacters, ...foundUsers].filter(Boolean);
   }
   // -- Action Queue
   /**

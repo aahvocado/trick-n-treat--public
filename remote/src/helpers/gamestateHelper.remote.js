@@ -25,22 +25,6 @@ export function canMyCharacterMoveTo(endPoint) {
   const isWithinDistance = mapUtils.isWithinPathDistance(getVisibileTileMapData(), myCharacter.position, endPoint, myCharacter.movement);
   return isWithinDistance;
 }
-/**
- *
- * @returns {Boolean}
- */
-export function canMyUserTrick() {
-  const myUser = remoteAppState.get('myUser');
-  return myUser.canTrick;
-}
-/**
- *
- * @returns {Boolean}
- */
-export function canMyUserTreat() {
-  const myUser = remoteAppState.get('myUser');
-  return myUser.canTreat;
-}
 // --
 /**
  * gets the Map Matrix with data as just the TileType

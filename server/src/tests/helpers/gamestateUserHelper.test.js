@@ -22,7 +22,6 @@ test.beforeEach((t) => {
     users: [],
     characters: [],
     tileMapModel: new MapModel(),
-    houses: [],
     encounters: [],
   });
 });
