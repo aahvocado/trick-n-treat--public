@@ -1,9 +1,9 @@
 import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
-import gameState from 'data/gameState';
-import serverState from 'data/serverState';
-
 import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
+
+import gameState from 'state/gameState';
+import serverState from 'state/serverState';
 
 import logger from 'utilities/logger.game';
 
@@ -39,6 +39,16 @@ export function sendUpdateToAllClients() {
   });
 }
 /**
+ * sends data to all Clients
+ */
+export function sendGameEnd() {
+  const clients = serverState.get('clients');
+  logger.lifecycle(`(sendGameEnd() - ${clients.length} clients)`);
+  clients.forEach((client) => {
+    client.emit(SOCKET_EVENTS.GAME.END);
+  });
+}
+/**
  * sends data to a User by finding its associated Client
  *
  * @param {SocketClientModel} clientModel
@@ -47,6 +57,9 @@ export function sendUpdateToClient(clientModel) {
   logger.verbose(`. (sendUpdateToClient() - "${clientModel.get('name')}")`);
   clientModel.emit(SOCKET_EVENTS.UPDATE.CLIENT, generateClientGameData(clientModel));
   clientModel.emit(SOCKET_EVENTS.UPDATE.GAME, gamestateDataHelper.getFormattedGamestateData());
+
+  // dev - send map history to connecting clients
+  sendMapHistoryToClient(clientModel);
 }
 /**
  * send updated data to show that the User needs to handle an Event
@@ -162,4 +175,34 @@ function createFormattedItemData(itemModel, characterModel) {
     ...itemModel.export(),
     _doesMeetConditions: conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList),
   };
+}
+// -- debugging dev stuff
+/**
+ * send data to a client's `appLog`
+ *
+ * @param {SocketClientModel} clientModel
+ * @param {String} logString
+ */
+export function sendToClientLog(clientModel, logString) {
+  clientModel.emit(SOCKET_EVENTS.DEBUG.LOG, logString);
+}
+/**
+ * send data to a client's TileEditor
+ *
+ * @param {String} matrix
+ */
+export function sendToTileEditor(matrix) {
+  const clients = serverState.get('clients');
+  clients.forEach((clientModel) => {
+    clientModel.emit(SOCKET_EVENTS.DEBUG.TILE_EDITOR, matrix);
+  });
+}
+/**
+ * send current TileMapModel's mapHistory to client
+ *
+ * @param {SocketClientModel} clientModel
+ */
+export function sendMapHistoryToClient(clientModel) {
+  const tileMapModel = gameState.get('tileMapModel');
+  clientModel.emit(SOCKET_EVENTS.DEBUG.MAP_HISTORY, tileMapModel.get('mapHistory'));
 }

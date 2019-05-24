@@ -20,32 +20,6 @@ import * as matrixUtils from 'utilities.shared/matrixUtils';
 import randomWalk from 'utilities/randomWalk';
 
 /**
- * creates the Model for the Tile Map
- *
- * @param {Object} mapSettings
- * @returns {MapModel}
- */
-export function createBaseTileMapModel(mapSettings) {
-  const {
-    startPoint,
-    width,
-    height,
-  } = mapSettings;
-
-  const newMapModel = new MapModel({
-    mapSettings: mapSettings,
-    start: startPoint.clone(),
-    baseWidth: width,
-    baseHeight: height,
-  });
-
-  newMapModel.generateMatrix(width, height, TILE_TYPES.EMPTY);
-
-  newMapModel.setTileAt(startPoint, TILE_TYPES.HOUSE);
-
-  return newMapModel;
-}
-/**
  * creates the Model for the Fog Matrix
  *
  * @param {MapModel} tileMapModel
@@ -95,20 +69,25 @@ export function createHomeBiomeModel(tileMapModel, biomeSettings) {
   const {
     width,
     height,
+    spawnPoint,
   } = biomeSettings;
 
-  // create an empty Map
-  const fullBiomeMapModel = new MapModel({
-    baseWidth: tileMapModel.getWidth(),
-    baseHeight: tileMapModel.getHeight(),
-  });
-
-  // use recursion to create paths on our MapModel
   const centerPoint = new Point(
     Math.floor(width / 2),
     Math.floor(height / 2),
   );
-  randomWalk(fullBiomeMapModel.get('matrix'), centerPoint, 200, 3);
+
+  // use recursion to create path
+  const baseMatrix = matrixUtils.createMatrix(width, height, null);
+  randomWalk(baseMatrix, centerPoint, 200, 3);
+
+  // make a MapModel with the same dimensions as the full map
+  const fullBiomeMapModel = new MapModel({
+    start: spawnPoint,
+    baseWidth: tileMapModel.getWidth(),
+    baseHeight: tileMapModel.getHeight(),
+  });
+  fullBiomeMapModel.mergeMatrix(baseMatrix, spawnPoint);
 
   return fullBiomeMapModel;
 }
@@ -121,17 +100,21 @@ export function createHomeBiomeModel(tileMapModel, biomeSettings) {
  */
 export function createGraveyardBiomeModel(tileMapModel, biomeSettings) {
   const {
-    connectingPoints,
     spawnPoint,
   } = biomeSettings;
 
   const biomeMapModel = new MapModel({
     matrix: graveyardBiomeBaseMatrix,
     start: spawnPoint,
-    connectingPointList: connectingPoints,
   });
 
-  return biomeMapModel;
+  // make it so it is the same dimension as the full map
+  const fullBiomeMapModel = new MapModel({
+    baseWidth: tileMapModel.getWidth(),
+    baseHeight: tileMapModel.getHeight(),
+  });
+  fullBiomeMapModel.mergeMatrixModel(biomeMapModel, biomeMapModel.get('start'));
+  return fullBiomeMapModel;
 }
 /**
  * idea: there can be many kinds of woods of different sizes and shapes
@@ -140,72 +123,28 @@ export function createGraveyardBiomeModel(tileMapModel, biomeSettings) {
  * @returns {MapModel}
  */
 export function createSmallWoodsBiomeModel(tileMapModel) {
-  const biomeWidth = mathUtils.getRandomIntInclusive(5, 8);
-  const biomeHeight = mathUtils.getRandomIntInclusive(5, 8);
-  const spawnPoint = tileMapModel.getRandomEmptyLocationNearWalkableTile(biomeWidth, biomeHeight, 2);
-
-  // create the basic model
-  const woodsBiomeModel = new MapModel({
-    start: spawnPoint,
-    baseWidth: biomeWidth,
-    baseHeight: biomeHeight,
-  });
-
-  // generate things from the center of the model
-  const connectingPoint = new Point(
-    spawnPoint.x + Math.floor(biomeWidth / 2),
-    spawnPoint.y + Math.floor(biomeHeight / 2),
+  const width = mathUtils.getRandomIntInclusive(5, 8);
+  const height = mathUtils.getRandomIntInclusive(5, 8);
+  const centerPoint = new Point(
+    Math.floor(width / 2),
+    Math.floor(height / 2),
   );
 
   // randomly generate a path - this becomes the actual walkable map
-  const mapMatrix = woodsBiomeModel.get('matrix');
-  randomWalk(mapMatrix, connectingPoint, 25, 2, TILE_TYPES.WOODS);
+  const baseMatrix = matrixUtils.createMatrix(width, height, null);
+  randomWalk(baseMatrix, centerPoint, 25, 2, TILE_TYPES.WOODS);
 
-  // pick a couple border points to be connecting points
-  const borderPointsList = randomizeArray(woodsBiomeModel.getBorderPoints());
-  woodsBiomeModel.set({connectingPointList: borderPointsList.slice(0, 2)});
+  const spawnPoint = tileMapModel.getRandomEmptyLocationNearWalkableTile(width, height, 2);
 
-  // add some decor
-  woodsBiomeModel.forEach((tileType, tilePoint) => {
-    // don't override existing tiles
-    if (tileType !== TILE_TYPES.EMPTY && tileType !== null) {
-      return;
-    }
-
-    // pick a random decor
-    const decorTileType = pickRandomWeightedChoice([
-      {
-        returns: TILE_TYPES.TREE_ONE,
-        weight: 10,
-      }, {
-        returns: TILE_TYPES.TREE_TWO,
-        weight: 10,
-      }, {
-        returns: TILE_TYPES.TREE_THREE,
-        weight: 10,
-      }, {
-        returns: TILE_TYPES.SPOOKY_TREE_ONE,
-        weight: 1,
-      }, {
-        returns: TILE_TYPES.LIT_WOODS,
-        weight: 3,
-      }, {
-        returns: TILE_TYPES.WOODS_TWO,
-        weight: 5,
-      }, {
-        returns: TILE_TYPES.LIT_WOODS_TWO,
-        weight: 3,
-      }, {
-        returns: null,
-        weight: 75,
-      },
-    ]);
-
-    woodsBiomeModel.setTileAt(tilePoint, decorTileType);
+  // make it so it is the same dimension as the full map
+  const fullBiomeMapModel = new MapModel({
+    start: spawnPoint,
+    baseWidth: tileMapModel.getWidth(),
+    baseHeight: tileMapModel.getHeight(),
   });
+  fullBiomeMapModel.mergeMatrix(baseMatrix, spawnPoint);
 
-  // done
-  return woodsBiomeModel;
+  return fullBiomeMapModel;
 }
 /**
  * generates potential encounter tiles

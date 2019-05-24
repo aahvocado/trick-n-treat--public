@@ -7,12 +7,12 @@ const {
   PATH,
 } = TILE_TYPES;
 
-import {GamestateModel} from 'data/gameState';
-
 import CharacterModel from 'models.shared/CharacterModel';
 import EncounterModel from 'models.shared/EncounterModel';
 import MapModel from 'models.shared/MapModel';
 import UserModel from 'models.shared/UserModel';
+
+import {GamestateModel} from 'state/gameState';
 
 // import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
 

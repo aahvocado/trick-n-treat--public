@@ -1,14 +1,14 @@
 import {extendObservable} from 'mobx';
 
 import {CLIENT_TYPES} from 'constants.shared/clientTypes';
+import {GAME_MODES} from 'constants.shared/gameModes';
 import {SERVER_MODES} from 'constants.shared/gameModes';
 
-import gameState from 'data/gameState';
-
-import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
 import Model from 'models.shared/Model';
+
+import gameState from 'state/gameState';
 
 import logger from 'utilities/logger.game';
 
@@ -40,6 +40,16 @@ export class ServerStateModel extends Model {
     // computed attributes - (have to pass in this model as context because getters have their own context)
     const stateModel = this;
     extendObservable(this.attributes, {
+      /** @type {SocketClientModel | null} */
+      get activeClient() {
+        const activeUser = gameState.get('activeUser');
+        if (activeUser === null) {
+          return null;
+        }
+
+        const matchingClient = stateModel.findClientByUser(activeUser);
+        return matchingClient;
+      },
       /** @type {Array<RemoteClientModel>} */
       get lobbyClients() {
         return stateModel.get('clients').filter((client) => (client.get('isInLobby')));
@@ -116,7 +126,25 @@ export class ServerStateModel extends Model {
     });
 
     // initialize the game
-    gamestateMapHelper.generateNewMap();
+    gameState.handleStartGame();
+  }
+  /**
+   * Restart the Game
+   */
+  handleRestartGame() {
+    logger.game('Restarting Game!');
+
+    gameState.set({
+      users: [],
+      characters: [],
+    });
+
+    const gameClients = this.get('gameClients');
+    gameClients.forEach((clientModel) => {
+      gamestateUserHelper.createUserFromClient(clientModel);
+    });
+
+    gameState.handleRestartGame();
   }
   /**
    * check if everything is valid to create a game

@@ -16,30 +16,21 @@ export class MapModel extends MatrixModel {
   constructor(newAttributes = {}) {
     super({
       /** @type {Matrix} */
-      matrix: undefined,
+      matrix: [[]],
       /** @type {Object} */
       mapSettings: undefined,
       /** @type {Point} */
       start: new Point(),
-      /** @type {Array<Point>} */
-      connectingPointList: [],
-
+      /** @type {Array<Matrix>} */
+      mapHistory: [],
       // other
       ...newAttributes,
     });
-  }
-  /**
-   * combines this with another MapModel, more specifically:
-   * - merges that `matrix` onto this
-   * - combines the list of `encounters` (removing duplicates)
-   *
-   * @param {MapModel} mergingMapModel
-   */
-  mergeMapModel(mergingMapModel) {
-    this.mergeMatrixModel(mergingMapModel);
 
-    // const myEncounters = this.get('encounters');
-    // const newEncounters = mergingMapModel.get('encounters');
+    // -- keep track of changes to the map
+    this.onChange('matrix', (matrix) => {
+      this.addToArray('mapHistory', matrix);
+    });
   }
   // -- class methods
   /**
@@ -50,7 +41,8 @@ export class MapModel extends MatrixModel {
    * @returns {Path}
    */
   findPath(startPoint, endPoint) {
-    return mapUtils.getAStarPath(this.getMatrix(), startPoint, endPoint);
+    const grid = mapUtils.createGridForPathfinding(this.getMatrix());
+    return mapUtils.getAStarPath(grid, startPoint, endPoint);
   }
   /**
    * finds if there is a TileType that is within path distance
@@ -64,14 +56,15 @@ export class MapModel extends MatrixModel {
     return mapUtils.hasTypeNearbyOnPath(this.getMatrix(), startPoint, tileType, distance);
   }
   /**
-   * finds a path and then applies it using given `tileType`
+   * creates a path and then applies it using given `tileType`
    *
    * @param {Point} startPoint
    * @param {Point} endPoint
    * @param {TileType} [tileType]
    */
   generatePath(startPoint, endPoint, tileType = TILE_TYPES.NULL) {
-    const newPath = this.findPath(startPoint, endPoint);
+    const grid = mapUtils.createGridForConnecting(this.getMatrix());
+    const newPath = mapUtils.getAStarPath(grid, startPoint, endPoint);
     this.setTileList(newPath, tileType);
   }
   // -- implements `mapUtils.js`

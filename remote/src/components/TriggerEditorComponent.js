@@ -4,7 +4,7 @@ import {
   faTimes,
 } from '@fortawesome/free-solid-svg-icons'
 
-import ClassicButtonComponent, { BUTTON_THEME } from 'common-components/ClassicButtonComponent';
+import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 import IconButtonComponent from 'common-components/IconButtonComponent';
 
 import ConditionEditorComponent from 'components/ConditionEditorComponent';
@@ -111,13 +111,13 @@ export default class TriggerEditorComponent extends PureComponent {
           />
         ))}
 
-        <ClassicButtonComponent
+        <ButtonComponent
           className='fsize-2 aself-start flex-none borradius-b-2 bor-b-1-gray bor-h-1-gray'
           theme={BUTTON_THEME.WHITE}
           onClick={onClickAddCondition}
         >
           Add Condition
-        </ClassicButtonComponent>
+        </ButtonComponent>
       </div>
     )
   }

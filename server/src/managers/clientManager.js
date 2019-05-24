@@ -3,12 +3,12 @@ import {CLIENT_TYPES} from 'constants.shared/clientTypes';
 import {SERVER_MODES} from 'constants.shared/gameModes';
 import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
-import serverState from 'data/serverState';
-
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
 import {SocketClientModel} from 'models/SocketClientModel';
 import ItemModel from 'models.shared/ItemModel';
+
+import serverState from 'state/serverState';
 
 import logger from 'utilities/logger.game';
 
@@ -84,9 +84,12 @@ function attachClientEvents(clientModel) {
     gamestateUserHelper.handleUserUseItem(userId, itemModel);
   });
 
-  /**
-   * disconnect
-   */
+  // -- debug events
+  socket.on(SOCKET_EVENTS.DEBUG.RESTART_GAME, () => {
+    serverState.handleRestartGame();
+  });
+
+  // -- socket.io events
   socket.on('disconnect', () => {
     logger.old(`- Client "${clientModel.get('name')}" disconnected`);
     serverState.removeClient(clientModel);

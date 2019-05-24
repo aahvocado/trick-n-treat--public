@@ -4,6 +4,8 @@ import {
   reaction,
   set,
   toJS,
+
+  isObservableArray,
 } from 'mobx';
 import uuid from 'uuid/v4';
 
@@ -41,7 +43,7 @@ export class Model {
     set(this.attributes, changes);
   }
   /**
-   * EXPERIMENTAL - I'm wary of functions that are too abstract
+   * EXPERIMENTAL - this might be unnecessary and mess things up more than it helps
    *
    * @param {String} arrayName
    * @param {*} item
@@ -60,7 +62,7 @@ export class Model {
     });
   }
   /**
-   * EXPERIMENTAL - I'm wary of functions that are too abstract
+   * EXPERIMENTAL - this might be unnecessary and mess things up more than it helps
    *
    * @param {String} arrayName
    * @param {*} item
@@ -82,6 +84,14 @@ export class Model {
    * @returns {Function} - returns the `disposer` which will remove the observer
    */
   onChange(property, callback) {
+    // @see https://mobx.js.org/refguide/array.html
+    if (isObservableArray(this.attributes[property])) {
+      return reaction(
+        () => toJS(this.attributes[property]),
+        callback,
+      );
+    };
+
     return reaction(
       () => this.attributes[property],
       callback,

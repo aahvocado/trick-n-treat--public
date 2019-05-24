@@ -1,9 +1,9 @@
 import {POINTS, getPointFromString} from 'constants/points';
 
-import gameState from 'data/gameState';
-
 import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
+
+import gameState from 'state/gameState';
 
 import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
 import logger from 'utilities/logger.game';

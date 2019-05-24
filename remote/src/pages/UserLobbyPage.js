@@ -5,7 +5,7 @@ import { observer } from 'mobx-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDesktop, faMobileAlt } from '@fortawesome/free-solid-svg-icons'
 
-import ButtonComponent from 'common-components/ButtonComponent';
+import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 
 import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
 
@@ -44,6 +44,7 @@ class UserLobbyPage extends Component {
       <div className='bg-secondary pad-h-2 flex-auto flex-center flex-col talign-center'>
         <ButtonComponent
           className='fsize-4 pad-2 f-bold mar-t-2 flex-col'
+          theme={BUTTON_THEME.ORANGE}
           disabled={!isConnected}
           onClick={this.handleOnStartClick}
         >

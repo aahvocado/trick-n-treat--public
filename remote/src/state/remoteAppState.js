@@ -58,6 +58,10 @@ export class RemoteStateModel extends Model {
       isDevMode: true,
       /** @type {Boolean} */
       isEditorMode: false,
+      /** @type {Matrix} */
+      currentTileMatrix: undefined,
+      /** @type {Array<Matrix>} */
+      mapHistory: [],
       /** @type {Boolean} */
       isDebugMenuActive: false,
       /** @type {Array} */
@@ -98,6 +102,23 @@ export class RemoteStateModel extends Model {
       });
 
       logger.server('SOCKET_EVENTS.UPDATE.MY_CHARACTER');
+    });
+
+    // server wants us to add something to the `appLog`
+    socket.on(SOCKET_EVENTS.DEBUG.LOG, (logString) => {
+      logger.server(logString);
+    });
+
+    // server gave us a matrix to display in the tileEditor
+    socket.on(SOCKET_EVENTS.DEBUG.TILE_EDITOR, (matrix) => {
+      this.set({currentTileMatrix: matrix});
+      logger.server('SOCKET_EVENTS.DEBUG.TILE_EDITOR');
+    });
+
+    // server gave us a map history
+    socket.on(SOCKET_EVENTS.DEBUG.MAP_HISTORY, (mapHistory) => {
+      this.set({mapHistory: mapHistory});
+      logger.server('SOCKET_EVENTS.DEBUG.MAP_HISTORY');
     });
 
     // -- connection stuff

@@ -137,8 +137,8 @@ export function map(matrix, callback) {
  * @returns {Boolean} - returns true if successfully set
  */
 export function setTileAt(matrix, point, newTileData) {
-  const tileData = matrix[point.y] !== undefined ? matrix[point.y][point.x] : undefined;
-  if (tileData === undefined) {
+  if (isPointOutOfBounds(matrix, point)) {
+    console.log('error: setTileAt() out of bounds');
     return false;
   }
 
@@ -169,8 +169,9 @@ export function setTileList(matrix, pointList, tileData) {
  */
 export function mergeMatrices(parentMatrix, childMatrix, point = new Point(0, 0)) {
   forEach(childMatrix, (tileData, position) => {
-    // don't replace existing tiles with null tiles
-    if (tileData === null) {
+    // don't replace existing tiles with null or undefined tiles,
+    //  but EMPTY tiles will override
+    if (tileData === null || tileData === undefined) {
       return;
     }
 

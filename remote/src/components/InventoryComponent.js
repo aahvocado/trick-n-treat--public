@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 
-import ClassicButtonComponent from 'common-components/ClassicButtonComponent';
+import ButtonComponent from 'common-components/ButtonComponent';
 
 /**
  * displays list of inventory items
@@ -64,13 +64,13 @@ export class InventoryItem extends PureComponent {
             <div className='fsize-4'>{name}</div>
           </div>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='flex-none'
             disabled={!_doesMeetConditions}
             onClick={onClick}
           >
             use
-          </ClassicButtonComponent>
+          </ButtonComponent>
         </div>
       </div>
     )

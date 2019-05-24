@@ -6,10 +6,11 @@ import {FOG_TYPES, isWalkableTile} from 'constants.shared/tileTypes';
 
 import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
+import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
-import Model from 'models.shared/Model';
 import MapModel from 'models.shared/MapModel';
+import Model from 'models.shared/Model';
 
 import * as fogUtils from 'utilities.shared/fogUtils';
 import logger from 'utilities/logger.game';
@@ -58,9 +59,9 @@ export class GamestateModel extends Model {
       /** @type {Array<EncounterModel>} */
       encounters: [],
       /** @type {MapModel} */
-      tileMapModel: MapModel,
+      tileMapModel: new MapModel(),
       /** @type {MapModel} */
-      fogMapModel: MapModel,
+      fogMapModel: new MapModel(),
 
       /** @type {Array<MapModel>} */
       biomeList: [],
@@ -119,6 +120,52 @@ export class GamestateModel extends Model {
     });
 
     logger.lifecycle(`Gamestate instantiated - (Seed "${seed}")`);
+  }
+  // -- Game methods
+   /**
+   * set up the start of a new game
+   */
+  handleStartGame() {
+    logger.lifecycle('(handleStartGame())');
+
+    this.set({
+      mode: GAME_MODES.WORKING,
+      actionQueue: [],
+      turnQueue: [],
+      round: 0,
+      houses: [],
+      encounters: [],
+      biomeList: [],
+    });
+
+    this.addToActionQueue(() => {
+      gamestateMapHelper.generateNewMap();
+    });
+
+    this.addToActionQueue(clientEventHelper.sendUpdateToAllClients);
+  }
+  /**
+   * end current game
+   */
+  handleEndGame() {
+    logger.lifecycle('(handleEndGame())');
+
+    this.set({
+      mode: GAME_MODES.INACTIVE,
+      activeAction: null,
+      activeEncounter: null,
+    });
+
+    this.addToActionQueue(clientEventHelper.sendGameEnd);
+  }
+  /**
+   * restart game
+   */
+  handleRestartGame() {
+    logger.lifecycle('(handleRestartGame())');
+
+    this.addToActionQueue(this.handleEndGame.bind(this));
+    this.addToActionQueue(this.handleStartGame.bind(this));
   }
   // -- Character methods
   /**
@@ -409,7 +456,7 @@ export class GamestateModel extends Model {
    * handles start of turn
    */
   handleStartOfTurn() {
-    logger.lifecycle('(handleStartOfTurn)');
+    logger.lifecycle('(handleStartOfTurn())');
 
     // if the current active is a User, then we should let them know
     const activeUser = this.get('activeUser');
@@ -427,7 +474,7 @@ export class GamestateModel extends Model {
    * end of turn
    */
   handleEndOfTurn() {
-    logger.lifecycle('(handleEndOfTurn)');
+    logger.lifecycle('(handleEndOfTurn())');
 
     // remove the previous `activeCharacter`
     const currentTurnQueue = this.get('turnQueue').slice();
@@ -452,7 +499,7 @@ export class GamestateModel extends Model {
    * round
    */
   handleStartOfRound() {
-    logger.lifecycle('(handleStartOfRound)');
+    logger.lifecycle('(handleStartOfRound())');
 
     // increment round
     this.set({round: this.get('round') + 1});

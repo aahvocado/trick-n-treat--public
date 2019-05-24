@@ -10,13 +10,15 @@ import {
 import {MAP_SETTINGS} from 'constants/mapSettings';
 import {TAG_ID} from 'constants.shared/tagIds';
 
-import gameState from 'data/gameState';
+import MapModel from 'models.shared/MapModel';
+
+import gameState from 'state/gameState';
 
 import logger from 'utilities/logger.game';
 import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
 import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
-// import * as mapUtils from 'utilities.shared/mapUtils';
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
+
 import * as mathUtils from 'utilities.shared/mathUtils';
 
 /**
@@ -32,9 +34,16 @@ export function generateNewMap() {
   logger.game('Generating New Map...');
   console.time('MapGenTime');
 
-  // create the map instance
-  const tileMapModel = mapGenerationUtils.createBaseTileMapModel(MAP_SETTINGS);
-  gameState.set({tileMapModel: tileMapModel});
+  const tileMapModel = gameState.get('tileMapModel');
+  tileMapModel.set({mapHistory: []}); // reset mapHistory
+
+  // generate base tileMap
+  const {
+    height,
+    width,
+    startPoint,
+  } = MAP_SETTINGS;
+  tileMapModel.generateMatrix(width, height, TILE_TYPES.EMPTY);
 
   // generate the Home neighborhood
   generateHomeBiome();
@@ -42,6 +51,8 @@ export function generateNewMap() {
   // -- generate biomes
   generateGraveyard();
 
+  generateSmallWoods();
+  generateSmallWoods();
   generateSmallWoods();
   generateSmallWoods();
   generateSmallWoods();
@@ -90,7 +101,7 @@ export function generateHomeBiome() {
     biomeMapModel.setTileAt(encounterModel.get('location'), TILE_TYPES.HOUSE);
   });
 
-  // merge map and add it to the biome list
+  // merge with main map and add it to the BiomeList
   tileMapModel.mergeMatrixModel(biomeMapModel);
   gameState.addToArray('biomeList', biomeMapModel);
   return biomeMapModel;
@@ -101,10 +112,25 @@ export function generateHomeBiome() {
 export function generateGraveyard() {
   logger.game('. Generating Graveyard Biome');
   const tileMapModel = gameState.get('tileMapModel');
+
+  // create the basic Biome Map
   const biomeMapModel = mapGenerationUtils.createGraveyardBiomeModel(tileMapModel, GRAVEYARD_BIOME_SETTINGS);
 
-  // merge map and add it to the biome list
-  tileMapModel.mergeMatrixModel(biomeMapModel, biomeMapModel.get('start'));
+  // pick a random border point as the point to start connecting from
+  const borderPoints = biomeMapModel.getBorderPoints();
+  const randomPointIdx = mathUtils.getRandomIntInclusive(0, borderPoints.length - 1);
+  const connectingPoint = borderPoints[randomPointIdx];
+
+  // find the nearest tile on the main map to connect to
+  const nearestPoint = tileMapModel.getPointOfNearestWalkableType(connectingPoint, 20);
+
+  // generate the path (and for now mark some points with a different tile type)
+  tileMapModel.generatePath(nearestPoint, connectingPoint, TILE_TYPES.DEBUG);
+  biomeMapModel.setTileAt(connectingPoint, TILE_TYPES.CONNECTOR);
+  biomeMapModel.setTileAt(nearestPoint, TILE_TYPES.CONNECTOR);
+
+  // merge with main map and add it to the BiomeList
+  tileMapModel.mergeMatrixModel(biomeMapModel);
   gameState.addToArray('biomeList', biomeMapModel);
   return biomeMapModel;
 }
@@ -114,10 +140,25 @@ export function generateGraveyard() {
 export function generateSmallWoods() {
   logger.game('. Generating Small Woods Biome');
   const tileMapModel = gameState.get('tileMapModel');
+
+  // create the basic Biome Map
   const biomeMapModel = mapGenerationUtils.createSmallWoodsBiomeModel(tileMapModel);
 
-  // merge map and add it to the biome list
-  tileMapModel.mergeMatrixModel(biomeMapModel, biomeMapModel.get('start'));
+  // pick a random border point as the point to start connecting from
+  const borderPoints = biomeMapModel.getBorderPoints();
+  const randomPointIdx = mathUtils.getRandomIntInclusive(0, borderPoints.length - 1);
+  const connectingPoint = borderPoints[randomPointIdx];
+
+  // find the nearest tile on the main map to connect to
+  const nearestPoint = tileMapModel.getPointOfNearestWalkableType(connectingPoint, 10);
+
+  // generate the path (and for now mark some points with a different tile type)
+  tileMapModel.generatePath(nearestPoint, connectingPoint, TILE_TYPES.DEBUG);
+  biomeMapModel.setTileAt(connectingPoint, TILE_TYPES.CONNECTOR);
+  biomeMapModel.setTileAt(nearestPoint, TILE_TYPES.CONNECTOR);
+
+  // merge with main map and add it to the BiomeList
+  tileMapModel.mergeMatrixModel(biomeMapModel);
   gameState.addToArray('biomeList', biomeMapModel);
   return biomeMapModel;
 }

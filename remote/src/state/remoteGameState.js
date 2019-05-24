@@ -54,6 +54,13 @@ export class RemoteGamestateModel extends Model {
         activeEncounter: data,
       });
     });
+
+    socket.on(SOCKET_EVENTS.GAME.END, () => {
+      this.set({
+        gamestate: undefined,
+        activeEncounter: null,
+      });
+    });
   }
 }
 /**

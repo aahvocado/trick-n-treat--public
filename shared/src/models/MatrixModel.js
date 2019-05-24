@@ -14,7 +14,7 @@ export class MatrixModel extends Model {
   constructor(newAttributes = {}) {
     super({
       /** @type {Matrix} */
-      matrix: undefined,
+      matrix: [[]],
       /** @type {Number} */
       baseWidth: 0,
       /** @type {Number} */
@@ -25,7 +25,7 @@ export class MatrixModel extends Model {
 
     // if no `matrix` was given, then we'll make one automatically
     const baseMatrix = this.get('matrix');
-    if (baseMatrix === undefined) {
+    if (baseMatrix === undefined || (this.getWidth() === 0 || this.getHeight() === 0)) {
       this.generateMatrix();
     }
 
@@ -61,14 +61,23 @@ export class MatrixModel extends Model {
   /**
    * replaces a portion of a matrix with another MatrixModel
    *
+   * @param {Matrix} childMatrix - what's being merged onto this map
+   * @param {Point} [point] - where to merge, by default at the top-left
+   */
+  mergeMatrix(childMatrix, point = new Point(0, 0)) {
+    const myMatrix = this.get('matrix');
+    const resultMatrix = matrixUtils.mergeMatrices(myMatrix, childMatrix, point);
+    this.set({matrix: resultMatrix});
+  }
+  /**
+   * replaces a portion of a matrix with another MatrixModel
+   *
    * @param {MatrixModel} childMatrixModel - what's being merged onto this map
    * @param {Point} [point] - where to merge, by default at the top-left
    */
   mergeMatrixModel(childMatrixModel, point = new Point(0, 0)) {
-    const myMatrix = this.get('matrix');
-    const childMatrix = childMatrixModel.getMatrix();
-    const resultMatrix = matrixUtils.mergeMatrices(myMatrix, childMatrix, point);
-    this.set({matrix: resultMatrix});
+    const childMatrix = childMatrixModel.get('matrix');
+    this.mergeMatrix(childMatrix, point);
   }
   // -- implements `matrixUtils.js`
   /**
@@ -161,7 +170,7 @@ export class MatrixModel extends Model {
    * @returns {TileData | undefined}
    */
   getTileAt(point) {
-    return matrixUtils.getTileAt(this.getMatrix(), point);
+    return matrixUtils.getTileAt(this.get('matrix'), point);
   }
   /**
    * @param {Point} point
@@ -169,7 +178,7 @@ export class MatrixModel extends Model {
    * @returns {TileData | undefined}
    */
   getTileLeft(point, distance = 1) {
-    return matrixUtils.getTileLeft(this.getMatrix(), point, distance);
+    return matrixUtils.getTileLeft(this.get('matrix'), point, distance);
   }
   /**
    * @param {Point} point
@@ -177,7 +186,7 @@ export class MatrixModel extends Model {
    * @returns {TileData | undefined}
    */
   getTileRight(point, distance = 1) {
-    return matrixUtils.getTileRight(this.getMatrix(), point, distance);
+    return matrixUtils.getTileRight(this.get('matrix'), point, distance);
   }
   /**
    * @param {Point} point
@@ -185,7 +194,7 @@ export class MatrixModel extends Model {
    * @returns {TileData | undefined}
    */
   getTileAbove(point, distance = 1) {
-    return matrixUtils.getTileAbove(this.getMatrix(), point, distance);
+    return matrixUtils.getTileAbove(this.get('matrix'), point, distance);
   }
   /**
    * @param {Point} point
@@ -193,7 +202,7 @@ export class MatrixModel extends Model {
    * @returns {TileData | undefined}
    */
   getTileBelow(point, distance = 1) {
-    return matrixUtils.getTileBelow(this.getMatrix(), point, distance);
+    return matrixUtils.getTileBelow(this.get('matrix'), point, distance);
   }
   /**
    * compares a tile at a given point the same as a value

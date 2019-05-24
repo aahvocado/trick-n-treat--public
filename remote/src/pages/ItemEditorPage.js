@@ -7,8 +7,8 @@ import {
   faCircle,
 } from '@fortawesome/free-solid-svg-icons'
 
+import ButtonComponent from 'common-components/ButtonComponent';
 import CheckboxComponent from 'common-components/CheckboxComponent';
-import ClassicButtonComponent from 'common-components/ClassicButtonComponent';
 import TextAreaComponent from 'common-components/TextAreaComponent';
 import TextInputComponent from 'common-components/TextInputComponent';
 
@@ -600,28 +600,28 @@ class ItemEditorMenu extends Component {
         }}
       >
         <MenuRow>
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickCreateNew}
           >
             Create New
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             disabled={!hasChanges || hasUndefinedId}
             onClick={onClickSave}
           >
             {`Save ${isNew ? 'New' : ''}`}
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             disabled={isNew}
             onClick={onClickDelete}
           >
             Delete
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
           <h3 className='talign-center adjacent-mar-t-2'>{`Items (${dataList.length})`}</h3>
 
@@ -639,26 +639,26 @@ class ItemEditorMenu extends Component {
 
         {/* Export options */}
         <MenuRow>
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickCopyCurrentData}
           >
             Copy Current Data
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickCopyAllData}
           >
             Copy All Data
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickDownload}
           >
             Download itemData.json
-          </ClassicButtonComponent>
+          </ButtonComponent>
         </MenuRow>
       </div>
     );

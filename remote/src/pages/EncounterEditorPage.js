@@ -10,7 +10,7 @@ import {
 
 import { ENCOUNTER_ACTION_ID } from 'constants.shared/encounterActions';
 
-import ClassicButtonComponent, { BUTTON_THEME } from 'common-components/ClassicButtonComponent';
+import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 import DropdownComponent from 'common-components/DropdownComponent';
 import IconButtonComponent from 'common-components/IconButtonComponent';
 import ModalComponent from 'common-components/ModalComponent';
@@ -664,28 +664,28 @@ class EncounterEditorMenu extends Component {
       >
         {/* Encounters */}
         <MenuRow>
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickCreateNew}
           >
             Create New
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickSave}
             disabled={!hasChanges || activeEncounterData.id === 'ENCOUNTER_ID.NEW' || activeEncounterData.id === ''}
           >
             {`Save ${isNewEncounter ? 'New' : ''}`}
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickDelete}
             disabled={isNewEncounter}
           >
             Delete
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
           <h3 className='talign-center adjacent-mar-t-2'>{`Encounters (${encounterList.length})`}</h3>
 
@@ -707,38 +707,38 @@ class EncounterEditorMenu extends Component {
         <FontAwesomeIcon className='adjacent-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
 
         <MenuRow>
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickTogglePreviewModal}
           >
             Preview Encounter
-          </ClassicButtonComponent>
+          </ButtonComponent>
         </MenuRow>
 
         <FontAwesomeIcon className='adjacent-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
 
         {/* Export options */}
         <MenuRow>
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickCopyCurrentData}
           >
             Copy Current Data
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickCopyAllData}
           >
             Copy All Data
-          </ClassicButtonComponent>
+          </ButtonComponent>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={onClickDownload}
           >
             Download encounterData.json
-          </ClassicButtonComponent>
+          </ButtonComponent>
         </MenuRow>
       </div>
     );
@@ -1037,12 +1037,12 @@ const ViewerActionItem = (props) => (
       />
     ))}
 
-    <ClassicButtonComponent
+    <ButtonComponent
       className='fsize-2 aself-start flex-none borradius-b-2 bor-b-1-gray bor-h-1-gray'
       theme={BUTTON_THEME.WHITE}
       onClick={props.onClickAddCondition}
     >
       Add Condition
-    </ClassicButtonComponent>
+    </ButtonComponent>
   </div>
 )

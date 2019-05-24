@@ -1,12 +1,12 @@
-import gameState from 'data/gameState';
-import serverState from 'data/serverState';
-
 import EncounterModel from 'models.shared/EncounterModel';
 
 import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 
 import {getEncounterDataById} from 'helpers.shared/encounterDataHelper';
+
+import gameState from 'state/gameState';
+import serverState from 'state/serverState';
 
 import logger from 'utilities/logger.game';
 import * as triggerHandlerUtil from 'utilities/triggerHandlerUtil';

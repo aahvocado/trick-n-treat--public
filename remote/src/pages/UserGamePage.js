@@ -21,7 +21,7 @@ import {
   TILE_SIZE,
 } from 'constants/mapConstants';
 
-import ButtonComponent from 'common-components/ButtonComponent';
+import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 import ModalComponent from 'common-components/ModalComponent';
 
 import InventoryComponent from 'components/InventoryComponent';
@@ -89,7 +89,7 @@ export default observer(
         remoteAppState.set({isInGame: false});
         return <Redirect to='/' />
       }
-      const canUseActions = remoteAppState.get('canUseActions');
+      const canUseActions = remoteAppStateHelper.canUseActions();
       const myCharacter = remoteAppState.get('myCharacter');
 
       const gamestate = remoteGameState.get('gamestate');
@@ -191,6 +191,7 @@ export default observer(
           <div className='flex-row-center'>
             <ButtonComponent
               className='adjacent-mar-l-2'
+              theme={BUTTON_THEME.ORANGE}
               onClick={() => { this.toggleItemModal(true); }}
             >
               Items
@@ -198,6 +199,7 @@ export default observer(
 
             <ButtonComponent
               className='adjacent-mar-l-2'
+              theme={BUTTON_THEME.ORANGE}
               disabled={!this.canMove()}
               onClick={this.handleMoveToOnClick}
             >

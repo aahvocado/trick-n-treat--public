@@ -8,14 +8,14 @@ const {
   PATH,
 } = TILE_TYPES;
 
-import gameState from 'data/gameState';
-
 import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 
 import CharacterModel from 'models.shared/CharacterModel';
 import EncounterModel from 'models.shared/EncounterModel';
 import MapModel from 'models.shared/MapModel';
 import UserModel from 'models.shared/UserModel';
+
+import gameState from 'state/gameState';
 
 test.beforeEach((t) => {
   // reset the gamestate for each test

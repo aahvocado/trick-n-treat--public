@@ -9,12 +9,12 @@ const {
   PATH,
 } = TILE_TYPES;
 
-import gameState from 'data/gameState';
-
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 
 import CharacterModel from 'models.shared/CharacterModel';
 import MapModel from 'models.shared/MapModel';
+
+import gameState from 'state/gameState';
 
 import * as matrixUtils from 'utilities.shared/matrixUtils';
 

@@ -6,7 +6,7 @@ import {
 } from 'react-router-dom';
 import { observer } from 'mobx-react';
 
-import ClassicButtonComponent from 'common-components/ClassicButtonComponent';
+import ButtonComponent from 'common-components/ButtonComponent';
 import LetterIconComponent from 'common-components/LetterIconComponent';
 
 import remoteAppState from 'state/remoteAppState';
@@ -64,12 +64,12 @@ export default observer(
 
               {/* Debug Menu */}
               { remoteAppState.get('isDevMode') &&
-                <ClassicButtonComponent
+                <ButtonComponent
                   className='pad-2 adjacent-mar-l-2'
                   onClick={() => { remoteAppState.set({isDebugMenuActive: !remoteAppState.get('isDebugMenuActive')}); }}
                 >
                   <LetterIconComponent className='mar-r-1' children='`' /> Debugger
-                </ClassicButtonComponent>
+                </ButtonComponent>
               }
             </div>
           </div>

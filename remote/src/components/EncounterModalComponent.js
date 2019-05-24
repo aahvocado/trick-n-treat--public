@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 
-import ButtonComponent from 'common-components/ButtonComponent';
+import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 import ModalComponent from 'common-components/ModalComponent';
 
 import TriggerDisplayComponent from 'components/TriggerDisplayComponent';
@@ -127,6 +127,7 @@ class EncounterActionButton extends PureComponent {
       <ButtonComponent
         {...otherProps}
         className='fsize-4 pad-2 f-bold adjacent-mar-l-2'
+        theme={BUTTON_THEME.ORANGE}
         id={actionId}
         onClick={this.onClickButton.bind(this)}
       >

@@ -9,10 +9,5 @@ dotenv.config({
 import * as serverInstance from 'managers/serverInstance';
 serverInstance.init();
 
-import serverState from 'data/serverState';
-import 'data/gameState';
-
-const autostartGame = false;
-if (autostartGame) {
-  serverState.handleStartGame();
-}
+import 'state/serverState';
+import 'state/gameState';

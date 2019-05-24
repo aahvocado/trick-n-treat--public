@@ -1,4 +1,4 @@
-import gameState from 'data/gameState';
+import gameState from 'state/gameState';
 
 import logger from 'utilities/logger.game';
 

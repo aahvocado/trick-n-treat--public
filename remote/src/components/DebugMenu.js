@@ -4,10 +4,14 @@ import {
 } from 'react-router-dom';
 import { observer } from 'mobx-react';
 
-import ClassicButtonComponent from 'common-components/ClassicButtonComponent';
+import ButtonComponent from 'common-components/ButtonComponent';
 import CheckboxComponent from 'common-components/CheckboxComponent';
 import FixedMenuComponent from 'common-components/FixedMenuComponent';
 import LetterIconComponent from 'common-components/LetterIconComponent';
+
+import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
+
+import * as connectionManager from 'managers/connectionManager';
 
 import remoteAppState from 'state/remoteAppState';
 import remoteGameState from 'state/remoteGameState';
@@ -18,120 +22,137 @@ import {parseLogData} from 'utilities/logger.remote';
  * dev debug menu
  */
 export default observer(
-  class DebugMenu extends Component {
-    static defaultProps = {
-      /** @type {Boolean} */
-      active: false,
+class DebugMenu extends Component {
+  static defaultProps = {
+    /** @type {Boolean} */
+    active: false,
 
-      /** @type {Function} */
-      onClickOverlay: () => {},
-      /** @type {Function} */
-      onClickClose: () => {},
-    };
-    /** @override */
-    constructor(props) {
-      super(props);
+    /** @type {Function} */
+    onClickOverlay: () => {},
+    /** @type {Function} */
+    onClickClose: () => {},
+  };
+  /** @override */
+  constructor(props) {
+    super(props);
 
-      this.onClickToggleZoom = this.onClickToggleZoom.bind(this);
-      this.onClickToggleVisibility = this.onClickToggleVisibility.bind(this);
-    }
-    /** @override */
-    render() {
-      const {
-        active,
-      } = this.props;
+    this.onClickToggleZoom = this.onClickToggleZoom.bind(this);
+    this.onClickToggleVisibility = this.onClickToggleVisibility.bind(this);
 
-      return (
-        <FixedMenuComponent
-          className='bg-secondary flex-col aitems-center width-full talign-center'
-          style={{
-            boxShadow: '5px 0 3px 3px rgba(0, 0, 0, 0.4)',
-            width: '250px',
-          }}
-          active={active}
-          shouldUseOverlay={false}
-          onClickOverlay={this.props.onClickOverlay}
-        >
-
-          <div className='flex-row jcontent-center width-full adjacent-mar-t-2'>
-            <div className='fsize-3 color-grayer mar-r-1'>userId</div>
-            <div>{remoteAppState.get('userId')}</div>
-          </div>
-
-          <ClassicButtonComponent
-            className='width-full adjacent-mar-t-2'
-            onClick={this.props.onClickClose}
-          >
-            Close Debug Menu
-          </ClassicButtonComponent>
-
-          <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
-            <h3 className='fsize-3 adjacent-mar-t-2'>Editor Tools</h3>
-
-            <CloseMenuButton label='Close Editor' />
-
-            <RouteToEncounterEditorButton label='Open Encounter Editor' />
-
-            <RouteToItemEditorButton label='Open Item Editor' />
-
-            <RouteToTileEditorButton label='Open Tile Editor' />
-          </div>
-
-          <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
-            <h3 className='fsize-3 adjacent-mar-t-2'>Game Map Options</h3>
-
-            <CheckboxComponent
-              className='width-full aitems-center jcontent-start flex-row adjacent-mar-t-2'
-              checked={remoteGameState.get('useZoomedOutMap')}
-              onChange={this.onClickToggleZoom}
-            >
-              <LetterIconComponent className='mar-r-1' children='z' /> Zoom Out of Map
-            </CheckboxComponent>
-
-            <CheckboxComponent
-              className='width-full aitems-center jcontent-start flex-row adjacent-mar-t-2'
-              checked={remoteGameState.get('useFullyVisibleMap')}
-              onChange={this.onClickToggleVisibility}
-            >
-              <LetterIconComponent className='mar-r-1' children='v' /> Fully Visible Map
-            </CheckboxComponent>
-          </div>
-
-          <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
-            <h3 className='fsize-3 adjacent-mar-t-2'>Logs</h3>
-
-            <textarea
-              readOnly
-              className='fsize-2 bor-1-gray borradius-1 pad-1 width-full flex-auto resize-none whitespace-pre-line'
-              style={{
-                height: '220px',
-              }}
-              value={parseLogData(remoteAppState.get('appLog'))}
-            />
-          </div>
-
-        </FixedMenuComponent>
-      )
-    }
-    /**
-     *
-     */
-    onClickToggleZoom() {
-      remoteGameState.set({useZoomedOutMap: !remoteGameState.get('useZoomedOutMap')});
-    }
-    /**
-     *
-     */
-    onClickToggleVisibility() {
-      remoteGameState.set({useFullyVisibleMap: !remoteGameState.get('useFullyVisibleMap')});
-    }
+    this.onClickRestart = this.onClickRestart.bind(this);
   }
-)
+  /** @override */
+  render() {
+    const {
+      active,
+    } = this.props;
+
+    return (
+      <FixedMenuComponent
+        className='bg-secondary flex-col aitems-center width-full talign-center'
+        style={{
+          boxShadow: '5px 0 3px 3px rgba(0, 0, 0, 0.4)',
+          width: '250px',
+        }}
+        active={active}
+        shouldUseOverlay={false}
+        onClickOverlay={this.props.onClickOverlay}
+      >
+
+        <div className='flex-row jcontent-center width-full adjacent-mar-t-2'>
+          <div className='fsize-3 color-grayer mar-r-1'>userId</div>
+          <div>{remoteAppState.get('userId')}</div>
+        </div>
+
+        <ButtonComponent
+          className='width-full adjacent-mar-t-2'
+          onClick={this.props.onClickClose}
+        >
+          Close Debug Menu
+        </ButtonComponent>
+
+        <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
+          <h3 className='fsize-3 adjacent-mar-t-2'>Editor Tools</h3>
+
+          <CloseMenuButton label='Close Editor' />
+
+          <RouteToEncounterEditorButton label='Open Encounter Editor' />
+
+          <RouteToItemEditorButton label='Open Item Editor' />
+
+          <RouteToTileEditorButton label='Open Tile Editor' />
+        </div>
+
+        <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
+          <h3 className='fsize-3 adjacent-mar-t-2'>Game Map Options</h3>
+
+          <CheckboxComponent
+            className='width-full aitems-center jcontent-start flex-row adjacent-mar-t-2'
+            checked={remoteGameState.get('useZoomedOutMap')}
+            onChange={this.onClickToggleZoom}
+          >
+            <LetterIconComponent className='mar-r-1' children='z' /> Zoom Out of Map
+          </CheckboxComponent>
+
+          <CheckboxComponent
+            className='width-full aitems-center jcontent-start flex-row adjacent-mar-t-2'
+            checked={remoteGameState.get('useFullyVisibleMap')}
+            onChange={this.onClickToggleVisibility}
+          >
+            <LetterIconComponent className='mar-r-1' children='v' /> Fully Visible Map
+          </CheckboxComponent>
+        </div>
+
+        <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
+          <ButtonComponent
+            className='width-full adjacent-mar-t-2'
+            disabled={remoteGameState.get('gamestate') === undefined}
+            onClick={this.onClickRestart}
+          >
+            Restart Game
+          </ButtonComponent>
+        </div>
+
+        <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
+          <h3 className='fsize-3 adjacent-mar-t-2'>Logs</h3>
+
+          <textarea
+            readOnly
+            className='fsize-2 bor-1-gray borradius-1 pad-1 width-full flex-auto resize-none whitespace-pre-line'
+            style={{
+              height: '220px',
+            }}
+            value={parseLogData(remoteAppState.get('appLog'))}
+          />
+        </div>
+
+      </FixedMenuComponent>
+    )
+  }
+  /**
+   *
+   */
+  onClickToggleZoom() {
+    remoteGameState.set({useZoomedOutMap: !remoteGameState.get('useZoomedOutMap')});
+  }
+  /**
+   *
+   */
+  onClickToggleVisibility() {
+    remoteGameState.set({useFullyVisibleMap: !remoteGameState.get('useFullyVisibleMap')});
+  }
+  /**
+   *
+   */
+  onClickRestart() {
+    connectionManager.socket.emit(SOCKET_EVENTS.DEBUG.RESTART_GAME);
+  }
+})
 /**
  *
  */
 const CloseMenuButton = withRouter(({label, history}) => (
-  <ClassicButtonComponent
+  <ButtonComponent
     className='width-full flex-row aitems-center adjacent-mar-t-2'
     disabled={
       history.location.pathname !== '/encounter_editor' &&
@@ -147,13 +168,13 @@ const CloseMenuButton = withRouter(({label, history}) => (
     }}
   >
     { label }
-  </ClassicButtonComponent>
+  </ButtonComponent>
 ));
 /**
  *
  */
 const RouteToEncounterEditorButton = withRouter(({label, history}) => (
-  <ClassicButtonComponent
+  <ButtonComponent
     className='width-full flex-row aitems-center adjacent-mar-t-2'
     disabled={history.location.pathname === '/encounter_editor'}
     onClick={() => {
@@ -165,13 +186,13 @@ const RouteToEncounterEditorButton = withRouter(({label, history}) => (
     }}
   >
     { label }
-  </ClassicButtonComponent>
+  </ButtonComponent>
 ));
 /**
  *
  */
 const RouteToItemEditorButton = withRouter(({label, history}) => (
-  <ClassicButtonComponent
+  <ButtonComponent
     className='width-full flex-row aitems-center adjacent-mar-t-2'
     disabled={history.location.pathname === '/item_editor'}
     onClick={() => {
@@ -183,13 +204,13 @@ const RouteToItemEditorButton = withRouter(({label, history}) => (
     }}
   >
     { label }
-  </ClassicButtonComponent>
+  </ButtonComponent>
 ));
 /**
  *
  */
 const RouteToTileEditorButton = withRouter(({label, history}) => (
-  <ClassicButtonComponent
+  <ButtonComponent
     className='width-full flex-row aitems-center adjacent-mar-t-2'
     disabled={history.location.pathname === '/tile_editor'}
     onClick={() => {
@@ -201,5 +222,5 @@ const RouteToTileEditorButton = withRouter(({label, history}) => (
     }}
   >
     { label }
-  </ClassicButtonComponent>
+  </ButtonComponent>
 ));

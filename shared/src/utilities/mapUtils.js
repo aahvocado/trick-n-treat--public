@@ -22,29 +22,45 @@ import * as matrixUtils from 'utilities.shared/matrixUtils';
  * @see https://github.com/qiao/PathFinding.js
  *
  * @param {Matrix} matrix
- * @returns {Matrix}
+ * @returns {Grid}
  */
 export function createGridForPathfinding(matrix) {
-  return new Pathfinding.Grid(matrixUtils.map(matrix, (tile, point) => {
-    // empty tiles are unwalkable
-    if (tile === TILE_TYPES.EMPTY || tile === null) {
+  return new Pathfinding.Grid(matrixUtils.map(matrix, (tileType, point) => {
+    // treat walkable tiles as pathable
+    if (isWalkableTile(tileType)) {
+      return 0;
+    }
+
+    // everything else is walls
+    return 1;
+  }));
+}
+/**
+ * revered with walkable tiles as walls
+ *
+ * @param {Matrix} matrix
+ * @returns {Grid}
+ */
+export function createGridForConnecting(matrix) {
+  return new Pathfinding.Grid(matrixUtils.map(matrix, (tileType, point) => {
+    // treat walkable tiles as Walls
+    if (isWalkableTile(tileType)) {
       return 1;
     }
 
-    // otherwise we'll have it walkable
+    // can be pathed
     return 0;
   }));
 }
 /**
- * finds if a matrix contains a type
+ * uses a* algo to find the path between two points
  *
- * @param {Matrix} matrix
+ * @param {Grid} grid
  * @param {Point} startPoint
  * @param {Point} endPoint
  * @returns {Path}
  */
-export function getAStarPath(matrix, startPoint, endPoint) {
-  const grid = createGridForPathfinding(matrix);
+export function getAStarPath(grid, startPoint, endPoint) {
   const finder = new Pathfinding.AStarFinder();
   const coordinatePath = finder.findPath(startPoint.x, startPoint.y, endPoint.x, endPoint.y, grid);
 
@@ -64,7 +80,8 @@ export function getAStarPath(matrix, startPoint, endPoint) {
 export function createPath(matrix, startPoint, endPoint, tileType = TILE_TYPES.NULL) {
   const matrixCopy = matrix.slice();
 
-  const aStarPath = getAStarPath(matrixCopy, startPoint, endPoint);
+  const grid = createGridForConnecting(matrix);
+  const aStarPath = getAStarPath(grid, startPoint, endPoint);
   aStarPath.forEach((pathPoint) => {
     matrixUtils.setTileAt(matrixCopy, pathPoint, tileType);
   });
@@ -80,7 +97,8 @@ export function createPath(matrix, startPoint, endPoint, tileType = TILE_TYPES.N
  */
 export function isWithinPathDistance(matrix, startPoint, endPoint, distance) {
   // create a path that walks to the point
-  const path = getAStarPath(matrix, startPoint, endPoint);
+  const grid = createGridForPathfinding(matrix);
+  const path = getAStarPath(grid, startPoint, endPoint);
 
   // check if path does not exist, or is too far
   // (we add one to the distance to account for the starting point)
@@ -114,7 +132,8 @@ export function getPointsWithinPathDistance(matrix, startPoint, distance) {
     };
 
     // create a path that walks to the point
-    const path = getAStarPath(matrix, startPoint, tilePoint);
+    const grid = createGridForPathfinding(matrix);
+    const path = getAStarPath(grid, startPoint, tilePoint);
 
     // check if path does not exist, or is too far
     // (we add one to the distance to account for the starting point)
@@ -317,7 +336,7 @@ export function isBorderPoint(matrix, point) {
   // if this tile is not walkable, we don't need to do any other checks
   const tileType = matrixModel.getTileAt(point);
   if (!isWalkableTile(tileType)) {
-    return;
+    return false;
   }
 
   // check if surrounding tiles are walkable
@@ -334,12 +353,15 @@ export function isBorderPoint(matrix, point) {
   const belowTile = matrixModel.getTileBelow(point);
   const hasBelowWalkable = isWalkableTile(belowTile) && belowTile !== undefined;
 
-  // not a border if landlocked by the nature of neighbors being walkable
-  if (hasLeftWalkable && hasRightWalkable && hasAboveWalkable && hasBelowWalkable) {
-    return false;
+  // count how many walkable tiles this is adjacent to
+  const adjacentWalkableCount = [hasLeftWalkable, hasRightWalkable, hasAboveWalkable, hasBelowWalkable].filter(Boolean).length;
+
+  // is a border if it's not completely surrounded or alone
+  if (adjacentWalkableCount <= 3 && adjacentWalkableCount > 0) {
+    return true;
   }
 
-  return true;
+  return false;
 }
 /**
  * finds Path points that surround the map

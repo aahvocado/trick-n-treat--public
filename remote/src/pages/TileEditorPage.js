@@ -6,12 +6,15 @@ import Point from '@studiomoniker/point';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCircle,
+  faPause,
+  faPlay,
 } from '@fortawesome/free-solid-svg-icons'
 
-import ClassicButtonComponent from 'common-components/ClassicButtonComponent';
+import ButtonComponent from 'common-components/ButtonComponent';
 import CheckboxComponent from 'common-components/CheckboxComponent';
 import TextInputComponent from 'common-components/TextInputComponent';
 import ModalComponent from 'common-components/ModalComponent';
+import NumericalMenuComponent from 'common-components/NumericalMenuComponent';
 import RadioButtonComponent from 'common-components/RadioButtonComponent';
 
 import {TileItemComponent} from 'components/TileMapComponent';
@@ -24,241 +27,333 @@ import {
 
 import remoteAppState from 'state/remoteAppState';
 
-import debounce from 'utilities/debounce';
+import debounce from 'utilities.shared/debounce';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * page for tile editing
  */
 export default observer(
-  class TileEditorPage extends Component {
-    /** @override */
-    constructor(props) {
-      super(props);
+class TileEditorPage extends Component {
+  /** @override */
+  constructor(props) {
+    super(props);
 
-      this.handleOnChangeHeightValue = this.handleOnChangeHeightValue.bind(this);
-      this.handleOnChangeWidthValue = this.handleOnChangeWidthValue.bind(this);
-      this.handleOnChangeTileSizeValue = this.handleOnChangeTileSizeValue.bind(this);
-      this.handleNewMatrix = this.handleNewMatrix.bind(this);
-      this.updateMatrix = debounce(this.updateMatrix.bind(this), 350);
+    this.handleOnChangeHeightValue = this.handleOnChangeHeightValue.bind(this);
+    this.handleOnChangeWidthValue = this.handleOnChangeWidthValue.bind(this);
+    this.handleOnChangeTileSizeValue = this.handleOnChangeTileSizeValue.bind(this);
+    this.handleNewMatrix = this.handleNewMatrix.bind(this);
+    this.updateMatrix = debounce(this.updateMatrix.bind(this), 350);
 
-      this.handleOnClickTile = this.handleOnClickTile.bind(this);
-      this.handleOnHoverTile = this.handleOnHoverTile.bind(this);
-      this.handleOnLeaveTile = this.handleOnLeaveTile.bind(this);
-      this.handleOnChangeEditorTile = this.handleOnChangeEditorTile.bind(this);
+    this.handleOnClickTile = this.handleOnClickTile.bind(this);
+    this.handleOnHoverTile = this.handleOnHoverTile.bind(this);
+    this.handleOnLeaveTile = this.handleOnLeaveTile.bind(this);
+    this.handleOnChangeEditorTile = this.handleOnChangeEditorTile.bind(this);
 
-      this.state = {
-        selectedEditorTile: 'GRASS_EDITOR_TILE',
-        focusedTile: new Point(-1, -1),
-        mapMatrix: matrixUtils.createMatrix(10, 10, null),
-        mapWidth: 10,
-        mapHeight: 10,
-        tileSize: 40,
-      }
+    this.onChangeMapHistoryIdx = this.onChangeMapHistoryIdx.bind(this);
+    this.onToggleAutoplayHistory = this.onToggleAutoplayHistory.bind(this);
+
+    const mapHistory = remoteAppState.get('mapHistory');
+    const currentTileMatrix = remoteAppState.get('currentTileMatrix')
+    const defaultMatrix = mapHistory[0] || currentTileMatrix || matrixUtils.createMatrix(10, 10, null);
+
+    this.state = {
+      selectedEditorTile: 'GRASS_EDITOR_TILE',
+      focusedTile: new Point(-1, -1),
+      mapMatrix: defaultMatrix,
+      mapWidth: matrixUtils.getWidth(defaultMatrix),
+      mapHeight: matrixUtils.getHeight(defaultMatrix),
+      tileSize: this.getAutoAdjustedTileSize(defaultMatrix),
+
+      /** @type {Boolean} */
+      isAutoplayHistory: false,
+      /** @type {Number} */
+      mapHistoryIdx: 0,
     }
-    /** @override */
-    render() {
-      if (!remoteAppState.get('isEditorMode')) {
-        if (remoteAppState.get('isInLobby')) {
-          return <Redirect to='/lobby' />
-        }
+  }
+  /** @override */
+  componentDidMount() {
+    setInterval(() => {
+      if (this.state.isAutoplayHistory) {
+        const mapHistory = remoteAppState.get('mapHistory');
+        const nextIdx = this.state.mapHistoryIdx + 1;
 
-        if (remoteAppState.get('isInGame')) {
-          return <Redirect to='/game' />
-        }
-      }
-
-      const {
-        focusedTile,
-        mapMatrix,
-        mapWidth,
-        mapHeight,
-        selectedEditorTile,
-        tileSize,
-      } = this.state;
-
-      return (
-        <div className='flex-center flex-col color-white bg-primary'>
-          <h2 className='bg-secondary fsize-4 pad-v-1 width-full talign-center'>Tile Editor</h2>
-
-          <div className='flex-row height-full bg-primary-darker'>
-            <EditorPanel
-              mapMatrix={mapMatrix}
-              mapWidth={mapWidth}
-              mapHeight={mapHeight}
-              tileSize={tileSize}
-              selectedEditorTile={selectedEditorTile}
-
-              onChangeHeightValue={this.handleOnChangeHeightValue}
-              onChangeWidthValue={this.handleOnChangeWidthValue}
-              onChangeTileSizeValue={this.handleOnChangeTileSizeValue}
-              onChangeEditorTile={this.handleOnChangeEditorTile}
-
-              onNewMatrix={this.handleNewMatrix}
-            />
-
-            <div
-              className='flex-row-center mar-h-auto mar-t-5'
-            >
-              <div
-                className='overflow-hidden flex-auto flex-col aitems-center position-relative bor-4-primary bg-gray'
-              >
-                { mapMatrix.map((mapRowData, rowIdx) => {
-                  return (
-                    <div className='flex-row flex-grow-only' key={`tile-map-row-${rowIdx}-key`} >
-                      { mapRowData.map((tileData, colIdx) => {
-                        const position = new Point(colIdx, rowIdx);
-
-                        return (
-                          <TileItemComponent
-                            key={`tile-item-${colIdx}-${rowIdx}-key`}
-                            {...tileData}
-                            tileSize={tileSize}
-                            position={position}
-                            tileType={tileData}
-                            fogType={FOG_TYPES.VISIBLE}
-                            isSelected={focusedTile.equals(position)}
-
-
-                            onTileClick={this.handleOnClickTile}
-                            onTileHover={this.handleOnHoverTile}
-                            onTileLeave={this.handleOnLeaveTile}
-                          />
-                        )
-                      })}
-                    </div>
-                  )})
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    /**
-     * @param {Point} point
-     */
-    handleOnClickTile(point) {
-      const {
-        selectedEditorTile,
-        mapMatrix,
-      } = this.state;
-
-      const translatedEditorTile = (() => {
-        switch(selectedEditorTile) {
-          case 'EMPTY_EDITOR_TILE':
-            return TILE_TYPES.EMPTY;
-          case 'GRASS_EDITOR_TILE':
-            return TILE_TYPES.GRASS;
-          case 'SIDEWALK_EDITOR_TILE':
-            return TILE_TYPES.SIDEWALK;
-          case 'ROAD_EDITOR_TILE':
-            return TILE_TYPES.ROAD;
-          case 'SWAMP_EDITOR_TILE':
-            return TILE_TYPES.SWAMP;
-          case 'PLANKS_EDITOR_TILE':
-            return TILE_TYPES.PLANKS;
-          case 'WOODS_EDITOR_TILE':
-            return TILE_TYPES.WOODS;
-          case 'WATER_EDITOR_TILE':
-            return TILE_TYPES.WATER;
-          case 'FOREST_EDITOR_TILE':
-            return TILE_TYPES.FOREST;
-          case 'NULL_EDITOR_TILE':
-          default:
-            return null;
-        }
-      })();
-
-      // look at what's existing, if we're about to use the same type on a tile, then make it empty
-      const existingTileType = matrixUtils.getTileAt(mapMatrix, point);
-      const isIdentitical = existingTileType === translatedEditorTile;
-      const nextTileType = !isIdentitical ? translatedEditorTile : TILE_TYPES.EMPTY;
-
-      // update that tile
-      matrixUtils.setTileAt(mapMatrix, point, nextTileType);
-      this.setState({mapMatrix: mapMatrix});
-    }
-    /**
-     *
-     */
-    handleOnHoverTile(position) {
-      this.setState({focusedTile: position});
-    }
-    /**
-     *
-     */
-    handleOnLeaveTile(position) {
-
-    }
-    /**
-     *
-     */
-    handleOnChangeHeightValue(newHeight) {
-      this.setState({mapHeight: newHeight}, () => {
-        this.updateMatrix();
-      });
-    }
-    /**
-     *
-     */
-    handleOnChangeWidthValue(newWidth) {
-      this.setState({mapWidth: newWidth}, () => {
-        this.updateMatrix();
-      });
-    }
-    /**
-     *
-     */
-    handleNewMatrix(newMatrix) {
-      const newHeight = newMatrix[0].length;
-      const newWidth = newMatrix.length;
-
-      this.setState({
-        mapMatrix: newMatrix,
-        mapHeight: newHeight,
-        mapWidth: newWidth,
-      });
-    }
-    /**
-     *
-     */
-    updateMatrix() {
-      const oldMatrix = this.state.mapMatrix;
-      const newHeight = this.state.mapHeight;
-      const newWidth = this.state.mapWidth;
-
-      // go through and assign old data
-      const newMatrix = matrixUtils.createMatrix(newWidth, newHeight, null);
-      matrixUtils.forEach(newMatrix, (tile, position) => {
-        const oldTileData = oldMatrix[position.y] && oldMatrix[position.y][position.x];
-        if (oldTileData === null || oldTileData === undefined) {
+        // if autoplay is about to go above idx, then we have to stop;
+        if (nextIdx > mapHistory.length - 1) {
+          this.onToggleAutoplayHistory();
           return;
         }
 
-        newMatrix[position.y][position.x] = oldTileData;
-      });
-
-      this.setState({
-        mapMatrix: newMatrix,
-        mapHeight: newHeight,
-        mapWidth: newWidth,
-      });
-    }
-    /**
-     *
-     */
-    handleOnChangeTileSizeValue(newValue) {
-      this.setState({tileSize: newValue});
-    }
-    /**
-     * @param {String} newValue
-     */
-    handleOnChangeEditorTile(newValue) {
-      this.setState({selectedEditorTile: newValue});
-    }
+        // show the next map
+        this.onChangeMapHistoryIdx(nextIdx);
+      };
+    }, 50);
   }
-)
+  /** @override */
+  render() {
+    if (!remoteAppState.get('isEditorMode')) {
+      if (remoteAppState.get('isInLobby')) {
+        return <Redirect to='/lobby' />
+      }
+
+      if (remoteAppState.get('isInGame')) {
+        return <Redirect to='/game' />
+      }
+    }
+
+    const {
+      focusedTile,
+      isAutoplayHistory,
+      mapMatrix,
+      mapWidth,
+      mapHeight,
+      mapHistoryIdx,
+      selectedEditorTile,
+      tileSize,
+    } = this.state;
+
+    const mapHistory = remoteAppState.get('mapHistory');
+
+    return (
+      <div className='flex-center flex-col color-white bg-primary'>
+        <h2 className='bg-secondary fsize-4 pad-v-1 width-full talign-center'>Tile Editor</h2>
+
+        <div className='flex-row-center'>
+          <div className='fsize-3 adjacent-mar-l-2'>
+            Tile Map History
+          </div>
+
+          <NumericalMenuComponent
+            className='fsize-4 adjacent-mar-l-2'
+            defaultIdx={mapHistoryIdx}
+            maxToShow={7}
+            maxIdx={Math.max(mapHistory.length - 1, 0)}
+            onChange={this.onChangeMapHistoryIdx}
+          />
+
+          <ButtonComponent
+            className='flex-none adjacent-mar-l-2'
+            disabled={mapHistory.length <= 0 || mapHistoryIdx >= mapHistory.length - 1}
+            onClick={this.onToggleAutoplayHistory}
+          >
+            <FontAwesomeIcon className='fsize-3' icon={isAutoplayHistory ? faPause : faPlay} />
+          </ButtonComponent>
+        </div>
+
+        <div className='flex-row height-full bg-primary-darker'>
+          <EditorPanel
+            mapMatrix={mapMatrix}
+            mapWidth={mapWidth}
+            mapHeight={mapHeight}
+            tileSize={tileSize}
+            selectedEditorTile={selectedEditorTile}
+
+            onChangeHeightValue={this.handleOnChangeHeightValue}
+            onChangeWidthValue={this.handleOnChangeWidthValue}
+            onChangeTileSizeValue={this.handleOnChangeTileSizeValue}
+            onChangeEditorTile={this.handleOnChangeEditorTile}
+
+            onNewMatrix={this.handleNewMatrix}
+          />
+
+          <div
+            className='flex-row-center mar-h-auto mar-t-5'
+          >
+            <div
+              className='overflow-hidden flex-auto flex-col aitems-center position-relative bor-4-primary bg-gray'
+            >
+              { mapMatrix.map((mapRowData, rowIdx) => {
+                return (
+                  <div className='flex-row flex-grow-only' key={`tile-map-row-${rowIdx}-key`} >
+                    { mapRowData.map((tileData, colIdx) => {
+                      const position = new Point(colIdx, rowIdx);
+
+                      return (
+                        <TileItemComponent
+                          key={`tile-item-${colIdx}-${rowIdx}-key`}
+                          {...tileData}
+                          tileSize={tileSize}
+                          position={position}
+                          tileType={tileData}
+                          fogType={FOG_TYPES.VISIBLE}
+                          isSelected={focusedTile.equals(position)}
+
+
+                          onTileClick={this.handleOnClickTile}
+                          onTileHover={this.handleOnHoverTile}
+                          onTileLeave={this.handleOnLeaveTile}
+                        />
+                      )
+                    })}
+                  </div>
+                )})
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  /**
+   * @param {Point} point
+   */
+  handleOnClickTile(point) {
+    const {
+      selectedEditorTile,
+      mapMatrix,
+    } = this.state;
+
+    const translatedEditorTile = (() => {
+      switch(selectedEditorTile) {
+        case 'EMPTY_EDITOR_TILE':
+          return TILE_TYPES.EMPTY;
+        case 'GRASS_EDITOR_TILE':
+          return TILE_TYPES.GRASS;
+        case 'SIDEWALK_EDITOR_TILE':
+          return TILE_TYPES.SIDEWALK;
+        case 'ROAD_EDITOR_TILE':
+          return TILE_TYPES.ROAD;
+        case 'SWAMP_EDITOR_TILE':
+          return TILE_TYPES.SWAMP;
+        case 'PLANKS_EDITOR_TILE':
+          return TILE_TYPES.PLANKS;
+        case 'WOODS_EDITOR_TILE':
+          return TILE_TYPES.WOODS;
+        case 'WATER_EDITOR_TILE':
+          return TILE_TYPES.WATER;
+        case 'FOREST_EDITOR_TILE':
+          return TILE_TYPES.FOREST;
+        case 'NULL_EDITOR_TILE':
+        default:
+          return null;
+      }
+    })();
+
+    // look at what's existing, if we're about to use the same type on a tile, then make it empty
+    const existingTileType = matrixUtils.getTileAt(mapMatrix, point);
+    const isIdentitical = existingTileType === translatedEditorTile;
+    const nextTileType = !isIdentitical ? translatedEditorTile : TILE_TYPES.EMPTY;
+
+    // update that tile
+    matrixUtils.setTileAt(mapMatrix, point, nextTileType);
+    this.setState({mapMatrix: mapMatrix});
+  }
+  /**
+   *
+   */
+  handleOnHoverTile(position) {
+    this.setState({focusedTile: position});
+  }
+  /**
+   *
+   */
+  handleOnLeaveTile(position) {
+
+  }
+  /**
+   *
+   */
+  handleOnChangeHeightValue(newHeight) {
+    this.setState({mapHeight: newHeight}, () => {
+      this.updateMatrix();
+    });
+  }
+  /**
+   *
+   */
+  handleOnChangeWidthValue(newWidth) {
+    this.setState({mapWidth: newWidth}, () => {
+      this.updateMatrix();
+    });
+  }
+  /**
+   *
+   */
+  handleNewMatrix(newMatrix) {
+    const newHeight = newMatrix[0].length;
+    const newWidth = newMatrix.length;
+
+    this.setState({
+      mapMatrix: newMatrix,
+      mapHeight: newHeight,
+      mapWidth: newWidth,
+      tileSize: this.getAutoAdjustedTileSize(newMatrix),
+    });
+  }
+  /**
+   *
+   */
+  updateMatrix() {
+    const oldMatrix = this.state.mapMatrix;
+    const newHeight = this.state.mapHeight;
+    const newWidth = this.state.mapWidth;
+
+    // go through and assign old data
+    const newMatrix = matrixUtils.createMatrix(newWidth, newHeight, null);
+    matrixUtils.forEach(newMatrix, (tile, position) => {
+      const oldTileData = oldMatrix[position.y] && oldMatrix[position.y][position.x];
+      if (oldTileData === null || oldTileData === undefined) {
+        return;
+      }
+
+      newMatrix[position.y][position.x] = oldTileData;
+    });
+
+    this.setState({
+      mapMatrix: newMatrix,
+      mapHeight: newHeight,
+      mapWidth: newWidth,
+      tileSize: this.getAutoAdjustedTileSize(newMatrix),
+    });
+  }
+  /**
+   *
+   */
+  handleOnChangeTileSizeValue(newValue) {
+    this.setState({tileSize: newValue});
+  }
+  /**
+   * @param {String} newValue
+   */
+  handleOnChangeEditorTile(newValue) {
+    this.setState({selectedEditorTile: newValue});
+  }
+  /**
+   * @param {Matrix} matrix
+   * @returns {Number}
+   */
+  getAutoAdjustedTileSize(matrix) {
+    const minTileSize = 10;
+    const maxTileSize = 45;
+
+    const width = matrixUtils.getWidth(matrix);
+    const height = matrixUtils.getHeight(matrix);
+
+    const excessLimit = 5;
+    const excessMapWidth = width > excessLimit ? (width - excessLimit) : 0;
+    const excessMapHeight = height > excessLimit ? (height - excessLimit) : 0;
+    const greatestExcess = Math.max(excessMapWidth, excessMapHeight);
+
+    return Math.max(maxTileSize - greatestExcess, minTileSize);
+  }
+  /**
+   * @param {Number} idx
+   */
+  onChangeMapHistoryIdx(idx) {
+    const mapHistory = remoteAppState.get('mapHistory');
+    const nextMatrix = mapHistory[idx];
+    this.setState({mapHistoryIdx: idx}, () => {
+      this.handleNewMatrix(nextMatrix);
+    });
+  }
+  /**
+   *
+   */
+  onToggleAutoplayHistory() {
+    const {isAutoplayHistory} = this.state;
+    this.setState({isAutoplayHistory: !isAutoplayHistory});
+  }
+})
 /**
  *
  */
@@ -462,18 +557,21 @@ class EditorPanel extends PureComponent {
           <TextInputComponent
             value={mapWidth}
             onChange={this.onChangeWidthValue}
+            type='number'
             label='Width'
           />
 
           <TextInputComponent
             value={mapHeight}
             onChange={this.onChangeHeightValue}
+            type='number'
             label='Height'
           />
 
           <TextInputComponent
             value={tileSize}
             onChange={this.onChangeTileSizeValue}
+            type='number'
             label='Tile Size'
           />
         </form>
@@ -503,12 +601,12 @@ class EditorPanel extends PureComponent {
             export with Tile Name
           </RadioButtonComponent>
 
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-2'
             onClick={this.onExportClick}
           >
             Export
-          </ClassicButtonComponent>
+          </ButtonComponent>
         </form>
 
         <FontAwesomeIcon className='adjacent-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
@@ -518,12 +616,12 @@ class EditorPanel extends PureComponent {
           className='adjacent-mar-t-3 width-full flex-col'
           onSubmit={e => e.preventDefault()}
         >
-          <ClassicButtonComponent
+          <ButtonComponent
             className='adjacent-mar-t-3'
             onClick={this.onImportClick}
           >
             Import
-          </ClassicButtonComponent>
+          </ButtonComponent>
         </form>
       </div>
     );
@@ -679,12 +777,12 @@ class ImportModal extends Component {
           onChange={this.handleOnChangeTextarea.bind(this)}
         />
 
-        <ClassicButtonComponent
+        <ButtonComponent
           className='mar-t-2'
           onClick={this.onClickSubmit.bind(this)}
         >
           Submit
-        </ClassicButtonComponent>
+        </ButtonComponent>
       </Fragment>
     )
   }

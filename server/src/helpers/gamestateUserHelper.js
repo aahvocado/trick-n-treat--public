@@ -9,14 +9,14 @@ import {GAME_MODES} from 'constants.shared/gameModes';
 import {MAP_START} from 'constants/mapSettings';
 import {POINTS} from 'constants/points';
 
-import gameState from 'data/gameState';
-import serverState from 'data/serverState';
-
 import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 
 import UserModel from 'models.shared/UserModel';
+
+import gameState from 'state/gameState';
+import serverState from 'state/serverState';
 
 import logger from 'utilities/logger.game';
 import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';

@@ -4,6 +4,11 @@ import {FOG_TYPES, TILE_TYPES} from 'constants.shared/tileTypes';
 export const TILE_STYLES = {
   [TILE_TYPES.EMPTY]: { backgroundColor: '#313131' },
 
+  [TILE_TYPES.DEBUG]: { backgroundColor: '#e5fdf4' },
+  [TILE_TYPES.LIT_DEBUG]: { backgroundColor: '#e5fdf4' },
+  [TILE_TYPES.CONNECTOR]: { backgroundColor: '#edf7c4' },
+  [TILE_TYPES.LIT_CONNECTOR]: { backgroundColor: '#edf7c4' },
+
   [TILE_TYPES.PATH]: { backgroundColor: '#d49864' },
   [TILE_TYPES.LIT_PATH]: { backgroundColor: '#d49864' },
 

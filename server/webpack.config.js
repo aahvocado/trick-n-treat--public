@@ -23,6 +23,7 @@ module.exports = {
       helpers: path.resolve(srcPath, 'helpers'),
       managers: path.resolve(srcPath, 'managers'),
       models: path.resolve(srcPath, 'models'),
+      state: path.resolve(srcPath, 'state'),
       tests: path.resolve(srcPath, 'tests'),
       utilities: path.resolve(srcPath, 'utilities'),
 

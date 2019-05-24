@@ -14,7 +14,6 @@ import * as mathUtils from 'utilities.shared/mathUtils';
  * @property {Number} BiomeSettings.width
  * @property {Number} BiomeSettings.height
  * @property {Point} BiomeSettings.spawnPoint - where to place
- * @property {Array<Point>} BiomeSettings.connectingPoints - where other paths can connect to
  */
 
 /**
@@ -22,8 +21,8 @@ import * as mathUtils from 'utilities.shared/mathUtils';
  *
  * @type {BiomeSettings}
  */
-const homeBiomeWidth = Math.floor(MAP_WIDTH * 0.4);
-const homeBiomeHeight = Math.floor(MAP_HEIGHT * 0.4);
+const homeBiomeWidth = Math.floor(MAP_WIDTH * 0.7);
+const homeBiomeHeight = Math.floor(MAP_HEIGHT * 0.7);
 const homeSpawnPoint = new Point(
   mathUtils.getRandomIntInclusive(MAP_START.x - Math.floor(homeBiomeWidth / 2), MAP_START.x - Math.floor(homeBiomeWidth / 2)),
   mathUtils.getRandomIntInclusive(MAP_START.y - Math.floor(homeBiomeHeight / 2), MAP_START.y - Math.floor(homeBiomeHeight / 2)),
@@ -32,7 +31,6 @@ export const HOME_BIOME_SETTINGS = {
   width: homeBiomeWidth,
   height: homeBiomeHeight,
   spawnPoint: homeSpawnPoint,
-  connectingPoints: [homeSpawnPoint],
 
   numHouses: 25,
 
@@ -53,9 +51,6 @@ export const GRAVEYARD_BIOME_SETTINGS = {
   width: graveyardHeight,
   height: graveyardWidth,
   spawnPoint: graveyardSpawnPoint,
-  connectingPoints: [
-    new Point((graveyardSpawnPoint.x + Math.floor(graveyardWidth / 2)), (graveyardSpawnPoint.y + graveyardHeight - 1)),
-  ],
 };
 /**
  * settings for all Biomes
