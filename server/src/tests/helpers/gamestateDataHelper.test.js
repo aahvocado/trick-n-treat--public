@@ -13,14 +13,12 @@ import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 import CharacterModel from 'models.shared/CharacterModel';
 import EncounterModel from 'models.shared/EncounterModel';
 import MapModel from 'models.shared/MapModel';
-import UserModel from 'models.shared/UserModel';
 
 import gameState from 'state/gameState';
 
 test.beforeEach((t) => {
   // reset the gamestate for each test
   gameState.set({
-    users: [],
     characters: [],
     tileMapModel: new MapModel(),
     encounters: [],
@@ -47,23 +45,19 @@ test('getFormattedMapData() - formats gamestate data into expected object', (t) 
     ],
   });
 
-  gameState.addUser(new UserModel({
-    name: 'TEST_USER_NAME',
-    userId: 'TEST_USER_ID',
-    characterId: 'TEST-CHAR-ID-1',
-  }));
-
-  gameState.addCharacter(new CharacterModel({
+  const testChar1 = new CharacterModel({
     name: 'TEST-CHAR-1',
     characterId: 'TEST-CHAR-ID-1',
     position: new Point(0, 0),
-  }));
+  });
+  testGamestate.addToArray('characters', testChar1);
 
-  gameState.addCharacter(new CharacterModel({
+  const testChar2 = new CharacterModel({
     name: 'TEST-CHAR-2',
     characterId: 'TEST-CHAR-ID-2',
     position: new Point(4, 0),
-  }));
+  });
+  testGamestate.addToArray('characters', testChar2);
 
   const formatResult = gamestateDataHelper.getFormattedMapData();
 

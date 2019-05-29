@@ -3,7 +3,6 @@ import {
   isWalkableTile,
 } from 'constants.shared/tileTypes';
 
-import remoteAppState from 'state/remoteAppState';
 import remoteGameState from 'state/remoteGameState';
 
 import * as mapUtils from 'utilities.shared/mapUtils';
@@ -21,7 +20,7 @@ export function canMyCharacterMoveTo(endPoint) {
     return false;
   }
 
-  const myCharacter = remoteAppState.get('myCharacter');
+  const myCharacter = remoteGameState.get('myCharacter');
   const isWithinDistance = mapUtils.isWithinPathDistance(getVisibileTileMapData(), myCharacter.position, endPoint, myCharacter.movement);
   return isWithinDistance;
 }

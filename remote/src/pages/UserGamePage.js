@@ -30,12 +30,11 @@ import EncounterModalComponent from 'components/EncounterModalComponent';
 
 import {MAP_CONTAINER_WIDTH} from 'constants/mapConstants';
 
-import {CLIENT_ACTIONS} from 'constants.shared/clientActions';
+import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import remoteAppState from 'state/remoteAppState';
 import remoteGameState from 'state/remoteGameState';
 
-import * as remoteAppStateHelper from 'helpers/remoteAppStateHelper';
 import * as gamestateHelper from 'helpers/gamestateHelper.remote';
 
 import * as connectionManager from 'managers/connectionManager';
@@ -86,10 +85,9 @@ export default observer(
         remoteAppState.set({isInGame: false});
         return <Redirect to='/' />
       }
-      const canUseActions = remoteAppStateHelper.canUseActions();
-      const myCharacter = remoteAppState.get('myCharacter');
 
       const gamestate = remoteGameState.get('gamestate');
+      const myCharacter = remoteGameState.get('myCharacter');
       const activeEncounter = remoteGameState.get('activeEncounter');
       const useZoomedOutMap = remoteGameState.get('useZoomedOutMap');
       const useFullyVisibleMap = remoteGameState.get('useFullyVisibleMap');
@@ -166,7 +164,7 @@ export default observer(
           {/* Info Bar */}
           <div className='flex-row-center bg-primary pad-v-1 color-tertiary'>
             <div className='flex-none adjacent-mar-l-2'>
-              <FontAwesomeIcon icon={canUseActions ? faPlay : faPause} />
+              <FontAwesomeIcon icon={myCharacter.isActiveCharacter ? faPlay : faPause} />
             </div>
 
             <div className='flex-none adjacent-mar-l-2' >{`Round ${gamestate.round}`}</div>
@@ -205,7 +203,7 @@ export default observer(
           </div>
 
           {/* Debugging Tools */}
-          { remoteAppState.get('isDevMode') &&
+          { remoteAppState.get('isDevMode') && gamestate.mapData.length > 0 &&
             <div className='color-white flex-row-center pad-2'>
               <span className='pad-h-2'>{`Selected Tile: (x: ${selectedTilePos.x}, y: ${selectedTilePos.y})`}</span>
 
@@ -219,7 +217,7 @@ export default observer(
      * selection of a Tile
      */
     handleOnTileClick(tilePosition) {
-      const myCharacter = remoteAppState.get('myCharacter');
+      const myCharacter = remoteGameState.get('myCharacter');
 
       const grid = mapUtils.createGridForPathfinding(gamestateHelper.getVisibileTileMapData());
       const aStarPath = mapUtils.getAStarPath(grid, myCharacter.position, tilePosition);
@@ -233,7 +231,8 @@ export default observer(
      * check if User can Move to a Tile
      */
     canMove() {
-      if (!remoteAppStateHelper.canUseActions()) {
+      const myCharacter = remoteGameState.get('myCharacter');
+      if (!myCharacter.isActiveCharacter) {
         return false;
       }
 
@@ -250,7 +249,7 @@ export default observer(
      * @returns {Boolean}
      */
     isOnSelectedTile() {
-      const myCharacter = remoteAppState.get('myCharacter');
+      const myCharacter = remoteGameState.get('myCharacter');
       const {selectedTilePos} = this.state;
 
       return myCharacter.position.equals(selectedTilePos);
@@ -259,12 +258,13 @@ export default observer(
      * Move action
      */
     handleMoveToOnClick() {
-      if (!remoteAppStateHelper.canUseActions()) {
+      const myCharacter = remoteGameState.get('myCharacter');
+      if (!myCharacter.isActiveCharacter) {
         return;
       }
 
       const {selectedTilePos} = this.state;
-      connectionManager.socket.emit(CLIENT_ACTIONS.MOVE.TO, selectedTilePos);
+      connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.MOVE_TO, selectedTilePos);
 
       this.setState({selectedPath: []});
     }
@@ -277,7 +277,7 @@ export default observer(
       const activeEncounter = remoteGameState.get('activeEncounter');
 
       logger.user(`User selected "${actionData.actionId}" for encounter "${activeEncounter.id}"`);
-      connectionManager.socket.emit(CLIENT_ACTIONS.CHOICE, activeEncounter.id, actionData);
+      connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.CHOSE_ACTION, activeEncounter.id, actionData);
     }
     /**
      * toggles visibility of the Modal
@@ -301,7 +301,7 @@ export default observer(
       this.setState({showModal: false});
 
       logger.user(`user used ${itemData.name}`);
-      connectionManager.socket.emit(CLIENT_ACTIONS.USE_ITEM, itemData);
+      connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, itemData);
     }
   }
 )

@@ -48,16 +48,13 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
   clientEventHelper.sendEncounterToClient(clientModel, encounterModel);
 }
 /**
- * the Action that was chosen takes User to another Encounter
+ * the Action that was chosen takes Character to another Encounter
  *
- * @param {UserModel} userModel
+ * @param {CharacterModel} characterModel
  * @param {EncounterId} encounterId
  */
-export function handleEncounterActionGoTo(userModel, encounterId) {
-  const userId = userModel.get('userId');
-  const characterModel = gameState.findCharacterByUserId(userId);
-
-  // find the data and create the next Encounter to go to
+export function handleEncounterActionGoTo(characterModel, encounterId) {
+  // find the data of the Encounter it is going to and create a Model out of it
   const encounterData = getEncounterDataById(encounterId);
   const newEncounterModel = new EncounterModel(encounterData);
 

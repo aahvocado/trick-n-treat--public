@@ -21,20 +21,6 @@ export function displayTurnQueue() {
   logger.game('Turn Order' + displayList);
 }
 /**
- * formats Gamestate into something more convenient for the Remote
- *
- * @returns {GamestateObject}
- */
-export function getFormattedGamestateData() {
-  const formattedMapData = getFormattedMapData();
-
-  return {
-    mapData: formattedMapData,
-    mode: gameState.get('mode'),
-    round: gameState.get('round'),
-  };
-}
-/**
  * formats TileMapModel and the entities on the map into something more convenient
  *
  * @typedef {Object} TileData
@@ -48,6 +34,9 @@ export function getFormattedGamestateData() {
 export function getFormattedMapData() {
   const tileMapModel = gameState.get('tileMapModel');
   const fogMapModel = gameState.get('fogMapModel');
+  if (tileMapModel === undefined) {
+    return;
+  }
 
   const formattedMapData = tileMapModel.map((tileData, tilePoint) => {
     const charactersHere = gameState.getCharactersAt(tilePoint).map((character) => (character.export()));

@@ -1,5 +1,7 @@
 import Model from 'models.shared/Model';
 
+import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
+
 /**
  * Item
  *
@@ -28,8 +30,19 @@ export default class ItemModel extends Model {
       /** @type {Array<TagId>} */
       tagList: [],
 
-      //
+      /** @type {SourceId} */
+      attributeSource: undefined,
+      /** @type {Object} */
       ...newAttributes,
     });
+  }
+  /**
+   * @param {CharacterModel} characterModel
+   * @returns {Boolean}
+   */
+  canBeUsedBy(characterModel) {
+    const conditionList = this.get('conditionList');
+    const doesMeetAllConditions = conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList);
+    return doesMeetAllConditions;
   }
 }

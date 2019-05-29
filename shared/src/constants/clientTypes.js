@@ -1,7 +1,7 @@
 /**
  * @typedef {String | Number} ClientType
  */
-export const CLIENT_TYPES = {
-  REMOTE: 'REMOTE_CLIENT_TYPE',
-  SCREEN: 'SCREEN_CLIENT_TYPE',
+export const CLIENT_TYPE = {
+  REMOTE: 'CLIENT_TYPE.REMOTE',
+  SCREEN: 'CLIENT_TYPE.SCREEN',
 };

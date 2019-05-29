@@ -1,6 +1,8 @@
 import io from 'socket.io-client';
 import { SocketConfig } from 'constants/server.js';
 
+import {CLIENT_TYPE} from 'constants.shared/clientTypes';
+
 /**
  * Singleton for handling Websocket Server
  */
@@ -18,8 +20,8 @@ export function connect() {
     reconnect: false,
     reconnectionAttempts: 1,
     query: {
-      clientType: 'SCREEN_SOCKET_CLIENT',
-      userId: `screen-client-${Date.now()}`,
+      clientType: CLIENT_TYPE.SCREEN,
+      clientId: `screen-client-${Date.now()}`,
     },
   });
   return socket;

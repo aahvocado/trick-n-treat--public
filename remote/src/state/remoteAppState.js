@@ -1,6 +1,4 @@
-import Point from '@studiomoniker/point';
-
-import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
+import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import Model from 'models/Model';
 
@@ -28,8 +26,8 @@ export class RemoteStateModel extends Model {
       /** @type {String} */
       name: _name,
       /** @type {String} */
-      _userId: `${_name}-${createDate.getTime()}`,
-      userId: 'TEST_REMOTE_USER',
+      _clientId: `${_name}-${createDate.getTime()}`,
+      clientId: 'TEST_REMOTE_USER',
 
       // -- my client state - from the server
       /** @type {Boolean} */
@@ -40,12 +38,6 @@ export class RemoteStateModel extends Model {
       isGameInProgress: false,
       /** @type {Array<String>} */
       lobbyData: [],
-
-      // -- my player's specific gamestate stuff
-      /** @type {Object | undefined} */
-      myCharacter: undefined,
-      /** @type {Object | undefined} */
-      myUser: undefined,
 
       // -- websocket connection status
       /** @type {Boolean} */
@@ -74,51 +66,33 @@ export class RemoteStateModel extends Model {
    * attach listeners to the websocket
    */
   attachSocketListeners(socket) {
-    socket.on(SOCKET_EVENTS.UPDATE.CLIENT, (data) => {
-      // convert positional Coordinates into points
-      // @todo - fix this ugly
-      const myCharacterData = data.myCharacter ? {
-        ...data.myCharacter,
-        position: new Point(data.myCharacter.position.x, data.myCharacter.position.y),
-      } : {};
+    // lobby data updated
+    socket.on(SOCKET_EVENT.LOBBY.TO_CLIENT.UPDATE, (data) => {
+      logger.server('SOCKET_EVENT.LOBBY.TO_CLIENT.UPDATE');
 
       this.set({
-        ...data,
-        myCharacter: myCharacterData,
+        isInLobby: data.isInLobby,
+        isInGame: data.isInGame,
+        isGameInProgress: data.isGameInProgress,
+        lobbyData: data.lobbyData,
       });
-
-      logger.server('SOCKET_EVENTS.UPDATE.CLIENT');
-    });
-
-    // update just for character
-    socket.on(SOCKET_EVENTS.UPDATE.MY_CHARACTER, (characterAttributes) => {
-      const formattedCharacterData = {
-        ...characterAttributes,
-        position: new Point(characterAttributes.position.x, characterAttributes.position.y),
-      };
-
-      this.set({
-        myCharacter: formattedCharacterData,
-      });
-
-      logger.server('SOCKET_EVENTS.UPDATE.MY_CHARACTER');
     });
 
     // server wants us to add something to the `appLog`
-    socket.on(SOCKET_EVENTS.DEBUG.LOG, (logString) => {
+    socket.on(SOCKET_EVENT.DEBUG.TO_CLIENT.ADD_LOG, (logString) => {
       logger.server(logString);
     });
 
     // server gave us a matrix to display in the tileEditor
-    socket.on(SOCKET_EVENTS.DEBUG.TILE_EDITOR, (matrix) => {
+    socket.on(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_TILE_EDITOR, (matrix) => {
+      logger.server('SOCKET_EVENT.DEBUG.TO_CLIENT.SET_TILE_EDITOR');
       this.set({currentTileMatrix: matrix});
-      logger.server('SOCKET_EVENTS.DEBUG.TILE_EDITOR');
     });
 
     // server gave us a map history
-    socket.on(SOCKET_EVENTS.DEBUG.MAP_HISTORY, (mapHistory) => {
+    socket.on(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY, (mapHistory) => {
+      logger.server('SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY');
       this.set({mapHistory: mapHistory});
-      logger.server('SOCKET_EVENTS.DEBUG.MAP_HISTORY');
     });
 
     // -- connection stuff

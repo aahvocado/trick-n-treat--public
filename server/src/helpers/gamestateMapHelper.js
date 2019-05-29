@@ -13,6 +13,7 @@ import {TAG_ID} from 'constants.shared/tagIds';
 import gameState from 'state/gameState';
 
 import logger from 'utilities/logger.game';
+import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
 import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
@@ -59,6 +60,11 @@ export function generateNewMap() {
   // start the first round, which will create a turn queue
   console.timeEnd('MapGenTime');
   gameState.set({mode: GAME_MODES.ACTIVE});
+
+  // send update to tell clients that Game is in Progress
+  clientEventHelper.sendLobbyUpdate();
+
+  // handle starting start round
   gameState.addToActionQueue(gameState.handleStartOfRound.bind(gameState));
 }
 /**
@@ -171,8 +177,7 @@ export function handlePlacingEntities(mapModel) {
     }
 
     // if there are no nearby Encounters, then we should definitely make an encounter
-    const hasNearbyEncounters = hasNearbyEncountersOnPath(tilePoint, 2);
-    if (!hasNearbyEncounters) {
+    if (!gameState.hasNearbyEncountersOnPath(tilePoint, 2)) {
       placeEncounter(mapModel, tilePoint);
       return;
     }
@@ -242,6 +247,15 @@ export function placeEncounter(mapModel, location) {
   gameState.addToArray('encounters', encounterModel);
 }
 // -- utility
+/**
+ * @param {Point} point
+ * @returns {Boolean}
+ */
+export function isWalkableAt(point) {
+  const tileMapModel = gameState.get('tileMapModel');
+  const foundTile = tileMapModel.getTileAt(point);
+  return isWalkableTile(foundTile);
+}
 /**
  * determines if there is are any Encounter nearby given points
  *

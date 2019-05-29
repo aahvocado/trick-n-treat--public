@@ -1,5 +1,7 @@
 import io from 'socket.io-client';
 
+import {CLIENT_TYPE} from 'constants.shared/clientTypes';
+
 import remoteAppState from 'state/remoteAppState';
 
 const SERVER_URL = 'localhost:666';
@@ -16,9 +18,9 @@ export function connect() {
     reconnect: false,
     reconnectionAttempts: 1,
     query: {
-      clientType: 'REMOTE_SOCKET_CLIENT',
+      clientType: CLIENT_TYPE.REMOTE,
       name: remoteAppState.get('name'),
-      userId: remoteAppState.get('userId'),
+      clientId: remoteAppState.get('clientId'),
     },
   });
 

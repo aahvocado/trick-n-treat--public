@@ -9,7 +9,7 @@ import CheckboxComponent from 'common-components/CheckboxComponent';
 import FixedMenuComponent from 'common-components/FixedMenuComponent';
 import LetterIconComponent from 'common-components/LetterIconComponent';
 
-import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
+import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import * as connectionManager from 'managers/connectionManager';
 
@@ -60,8 +60,8 @@ class DebugMenu extends Component {
       >
 
         <div className='flex-row jcontent-center width-full adjacent-mar-t-2'>
-          <div className='fsize-3 color-grayer mar-r-1'>userId</div>
-          <div>{remoteAppState.get('userId')}</div>
+          <div className='fsize-3 color-grayer mar-r-1'>clientId</div>
+          <div>{remoteAppState.get('clientId')}</div>
         </div>
 
         <ButtonComponent
@@ -145,7 +145,7 @@ class DebugMenu extends Component {
    *
    */
   onClickRestart() {
-    connectionManager.socket.emit(SOCKET_EVENTS.DEBUG.RESTART_GAME);
+    connectionManager.socket.emit(SOCKET_EVENT.DEBUG.TO_SERVER.RESTART_GAME);
   }
 })
 /**

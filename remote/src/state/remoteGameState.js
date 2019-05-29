@@ -1,6 +1,6 @@
 import Point from '@studiomoniker/point';
 
-import { SOCKET_EVENTS } from 'constants.shared/socketEvents';
+import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import Model from 'models/Model';
 
@@ -17,6 +17,8 @@ export class RemoteGamestateModel extends Model {
       // -- gamestate - from the server
       /** @type {GamestateObject | undefined} */
       gamestate: undefined,
+      /** @type {Object | undefined} */
+      myCharacter: undefined,
 
       /** @type {EncounterData| null} */
       activeEncounter: null,
@@ -33,29 +35,59 @@ export class RemoteGamestateModel extends Model {
    */
   attachSocketListeners(socket) {
     // received new Gamestate from Server
-    socket.on(SOCKET_EVENTS.UPDATE.GAME, (data) => {
+    socket.on(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, (data) => {
+      logger.server('SOCKET_EVENT.GAME.TO_CLIENT.UPDATE');
+
+      const {
+        myCharacter,
+      } = data;
+
       // convert positional Coordinates into points
       // @todo - fix this ugly
+      const myCharacterData = myCharacter ? {
+        ...myCharacter,
+        position: new Point(myCharacter.position.x, myCharacter.position.y),
+      } : {};
+
       this.set({
+        myCharacter: myCharacterData,
         gamestate: {
-          ...data,
+          mode: data.mode,
+          round: data.round,
+
           mapData: matrixUtils.map(data.mapData, ((tileData) => ({
             ...tileData,
             position: new Point(tileData.position.x, tileData.position.y),
           }))),
         },
       });
-
-      logger.server('SOCKET_EVENTS.UPDATE.GAME');
     });
 
-    socket.on(SOCKET_EVENTS.GAME.ENCOUNTER, (data) => {
+    // update just for character
+    socket.on(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, (characterAttributes) => {
+      logger.server('SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER');
+
+      const formattedCharacterData = {
+        ...characterAttributes,
+        position: new Point(characterAttributes.position.x, characterAttributes.position.y),
+      };
+
+      this.set({
+        myCharacter: formattedCharacterData,
+      });
+    });
+
+    socket.on(SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER, (data) => {
+      logger.server('SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER');
+
       this.set({
         activeEncounter: data,
       });
     });
 
-    socket.on(SOCKET_EVENTS.GAME.END, () => {
+    socket.on(SOCKET_EVENT.GAME.TO_CLIENT.END, () => {
+      logger.server('SOCKET_EVENT.GAME.TO_CLIENT.END');
+
       this.set({
         gamestate: undefined,
         activeEncounter: null,

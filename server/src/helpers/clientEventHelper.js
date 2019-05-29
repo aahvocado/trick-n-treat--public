@@ -1,4 +1,6 @@
-import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
+import {GAME_MODES} from 'constants.shared/gameModes';
+import {SOCKET_EVENT} from 'constants.shared/socketEvents';
+import {SERVER_MODES} from 'constants.shared/gameModes';
 
 import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 
@@ -11,85 +13,90 @@ import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
 import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
 
 /**
- * creates some State data for a Remote Client
- *
- * @param {SocketClientModel} clientModel
- * @returns {Object} - for the Remote
- */
-function generateClientGameData(clientModel) {
-  const userId = clientModel.get('userId');
-  const characterModel = gameState.findCharacterByUserId(userId);
-  const userModel = gameState.findUserById(userId);
-
-  return {
-    isInLobby: clientModel.get('isInLobby'),
-    isInGame: clientModel.get('isInGame'),
-    myCharacter: createFormattedCharacterData(characterModel),
-    myUser: createFormattedUserData(userModel),
-  };
-}
-/**
- * sends data to all Clients
- */
-export function sendUpdateToAllClients() {
-  const clients = serverState.get('clients');
-  logger.lifecycle(`(sendUpdateToAllClients() - ${clients.length} clients)`);
-  clients.forEach((client) => {
-    sendUpdateToClient(client);
-  });
-}
-/**
  * sends data to all Clients
  */
 export function sendGameEnd() {
   const clients = serverState.get('clients');
   logger.lifecycle(`(sendGameEnd() - ${clients.length} clients)`);
   clients.forEach((client) => {
-    client.emit(SOCKET_EVENTS.GAME.END);
+    client.emit(SOCKET_EVENT.GAME.TO_CLIENT.END);
   });
-}
-/**
- * sends data to a User by finding its associated Client
- *
- * @param {SocketClientModel} clientModel
- */
-export function sendUpdateToClient(clientModel) {
-  logger.verbose(`. (sendUpdateToClient() - "${clientModel.get('name')}")`);
-  clientModel.emit(SOCKET_EVENTS.UPDATE.CLIENT, generateClientGameData(clientModel));
-  clientModel.emit(SOCKET_EVENTS.UPDATE.GAME, gamestateDataHelper.getFormattedGamestateData());
-
-  // dev - send map history to connecting clients
-  sendMapHistoryToClient(clientModel);
 }
 /**
  * send updated data to show that the User needs to handle an Event
  *
- * @param {SocketClientModel} clientModel
+ * @param {ClientModel} clientModel
  * @param {EncounterModel} encounterModel
  */
 export function sendEncounterToClient(clientModel, encounterModel) {
   // if no `encounterModel` is `null` then it means we want to clear out the data
   if (encounterModel === null) {
     logger.verbose(`. (sendEncounterToClient() - clearing out encounter for "${clientModel.get('name')}")`);
-    clientModel.emit(SOCKET_EVENTS.GAME.ENCOUNTER, null);
+    clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER, null);
     return;
   }
 
   // otherwise send formatted data
   logger.verbose(`. (sendEncounterToClient() - "${clientModel.get('name')}")`);
-  const userId = clientModel.get('userId');
-  const characterModel = gameState.findCharacterByUserId(userId);
+  const clientId = clientModel.get('clientId');
+  const characterModel = gameState.findCharacterByClientId(clientId);
   const formattedEncounterData = createFormattedEncounterData(encounterModel, characterModel);
-  clientModel.emit(SOCKET_EVENTS.GAME.ENCOUNTER, formattedEncounterData);
+  clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER, formattedEncounterData);
 }
 /**
  * send updated data to show that the User needs to handle an Event
  *
- * @param {SocketClientModel} clientModel
+ * @param {ClientModel} clientModel
  */
 export function sendMyCharacter(clientModel) {
   logger.verbose(`. (sendMyCharacter() - "${clientModel.get('name')}")`);
-  clientModel.emit(SOCKET_EVENTS.UPDATE.MY_CHARACTER, clientModel.export());
+  clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, clientModel.export());
+}
+/**
+ * sends data related to the Lobby if they are in game or now
+ */
+export function sendLobbyUpdate() {
+  const clients = serverState.get('clients');
+  logger.lifecycle(`(sendLobbyUpdate() - ${clients.length} clients)`);
+
+  // format the data - these are the same for everyone
+  const formattedLobbyData = createFormattedLobbyData();
+  const isGameInProgress = serverState.get('mode') === SERVER_MODES.GAME && gameState.get('mode') === GAME_MODES.ACTIVE;
+
+  // send each Client the data and individual info
+  clients.forEach((clientModel) => {
+    clientModel.emit(SOCKET_EVENT.LOBBY.TO_CLIENT.UPDATE, {
+      isGameInProgress: isGameInProgress,
+      lobbyData: formattedLobbyData,
+
+      isInLobby: clientModel.get('isInLobby'),
+      isInGame: clientModel.get('isInGame'),
+    });
+  });
+}
+/**
+ * sends data related to the Game and a Client's character
+ */
+export function sendGameUpdate() {
+  const clients = serverState.get('clients');
+  logger.lifecycle(`(sendGameUpdate() - ${clients.length} clients)`);
+
+  // format the data as it will be the same for everyone
+  const formattedMapData = gamestateDataHelper.getFormattedMapData();
+
+  // send each Client the data and their individual info
+  clients.forEach((clientModel) => {
+    const clientId = clientModel.get('clientId');
+    const characterModel = gameState.findCharacterByClientId(clientId);
+
+    clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, {
+      mapData: formattedMapData,
+      mode: gameState.get('mode'),
+      round: gameState.get('round'),
+
+      myCharacter: createFormattedCharacterData(characterModel),
+    });
+  });
 }
 /**
  * formats an EncounterModel's data with some extra properties for sending out
@@ -144,20 +151,6 @@ function createFormattedCharacterData(characterModel) {
   };
 }
 /**
- * formats an UserModel's data
- * @todo
- *
- * @param {UserModel} userModel
- * @returns {Object}
- */
-function createFormattedUserData(userModel) {
-  if (userModel === undefined) {
-    return;
-  }
-
-  return userModel.export();
-}
-/**
  * formats an ItemModel's data
  * @todo
  *
@@ -176,15 +169,35 @@ function createFormattedItemData(itemModel, characterModel) {
     _doesMeetConditions: conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList),
   };
 }
+/**
+ * formats data of the state of all the Clients
+ *
+ * @returns {Object}
+ */
+function createFormattedLobbyData() {
+  const clients = serverState.get('clients').slice();
+
+  // also generate some data for the other Clients
+  const lobbyData = clients.map((client) => {
+    return {
+      clientType: client.get('clientType'),
+      name: client.get('name'),
+      isInLobby: client.get('isInLobby'),
+      isInGame: client.get('isInGame'),
+    };
+  });
+
+  return lobbyData;
+}
 // -- debugging dev stuff
 /**
  * send data to a client's `appLog`
  *
- * @param {SocketClientModel} clientModel
+ * @param {ClientModel} clientModel
  * @param {String} logString
  */
 export function sendToClientLog(clientModel, logString) {
-  clientModel.emit(SOCKET_EVENTS.DEBUG.LOG, logString);
+  clientModel.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.ADD_LOG, logString);
 }
 /**
  * send data to a client's TileEditor
@@ -194,15 +207,15 @@ export function sendToClientLog(clientModel, logString) {
 export function sendToTileEditor(matrix) {
   const clients = serverState.get('clients');
   clients.forEach((clientModel) => {
-    clientModel.emit(SOCKET_EVENTS.DEBUG.TILE_EDITOR, matrix);
+    clientModel.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_TILE_EDITOR, matrix);
   });
 }
 /**
  * send current TileMapModel's mapHistory to client
  *
- * @param {SocketClientModel} clientModel
+ * @param {ClientModel} clientModel
  */
 export function sendMapHistoryToClient(clientModel) {
   const tileMapModel = gameState.get('tileMapModel');
-  clientModel.emit(SOCKET_EVENTS.DEBUG.MAP_HISTORY, tileMapModel.get('mapHistory'));
+  clientModel.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY, tileMapModel.get('mapHistory'));
 }

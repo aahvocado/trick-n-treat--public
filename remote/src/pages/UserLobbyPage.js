@@ -7,7 +7,7 @@ import { faDesktop, faMobileAlt } from '@fortawesome/free-solid-svg-icons'
 
 import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 
-import {SOCKET_EVENTS} from 'constants.shared/socketEvents';
+import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import remoteAppState from 'state/remoteAppState';
 
@@ -108,11 +108,11 @@ class UserLobbyPage extends Component {
    */
   handleOnStartClick() {
     if (remoteAppState.get('isGameInProgress')) {
-      connectionManager.socket.emit(SOCKET_EVENTS.LOBBY.JOIN);
+      connectionManager.socket.emit(SOCKET_EVENT.LOBBY.TO_SERVER.JOIN);
       return;
     };
 
-    connectionManager.socket.emit(SOCKET_EVENTS.LOBBY.START);
+    connectionManager.socket.emit(SOCKET_EVENT.LOBBY.TO_SERVER.START);
   }
 })
 /**
