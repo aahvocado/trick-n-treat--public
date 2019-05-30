@@ -10,39 +10,28 @@ import TriggerDisplayComponent from 'components/TriggerDisplayComponent';
  */
 export default class EncounterModalComponent extends PureComponent {
   static defaultProps = {
-    // -- modal props
     /** @type {Boolean} */
     active: false,
-
-    // -- encounter props
-    /** @type {EncounterData.actionList} */
-    actionList: [],
-    /** @type {EncounterData.triggerList} */
-    triggerList: [],
-    /** @type {EncounterData.title} */
-    title: 'default title',
-    /** @type {EncounterData.content} */
-    content: 'default description',
-
     /** @type {Function} */
     onClickAction: () => {},
-  };
-  /** @override */
-  constructor(props) {
-    super(props);
 
-    this.onClickAction = this.onClickAction.bind(this);
-  }
+    /** @type {Object} */
+    encounterData: {},
+  };
   /** @override */
   render() {
     const {
-      actionList,
-      content,
-      title,
-      triggerList,
-
+      encounterData,
+      onClickAction,
       ...otherProps
     } = this.props;
+
+    const {
+      actionList = [],
+      content,
+      title,
+      triggerList = [],
+    } = encounterData;
 
     const hasTriggers = triggerList.length > 0;
 
@@ -77,6 +66,7 @@ export default class EncounterModalComponent extends PureComponent {
           { content }
         </div>
 
+        {/* action buttons */}
         <div className='flex-row adjacent-mar-t-2'>
           { actionList.map((actionData, idx) => {
             return (
@@ -84,7 +74,7 @@ export default class EncounterModalComponent extends PureComponent {
                 key={`encounter-modal-action-button-${actionData.actionId}-${idx}-key`}
                 actionData={actionData}
                 disabled={!actionData._doesMeetConditions}
-                onClick={this.onClickAction}
+                onClick={onClickAction}
               />
             )
           })}
@@ -92,20 +82,15 @@ export default class EncounterModalComponent extends PureComponent {
       </ModalComponent>
     )
   }
-  /**
-   * @param {*} - data from `<EncounterActionButton />`
-   */
-  onClickAction(...args) {
-    this.props.onClickAction(...args);
-  }
 }
-
+/**
+ *
+ */
 class EncounterActionButton extends PureComponent {
   /** @override */
   static defaultProps = {
     /** @type {ActionData} */
     actionData: undefined,
-
     /** @type {Function} */
     onClick: () => {},
   };

@@ -68,31 +68,4 @@ export default class EncounterModel extends Model {
 
     return false;
   }
-  /**
-   * exports just the data that is relevant for the Remote/Screen
-   *
-   * @returns {Object}
-   */
-  exportEncounterData() {
-    const exportData = this.export();
-    const {
-      actionList,
-      id,
-      content,
-      location,
-      tagList,
-      title,
-      triggerList,
-    } = exportData;
-
-    return {
-      actionList,
-      id,
-      content,
-      location,
-      tagList,
-      title,
-      triggerList,
-    };
-  }
 }

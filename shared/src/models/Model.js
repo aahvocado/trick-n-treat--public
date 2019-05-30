@@ -9,6 +9,8 @@ import {
 } from 'mobx';
 import uuid from 'uuid/v4';
 
+import convertObservableToJs from 'utilities.shared/convertObservableToJs';
+
 /**
  * Model base class
  *
@@ -117,40 +119,7 @@ export class Model {
    * @returns {Object}
    */
   export() {
-    const exportObject = {};
-    const stateObject = toJS(this.attributes);
-
-    const keys = Object.keys(stateObject);
-    keys.forEach((attributeName) => {
-      const attributeValue = get(this.attributes, attributeName);
-
-      // if value is a Model then use that Model's export
-      if (attributeValue.export !== undefined) {
-        exportObject[attributeName] = attributeValue.export();
-        return;
-      }
-
-      // check if we have an array of Models
-      if (Array.isArray(attributeValue)) {
-        // empty arrays don't matter
-        if (attributeValue.length <= 0) {
-          exportObject[attributeName] = attributeValue;
-          return;
-        }
-
-        // export array of models using their own export()
-        const isArrayOfModels = attributeValue[0].export !== undefined;
-        if (isArrayOfModels) {
-          exportObject[attributeName] = attributeValue.map((model) => (model.export()));
-          return;
-        }
-      }
-
-      // assign the value
-      exportObject[attributeName] = attributeValue;
-    });
-
-    return exportObject;
+    return convertObservableToJs(this.attributes);
   }
   /**
    * return a copy of this class

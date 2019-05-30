@@ -12,6 +12,8 @@ import serverState from 'state/serverState';
 
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 
+import convertObservableToJs from 'utilities.shared/convertObservableToJs';
+
 /**
  * class for a Websocket Client
  *
@@ -76,7 +78,7 @@ export default class ClientModel extends Model {
 
     // client wants to "Join" game in session
     socket.on(SOCKET_EVENT.LOBBY.TO_SERVER.JOIN, () => {
-      gamestateUserHelper.handleJoinGame(clientModel);
+      gamestateUserHelper.handleJoinGame(this);
     });
 
     // -- debug events
@@ -121,5 +123,17 @@ export default class ClientModel extends Model {
   onUseItem(itemData) {
     const itemModel = new ItemModel(itemData);
     gamestateCharacterHelper.handleCharacterUseItem(this.get('characterModel'), itemModel);
+  }
+  /**
+   * @override
+   */
+  export() {
+    const convertedData = convertObservableToJs(this.attributes);
+    return {
+      name: convertedData.name,
+      clientType: convertedData.clientType,
+      isInGame: convertedData.isInGame,
+      isInLobby: convertedData.isInLobby,
+    };
   }
 }

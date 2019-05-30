@@ -1,6 +1,6 @@
 import Model from 'models.shared/Model';
 
-import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
+import * as conditionUtils from 'utilities.shared/conditionUtils';
 
 /**
  * Item
@@ -42,7 +42,7 @@ export default class ItemModel extends Model {
    */
   canBeUsedBy(characterModel) {
     const conditionList = this.get('conditionList');
-    const doesMeetAllConditions = conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList);
+    const doesMeetAllConditions = conditionUtils.doesMeetAllConditions(characterModel, conditionList);
     return doesMeetAllConditions;
   }
 }

@@ -7,7 +7,7 @@ import ItemModel from 'models.shared/ItemModel';
 
 import logger from 'utilities/logger.game';
 
-import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
+import * as conditionUtils from 'utilities.shared/conditionUtils';
 import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
 
 /**
@@ -21,7 +21,7 @@ import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
 export function resolveTrigger(triggerData, characterModel) {
   // first check if this character meets the condition for this Trigger
   const conditionList = jsonDataUtils.getConditionList(triggerData);
-  if (!conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList)) {
+  if (!conditionUtils.doesMeetAllConditions(characterModel, conditionList)) {
     return;
   }
 

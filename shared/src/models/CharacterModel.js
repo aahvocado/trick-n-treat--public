@@ -2,7 +2,7 @@ import Point from '@studiomoniker/point';
 
 import Model from 'models.shared/Model';
 
-import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
+import * as conditionUtils from 'utilities.shared/conditionUtils';
 
 /**
  * Character data
@@ -129,7 +129,7 @@ export default class CharacterModel extends Model {
    */
   canUseItem(itemModel) {
     const conditionList = itemModel.get('conditionList');
-    const doesMeetAllConditions = conditionHandlerUtils.doesMeetAllConditions(this, conditionList);
+    const doesMeetAllConditions = conditionUtils.doesMeetAllConditions(this, conditionList);
     return doesMeetAllConditions;
   }
   /**

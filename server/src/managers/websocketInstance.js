@@ -27,6 +27,7 @@ export function init(httpServer) {
 
     // -- socket.io events
     socket.on('disconnect', () => {
+      const clientModel = serverState.get('clients').find((client) => client.get('sessionId') === socket.id);
       logger.old(`- Client "${clientModel.get('name')}" disconnected`);
       serverState.removeClient(clientModel);
     });

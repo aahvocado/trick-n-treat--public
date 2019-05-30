@@ -3,8 +3,11 @@ import Point from '@studiomoniker/point';
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import Model from 'models/Model';
+import CharacterModel from 'models.shared/CharacterModel';
+import EncounterModel from 'models.shared/EncounterModel';
 
 import logger from 'utilities/logger.remote';
+import * as conditionUtils from 'utilities.shared/conditionUtils';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
@@ -20,7 +23,7 @@ export class RemoteGamestateModel extends Model {
       /** @type {Object | undefined} */
       myCharacter: undefined,
 
-      /** @type {EncounterData| null} */
+      /** @type {EncounterModel | null} */
       activeEncounter: null,
 
       // -- tile map options
@@ -64,25 +67,44 @@ export class RemoteGamestateModel extends Model {
     });
 
     // update just for character
-    socket.on(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, (characterAttributes) => {
+    socket.on(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, (data) => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER');
 
-      const formattedCharacterData = {
-        ...characterAttributes,
-        position: new Point(characterAttributes.position.x, characterAttributes.position.y),
+      // do a little bit of organizing before creating Model
+      const characterModel = this.get('myCharacter');
+      const formattedCharacterAttributes = {
+        ...data,
+        position: new Point(data.position.x, data.position.y),
+        inventory: data.inventory.map((itemData) => ({
+          ...itemData,
+          _doesMeetConditions: conditionUtils.doesMeetAllConditions(characterModel, itemData.conditionList)
+        }))
       };
 
-      this.set({
-        myCharacter: formattedCharacterData,
-      });
+      this.set({myCharacter: new CharacterModel(formattedCharacterAttributes)});
     });
 
+    // Game is giving us an Encounter
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER, (data) => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER');
 
-      this.set({
-        activeEncounter: data,
-      });
+      // do a little bit of organizing before creating Model
+      const characterModel = this.get('myCharacter');
+      const formmatedEncounterAttributes = {
+        ...data,
+        actionList: data.actionList.map((actionData) => ({
+          ...actionData,
+          _doesMeetConditions: conditionUtils.doesMeetAllConditions(characterModel, actionData.conditionList)
+        }))
+      }
+
+      this.set({activeEncounter: new EncounterModel(formmatedEncounterAttributes)});
+    });
+
+    // Game is closing (removing) the Encounter
+    socket.on(SOCKET_EVENT.GAME.TO_CLIENT.CLOSE_ENCOUNTER, () => {
+      logger.server('SOCKET_EVENT.GAME.TO_CLIENT.CLOSE_ENCOUNTER');
+      this.set({activeEncounter: null});
     });
 
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.END, () => {

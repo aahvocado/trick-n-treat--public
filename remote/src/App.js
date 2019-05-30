@@ -25,59 +25,58 @@ import UserLobbyPage from 'pages/UserLobbyPage';
  *
  */
 export default observer(
-  class App extends Component {
-    render() {
-      return (
-        <BrowserRouter>
-          <div className='bg-primary'>
-            {/* connection status */}
-            <WebsocketConnectionIndicator />
+class App extends Component {
+  render() {
+    return (
+      <BrowserRouter>
+        <div className='bg-primary'>
+          {/* connection status */}
+          <WebsocketConnectionIndicator />
 
-            {/* Dev Tools - side menu */}
-            <DebugMenu
-              active={remoteAppState.get('isDebugMenuActive')}
-              onClickClose={() => { remoteAppState.set({isDebugMenuActive: false}); }}
-            />
+          {/* Dev Tools - side menu */}
+          <DebugMenu
+            active={remoteAppState.get('isDebugMenuActive')}
+            onClickClose={() => { remoteAppState.set({isDebugMenuActive: false}); }}
+          />
 
-            {/* Title */}
-            <TitleRouteButton />
+          {/* Title */}
+          <TitleRouteButton />
 
-            {/* Page Content */}
-            <Route exact path="/" component={UserLobbyPage} />
+          {/* Page Content */}
+          <Route exact path="/" component={UserLobbyPage} />
 
-            <Route path="/lobby" component={UserLobbyPage} />
+          <Route path="/lobby" component={UserLobbyPage} />
 
-            <Route path="/game" component={UserGamePage} />
+          <Route path="/game" component={UserGamePage} />
 
-            <Route path="/encounter_editor" component={EncounterEditorPage} />
+          <Route path="/encounter_editor" component={EncounterEditorPage} />
 
-            <Route path="/item_editor" component={ItemEditorPage} />
+          <Route path="/item_editor" component={ItemEditorPage} />
 
-            <Route path="/tile_editor" component={TileEditorPage} />
+          <Route path="/tile_editor" component={TileEditorPage} />
 
-            {/* "Footer" - needs to be refactored to not be so hacky eventually */}
-            <div
-              className='position-fixed pad-1 mar-1 flex-row aitems-center'
-              style={{bottom: 0, right: 0}}
-            >
-              <div className='adjacent-mar-l-2 color-gray'>{remoteAppState.get('name')}</div>
+          {/* "Footer" - needs to be refactored to not be so hacky eventually */}
+          <div
+            className='position-fixed pad-1 mar-1 flex-row aitems-center'
+            style={{bottom: 0, right: 0}}
+          >
+            <div className='adjacent-mar-l-2 color-gray'>{remoteAppState.get('name')}</div>
 
-              {/* Debug Menu */}
-              { remoteAppState.get('isDevMode') &&
-                <ButtonComponent
-                  className='pad-2 adjacent-mar-l-2'
-                  onClick={() => { remoteAppState.set({isDebugMenuActive: !remoteAppState.get('isDebugMenuActive')}); }}
-                >
-                  <LetterIconComponent className='mar-r-1' children='`' /> Debugger
-                </ButtonComponent>
-              }
-            </div>
+            {/* Debug Menu */}
+            { remoteAppState.get('isDevMode') &&
+              <ButtonComponent
+                className='pad-2 adjacent-mar-l-2'
+                onClick={() => { remoteAppState.set({isDebugMenuActive: !remoteAppState.get('isDebugMenuActive')}); }}
+              >
+                <LetterIconComponent className='mar-r-1' children='`' /> Debugger
+              </ButtonComponent>
+            }
           </div>
-        </BrowserRouter>
-      );
-    }
+        </div>
+      </BrowserRouter>
+    );
   }
-)
+})
 /**
  *
  */

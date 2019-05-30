@@ -1,5 +1,7 @@
 import {GAME_MODES} from 'constants.shared/gameModes';
 
+import * as clientEventHelper from 'helpers/clientEventHelper';
+
 import gameState from 'state/gameState';
 
 import logger from 'utilities/logger.game';
@@ -32,6 +34,7 @@ export function handleJoinGame(clientModel) {
   clientModel.set({
     isInLobby: false,
     isInGame: true,
+    characterModel: existingCharacter,
   });
 
   // update client on the lobby

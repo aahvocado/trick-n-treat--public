@@ -11,7 +11,7 @@ import gameState from 'state/gameState';
 import serverState from 'state/serverState';
 
 import logger from 'utilities/logger.game';
-import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
+import * as conditionUtils from 'utilities.shared/conditionUtils';
 
 import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
 import * as mapUtils from 'utilities.shared/mapUtils';
@@ -214,7 +214,7 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
 
   // check if character was allowed to take this action
   const conditionList = jsonDataUtils.getConditionList(actionData);
-  if (!conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList)) {
+  if (!conditionUtils.doesMeetAllConditions(characterModel, conditionList)) {
     logger.warning(`"${characterModel.get('name')}" used an action in "${activeEncounter.get('title')}" but did not meet conditions`);
     return;
   }

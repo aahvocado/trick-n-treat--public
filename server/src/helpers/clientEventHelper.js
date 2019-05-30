@@ -9,9 +9,6 @@ import serverState from 'state/serverState';
 
 import logger from 'utilities/logger.game';
 
-import * as conditionHandlerUtils from 'utilities/conditionHandlerUtils';
-import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
-
 /**
  * sends data to all Clients
  */
@@ -29,19 +26,16 @@ export function sendGameEnd() {
  * @param {EncounterModel} encounterModel
  */
 export function sendEncounterToClient(clientModel, encounterModel) {
-  // if no `encounterModel` is `null` then it means we want to clear out the data
+  // clear out activeEncounter if `encounterModel` is `null`
   if (encounterModel === null) {
-    logger.verbose(`. (sendEncounterToClient() - clearing out encounter for "${clientModel.get('name')}")`);
-    clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER, null);
+    logger.verbose(`. (sendEncounterToClient() to close Encounter for "${clientModel.get('name')}")`);
+    clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.CLOSE_ENCOUNTER);
     return;
   }
 
-  // otherwise send formatted data
-  logger.verbose(`. (sendEncounterToClient() - "${clientModel.get('name')}")`);
-  const clientId = clientModel.get('clientId');
-  const characterModel = gameState.findCharacterByClientId(clientId);
-  const formattedEncounterData = createFormattedEncounterData(encounterModel, characterModel);
-  clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER, formattedEncounterData);
+  // send formatted data
+  logger.verbose(`. (sendEncounterToClient() to "${clientModel.get('name')}")`);
+  clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER, encounterModel.export());
 }
 /**
  * send updated data to show that the User needs to handle an Event
@@ -60,7 +54,7 @@ export function sendLobbyUpdate() {
   logger.lifecycle(`(sendLobbyUpdate() - ${clients.length} clients)`);
 
   // format the data - these are the same for everyone
-  const formattedLobbyData = createFormattedLobbyData();
+  const formattedLobbyData = clients.map((model) => (model.export()));
   const isGameInProgress = serverState.get('mode') === SERVER_MODES.GAME && gameState.get('mode') === GAME_MODES.ACTIVE;
 
   // send each Client the data and individual info
@@ -68,9 +62,7 @@ export function sendLobbyUpdate() {
     clientModel.emit(SOCKET_EVENT.LOBBY.TO_CLIENT.UPDATE, {
       isGameInProgress: isGameInProgress,
       lobbyData: formattedLobbyData,
-
-      isInLobby: clientModel.get('isInLobby'),
-      isInGame: clientModel.get('isInGame'),
+      ...clientModel.export(),
     });
   });
 }
@@ -94,100 +86,9 @@ export function sendGameUpdate() {
       mode: gameState.get('mode'),
       round: gameState.get('round'),
 
-      myCharacter: createFormattedCharacterData(characterModel),
+      myCharacter: characterModel.export(),
     });
   });
-}
-/**
- * formats an EncounterModel's data with some extra properties for sending out
- *
- * - looks for any Actions or Triggers that have a Condition,
- *  then adds a `_doesMeetConditions: Boolean` for if the Character meets the condition
- *
- * @param {EncounterModel} encounterModel
- * @param {CharacterModel} characterModel
- * @returns {Object} - should return a structure similar to EncounterData
- */
-function createFormattedEncounterData(encounterModel, characterModel) {
-  const baseEncounterData = encounterModel.exportEncounterData();
-
-  return {
-    ...baseEncounterData,
-
-    actionList: baseEncounterData.actionList.map((actionData) => ({
-      ...actionData,
-      _doesMeetConditions: conditionHandlerUtils.doesMeetAllConditions(characterModel, jsonDataUtils.getConditionList(actionData)),
-    })),
-
-    triggerList: baseEncounterData.triggerList.map((triggerData) => ({
-      ...triggerData,
-      _doesMeetConditions: conditionHandlerUtils.doesMeetAllConditions(characterModel, jsonDataUtils.getConditionList(triggerData)),
-    })),
-  };
-}
-/**
- * formats an CharacterModel's data with some extra properties for sending out
- *
- * - looks at character's inventory and determines if the character can use it
- *  by adding `_doesMeetConditions: Boolean`
- *
- * @param {CharacterModel} characterModel
- * @returns {Object}
- */
-function createFormattedCharacterData(characterModel) {
-  if (characterModel === undefined) {
-    return;
-  }
-
-  // format each item
-  const inventory = characterModel.get('inventory');
-  const formattedInventory = inventory.map((itemModel) => {
-    return createFormattedItemData(itemModel, characterModel);
-  });
-
-  return {
-    ...characterModel.export(),
-    inventory: formattedInventory,
-  };
-}
-/**
- * formats an ItemModel's data
- * @todo
- *
- * @param {ItemModel} itemModel
- * @param {CharacterModel} characterModel
- * @returns {Object}
- */
-function createFormattedItemData(itemModel, characterModel) {
-  if (itemModel === undefined) {
-    return;
-  }
-
-  const conditionList = itemModel.get('conditionList');
-  return {
-    ...itemModel.export(),
-    _doesMeetConditions: conditionHandlerUtils.doesMeetAllConditions(characterModel, conditionList),
-  };
-}
-/**
- * formats data of the state of all the Clients
- *
- * @returns {Object}
- */
-function createFormattedLobbyData() {
-  const clients = serverState.get('clients').slice();
-
-  // also generate some data for the other Clients
-  const lobbyData = clients.map((client) => {
-    return {
-      clientType: client.get('clientType'),
-      name: client.get('name'),
-      isInLobby: client.get('isInLobby'),
-      isInGame: client.get('isInGame'),
-    };
-  });
-
-  return lobbyData;
 }
 // -- debugging dev stuff
 /**
