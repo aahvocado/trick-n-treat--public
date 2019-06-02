@@ -19,6 +19,20 @@ import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
 
 import * as mathUtils from 'utilities.shared/mathUtils';
+import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
+
+const rarityTagChoices = [
+  {
+    returns: TAG_ID.COMMON,
+    weight: 75,
+  }, {
+    returns: TAG_ID.UNCOMMON,
+    weight: 20,
+  }, {
+    returns: TAG_ID.RARE,
+    weight: 5,
+  },
+];
 
 /**
  * this Helper should try to organize the data (to be fleshed out later)
@@ -52,7 +66,7 @@ export function generateNewMap() {
   generateSmallWoods();
 
   // place entities based on the entire map
-  // handlePlacingEntities(tileMapModel);
+  handlePlacingEntities(tileMapModel);
 
   // generate a fog model
   generateFogMap();
@@ -167,17 +181,20 @@ export function generateSmallWoods() {
  * @param {MapModel} mapModel
  */
 export function handlePlacingEntities(mapModel) {
+  logger.game('. Generating Entities and Encounters');
   mapModel.forEach((tileType, tilePoint) => {
+    const walkableTile = isWalkableTile(tileType);
+
     // add decor to unwalkable tiles
     const noDecorChance = 80;
     const preferNoDecor = mathUtils.getRandomIntInclusive(0, 100) <= noDecorChance;
-    if (!isWalkableTile(tileType) && !preferNoDecor) {
+    if (!preferNoDecor && !walkableTile) {
       placeDecor(mapModel, tilePoint);
       return;
     }
 
     // if there are no nearby Encounters, then we should definitely make an encounter
-    if (!gameState.hasNearbyEncountersOnPath(tilePoint, 2)) {
+    if (!gameState.hasNearbyEncountersOnPath(tilePoint, 2) && walkableTile) {
       placeEncounter(mapModel, tilePoint);
       return;
     }
@@ -185,7 +202,7 @@ export function handlePlacingEntities(mapModel) {
     // otherwise make a random check with a potential to not
     const noEncountersChance = 80;
     const preferNoEncounters = mathUtils.getRandomIntInclusive(0, 100) <= noEncountersChance;
-    if (!preferNoEncounters) {
+    if (!preferNoEncounters && walkableTile) {
       placeEncounter(mapModel, tilePoint);
       return;
     }
@@ -208,7 +225,8 @@ export function placeDecor(mapModel, location) {
  * @param {Point} location
  */
 export function placeEncounter(mapModel, location) {
-  const tagsToSearch = [TAG_ID.ENCOUNTER];
+  const rarityTag = pickRandomWeightedChoice(rarityTagChoices);
+  const tagsToSearch = [TAG_ID.ENCOUNTER, rarityTag];
 
   const tileOnMap = mapModel.getTileAt(location);
   if (tileOnMap === TILE_TYPES.PATH) {

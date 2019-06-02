@@ -51,7 +51,7 @@ export default class TagEditorComponent extends PureComponent {
     )
   }
   /**
-   * @param {ConditionTargetId} conditionTargetId
+   * @param {TargetId} targetId
    */
   onSelectTag(tagId) {
     const { onEdit } = this.props;

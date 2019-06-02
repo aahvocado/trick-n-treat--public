@@ -40,6 +40,9 @@ export function handleJoinGame(clientModel) {
   // update client on the lobby
   clientEventHelper.sendLobbyUpdate();
 
+  // upate client on the game
+  clientEventHelper.sendGameUpdate();
+
   // check if the user rejoined and it is actually their turn
   const activeCharacter = gameState.get('activeCharacter');
   const isActiveCharacter = activeCharacter.get('clientId') === clientId;
@@ -49,7 +52,4 @@ export function handleJoinGame(clientModel) {
   if (isActiveCharacter && activeEncounter !== null) {
     clientEventHelper.sendEncounterToClient(clientModel, activeEncounter);
   }
-
-  // upate client on the game
-  clientEventHelper.sendGameUpdate();
 }

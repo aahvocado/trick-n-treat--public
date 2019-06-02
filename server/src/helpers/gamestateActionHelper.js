@@ -30,13 +30,13 @@ export function createActionFunction(baseFunction) {
     return;
   }
 
-  const actionId = actionCount;
+  const choiceId = actionCount;
   actionCount += 1;
-  logger.verbose(`. [[adding baseFunction #${actionId}]]`);
+  logger.verbose(`. [[adding baseFunction #${choiceId}]]`);
 
   return () => {
     return new Promise((resolve) => {
-      logger.verbose(`. [[resolving action #${actionId}]]`);
+      logger.verbose(`. [[resolving action #${choiceId}]]`);
 
       // actually call the function here
       baseFunction();

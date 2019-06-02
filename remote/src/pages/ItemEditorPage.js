@@ -7,18 +7,20 @@ import {
   faCircle,
 } from '@fortawesome/free-solid-svg-icons'
 
+import {DATA_TYPE} from 'constants.shared/dataTypes';
+
 import ButtonComponent from 'common-components/ButtonComponent';
 import CheckboxComponent from 'common-components/CheckboxComponent';
 import TextAreaComponent from 'common-components/TextAreaComponent';
 import TextInputComponent from 'common-components/TextInputComponent';
 
 import ConditionEditorComponent from 'components/ConditionEditorComponent';
-import ConditionIdDropdown from 'components/ConditionIdDropdown';
+import ConditionLogicDropdown from 'components/ConditionLogicDropdown';
 import ItemListDropdown from 'components/ItemListDropdown';
 import TagEditorComponent from 'components/TagEditorComponent';
 import TagListDropdown from 'components/TagListDropdown';
 import TriggerEditorComponent from 'components/TriggerEditorComponent';
-import TriggerListDropdown from 'components/TriggerListDropdown';
+import TriggerLogicListDropdown from 'components/TriggerLogicListDropdown';
 
 import * as itemDataHelper from 'helpers.shared/itemDataHelper';
 
@@ -47,6 +49,7 @@ class ItemEditorPage extends Component {
 
     this.onToggleConsumable = this.onToggleConsumable.bind(this);
     this.onToggleKeyItem = this.onToggleKeyItem.bind(this);
+    this.onToggleUseable = this.onToggleUseable.bind(this);
 
     this.copyActiveDataToClipboard = this.copyActiveDataToClipboard.bind(this);
     this.copyDataListToClipboard = this.copyDataListToClipboard.bind(this);
@@ -132,6 +135,7 @@ class ItemEditorPage extends Component {
 
             onToggleConsumable={this.onToggleConsumable}
             onToggleKeyItem={this.onToggleKeyItem}
+            onToggleUseable={this.onToggleUseable}
 
             onChangeConditionData={this.onChangeConditionData}
             onRemoveCondition={this.onRemoveCondition}
@@ -358,18 +362,34 @@ class ItemEditorPage extends Component {
     });
   }
   /**
+   *
+   */
+  onToggleUseable() {
+    const { activeData } = this.state;
+
+    // change the data
+    activeData.isUseable = !activeData.isUseable;
+
+    // update the data
+    this.setState({
+      activeData: deepClone(activeData),
+      hasChanges: true,
+    });
+  }
+  /**
    * adds a new Condition to the active Data
    *
-   * @param {ConditionId} conditionId
+   * @param {ConditionLogicId} conditionLogicId
    */
-  addCondition(conditionId) {
+  addCondition(conditionLogicId) {
     const { activeData } = this.state;
     const { conditionList } = activeData;
 
     // add it
     conditionList.push({
-      conditionId: conditionId,
-      conditionTargetId: undefined,
+      dataType: DATA_TYPE.CONDITION,
+      conditionLogicId: conditionLogicId,
+      targetId: undefined,
     });
 
     // update the data
@@ -381,11 +401,11 @@ class ItemEditorPage extends Component {
   /**
    *
    */
-  onChangeConditionData(conditionData, conditionIdx) {
+  onChangeConditionData(conditionData, conditionLogicIdx) {
     const { activeData } = this.state;
 
     // change the data
-   activeData.conditionList[conditionIdx] = conditionData;
+   activeData.conditionList[conditionLogicIdx] = conditionData;
 
     // update the data
     this.setState({
@@ -412,20 +432,21 @@ class ItemEditorPage extends Component {
   /**
    * adds a new Trigger to the active Data
    *
-   * @param {TriggerId} triggerId
+   * @param {TriggerLogicId} triggerLogicId
    */
-  addTrigger(triggerId) {
+  addTrigger(triggerLogicId) {
     const { activeData } = this.state;
     const { triggerList } = activeData;
 
     // do not add duplicates
-    if (triggerList.find(t => t.triggerId === triggerId)) {
+    if (triggerList.find(t => t.triggerLogicId === triggerLogicId)) {
       return;
     }
 
     // add it
     triggerList.push({
-      triggerId: triggerId,
+      dataType: DATA_TYPE.CONDITION,
+      triggerLogicId: triggerLogicId,
       value: 1,
     });
 
@@ -438,10 +459,10 @@ class ItemEditorPage extends Component {
   /**
    * remove Trigger
    *
-   * @param {TriggerId} triggerId
+   * @param {TriggerLogicId} triggerLogicId
    * @param {Number} idx
    */
-  removeTrigger(triggerId, idx) {
+  removeTrigger(triggerLogicId, idx) {
     const { activeData } = this.state;
     const { triggerList } = activeData;
 
@@ -486,8 +507,8 @@ class ItemEditorPage extends Component {
     // add a new blank condition
     const conditionList = triggerData.conditionList || [];
     conditionList.push({
-      conditionId: undefined,
-      conditionTargetId: undefined,
+      conditionLogicId: undefined,
+      targetId: undefined,
       value: 1,
     });
 
@@ -679,6 +700,7 @@ class ItemEditorViewer extends Component {
 
       onToggleConsumable,
       onToggleKeyItem,
+      onToggleUseable,
 
       onChangeConditionData,
       onRemoveCondition,
@@ -698,6 +720,7 @@ class ItemEditorViewer extends Component {
       id,
       isConsumable,
       isKeyItem,
+      isUseable,
       name,
       conditionList,
       description,
@@ -745,6 +768,13 @@ class ItemEditorViewer extends Component {
         <ViewerRow>
           <CheckboxComponent
             className='adjacent-mar-t-2'
+            children={'Useable'}
+            checked={isUseable || false}
+            onChange={onToggleUseable}
+          />
+
+          <CheckboxComponent
+            className='adjacent-mar-t-2'
             children={'Consumable'}
             checked={isConsumable || false}
             onChange={onToggleConsumable}
@@ -764,7 +794,7 @@ class ItemEditorViewer extends Component {
         <ViewerRow>
           <ViewerHeader>Use Conditions</ViewerHeader>
 
-          <ConditionIdDropdown
+          <ConditionLogicDropdown
             className='flex-auto bor-1-gray adjacent-mar-t-2'
             placeholder='Add New Use Condition...'
             onSelect={onSelectNewCondition}
@@ -793,7 +823,7 @@ class ItemEditorViewer extends Component {
         <ViewerRow>
           <ViewerHeader>Triggers</ViewerHeader>
 
-          <TriggerListDropdown
+          <TriggerLogicListDropdown
             className='fsize-3 bor-1-gray adjacent-mar-t-2'
             placeholder='New Trigger...'
             canSearch={true}
@@ -803,7 +833,7 @@ class ItemEditorViewer extends Component {
           <div className='fsize-3 flex-col adjacent-mar-t-2'>
             { triggerList.map((triggerData, idx) => (
               <TriggerEditorComponent
-                key={`trigger-item-${triggerData.triggerId}-${idx}-key`}
+                key={`trigger-item-${triggerData.triggerLogicId}-${idx}-key`}
                 data={triggerData}
                 onEdit={(updatedData) => {
                   onChangeTriggerData(updatedData, idx);

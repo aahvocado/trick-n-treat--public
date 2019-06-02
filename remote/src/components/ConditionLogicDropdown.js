@@ -2,17 +2,17 @@ import React from 'react';
 
 import DropdownComponent from 'common-components/DropdownComponent';
 
-import { TRIGGER_ID_LIST } from 'constants.shared/triggerIds';
+import { CONDITION_LOGIC_ID_LIST } from 'constants.shared/conditionLogicIds';
 
 import l10n from 'utilities.shared/l10n';
 
 /**
  *
  */
-export default function TriggerListDropdown(props) {
+export default function ConditionLogicDropdown(props) {
   return (
     <DropdownComponent
-      options={TRIGGER_ID_LIST.map((item) => ({
+      options={CONDITION_LOGIC_ID_LIST.map((item) => ({
         data: item,
         id: item,
         label: l10n(item),

@@ -1,308 +1,198 @@
-import {TRIGGER_ID} from 'constants.shared/triggerIds';
+import {TARGET_ID} from 'constants.shared/targetIds';
+import {TRIGGER_LOGIC_ID} from 'constants.shared/triggerLogicIds';
 
-import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import * as itemDataHelper from 'helpers.shared/itemDataHelper';
 
 import ItemModel from 'models.shared/ItemModel';
 
 import logger from 'utilities/logger.game';
 
-import * as conditionUtils from 'utilities.shared/conditionUtils';
-import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
+import * as statUtils from 'utilities.shared/statUtils';
+import * as triggerLogicUtils from 'utilities.shared/triggerLogicUtils';
+import * as targetUtils from 'utilities.shared/targetUtils';
 
 /**
  * resolves an individual TriggerData for the character
- * @todo - I intentionally separated these into separate functions even though they are a simple +/- in anticipation
- *  of different side effects needing to be handled in the future
  *
  * @param {TriggerData} triggerData
  * @param {CharacterModel} characterModel
  */
 export function resolveTrigger(triggerData, characterModel) {
-  // first check if this character meets the condition for this Trigger
-  const conditionList = jsonDataUtils.getConditionList(triggerData);
-  if (!conditionUtils.doesMeetAllConditions(characterModel, conditionList)) {
-    return;
+  const {
+    triggerLogicId,
+    targetId,
+  } = triggerData;
+  logger.verbose(`. [[resolving trigger "${triggerLogicId}" targeting "${targetId}"]]`);
+
+  // get the function that will do the work of making the trigger work
+  const logicFunction = handleGetLogicFunction(triggerData);
+
+  // get the parameter that we will pass into the `logicFunction`
+  const targetParameter = targetUtils.handleGetTargetParameter(targetId, characterModel);
+
+  // get the function that will make the actual change with the trigger
+  const applyFunction = handleGetApplyFunction(triggerData, characterModel);
+
+  // use the target on the logic and then apply what we get to the target
+  const resultValue = logicFunction(targetParameter);
+  applyFunction(resultValue);
+}
+// -- logic functions
+/**
+
+ * @param {TriggerData} triggerData
+ * @param {CharacterModel} characterModel
+ * @returns {Function}
+ */
+export function handleGetLogicFunction(triggerData, characterModel) {
+  const {
+    triggerLogicId,
+  } = triggerData;
+
+  if (triggerLogicId === TRIGGER_LOGIC_ID.GIVE) {
+    return getGiveLogicFunction(triggerData);
   }
 
-  const {triggerId} = triggerData;
-  logger.verbose(`. [[resolving trigger '${triggerId}']]`);
-
-  //
-  if (triggerId === TRIGGER_ID.GIVE_ITEM) {
-    handleGiveItemTrigger(triggerData, characterModel);
-  }
-  // Add Candy
-  if (triggerId === TRIGGER_ID.CANDY.ADD) {
-    handleAddCandyTrigger(triggerData, characterModel);
-  }
-  // Lose Candy
-  if (triggerId === TRIGGER_ID.CANDY.SUBTRACT) {
-    handleLoseCandyTrigger(triggerData, characterModel);
+  if (triggerLogicId === TRIGGER_LOGIC_ID.TAKE) {
+    return getTakeLogicFunction(triggerData);
   }
 
-  //
-  if (triggerId === TRIGGER_ID.HEALTH.ADD) {
-    handleAddHealthTrigger(triggerData, characterModel);
-  }
-  //
-  if (triggerId === TRIGGER_ID.HEALTH.SUBTRACT) {
-    handleLoseHealthTrigger(triggerData, characterModel);
+  if (triggerLogicUtils.isAddTriggerLogic(triggerLogicId)) {
+    return getAddLogicFunction(triggerData);
   }
 
-  //
-  if (triggerId === TRIGGER_ID.MOVEMENT.ADD) {
-    handleAddMovementTrigger(triggerData, characterModel);
-  }
-  //
-  if (triggerId === TRIGGER_ID.MOVEMENT.SUBTRACT) {
-    handleLoseMovementTrigger(triggerData, characterModel);
-  }
-
-  //
-  if (triggerId === TRIGGER_ID.SANITY.ADD) {
-    handleAddSanityTrigger(triggerData, characterModel);
-  }
-  //
-  if (triggerId === TRIGGER_ID.SANITY.SUBTRACT) {
-    handleLoseSanityTrigger(triggerData, characterModel);
-  }
-
-  //
-  if (triggerId === TRIGGER_ID.VISION.ADD) {
-    handleAddVisionTrigger(triggerData, characterModel);
-  }
-  //
-  if (triggerId === TRIGGER_ID.VISION.SUBTRACT) {
-    handleLoseVisionTrigger(triggerData, characterModel);
-  }
-
-  //
-  if (triggerId === TRIGGER_ID.LUCK.ADD) {
-    handleAddLuckTrigger(triggerData, characterModel);
-  }
-  //
-  if (triggerId === TRIGGER_ID.LUCK.SUBTRACT) {
-    handleLoseLuckTrigger(triggerData, characterModel);
-  }
-
-  //
-  if (triggerId === TRIGGER_ID.GREED.ADD) {
-    handleAddGreedTrigger(triggerData, characterModel);
-  }
-  //
-  if (triggerId === TRIGGER_ID.GREED.SUBTRACT) {
-    handleLoseGreedTrigger(triggerData, characterModel);
-  }
-
-  //
-  if (triggerId === TRIGGER_ID.CHANGE_LOCATION) {
-    handleChangeLocationTrigger(triggerData, characterModel);
+  if (triggerLogicUtils.isSubtractTriggerLogic(triggerLogicId)) {
+    return getAddLogicFunction(triggerData);
   }
 }
 /**
- * handles giving an item to character via trigger
- *
  * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
+ * @returns {Function}
  */
-export function handleGiveItemTrigger(triggerData, characterModel) {
+export function getAddLogicFunction(triggerData) {
   const {
-    itemId,
     value,
   } = triggerData;
 
-  const itemData = itemDataHelper.getItemDataById(itemId);
-  if (itemData === undefined) {
-    logger.error(`handleGiveItemTrigger() - failed to find ${itemId}`);
+  return (targetValue) => {
+    return targetValue + value;
+  };
+}
+/**
+ * @param {TriggerData} triggerData
+ * @returns {Function}
+ */
+export function getSubtractLogicFunction(triggerData) {
+  const {
+    value,
+  } = triggerData;
+
+  return (targetValue) => {
+    return targetValue - value;
+  };
+}
+/**
+ * @param {TriggerData} triggerData
+ * @returns {Function}
+ */
+export function getGiveLogicFunction(triggerData) {
+  const {
+    itemId,
+    targetId,
+    value,
+  } = triggerData;
+
+  if (targetId !== TARGET_ID.ITEM.ALL) {
+    logger.warning('How are you not giving an Item?');
     return;
   }
 
+  // find data attributes
+  const itemData = itemDataHelper.getItemDataById(itemId);
+  if (itemData === undefined) {
+    logger.warning(`Attempting to give item but failed to find "${itemId}".`);
+    return;
+  }
+
+  // make a model to give
   const createdItemModel = new ItemModel({
     ...itemData,
     quantity: value,
   });
-  characterModel.addToArray('inventory', createdItemModel);
-};
+
+  return (inventory) => {
+    inventory.push(createdItemModel);
+    return inventory;
+  };
+}
 /**
- * handles the basic Trigger of adding candy
- *
+ * @param {TriggerData} triggerData
+ * @returns {Function}
+ */
+export function getTakeLogicFunction(triggerData) {
+  const {
+    itemId,
+    targetId,
+  } = triggerData;
+
+  if (targetId !== TARGET_ID.ITEM.ALL) {
+    logger.warning('How are you not taking an Item?');
+    return;
+  }
+
+  return (inventory) => {
+    const foundItemIdx = inventory.findIndex((inventoryItem) => (inventoryItem.get('id') === itemId));
+
+    // not found
+    if (foundItemIdx <= 0) {
+      return [];
+    }
+
+    // grab the actual ItemModel and its quantity
+    const exactItemModel = inventory[foundItemIdx];
+    const itemQuantity = exactItemModel.get('quantity');
+
+    // if there will be none left, remove it
+    if (itemQuantity <= 1) {
+      inventory.splice(foundItemIdx, 1);
+      return inventory;
+    }
+
+    // otherwise we can just subtract one from the item's quantity
+    if (itemQuantity > 1) {
+      exactItemModel.set({quantity: itemQuantity - 1});
+    }
+
+    return inventory;
+  };
+}
+// -- application functions
+/**
  * @param {TriggerData} triggerData
  * @param {CharacterModel} characterModel
+ * @returns {Function}
  */
-export function handleAddCandyTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
+export function handleGetApplyFunction(triggerData, characterModel) {
+  const {
+    targetId,
+  } = triggerData;
 
-  const prevCandyCount = characterModel.get('candies');
-  characterModel.set({candies: prevCandyCount + value});
-};
+  if (targetId === TARGET_ID.ITEM.ALL) {
+    return (newInventory) => {
+      characterModel.set({inventory: newInventory});
+    };
+  }
+
+  if (targetUtils.isCharacterTarget(targetId)) {
+    return getStatApplyFunction(targetId, characterModel);
+  }
+}
 /**
- * handles the basic Trigger of subtracting candy
- *
- * @param {TriggerData} triggerData
+ * @param {TargetId} targetId
  * @param {CharacterModel} characterModel
+ * @returns {Function}
  */
-export function handleLoseCandyTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevCandyCount = characterModel.get('candies');
-  characterModel.set({candies: prevCandyCount - value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleAddHealthTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('health');
-  characterModel.set({health: prevValue + value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleLoseHealthTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('health');
-  characterModel.set({health: prevValue - value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleAddMovementTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('movement');
-  characterModel.set({movement: prevValue + value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleLoseMovementTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('movement');
-  characterModel.set({movement: prevValue - value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleAddSanityTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('sanity');
-  characterModel.set({sanity: prevValue + value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleLoseSanityTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('sanity');
-  characterModel.set({sanity: prevValue - value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleAddVisionTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('vision');
-  characterModel.set({vision: prevValue + value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleLoseVisionTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('vision');
-  characterModel.set({vision: prevValue - value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleAddLuckTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('luck');
-  characterModel.set({luck: prevValue + value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleLoseLuckTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('luck');
-  characterModel.set({luck: prevValue - value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleAddGreedTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('greed');
-  characterModel.set({greed: prevValue + value});
-};
-/**
- *
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleLoseGreedTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-
-  const prevValue = characterModel.get('greed');
-  characterModel.set({greed: prevValue - value});
-};
-/**
- * @todo - does this belong here since it uses the helper...?
- *
- * @param {TriggerData} triggerData
- * @param {CharacterModel} characterModel
- */
-export function handleChangeLocationTrigger(triggerData, characterModel) {
-  const {value} = triggerData;
-  const nextPoint = new Point(value.x, value.y);
-
-  // gameState.addToActionQueue(() => {
-  gamestateCharacterHelper.updateCharacterPosition(characterModel, nextPoint);
-  // })
-};
+export function getStatApplyFunction(targetId, characterModel) {
+  const statId = statUtils.convertTargetToStat(targetId);
+  return (resultValue) => (characterModel.setStatById(statId, resultValue));
+}

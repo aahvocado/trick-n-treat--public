@@ -33,7 +33,7 @@ export default class EncounterModalComponent extends PureComponent {
       triggerList = [],
     } = encounterData;
 
-    const hasTriggers = triggerList.length > 0;
+    const triggersToShow = triggerList.filter((triggerData) => triggerData._hasMetConditions);
 
     return (
       <ModalComponent
@@ -47,9 +47,9 @@ export default class EncounterModalComponent extends PureComponent {
         <h2 className='adjacent-mar-t-2'>{ title }</h2>
 
         {/* trigger display */}
-        { hasTriggers &&
+        { triggersToShow.length > 0 &&
           <div className='flex-col-center boxsizing-border bg-primary-darker width-full pad-3 mar-h-2 adjacent-mar-t-2'>
-            { triggerList.map((triggerData, idx) => (
+            { triggersToShow.map((triggerData, idx) => (
               <TriggerDisplayComponent
                 key={`encounter-modal-trigger-list-${idx}-key`}
                 className='adjacent-mar-t-1'
@@ -70,10 +70,10 @@ export default class EncounterModalComponent extends PureComponent {
         <div className='flex-row adjacent-mar-t-2'>
           { actionList.map((actionData, idx) => {
             return (
-              <EncounterActionButton
-                key={`encounter-modal-action-button-${actionData.actionId}-${idx}-key`}
+              <ChoiceButton
+                key={`encounter-modal-action-button-${actionData.choiceId}-${idx}-key`}
                 actionData={actionData}
-                disabled={!actionData._doesMeetConditions}
+                disabled={!actionData._hasMetConditions}
                 onClick={onClickAction}
               />
             )
@@ -86,7 +86,7 @@ export default class EncounterModalComponent extends PureComponent {
 /**
  *
  */
-class EncounterActionButton extends PureComponent {
+class ChoiceButton extends PureComponent {
   /** @override */
   static defaultProps = {
     /** @type {ActionData} */
@@ -103,7 +103,7 @@ class EncounterActionButton extends PureComponent {
     } = this.props;
 
     const {
-      actionId,
+      choiceId,
       // gotoId,
       label,
     } = actionData;
@@ -113,7 +113,7 @@ class EncounterActionButton extends PureComponent {
         {...otherProps}
         className='fsize-4 pad-2 f-bold adjacent-mar-l-2'
         theme={BUTTON_THEME.ORANGE}
-        id={actionId}
+        id={choiceId}
         onClick={this.onClickButton.bind(this)}
       >
         { label }

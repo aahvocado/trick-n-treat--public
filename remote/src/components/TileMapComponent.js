@@ -55,19 +55,16 @@ export class TileMapComponent extends Component {
       tileSize,
     } = this.props;
 
-    // check if Map has no data yet
-    if (mapData === undefined) {
-      return <div className='width-full pad-2'>(waiting for map data)</div>
-    }
-
+    const charPosition = myCharacter.get('position');
     const mapContainerTransform = useZoomedOutMap ?
       `translate(-${(mapData[0].length * 39) / 2}px, -${(mapData.length * 39.5) / 2}px) scale(${0.2}, ${0.2})` :
-      `translate(${calculateMapXOffset(myCharacter.position.x)}px, ${calculateMapYOffset(myCharacter.position.y)}px)`;
+      `translate(${calculateMapXOffset(charPosition.x)}px, ${calculateMapYOffset(charPosition.y)}px)`;
 
     return (
       <div
-        className='overflow-hidden flex-none flex-col-center position-relative mar-v-2 mar-h-auto bor-4-primary'
+        className='overflow-hidden flex-none flex-col-center position-relative mar-v-2 mar-h-auto'
         style={{
+          border: myCharacter.get('isActiveCharacter') ? '4px solid #33487b' : '4px solid #c17e36',
           backgroundColor: '#252525',
           height: `${MAP_CONTAINER_HEIGHT}px`,
           width: `${MAP_CONTAINER_WIDTH}px`,
@@ -87,7 +84,7 @@ export class TileMapComponent extends Component {
               <div className='flex-row' key={`tile-map-row-${rowIdx}-key`} >
                 { mapRowData.map((tileData, colIdx) => {
                   // is `myCharacter` one of the characters on this tile`
-                  const isUserHere = tileData.charactersHere.some((character) => (character.position.x === myCharacter.position.x && character.position.y === myCharacter.position.y))
+                  const isUserHere = tileData.charactersHere.some((character) => (character.position.x === charPosition.x && character.position.y === charPosition.y))
 
                   // assuming the path is in order, finding the index of this point on the path will tell us how far it is
                   const distanceFromMyCharacter = selectedPath.findIndex((pathPoint) => (pathPoint.equals(tileData.position)));
@@ -103,7 +100,7 @@ export class TileMapComponent extends Component {
                       tileSize={tileSize}
                       position={tileData.position}
                       isSelected={isSelected}
-                      isTooFar={distanceFromMyCharacter > myCharacter.movement || (!isUserHere && selectedPath.length === 0)}
+                      isTooFar={distanceFromMyCharacter > myCharacter.get('movement') || (!isUserHere && selectedPath.length === 0)}
                       isUserHere={isUserHere}
                       onTileClick={onTileClick}
                     />

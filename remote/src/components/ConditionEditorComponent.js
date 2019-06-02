@@ -4,13 +4,13 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons'
 
 import IconButtonComponent from 'common-components/IconButtonComponent';
 
-import ConditionIdDropdown from 'components/ConditionIdDropdown';
-import ConditionTargetDropdown from 'components/ConditionTargetDropdown';
+import ConditionLogicDropdown from 'components/ConditionLogicDropdown';
+import TargetListDropdown from 'components/TargetListDropdown';
 import ItemListDropdown from 'components/ItemListDropdown';
 
 import combineClassNames from 'utilities/combineClassNames';
 
-import * as conditionUtils from 'utilities.shared/conditionUtils'
+import * as conditionLogicUtils from 'utilities.shared/conditionLogicUtils'
 
 /**
  *
@@ -48,8 +48,8 @@ export default class ConditionEditorComponent extends PureComponent {
     } = this.props;
 
     const {
-      conditionTargetId,
-      conditionId,
+      targetId,
+      conditionLogicId,
       itemId,
       value,
     } = data;
@@ -61,25 +61,25 @@ export default class ConditionEditorComponent extends PureComponent {
         </div>
 
         {/* Target - for now only shows up for stats */}
-        { conditionUtils.isNumberCondition(conditionId) &&
-          <ConditionTargetDropdown
+        { conditionLogicUtils.isNumberConditionLogic(conditionLogicId) &&
+          <TargetListDropdown
             className='flex-auto'
             showButton={false}
-            selectedOption={{id: conditionTargetId}}
+            selectedOption={{id: targetId}}
             onSelect={this.onSelectTarget}
           />
         }
 
         {/* Logic check */}
-        <ConditionIdDropdown
+        <ConditionLogicDropdown
           className='flex-auto bor-l-1-gray'
           showButton={false}
-          selectedOption={{id: conditionId}}
+          selectedOption={{id: conditionLogicId}}
           onSelect={this.onSelectLogic}
         />
 
         {/* Value */}
-        { conditionUtils.isNumberCondition(conditionId) &&
+        { conditionLogicUtils.isNumberConditionLogic(conditionLogicId) &&
           <input
             className='flex-none bor-l-1-gray pad-h-2 pad-v-1'
             style={{width: '200px'}}
@@ -91,7 +91,7 @@ export default class ConditionEditorComponent extends PureComponent {
         }
 
         {/* Item */}
-        { conditionUtils.isItemCondition(conditionId) &&
+        { conditionLogicUtils.isItemConditionLogic(conditionLogicId) &&
           <ItemListDropdown
             className='flex-auto bor-l-1-gray'
             selectedOption={{id: itemId}}
@@ -108,23 +108,23 @@ export default class ConditionEditorComponent extends PureComponent {
     )
   }
   /**
-   * @param {ConditionTargetId} conditionTargetId
+   * @param {TargetId} targetId
    */
-  onSelectTarget(conditionTargetId) {
+  onSelectTarget(targetId) {
     const { data, onEdit } = this.props;
     onEdit({
       ...data,
-      conditionTargetId: conditionTargetId,
+      targetId: targetId,
     });
   }
   /**
-   * @param {ConditionId} conditionId
+   * @param {ConditionLogicId} conditionLogicId
    */
-  onSelectLogic(conditionId) {
+  onSelectLogic(conditionLogicId) {
     const { data, onEdit } = this.props;
     onEdit({
       ...data,
-      conditionId: conditionId,
+      conditionLogicId: conditionLogicId,
     });
   }
   /**

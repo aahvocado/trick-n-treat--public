@@ -52,12 +52,6 @@ export class Model {
    */
   addToArray(arrayName, item) {
     const currentArray = this.get(arrayName).slice();
-
-    // no add needed if array already has item
-    if (currentArray.includes(item)) {
-      return;
-    }
-
     currentArray.push(item);
     this.set({
       [arrayName]: currentArray,

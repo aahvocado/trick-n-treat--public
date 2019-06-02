@@ -31,6 +31,8 @@ export default class DropdownComponent extends PureComponent {
     /** @type {Boolean} */
     canSearch: false,
     /** @type {Boolean} */
+    disabled: false,
+    /** @type {Boolean} */
     showButton: true,
 
     /** @type {Function} */
@@ -102,6 +104,7 @@ export default class DropdownComponent extends PureComponent {
       baseClassName,
       className,
       canSearch,
+      disabled,
       inputSize,
       maxHeight,
       placeholder,
@@ -126,6 +129,7 @@ export default class DropdownComponent extends PureComponent {
         aria-haspopup="listbox"
       >
         <DropdownControl
+          disabled={disabled}
           value={searchValue}
           onClick={this.onClickControl}
           onFocus={this.onFocusControl}

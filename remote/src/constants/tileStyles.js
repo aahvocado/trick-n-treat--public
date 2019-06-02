@@ -9,8 +9,8 @@ export const TILE_STYLES = {
   [TILE_TYPES.CONNECTOR]: { backgroundColor: '#edf7c4' },
   [TILE_TYPES.LIT_CONNECTOR]: { backgroundColor: '#edf7c4' },
 
-  [TILE_TYPES.PATH]: { backgroundColor: '#d49864' },
-  [TILE_TYPES.LIT_PATH]: { backgroundColor: '#d49864' },
+  [TILE_TYPES.PATH]: { backgroundColor: '#8e3e3e' },
+  [TILE_TYPES.LIT_PATH]: { backgroundColor: '#8e3e3e' },
 
   [TILE_TYPES.GRASS]: { backgroundColor: 'lightgreen' },
   [TILE_TYPES.LIT_GRASS]: { backgroundColor: 'lightgreen' },

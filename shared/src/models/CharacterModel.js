@@ -1,5 +1,7 @@
 import Point from '@studiomoniker/point';
 
+import {STAT_ID} from 'constants.shared/statIds';
+
 import Model from 'models.shared/Model';
 
 import * as conditionUtils from 'utilities.shared/conditionUtils';
@@ -34,6 +36,10 @@ export default class CharacterModel extends Model {
       /** @type {Number} */
       candies: 0,
       /** @type {Number} */
+      tricky: 0,
+      /** @type {Number} */
+      treaty: 0,
+      /** @type {Number} */
       luck: 0,
       /** @type {Number} */
       greed: 0,
@@ -43,7 +49,7 @@ export default class CharacterModel extends Model {
       /** @type {Array<ItemModel>} */
       inventory: [],
 
-      //
+      /** @type {Object} */
       ...newAttributes,
     });
 
@@ -81,6 +87,90 @@ export default class CharacterModel extends Model {
    */
   canMove() {
     return this.get('movement') > 0;
+  }
+  // -- stats
+  /**
+   * @param {StatId} statId
+   * @returns {*}
+   */
+  getStatById(statId) {
+    if (statId === STAT_ID.HEALTH) {
+      return this.get('health');
+    }
+
+    if (statId === STAT_ID.MOVEMENT) {
+      return this.get('movement');
+    }
+
+    if (statId === STAT_ID.SANITY) {
+      return this.get('sanity');
+    }
+
+    if (statId === STAT_ID.VISION) {
+      return this.get('vision');
+    }
+
+    if (statId === STAT_ID.CANDIES) {
+      return this.get('candies');
+    }
+
+    if (statId === STAT_ID.TRICKY) {
+      return this.get('tricky');
+    }
+
+    if (statId === STAT_ID.TREATY) {
+      return this.get('treaty');
+    }
+
+    if (statId === STAT_ID.LUCK) {
+      return this.get('luck');
+    }
+
+    if (statId === STAT_ID.GREED) {
+      return this.get('greed');
+    }
+  }
+  /**
+   * @param {StatId} statId
+   * @param {Number} value
+   * @returns {*}
+   */
+  setStatById(statId, value) {
+    if (statId === STAT_ID.HEALTH) {
+      return this.set({health: value});
+    }
+
+    if (statId === STAT_ID.MOVEMENT) {
+      return this.set({movement: value});
+    }
+
+    if (statId === STAT_ID.SANITY) {
+      return this.set({sanity: value});
+    }
+
+    if (statId === STAT_ID.VISION) {
+      return this.set({vision: value});
+    }
+
+    if (statId === STAT_ID.CANDIES) {
+      return this.set({candies: value});
+    }
+
+    if (statId === STAT_ID.TRICKY) {
+      return this.set({tricky: value});
+    }
+
+    if (statId === STAT_ID.TREATY) {
+      return this.set({treaty: value});
+    }
+
+    if (statId === STAT_ID.LUCK) {
+      return this.set({luck: value});
+    }
+
+    if (statId === STAT_ID.GREED) {
+      return this.set({greed: value});
+    }
   }
   /**
    * changes a numerical stat
@@ -129,70 +219,7 @@ export default class CharacterModel extends Model {
    */
   canUseItem(itemModel) {
     const conditionList = itemModel.get('conditionList');
-    const doesMeetAllConditions = conditionUtils.doesMeetAllConditions(this, conditionList);
+    const doesMeetAllConditions = conditionUtils.doesMeetAllConditions(conditionList, this);
     return doesMeetAllConditions;
-  }
-  /**
-   * Uses an Item by resolvi all triggers in an Item
-   *  the Character must have the Item in `inventory`.
-   *
-   * @param {ItemModel} itemModel
-   */
-  useItem(itemModel) {
-    // character must have it
-    if (!this.hasItem(itemModel)) {
-      logger.warning(`"${this.get('name')}" tried to use "${itemModel.get('name')}" but does not have it.`);
-      return;
-    }
-
-    // check if character was allowed to use this item
-    if (!characterModel.canUseItem(itemModel)) {
-      logger.warning(`"${characterModel.get('name')}" tried to use "${itemModel.get('name')}" but does not meet use conditions.`);
-      return;
-    }
-
-    // find the Exact Matching Item type in our inventory and find out how to consume it
-    if (itemModel.get('isConsumable')) {
-      this.consumeItem(itemModel);
-    }
-
-    // resolve triggers
-    const triggerList = itemModel.get('triggerList');
-    triggerList.forEach((triggerData) => {
-      triggerHandlerUtil.resolveTrigger(triggerData, characterModel);
-    });
-  }
-  /**
-   * handles removing an item from Character's inventory or using one quantity of it
-   *
-   * @param {ItemModel} itemModel
-   */
-  consumeItem(itemModel) {
-    // find the "exact match" item in Character's inventory
-    // (using index in case we want to remove it completely)
-    const inventory = this.get('inventory');
-    const foundItemIdx = inventory.findIndex((inventoryItem) => (inventoryItem.get('id') === itemModel.get('id')));
-
-    // not found
-    if (foundItemIdx <= 0) {
-      logger.warning(`"${this.get('name')}" does not have "${itemModel.get('name')}" to remove.`);
-      return;
-    }
-
-    // grab the actual ItemModel and its quantity
-    const exactItemModel = inventory[foundItemIdx];
-    const itemQuantity = exactItemModel.get('quantity');
-
-    // if there will be none left, remove it
-    if (itemQuantity <= 1) {
-      inventory.splice(foundItemIdx, 1);
-      this.set({inventory: inventory});
-      return;
-    }
-
-    // otherwise we can just subtract one from the item's quantity
-    if (itemQuantity > 1) {
-      exactItemModel.set({quantity: itemQuantity - 1});
-    }
   }
 }

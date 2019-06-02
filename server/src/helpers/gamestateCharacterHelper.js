@@ -1,19 +1,22 @@
 import {CLIENT_TYPE} from 'constants.shared/clientTypes';
-import {ENCOUNTER_ACTION_ID} from 'constants.shared/encounterActions';
+import {CHOICE_ID} from 'constants.shared/choiceIds';
 import {MAP_START} from 'constants/mapSettings';
 
 import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 
+import {getEncounterDataById} from 'helpers.shared/encounterDataHelper';
+
 import CharacterModel from 'models.shared/CharacterModel';
+import EncounterModel from 'models.shared/EncounterModel';
 
 import gameState from 'state/gameState';
 import serverState from 'state/serverState';
 
 import logger from 'utilities/logger.game';
-import * as conditionUtils from 'utilities.shared/conditionUtils';
+import * as triggerHandlerUtil from 'utilities/triggerHandlerUtil';
 
-import * as jsonDataUtils from 'utilities.shared/jsonDataUtils';
+import * as conditionUtils from 'utilities.shared/conditionUtils';
 import * as mapUtils from 'utilities.shared/mapUtils';
 
 /**
@@ -128,13 +131,8 @@ export function updateCharacterPosition(characterModel, position) {
     return;
   }
 
-  // finished if there is an Encounter but Character can't trigger it
-  // @todo - this is no longer correct
-  if (!encounterModel.canTrigger(characterModel)) {
-    return;
-  }
-
-  // if reached this far, then add the handler for the Encounter to the front of the `actionQueue`
+  // add the handler for the Encounter to the front of the `actionQueue`
+  // (it may not necessarily trigger)
   gameState.insertIntoActionQueue(() => {
     gamestateEncounterHelper.handleCharacterTriggerEncounter(characterModel, encounterModel);
   });
@@ -189,8 +187,56 @@ export function moveCharacterTo(characterModel, position) {
  * @param {ItemModel} itemModel
  */
 export function handleCharacterUseItem(characterModel, itemModel) {
-  // use the item
-  characterModel.useItem(itemModel);
+  if (!itemModel.get('isUseable')) {
+    logger.warning(`"${characterModel.get('name')}" tried to use an unuseable item.`);
+    return;
+  }
+
+  // character must have it
+  if (!characterModel.hasItem(itemModel)) {
+    logger.warning(`"${characterModel.get('name')}" tried to use "${itemModel.get('name')}" but does not have it.`);
+    return;
+  }
+
+  // check if character was allowed to use characterModel item
+  if (!characterModel.canUseItem(itemModel)) {
+    logger.warning(`"${characterModel.get('name')}" tried to use "${itemModel.get('name')}" but does not meet use conditions.`);
+    return;
+  }
+
+  // find the Exact Matching Item type in our inventory and find out how to consume it
+  if (itemModel.get('isConsumable')) {
+    // find the "exact match" item in Character's inventory
+    // (using index in case we want to remove it completely)
+    const inventory = characterModel.get('inventory');
+    const foundItemIdx = inventory.findIndex((inventoryItem) => inventoryItem.get('id') === itemModel.get('id'));
+
+    // not found
+    if (foundItemIdx < 0) {
+      logger.warning(`"${characterModel.get('name')}" does not have "${itemModel.get('name')}" to remove.`);
+    } else {
+      // grab the actual ItemModel and its quantity
+      const exactItemModel = inventory[foundItemIdx];
+      const itemQuantity = exactItemModel.get('quantity');
+
+      // if there will be none left, remove it
+      if (itemQuantity <= 1) {
+        inventory.splice(foundItemIdx, 1);
+        characterModel.set({inventory: inventory});
+      }
+
+      // otherwise we can just subtract one from the item's quantity
+      if (itemQuantity > 1) {
+        exactItemModel.set({quantity: itemQuantity - 1});
+      }
+    }
+  }
+
+  // resolve triggers
+  const triggerList = itemModel.get('triggerList');
+  triggerList.forEach((triggerData) => {
+    triggerHandlerUtil.resolveTrigger(triggerData, characterModel);
+  });
 
   // update
   clientEventHelper.sendGameUpdate();
@@ -213,20 +259,19 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
   }
 
   // check if character was allowed to take this action
-  const conditionList = jsonDataUtils.getConditionList(actionData);
-  if (!conditionUtils.doesMeetAllConditions(characterModel, conditionList)) {
+  if (!conditionUtils.doesMeetAllConditions(actionData.conditionList, characterModel, activeEncounter)) {
     logger.warning(`"${characterModel.get('name')}" used an action in "${activeEncounter.get('title')}" but did not meet conditions`);
     return;
   }
 
   // finally, we can handle the action
   const {
-    actionId,
+    choiceId,
     gotoId,
   } = actionData;
 
   // just a basic confirmation to close the `Encounter`
-  if (actionId === ENCOUNTER_ACTION_ID.CONFIRM) {
+  if (choiceId === CHOICE_ID.CONFIRM) {
     // clear out `activeEncounter`
     gameState.set({activeEncounter: null});
 
@@ -240,8 +285,23 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
     });
   }
 
-  // this goes to another `Encounter`
-  if (actionId === ENCOUNTER_ACTION_ID.GOTO) {
-    gamestateEncounterHelper.handleEncounterActionGoTo(characterModel, gotoId);
+  // everything else goes to another Encounter
+  //  so we're going to find the data of the Encounter it is going to and create a Model out of it
+  const nextEncounterData = getEncounterDataById(gotoId);
+  const nextEncounterModel = new EncounterModel(nextEncounterData);
+
+  // choice goes to another `Encounter`
+  if (choiceId === CHOICE_ID.GOTO) {
+    gamestateEncounterHelper.handleChoiceGoTo(characterModel, nextEncounterModel);
+  }
+
+  // choice is a "Trick"
+  if (choiceId === CHOICE_ID.TRICK) {
+    gamestateEncounterHelper.handleChoiceTrick(characterModel, nextEncounterModel);
+  }
+
+  // choice is a "Treat"
+  if (choiceId === CHOICE_ID.TREAT) {
+    gamestateEncounterHelper.handleChoiceTreat(characterModel, nextEncounterModel);
   }
 }

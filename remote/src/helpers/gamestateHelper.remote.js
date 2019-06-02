@@ -21,7 +21,7 @@ export function canMyCharacterMoveTo(endPoint) {
   }
 
   const myCharacter = remoteGameState.get('myCharacter');
-  const isWithinDistance = mapUtils.isWithinPathDistance(getVisibileTileMapData(), myCharacter.position, endPoint, myCharacter.movement);
+  const isWithinDistance = mapUtils.isWithinPathDistance(getVisibileTileMapData(), myCharacter.get('position'), endPoint, myCharacter.get('movement'));
   return isWithinDistance;
 }
 // --

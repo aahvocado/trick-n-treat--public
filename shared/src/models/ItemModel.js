@@ -23,6 +23,8 @@ export default class ItemModel extends Model {
       triggerList: [],
 
       /** @type {Boolean} */
+      isUseable: true,
+      /** @type {Boolean} */
       isConsumable: false,
       /** @type {Number} */
       quantity: 1,
@@ -42,7 +44,7 @@ export default class ItemModel extends Model {
    */
   canBeUsedBy(characterModel) {
     const conditionList = this.get('conditionList');
-    const doesMeetAllConditions = conditionUtils.doesMeetAllConditions(characterModel, conditionList);
+    const doesMeetAllConditions = conditionUtils.doesMeetAllConditions(conditionList, characterModel);
     return doesMeetAllConditions;
   }
 }

@@ -58,6 +58,9 @@ class DebugMenu extends Component {
         shouldUseOverlay={false}
         onClickOverlay={this.props.onClickOverlay}
       >
+        <div className='fsize-4 flex-row jcontent-center width-full adjacent-mar-t-2'>
+          {remoteAppState.get('name')}
+        </div>
 
         <div className='flex-row jcontent-center width-full adjacent-mar-t-2'>
           <div className='fsize-3 color-grayer mar-r-1'>clientId</div>

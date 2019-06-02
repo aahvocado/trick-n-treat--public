@@ -1,209 +1,45 @@
-import {
-  CONDITION_ID,
-  CONDITION_TARGET_ID,
-  ITEM_CONDITION_ID_LIST,
-  NUMBER_CONDITION_ID_LIST,
-  POINT_CONDITION_ID_LIST,
-  TILETYPE_CONDITION_ID_LIST,
-} from 'constants.shared/conditionIds';
+import * as conditionLogicUtils from 'utilities.shared/conditionLogicUtils';
+import * as targetUtils from 'utilities.shared/targetUtils';
 
 /**
- * does condition depend on an Item
+ * checks if all Conditions in a list pass based on given parameters
  *
- * @param {ConditionId} conditionId
- * @returns {Boolean}
- */
-export function isItemCondition(conditionId) {
-  return ITEM_CONDITION_ID_LIST.includes(conditionId);
-}
-/**
- * does condition depend on a Number
- *
- * @param {ConditionId} conditionId
- * @returns {Boolean}
- */
-export function isNumberCondition(conditionId) {
-  return NUMBER_CONDITION_ID_LIST.includes(conditionId);
-}
-/**
- * does condition depend on a Point
- *
- * @param {ConditionId} conditionId
- * @returns {Boolean}
- */
-export function isPointCondition(conditionId) {
-  return POINT_CONDITION_ID_LIST.includes(conditionId);
-}
-/**
- * does condition depend on a TileType
- *
- * @param {ConditionId} conditionId
- * @returns {Boolean}
- */
-export function isTileTypeCondition(conditionId) {
-  return TILETYPE_CONDITION_ID_LIST.includes(conditionId);
-}
-/**
- * checks is a given character meets list of Conditions
- *
- * @param {CharacterModel} characterModel
  * @param {Array<ConditionData>} conditionList
+ * @param {CharacterModel} characterModel
+ * @param {EncounterModel} [encounterModel]
  * @returns {Boolean}
  */
-export function doesMeetAllConditions(characterModel, conditionList) {
-  // empty list means there are no conditions
+export function doesMeetAllConditions(conditionList, characterModel, encounterModel) {
+  // empty list means there are no conditions, so its a free pass
   if (conditionList === undefined || conditionList.length <= 0) {
     return true;
   }
 
   // check that each condition passes
   return conditionList.every((conditionData) => {
-    return doesMeetCondition(characterModel, conditionData);
+    return doesMeetCondition(conditionData, characterModel, encounterModel);
   });
 }
 /**
- * checks is a given character meets given condition
+ * checks if a single condition passes
  *
- * @param {CharacterModel} characterModel
  * @param {ConditionData} conditionData
+ * @param {CharacterModel} characterModel
+ * @param {EncounterModel} encounterModel
  * @returns {Boolean}
  */
-export function doesMeetCondition(characterModel, conditionData) {
+export function doesMeetCondition(conditionData, characterModel, encounterModel) {
   const {
-    conditionId,
-    conditionTargetId,
+    targetId,
   } = conditionData;
 
-  // find what Stat is being targetted
-  const targetValue = getCharacterConditionTargetValue(characterModel, conditionTargetId);
+  // get the function that will do the work of checking if condition is met
+  const logicFunction = conditionLogicUtils.handleGetLogicFunction(conditionData);
 
-  if (conditionId === CONDITION_ID.EQUALS) {
-    return doesMeetConditionOfEquals(targetValue, conditionData);
-  }
+  // get the parameter that we will pass into the `logicFunction`
+  const targetParameter = targetUtils.handleGetTargetParameter(targetId, characterModel, encounterModel);
 
-  if (conditionId === CONDITION_ID.LESS_THAN) {
-    return doesMeetConditionOfLessThan(targetValue, conditionData);
-  }
-
-  if (conditionId === CONDITION_ID.GREATER_THAN) {
-    return doesMeetConditionOfGreaterThan(targetValue, conditionData);
-  }
-
-  if (conditionId === CONDITION_ID.AT_LOCATION) {
-    return doesMeetConditionOfAtLocation(targetValue, conditionData);
-  }
-
-  if (conditionId === CONDITION_ID.HAS_ITEM) {
-    return doesMeetConditionOfHasItem(characterModel, conditionData);
-  }
-
-  // if (conditionId === CONDITION_ID.ON_TILE_TYPE) {
-  //   return doesMeetConditionOfOnTileType(targetValue, conditionData);
-  // }
+  // FUSION HAAAAA
+  return logicFunction(targetParameter);
 }
-/**
- * handles determining how to get a particular value from a Character using the `conditionTargetId`
- *
- * @param {CharacterModel} characterModel
- * @param {ConditionTargetId} conditionTargetId
- * @returns {Number | Point}
- */
-export function getCharacterConditionTargetValue(characterModel, conditionTargetId) {
-  if (conditionTargetId === CONDITION_TARGET_ID.STAT.HEALTH) {
-    return characterModel.get('health');
-  }
 
-  if (conditionTargetId === CONDITION_TARGET_ID.STAT.MOVEMENT) {
-    return characterModel.get('movement');
-  }
-
-  if (conditionTargetId === CONDITION_TARGET_ID.STAT.SANITY) {
-    return characterModel.get('sanity');
-  }
-
-  if (conditionTargetId === CONDITION_TARGET_ID.STAT.VISION) {
-    return characterModel.get('vision');
-  }
-
-  if (conditionTargetId === CONDITION_TARGET_ID.STAT.CANDIES) {
-    return characterModel.get('candies');
-  }
-
-  if (conditionTargetId === CONDITION_TARGET_ID.STAT.LUCK) {
-    return characterModel.get('luck');
-  }
-
-  if (conditionTargetId === CONDITION_TARGET_ID.STAT.GREED) {
-    return characterModel.get('greed');
-  }
-
-  if (conditionTargetId === CONDITION_TARGET_ID.LOCATION) {
-    return characterModel.get('location');
-  }
-}
-/**
- *
- * @param {Number} targetValue
- * @param {ConditionData} conditionData
- * @returns {Boolean}
- */
-export function doesMeetConditionOfEquals(targetValue, conditionData) {
-  const conditionValue = conditionData.value;
-  return targetValue === conditionValue;
-};
-/**
- *
- * @param {Number} targetValue
- * @param {ConditionData} conditionData
- * @returns {Boolean}
- */
-export function doesMeetConditionOfLessThan(targetValue, conditionData) {
-  const conditionValue = conditionData.value;
-  return targetValue < conditionValue;
-};
-/**
- *
- * @param {Number} targetValue
- * @param {ConditionData} conditionData
- * @returns {Boolean}
- */
-export function doesMeetConditionOfGreaterThan(targetValue, conditionData) {
-  const conditionValue = conditionData.value;
-  return targetValue > conditionValue;
-};
-/**
- * @todo - not sure how useful this is, since being at a specific location is near impossible
- *
- * @param {Point} targetValue
- * @param {ConditionData} conditionData
- * @returns {Boolean}
- */
-export function doesMeetConditionOfAtLocation(targetValue, conditionData) {
-  const conditionValue = conditionData.value;
-  return targetValue.x === conditionValue.x && targetValue.y === conditionValue.y;
-};
-/**
- * @todo - not sure how useful this is, since being at a specific location is near impossible
- *
- * @param {CharacterModel} characterModel
- * @param {ConditionData} conditionData
- * @returns {Boolean}
- */
-export function doesMeetConditionOfHasItem(characterModel, conditionData) {
-  const inventory = characterModel.get('inventory');
-  const itemId = conditionData.itemId;
-
-  const matchingItem = inventory.find((item) => (item.get('id') === itemId));
-  return matchingItem !== undefined;
-};
-// /**
-//  * @todo - implement another time
-//  *
-//  * @param {Number} targetValue
-//  * @param {ConditionData} conditionData
-//  * @returns {Boolean}
-//  */
-// export function doesMeetConditionOfOnTileType(targetValue, conditionData) {
-//   const conditionValue = conditionData.value;
-//   return false;
-// };

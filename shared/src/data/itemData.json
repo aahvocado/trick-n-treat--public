@@ -1,6 +1,7 @@
 [
   {
     "id": "ITEM_ID.DEBUG_ITEM",
+    "isUseable": false,
     "isConsumable": false,
     "isKeyItem": true,
     "name": "Developer Item",
@@ -8,8 +9,8 @@
     "conditionList": [
       {
         "value": 5,
-        "conditionTargetId": "CONDITION_TARGET_ID.STAT.LUCK",
-        "conditionId": "CONDITION_ID.GREATER_THAN"
+        "targetId": "TARGET_ID.CHARACTER.LUCK",
+        "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN"
       }
     ],
     "tagList": [
@@ -17,28 +18,30 @@
     ],
     "triggerList": [
       {
-        "triggerId": "TRIGGER_ID.GIVE_ITEM",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "targetId": "TARGET_ID.ITEM.ALL",
         "value": 1,
         "itemId": "ITEM_ID.GUMMY_VIAL"
       },
       {
-        "triggerId": "TRIGGER_ID.CANDY.ADD",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
         "value": 100,
         "conditionList": [
           {
             "value": 3,
-            "conditionTargetId": "CONDITION_TARGET_ID.STAT.GREED",
-            "conditionId": "CONDITION_ID.LESS_THAN"
+            "targetId": "TARGET_ID.CHARACTER.GREED",
+            "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN"
           },
           {
             "value": 1,
-            "conditionTargetId": "CONDITION_TARGET_ID.STAT.LUCK",
-            "conditionId": "CONDITION_ID.GREATER_THAN"
+            "targetId": "TARGET_ID.CHARACTER.LUCK",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN"
           }
         ]
       },
       {
-        "triggerId": "TRIGGER_ID.GREED.ADD",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GREED.ADD",
         "value": 1
       }
     ]
@@ -46,6 +49,7 @@
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.GUMMY_VIAL",
+    "isUseable": true,
     "isConsumable": true,
     "isKeyItem": false,
     "name": "Gummy Vial",
@@ -54,12 +58,14 @@
     "triggerList": [
       {
         "dataType": "DATA_TYPE.TRIGGER",
-        "triggerId": "TRIGGER_ID.HEALTH.ADD",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
         "value": 1
       }
     ],
     "tagList": [
       "TAG_ID.ITEM",
+      "TAG_ID.COMMON",
       "TAG_ID.CONSUMABLE",
       "TAG_ID.HEALTH"
     ]
@@ -67,6 +73,7 @@
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.BRAIN_FOOD",
+    "isUseable": true,
     "isConsumable": true,
     "isKeyItem": false,
     "name": "Brain Food",
@@ -75,18 +82,21 @@
     "triggerList": [
       {
         "dataType": "DATA_TYPE.TRIGGER",
-        "triggerId": "TRIGGER_ID.SANITY.ADD",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "targetId": "TARGET_ID.CHARACTER.SANITY",
         "value": 1
       }
     ],
     "tagList": [
       "TAG_ID.ITEM",
+      "TAG_ID.COMMON",
       "TAG_ID.CONSUMABLE",
       "TAG_ID.SANITY"
     ]
   },
   {
     "id": "ITEM_ID.MOUSETRAP",
+    "isUseable": false,
     "isConsumable": true,
     "isKeyItem": false,
     "name": "Mouse Trap",
@@ -94,9 +104,38 @@
     "conditionList": [],
     "tagList": [
       "TAG_ID.QUEST",
+      "TAG_ID.RARE",
       "TAG_ID.ITEM",
       "TAG_ID.SIDEWALK"
     ],
     "triggerList": []
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.PLASTIC_PUMPKIN",
+    "isConsumable": false,
+    "isKeyItem": false,
+    "name": "Plastic Pumpkin",
+    "description": "This is one of those store bought pumpkins with a normal triangle eyes and square-toothed smile. ",
+    "conditionList": [],
+    "tagList": [
+      "TAG_ID.ITEM"
+    ],
+    "triggerList": [],
+    "isUseable": false
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.COTTON_COBWEB",
+    "isConsumable": false,
+    "isKeyItem": false,
+    "name": "Cotton Cobwebs",
+    "description": "This is one of those store bought cobwebs. It even has a couple of plastic spiders on it.",
+    "conditionList": [],
+    "tagList": [
+      "TAG_ID.ITEM"
+    ],
+    "triggerList": [],
+    "isUseable": false
   }
 ]

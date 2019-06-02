@@ -6,9 +6,6 @@ import {
 } from 'react-router-dom';
 import { observer } from 'mobx-react';
 
-import ButtonComponent from 'common-components/ButtonComponent';
-import LetterIconComponent from 'common-components/LetterIconComponent';
-
 import remoteAppState from 'state/remoteAppState';
 // import remoteGameState from 'state/remoteGameState';
 
@@ -54,24 +51,6 @@ class App extends Component {
           <Route path="/item_editor" component={ItemEditorPage} />
 
           <Route path="/tile_editor" component={TileEditorPage} />
-
-          {/* "Footer" - needs to be refactored to not be so hacky eventually */}
-          <div
-            className='position-fixed pad-1 mar-1 flex-row aitems-center'
-            style={{bottom: 0, right: 0}}
-          >
-            <div className='adjacent-mar-l-2 color-gray'>{remoteAppState.get('name')}</div>
-
-            {/* Debug Menu */}
-            { remoteAppState.get('isDevMode') &&
-              <ButtonComponent
-                className='pad-2 adjacent-mar-l-2'
-                onClick={() => { remoteAppState.set({isDebugMenuActive: !remoteAppState.get('isDebugMenuActive')}); }}
-              >
-                <LetterIconComponent className='mar-r-1' children='`' /> Debugger
-              </ButtonComponent>
-            }
-          </div>
         </div>
       </BrowserRouter>
     );

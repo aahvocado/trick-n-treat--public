@@ -19,7 +19,7 @@ export default function convertObservableToJs(attributes) {
     const attributeValue = get(attributes, attributeName);
 
     // no need to do anything more with null
-    if (attributeValue === null) {
+    if (attributeValue === null || attributeValue === undefined) {
       exportObject[attributeName] = attributeValue;
       return;
     }
@@ -38,15 +38,16 @@ export default function convertObservableToJs(attributes) {
         return;
       }
 
-      // export array of models using their own export()
-      const isArrayOfModels = attributeValue[0].export !== undefined;
-      if (isArrayOfModels) {
-        exportObject[attributeName] = attributeValue.map((model) => (model.export()));
-        return;
-      }
+      // export each item in array
+      exportObject[attributeName] = attributeValue.map((data) => {
+        // if its a model then also use their export
+        if (data.export !== undefined) {
+          return data.export();
+        }
 
-      // just an array but still needs converting
-      exportObject[attributeName] = toJS(attributeValue);
+        // otherwise it still might need to be converted
+        return toJS(data);
+      });
       return;
     }
 

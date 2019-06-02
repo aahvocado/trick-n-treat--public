@@ -97,7 +97,7 @@ export default class ClientModel extends Model {
     socket.on(SOCKET_EVENT.GAME.TO_SERVER.MOVE_TO, this.onMoveTo.bind(this));
 
     // client clicked an Action from the Encounter modal
-    socket.on(SOCKET_EVENT.GAME.TO_SERVER.CHOSE_ACTION, this.onEncounterAction.bind(this));
+    socket.on(SOCKET_EVENT.GAME.TO_SERVER.CHOSE_ACTION, this.onChooseAction.bind(this));
 
     // client used an Item
     socket.on(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, this.onUseItem.bind(this));
@@ -114,7 +114,7 @@ export default class ClientModel extends Model {
    * @param {EncounterId} encounterId
    * @param {ActionData} actionData
    */
-  onEncounterAction(encounterId, actionData) {
+  onChooseAction(encounterId, actionData) {
     gamestateCharacterHelper.handleCharacterChoseAction(this.get('characterModel'), encounterId, actionData);
   }
   /**

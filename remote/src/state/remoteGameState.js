@@ -5,6 +5,7 @@ import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 import Model from 'models/Model';
 import CharacterModel from 'models.shared/CharacterModel';
 import EncounterModel from 'models.shared/EncounterModel';
+import ItemModel from 'models.shared/ItemModel';
 
 import logger from 'utilities/logger.remote';
 import * as conditionUtils from 'utilities.shared/conditionUtils';
@@ -21,10 +22,12 @@ export class RemoteGamestateModel extends Model {
       /** @type {GamestateObject | undefined} */
       gamestate: undefined,
       /** @type {Object | undefined} */
-      myCharacter: undefined,
+      myCharacter: new CharacterModel(),
 
-      /** @type {EncounterModel | null} */
-      activeEncounter: null,
+      /** @type {Boolean} */
+      showEncounterModal: false,
+      /** @type {EncounterModel} */
+      activeEncounter: new EncounterModel(),
 
       // -- tile map options
       /** @type {Boolean} */
@@ -41,19 +44,7 @@ export class RemoteGamestateModel extends Model {
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, (data) => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.UPDATE');
 
-      const {
-        myCharacter,
-      } = data;
-
-      // convert positional Coordinates into points
-      // @todo - fix this ugly
-      const myCharacterData = myCharacter ? {
-        ...myCharacter,
-        position: new Point(myCharacter.position.x, myCharacter.position.y),
-      } : {};
-
       this.set({
-        myCharacter: myCharacterData,
         gamestate: {
           mode: data.mode,
           round: data.round,
@@ -71,17 +62,21 @@ export class RemoteGamestateModel extends Model {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER');
 
       // do a little bit of organizing before creating Model
-      const characterModel = this.get('myCharacter');
+      const convertedInventory = data.inventory.map((itemData) => new ItemModel(itemData));
       const formattedCharacterAttributes = {
         ...data,
         position: new Point(data.position.x, data.position.y),
-        inventory: data.inventory.map((itemData) => ({
-          ...itemData,
-          _doesMeetConditions: conditionUtils.doesMeetAllConditions(characterModel, itemData.conditionList)
-        }))
+        inventory: convertedInventory,
       };
 
-      this.set({myCharacter: new CharacterModel(formattedCharacterAttributes)});
+      const newCharacterModel = new CharacterModel(formattedCharacterAttributes);
+      const formattedInventory = convertedInventory.map((itemModel) => {
+        itemModel.set({_hasMetConditions: itemModel.canBeUsedBy(newCharacterModel)});
+        return itemModel;
+      });
+      newCharacterModel.set({inventory: formattedInventory});
+
+      this.set({myCharacter: newCharacterModel});
     });
 
     // Game is giving us an Encounter
@@ -90,21 +85,30 @@ export class RemoteGamestateModel extends Model {
 
       // do a little bit of organizing before creating Model
       const characterModel = this.get('myCharacter');
-      const formmatedEncounterAttributes = {
-        ...data,
-        actionList: data.actionList.map((actionData) => ({
-          ...actionData,
-          _doesMeetConditions: conditionUtils.doesMeetAllConditions(characterModel, actionData.conditionList)
-        }))
-      }
+      const encounterModel = new EncounterModel(data);
 
-      this.set({activeEncounter: new EncounterModel(formmatedEncounterAttributes)});
+      const formattedActionList = data.actionList.map((actionData) => ({
+        ...actionData,
+        _hasMetConditions: conditionUtils.doesMeetAllConditions(actionData.conditionList, characterModel, encounterModel),
+      }));
+      encounterModel.set({actionList: formattedActionList});
+
+      const formattedTriggerList = data.triggerList.map((triggerData) => ({
+        ...triggerData,
+        _hasMetConditions: conditionUtils.doesMeetAllConditions(triggerData.conditionList, characterModel, encounterModel),
+      }));
+      encounterModel.set({triggerList: formattedTriggerList});
+
+      this.set({
+        activeEncounter: encounterModel,
+        showEncounterModal: true,
+      });
     });
 
     // Game is closing (removing) the Encounter
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.CLOSE_ENCOUNTER, () => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.CLOSE_ENCOUNTER');
-      this.set({activeEncounter: null});
+      this.set({showEncounterModal: false});
     });
 
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.END, () => {
@@ -112,7 +116,7 @@ export class RemoteGamestateModel extends Model {
 
       this.set({
         gamestate: undefined,
-        activeEncounter: null,
+        activeEncounter: new EncounterModel(),
       });
     });
   }

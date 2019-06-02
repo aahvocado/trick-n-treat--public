@@ -2,6 +2,8 @@ import Point from '@studiomoniker/point';
 
 import Model from 'models.shared/Model';
 
+import * as conditionUtils from 'utilities.shared/conditionUtils';
+
 /**
  * @typedef {Model} EncounterModel
  */
@@ -18,6 +20,8 @@ export default class EncounterModel extends Model {
       content: '',
       /** @type {Array<ActionData>} */
       actionList: [],
+      /** @type {Array<ConditionData>} */
+      conditionList: [],
       /** @type {Array<TagId>} */
       tagList: [],
       /** @type {Array<TriggerData>} */
@@ -28,44 +32,106 @@ export default class EncounterModel extends Model {
       location: new Point(),
 
       // -- instance data
-      /** @type {Number} */
-      triggerCount: 0,
       /** @type {Array<CharacterModel>} */
       visitors: [],
-      //
+      /** @type {Array<CharacterModel>} */
+      trickers: [],
+      /** @type {Array<CharacterModel>} */
+      treaters: [],
+      /** @type {Object} */
       ...newAttributes,
     });
   }
-  // -- instance methods
   /**
-   * base function that will be called when a character gets on this
+   * called when Character triggers this
    *
    * @param {CharacterModel} characterModel
    */
-  trigger(characterModel) {
-    this.set({triggerCount: this.attributes.triggerCount + 1});
+  addVisit(characterModel) {
     this.addToArray('visitors', characterModel);
   }
   /**
-   * @abstract
-   * @param {CharacterModel} characterModel
-   * @returns {Boolean}
-   */
-  canTrigger(characterModel) {
-    return !this.hasVisitedAlready(characterModel);
-  }
-  /**
-   * determines if character has done anything here
+   * get number of times a Character has visited
    *
    * @param {CharacterModel} characterModel
+   * @returns {Number}
+   */
+  getVisitsBy(characterModel) {
+    const visitors = this.get('visitors');
+    return visitors.reduce((count, character) => {
+      if (character.get('id') === characterModel.get('id')) {
+        count += 1;
+      }
+
+      return count;
+    }, 0);
+  }
+  /**
+   * get number of times a Character has Trick'd here
+   *
+   * @param {CharacterModel} characterModel
+   * @returns {Number}
+   */
+  getTricksBy(characterModel) {
+    const trickers = this.get('trickers');
+    return trickers.reduce((count, character) => {
+      if (character.get('id') === characterModel.get('id')) {
+        count += 1;
+      }
+
+      return count;
+    }, 0);
+  }
+  /**
+   * get number of times a Character has Treat'd here
+   *
+   * @param {CharacterModel} characterModel
+   * @returns {Number}
+   */
+  getTreatsBy(characterModel) {
+    const treaters = this.get('treaters');
+    return treaters.reduce((count, character) => {
+      if (character.get('id') === characterModel.get('id')) {
+        count += 1;
+      }
+
+      return count;
+    }, 0);
+  }
+  /**
+   * get Set of unique visitors
+   *
+   * @returns {Set}
+   */
+  getUniqueVisitors() {
+    const visitors = this.get('visitors');
+    return new Set(visitors);
+  }
+  /**
+   * get Set of unique trickers
+   *
+   * @returns {Set}
+   */
+  getUniqueTrickers() {
+    const trickers = this.get('trickers');
+    return new Set(trickers);
+  }
+  /**
+   * get Set of unique treaters
+   *
+   * @returns {Set}
+   */
+  getUniqueTreaters() {
+    const treaters = this.get('treaters');
+    return new Set(treaters);
+  }
+  /**
+   * @param {CharacterModel} characterModel
    * @returns {Boolean}
    */
-  hasVisitedAlready(characterModel) {
-    const visitors = this.get('visitors');
-    if (visitors.includes(characterModel)) {
-      return true;
-    }
-
-    return false;
+  canBeEncounteredBy(characterModel) {
+    const conditionList = this.get('conditionList');
+    const doesMeetAllConditions = conditionUtils.doesMeetAllConditions(conditionList, characterModel, this);
+    return doesMeetAllConditions;
   }
 }

@@ -5,28 +5,27 @@ import { observer } from 'mobx-react';
 import Point from '@studiomoniker/point';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {
-  faBacon,
   faCircle,
-  faDove,
-  faHeart,
   faPause,
   faPlay,
-  faRunning,
 } from '@fortawesome/free-solid-svg-icons'
 
-import {
-  TILE_TYPES_NAME,
-} from 'constants.shared/tileTypes';
 import {
   TILE_SIZE,
 } from 'constants/mapConstants';
 
+import {
+  TILE_TYPES_NAME,
+} from 'constants.shared/tileTypes';
+import {STAT_ID} from 'constants.shared/statIds';
+
 import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 import ModalComponent from 'common-components/ModalComponent';
 
+import EncounterModalComponent from 'components/EncounterModalComponent';
+import GameIconComponent from 'components/GameIconComponent';
 import InventoryComponent from 'components/InventoryComponent';
 import TileMapComponent from 'components/TileMapComponent';
-import EncounterModalComponent from 'components/EncounterModalComponent';
 
 import {MAP_CONTAINER_WIDTH} from 'constants/mapConstants';
 
@@ -57,7 +56,7 @@ class UserGamePage extends Component {
     this.handleOnTileClick = this.handleOnTileClick.bind(this);
 
     this.handleMoveToOnClick = this.handleMoveToOnClick.bind(this);
-    this.onClickEncounterAction = this.onClickEncounterAction.bind(this);
+    this.onClickChoice = this.onClickChoice.bind(this);
 
     this.state = {
       /** @type {Point} */
@@ -89,11 +88,12 @@ class UserGamePage extends Component {
     const gamestate = remoteGameState.get('gamestate');
     const myCharacter = remoteGameState.get('myCharacter');
     const activeEncounter = remoteGameState.get('activeEncounter');
+    const showEncounterModal = remoteGameState.get('showEncounterModal');
     const useZoomedOutMap = remoteGameState.get('useZoomedOutMap');
     const useFullyVisibleMap = remoteGameState.get('useFullyVisibleMap');
 
     // represent "loading" for now
-    if (gamestate === undefined) {
+    if (gamestate === undefined || myCharacter === undefined) {
       return <div className='color-white bg-secondary flex-auto pad-v-2 flex-center flex-col width-full talign-center'>(waiting for map data)</div>
     }
 
@@ -102,8 +102,6 @@ class UserGamePage extends Component {
       selectedPath,
       showModal,
     } = this.state;
-
-    const hasActiveEncounter = activeEncounter !== null;
 
     return (
       <div className='bg-secondary flex-auto flex-center flex-col width-full talign-center'>
@@ -118,51 +116,51 @@ class UserGamePage extends Component {
           onClickOverlay={() => { this.toggleItemModal(false); }}
         >
           <InventoryComponent
-            inventory={myCharacter.inventory}
+            inventory={myCharacter.get('inventory')}
             onClickUseItem={this.onClickUseItem}
           />
         </ModalComponent>
 
         {/* Encounter Modal */}
         <EncounterModalComponent
-          active={hasActiveEncounter}
-          onClickAction={this.onClickEncounterAction}
-          encounterData={hasActiveEncounter ? activeEncounter.export() : {}}
+          active={showEncounterModal}
+          onClickAction={this.onClickChoice}
+          encounterData={activeEncounter.export()}
         />
 
         {/* Stat Bar */}
         <div className='color-white flex-row-center pad-v-1'>
           <span className='adjacent-mar-l-2'>
-            <FontAwesomeIcon icon={faHeart} />
-            <span className='fsize-5 mar-l-1'>{myCharacter.health}</span>
+            <span className='fsize-5 mar-r-1'>{myCharacter.get('health')}</span>
+            <GameIconComponent statId={STAT_ID.HEALTH} />
           </span>
 
           <FontAwesomeIcon className='adjacent-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
 
           <span className='adjacent-mar-l-2'>
-            <FontAwesomeIcon icon={faRunning} />
-            <span className='fsize-5 mar-l-1'>{myCharacter.movement}</span>
+            <span className='fsize-5 mar-r-1'>{myCharacter.get('movement')}</span>
+            <GameIconComponent statId={STAT_ID.MOVEMENT} />
           </span>
 
           <FontAwesomeIcon className='adjacent-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
 
           <span className='adjacent-mar-l-2'>
-            <FontAwesomeIcon icon={faBacon} />
-            <span className='fsize-5 mar-l-1'>{myCharacter.candies}</span>
+            <span className='fsize-5 mar-r-1'>{myCharacter.get('candies')}</span>
+            <GameIconComponent statId={STAT_ID.CANDIES} />
           </span>
 
           <FontAwesomeIcon className='adjacent-mar-l-2 fsize-1 color-tertiary' icon={faCircle} />
 
           <span className='adjacent-mar-l-2'>
-            <FontAwesomeIcon icon={faDove} />
-            <span className='fsize-5 mar-l-1'>{myCharacter.sanity}</span>
+            <span className='fsize-5 mar-r-1'>{myCharacter.get('sanity')}</span>
+            <GameIconComponent statId={STAT_ID.SANITY} />
           </span>
         </div>
 
         {/* Info Bar */}
         <div className='flex-row-center bg-primary pad-v-1 color-tertiary'>
           <div className='flex-none adjacent-mar-l-2'>
-            <FontAwesomeIcon icon={myCharacter.isActiveCharacter ? faPlay : faPause} />
+            <FontAwesomeIcon icon={myCharacter.get('isActiveCharacter') ? faPlay : faPause} />
           </div>
 
           <div className='flex-none adjacent-mar-l-2' >{`Round ${gamestate.round}`}</div>
@@ -218,7 +216,7 @@ class UserGamePage extends Component {
     const myCharacter = remoteGameState.get('myCharacter');
 
     const grid = mapUtils.createGridForPathfinding(gamestateHelper.getVisibileTileMapData());
-    const aStarPath = mapUtils.getAStarPath(grid, myCharacter.position, tilePosition);
+    const aStarPath = mapUtils.getAStarPath(grid, myCharacter.get('position'), tilePosition);
 
     this.setState({
       selectedTilePos: tilePosition,
@@ -230,7 +228,7 @@ class UserGamePage extends Component {
    */
   canMove() {
     const myCharacter = remoteGameState.get('myCharacter');
-    if (!myCharacter.isActiveCharacter) {
+    if (!myCharacter.get('isActiveCharacter')) {
       return false;
     }
 
@@ -250,14 +248,14 @@ class UserGamePage extends Component {
     const myCharacter = remoteGameState.get('myCharacter');
     const {selectedTilePos} = this.state;
 
-    return myCharacter.position.equals(selectedTilePos);
+    return myCharacter.get('position').equals(selectedTilePos);
   }
   /**
    * Move action
    */
   handleMoveToOnClick() {
     const myCharacter = remoteGameState.get('myCharacter');
-    if (!myCharacter.isActiveCharacter) {
+    if (!myCharacter.get('isActiveCharacter')) {
       return;
     }
 
@@ -269,12 +267,12 @@ class UserGamePage extends Component {
   /**
    * selected an action from the Encounter
    *
-   * @param {ActionId} actionId
+   * @param {ChoiceId} choiceId
    */
-  onClickEncounterAction(actionData) {
+  onClickChoice(actionData) {
     const activeEncounter = remoteGameState.get('activeEncounter');
 
-    logger.user(`User selected "${actionData.actionId}" for encounter "${activeEncounter.get('id')}"`);
+    logger.user(`User selected "${actionData.choiceId}" for encounter "${activeEncounter.get('id')}"`);
     connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.CHOSE_ACTION, activeEncounter.get('id'), actionData);
   }
   /**

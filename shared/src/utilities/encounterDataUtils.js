@@ -1,5 +1,5 @@
 import {DATA_TYPE} from 'constants.shared/dataTypes';
-import {ENCOUNTER_ACTION_ID} from 'constants.shared/encounterActions'
+import {CHOICE_ID} from 'constants.shared/choiceIds'
 
 /**
  * @todo - json validation
@@ -25,9 +25,11 @@ export function getBlankTemplate() {
     title: '',
     content: '',
     tagList: [],
+    conditionList: [],
     actionList: [{
+      dataType: DATA_TYPE.ACTION,
       label: 'Okay',
-      actionId: ENCOUNTER_ACTION_ID.CONFIRM
+      choiceId: CHOICE_ID.CONFIRM,
     }],
     triggerList: [],
   }

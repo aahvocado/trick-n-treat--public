@@ -44,7 +44,9 @@ export function sendEncounterToClient(clientModel, encounterModel) {
  */
 export function sendMyCharacter(clientModel) {
   logger.verbose(`. (sendMyCharacter() - "${clientModel.get('name')}")`);
-  clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, clientModel.export());
+  const clientId = clientModel.get('clientId');
+  const characterModel = gameState.findCharacterByClientId(clientId);
+  clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, characterModel.export());
 }
 /**
  * sends data related to the Lobby if they are in game or now
@@ -78,15 +80,12 @@ export function sendGameUpdate() {
 
   // send each Client the data and their individual info
   clients.forEach((clientModel) => {
-    const clientId = clientModel.get('clientId');
-    const characterModel = gameState.findCharacterByClientId(clientId);
+    sendMyCharacter(clientModel);
 
     clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, {
       mapData: formattedMapData,
       mode: gameState.get('mode'),
       round: gameState.get('round'),
-
-      myCharacter: characterModel.export(),
     });
   });
 }

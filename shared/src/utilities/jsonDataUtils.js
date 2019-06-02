@@ -8,17 +8,17 @@
 
 /**
  * @typedef {Object} ActionData
- * @property {ActionId} ActionData.actionId
+ * @property {ChoiceId} ActionData.choiceId
  * @property {String} ActionData.label
  *
  * @typedef {Object} TriggerData
- * @property {TriggerId} TriggerData.triggerId
+ * @property {TriggerLogicId} TriggerData.triggerLogicId
  * @property {Number | Point} TriggerData.value
  * @property {Array<ConditionData>} TriggerData.conditionList
  *
  * @typedef {Object} ConditionData
- * @property {ConditionId} ConditionData.conditionId
- * @property {ConditionTargetId} ConditionData.conditionTargetId
+ * @property {ConditionLogicId} ConditionData.conditionLogicId
+ * @property {TargetId} ConditionData.targetId
  * @property {Number | Point} ConditionData.value
  */
 

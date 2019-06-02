@@ -31,6 +31,11 @@ export const TAG_ID = {
   PLANKS: 'TAG_ID.PLANKS',
   WOODS: 'TAG_ID.WOODS',
 
+  // -- rarity, might change later
+  COMMON: 'TAG_ID.COMMON',
+  UNCOMMON: 'TAG_ID.UNCOMMON',
+  RARE: 'TAG_ID.RARE',
+
   // -- debugging?
   DEBUG: 'TAG_ID.DEBUG',
 };

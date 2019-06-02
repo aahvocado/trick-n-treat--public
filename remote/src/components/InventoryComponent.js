@@ -7,7 +7,7 @@ import ButtonComponent from 'common-components/ButtonComponent';
  */
 export default class InventoryComponent extends PureComponent {
   static defaultProps = {
-    /** @type {Array} */
+    /** @type {Array<ItemModel>} */
     inventory: [],
     /** @type {Function} */
     onClickUseItem: () => {},
@@ -21,15 +21,18 @@ export default class InventoryComponent extends PureComponent {
 
     return (
       <div className='position-relative width-full mar-v-2'>
-        { inventory.map((itemData, idx) => (
-          <InventoryItem
-            key={`inventory-item-${idx}-key`}
-            onClick={() => {
-              onClickUseItem(itemData);
-            }}
-            {...itemData}
-          />
-        ))}
+        { inventory.map((itemModel, idx) => {
+          const itemData = itemModel.export();
+          return (
+            <InventoryItem
+              key={`inventory-item-${idx}-key`}
+              onClick={() => {
+                onClickUseItem(itemData);
+              }}
+              {...itemData}
+            />
+          )
+        })}
       </div>
     )
   }
@@ -49,9 +52,10 @@ export class InventoryItem extends PureComponent {
     const {
       // description,
       id,
+      isUseable,
       name,
       onClick,
-      _doesMeetConditions,
+      _hasMetConditions,
     } = this.props;
 
     return (
@@ -64,13 +68,15 @@ export class InventoryItem extends PureComponent {
             <div className='fsize-4'>{name}</div>
           </div>
 
-          <ButtonComponent
-            className='flex-none'
-            disabled={!_doesMeetConditions}
-            onClick={onClick}
-          >
-            use
-          </ButtonComponent>
+          { isUseable &&
+            <ButtonComponent
+              className='flex-none'
+              disabled={!_hasMetConditions}
+              onClick={onClick}
+            >
+              use
+            </ButtonComponent>
+          }
         </div>
       </div>
     )

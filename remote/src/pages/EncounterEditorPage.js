@@ -8,7 +8,8 @@ import {
   faTimes,
 } from '@fortawesome/free-solid-svg-icons'
 
-import { ENCOUNTER_ACTION_ID } from 'constants.shared/encounterActions';
+import {DATA_TYPE} from 'constants.shared/dataTypes';
+import {CHOICE_ID, GOTO_CHOICE_ID_LIST} from 'constants.shared/choiceIds';
 
 import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 import DropdownComponent from 'common-components/DropdownComponent';
@@ -19,11 +20,12 @@ import TextInputComponent from 'common-components/TextInputComponent';
 
 import ActionListDropdown from 'components/ActionListDropdown';
 import ConditionEditorComponent from 'components/ConditionEditorComponent';
+import ConditionLogicDropdown from 'components/ConditionLogicDropdown';
 import EncounterModalComponent from 'components/EncounterModalComponent';
 import TagEditorComponent from 'components/TagEditorComponent';
 import TagListDropdown from 'components/TagListDropdown';
 import TriggerEditorComponent from 'components/TriggerEditorComponent';
-import TriggerListDropdown from 'components/TriggerListDropdown';
+import TriggerLogicListDropdown from 'components/TriggerLogicListDropdown';
 
 import ENCOUNTER_DATA from 'data.shared/encounterData.json';
 
@@ -67,6 +69,10 @@ class EncounterEditorPage extends Component {
     this.removeAction = this.removeAction.bind(this);
     this.updateAction = this.updateAction.bind(this);
     this.addConditionToAction = this.addConditionToAction.bind(this);
+
+    this.onChangeConditionData = this.onChangeConditionData.bind(this);
+    this.onRemoveCondition = this.onRemoveCondition.bind(this);
+    this.addCondition = this.addCondition.bind(this);
 
     this.addTrigger = this.addTrigger.bind(this);
     this.removeTrigger = this.removeTrigger.bind(this);
@@ -133,7 +139,7 @@ class EncounterEditorPage extends Component {
         <EncounterModalComponent
           active={showPreview}
           onClickOverlay={this.togglePreviewModal}
-          {...activeEncounterData}
+          encounterData={activeEncounterData}
         />
 
         <h2 className='bg-secondary fsize-4 pad-v-1 width-full talign-center'>
@@ -172,6 +178,10 @@ class EncounterEditorPage extends Component {
             onClickRemoveAction={this.removeAction}
             onSelectNewAction={this.addAction}
             onClickAddActionCondition={this.addConditionToAction}
+
+            onChangeConditionData={this.onChangeConditionData}
+            onRemoveCondition={this.onRemoveCondition}
+            onSelectNewCondition={this.addCondition}
 
             onChangeTriggerData={this.updateTrigger}
             onClickRemoveTrigger={this.removeTrigger}
@@ -423,8 +433,17 @@ class EncounterEditorPage extends Component {
     actionList[idx] = actionData;
 
     // if it is no longer a "go to" action, then clear out the id
-    if (actionData.actionId !== ENCOUNTER_ACTION_ID.GOTO) {
+    const isGoto = GOTO_CHOICE_ID_LIST.includes(actionData.choiceId);
+    if (!isGoto) {
       actionData.gotoId = undefined;
+    }
+
+    if (isGoto && actionData.choiceId === CHOICE_ID.TRICK) {
+      actionData.label = 'Trick';
+    }
+
+    if (isGoto && actionData.choiceId === CHOICE_ID.TREAT) {
+      actionData.label = 'Treat';
     }
 
     // update the data
@@ -436,15 +455,16 @@ class EncounterEditorPage extends Component {
   /**
    * adds a new Action to the active Encounter
    *
-   * @param {ActionId} [actionId]
+   * @param {ChoiceId} [choiceId]
    */
-  addAction(actionId) {
+  addAction(choiceId) {
     const { activeEncounterData } = this.state;
     const { actionList } = activeEncounterData;
 
     // add it
     actionList.push({
-      actionId: actionId,
+      dataType: DATA_TYPE.ACTION,
+      choiceId: choiceId,
       label: '',
     });
 
@@ -457,10 +477,10 @@ class EncounterEditorPage extends Component {
   /**
    * remove Action
    *
-   * @param {ActionId} actionId
+   * @param {ChoiceId} choiceId
    * @param {Number} idx
    */
-  removeAction(actionId, idx) {
+  removeAction(choiceId, idx) {
     const { activeEncounterData } = this.state;
     const { actionList } = activeEncounterData;
 
@@ -486,8 +506,8 @@ class EncounterEditorPage extends Component {
     // add a new blank condition
     const conditionList = jsonDataUtils.getConditionList(actionData);
     conditionList.push({
-      conditionId: undefined,
-      conditionTargetId: undefined,
+      conditionLogicId: undefined,
+      targetId: undefined,
       value: 1,
     });
 
@@ -502,22 +522,76 @@ class EncounterEditorPage extends Component {
     });
   }
   /**
+   * adds a new Condition to the active Data
+   *
+   * @param {ConditionLogicId} conditionLogicId
+   */
+  addCondition(conditionLogicId) {
+    const { activeEncounterData } = this.state;
+    const { conditionList } = activeEncounterData;
+
+    // add it
+    conditionList.push({
+      dataType: DATA_TYPE.CONDITION,
+      conditionLogicId: conditionLogicId,
+      targetId: undefined,
+    });
+
+    // update the data
+    this.setState({
+      activeEncounterData: deepClone(activeEncounterData),
+      hasChanges: true,
+    });
+  }
+  /**
+   *
+   */
+  onChangeConditionData(conditionData, conditionLogicIdx) {
+    const { activeEncounterData } = this.state;
+
+    // change the data
+    activeEncounterData.conditionList[conditionLogicIdx] = conditionData;
+
+    // update the data
+    this.setState({
+      activeEncounterData: deepClone(activeEncounterData),
+      hasChanges: true,
+    });
+  }
+  /**
+   *
+   */
+  onRemoveCondition(idx) {
+    const { activeEncounterData } = this.state;
+
+    // change the data
+    const conditionList = activeEncounterData.conditionList || [];
+    conditionList.splice(idx, 1);
+
+    // update the data
+    this.setState({
+      activeEncounterData: deepClone(activeEncounterData),
+      hasChanges: true,
+    });
+  }
+  /**
    * adds a new Trigger to the active Encounter
    *
-   * @param {TriggerId} triggerId
+   * @param {TriggerLogicId} triggerLogicId
    */
-  addTrigger(triggerId) {
+  addTrigger(triggerLogicId) {
     const { activeEncounterData } = this.state;
     const { triggerList } = activeEncounterData;
 
     // do not add duplicates
-    if (triggerList.find(t => t.triggerId === triggerId)) {
+    if (triggerList.find(t => t.triggerLogicId === triggerLogicId)) {
       return;
     }
 
     // add it
     triggerList.push({
-      triggerId: triggerId,
+      dataType: DATA_TYPE.TRIGGER,
+      triggerLogicId: triggerLogicId,
       value: 1,
     });
 
@@ -530,10 +604,10 @@ class EncounterEditorPage extends Component {
   /**
    * remove Trigger
    *
-   * @param {TriggerId} triggerId
+   * @param {TriggerLogicId} triggerLogicId
    * @param {Number} idx
    */
-  removeTrigger(triggerId, idx) {
+  removeTrigger(triggerLogicId, idx) {
     const { activeEncounterData } = this.state;
     const { triggerList } = activeEncounterData;
 
@@ -578,8 +652,9 @@ class EncounterEditorPage extends Component {
     // add a new blank condition
     const conditionList = jsonDataUtils.getConditionList(triggerData);
     conditionList.push({
-      conditionId: undefined,
-      conditionTargetId: undefined,
+      dataType: DATA_TYPE.CONDITION,
+      conditionLogicId: undefined,
+      targetId: undefined,
       value: 1,
     });
 
@@ -762,6 +837,10 @@ class EncounterEditorViewer extends Component {
       onSelectNewAction,
       onClickAddActionCondition,
 
+      onChangeConditionData,
+      onRemoveCondition,
+      onSelectNewCondition,
+
       onChangeTriggerData,
       onClickRemoveTrigger,
       onSelectNewTrigger,
@@ -777,6 +856,7 @@ class EncounterEditorViewer extends Component {
       title,
       content,
       actionList,
+      conditionList,
       tagList,
       triggerList,
     } = activeEncounterData;
@@ -818,11 +898,38 @@ class EncounterEditorViewer extends Component {
 
         <ViewerDivider />
 
+        {/* Condition List */}
+        <ViewerRow>
+          <ViewerHeader>Trigger Condition</ViewerHeader>
+
+          <ConditionLogicDropdown
+            className='flex-auto bor-1-gray adjacent-mar-t-2'
+            placeholder='Add New Trigger Condition...'
+            onSelect={onSelectNewCondition}
+          />
+
+          { conditionList.map((conditionData, idx) => (
+            <ConditionEditorComponent
+              key={`viewer-trigger-item-condition-row-${idx}-key`}
+              className='bor-1-gray adjacent-mar-t-2'
+              data={conditionData}
+              onEdit={(updatedData) => {
+                onChangeConditionData(updatedData, idx);
+              }}
+              onClickRemove={() => {
+                onRemoveCondition(idx);
+              }}
+            />
+          ))}
+        </ViewerRow>
+
+        <ViewerDivider />
+
         {/* Trigger List */}
         <ViewerRow>
           <ViewerHeader>Triggers</ViewerHeader>
 
-          <TriggerListDropdown
+          <TriggerLogicListDropdown
             className='fsize-3 bor-1-gray adjacent-mar-t-2'
             placeholder='New Trigger...'
             canSearch={true}
@@ -832,7 +939,7 @@ class EncounterEditorViewer extends Component {
           <div className='fsize-3 flex-col adjacent-mar-t-2'>
             { triggerList.map((triggerData, idx) => (
               <TriggerEditorComponent
-                key={`trigger-item-${triggerData.triggerId}-${idx}-key`}
+                key={`trigger-item-${triggerData.triggerLogicId}-${idx}-key`}
                 data={triggerData}
                 onEdit={(updatedData) => {
                   onChangeTriggerData(updatedData, idx);
@@ -861,19 +968,19 @@ class EncounterEditorViewer extends Component {
           <div className='flex-col adjacent-mar-t-2'>
             { actionList.map((actionData, idx) => (
               <ViewerActionItem
-                key={`action-item-${actionData.actionId}-${idx}-key`}
+                key={`action-item-${actionData.choiceId}-${idx}-key`}
                 label={actionData.label}
-                actionId={actionData.actionId}
+                choiceId={actionData.choiceId}
                 gotoId={actionData.gotoId}
                 options={encounterList.map((item) => ({
                   data: item.id,
                   id: item.id,
                   label: item.title,
                 }))}
-                onSelectAction={(actionId) => {
+                onSelectAction={(choiceId) => {
                   onChangeActionData({
                     ...actionData,
-                    actionId: actionId,
+                    choiceId: choiceId,
                   }, idx);
                 }}
                 onSelectGoto={(gotoId) => {
@@ -892,8 +999,8 @@ class EncounterEditorViewer extends Component {
 
                 conditionList={actionData.conditionList || []}
                 onClickAddCondition={() => { onClickAddActionCondition(actionData, idx); }}
-                onChangeConditionData={(conditionData, conditionIdx) => {
-                  actionData.conditionList[conditionIdx] = conditionData;
+                onChangeConditionData={(conditionData, conditionLogicIdx) => {
+                  actionData.conditionList[conditionLogicIdx] = conditionData;
 
                   onChangeActionData({
                     ...actionData,
@@ -990,7 +1097,7 @@ const ViewerActionItem = (props) => (
       <ActionListDropdown
         className='bor-0-transparent adjacent-mar-t-2'
         showButton={false}
-        selectedOption={{id: props.actionId}}
+        selectedOption={{id: props.choiceId}}
         onSelect={props.onSelectAction}
       />
 
@@ -1010,7 +1117,7 @@ const ViewerActionItem = (props) => (
     </div>
 
     {/* Encounter to "go to" */}
-    { props.actionId === ENCOUNTER_ACTION_ID.GOTO &&
+    { GOTO_CHOICE_ID_LIST.includes(props.choiceId) &&
       <div className='bg-white flex-row-center bor-h-1-gray bor-b-1-gray'>
         <div className='flex-none pad-1 bor-r-1-gray color-grayer'>Goes to Encounter</div>
         <DropdownComponent
