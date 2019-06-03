@@ -39,7 +39,7 @@ export const TARGET_ID = {
   },
 };
 /** @type {Array<TargetId>} */
-export const TARGET_ID_LIST = convertObjectToArray(TARGET_ID);
+export const TARGET_ID_LIST = convertObjectToArray(TARGET_ID, {flatten: true});
 /**
  * list of all targets that depend on a Character
  */

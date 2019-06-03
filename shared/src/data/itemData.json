@@ -106,7 +106,8 @@
       "TAG_ID.QUEST",
       "TAG_ID.RARE",
       "TAG_ID.ITEM",
-      "TAG_ID.SIDEWALK"
+      "TAG_ID.SIDEWALK",
+      "TAG_ID.UNCOMMON"
     ],
     "triggerList": []
   },
@@ -137,5 +138,79 @@
     ],
     "triggerList": [],
     "isUseable": false
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.BIG_GUMMY_BEAR",
+    "isConsumable": true,
+    "isKeyItem": false,
+    "name": "Gummy Bear",
+    "description": "Yeah, there's only one because this gummy is the size of your head. Just looking at it makes your eyes nearly just as big.",
+    "conditionList": [],
+    "tagList": [
+      "TAG_ID.ITEM",
+      "TAG_ID.UNCOMMON"
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1,
+        "targetId": "TARGET_ID.CHARACTER.GREED"
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 3,
+        "targetId": "TARGET_ID.CHARACTER.HEALTH"
+      }
+    ],
+    "isUseable": true
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.CHOCOLATE_COVERED_PEANUTS_N_PRETZELS",
+    "isConsumable": true,
+    "isKeyItem": false,
+    "name": "Chocolate Covered P&Ps",
+    "description": "Ugh, this might be candy because it's chocolate covered but it's just a smooshed chunk of peanuts and pretzels that it's going to hurt your mouth so much if you eat it.",
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "value": 1
+      }
+    ],
+    "tagList": [
+      "TAG_ID.ITEM",
+      "TAG_ID.UNCOMMON"
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 2,
+        "targetId": "TARGET_ID.CHARACTER.HEALTH"
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 3,
+        "targetId": "TARGET_ID.CHARACTER.SANITY"
+      }
+    ],
+    "isUseable": true
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.LONNIE_NECKLACE",
+    "isConsumable": false,
+    "isKeyItem": true,
+    "name": "Lonnie's Necklace",
+    "description": "This necklace is a shiny silver color depicting a half moon. Supposedly the other half belongs to Monnie because they separated after fighting over a caramel chocolate bar at Monnie's house. ",
+    "conditionList": [],
+    "tagList": [],
+    "triggerList": []
   }
 ]

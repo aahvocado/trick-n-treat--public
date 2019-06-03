@@ -19,9 +19,6 @@ import {
   isNumberTriggerLogic,
 } from 'utilities.shared/triggerLogicUtils';
 
-import * as targetUtils from 'utilities.shared/targetUtils';
-
-
 /**
  *
  */
@@ -75,10 +72,8 @@ export default class TriggerEditorComponent extends PureComponent {
             onSelect={this.onSelectTrigger}
           />
 
-
-
           {/* trigger changes a Number */}
-          { isNumberTriggerLogic(triggerLogicId) && targetUtils.isCharacterTarget(targetId) &&
+          { isNumberTriggerLogic(triggerLogicId) &&
             <Fragment>
               <TriggerTargetListDropdown
                 className='bor-l-1-gray'
@@ -99,24 +94,13 @@ export default class TriggerEditorComponent extends PureComponent {
 
           {/* trigger gives an Item */}
           { isItemTriggerLogic(triggerLogicId) &&
-            <Fragment>
-              <TriggerTargetListDropdown
-                className='bor-l-1-gray'
-                inputSize={16}
-                showButton={false}
-                selectedOption={{id: targetId}}
-                onSelect={this.onSelectTarget}
-                disabled
-              />
-
-              <ItemEditorComponent
-                className='flex-auto'
-                data={data}
-                onEdit={(updatedData) => {
-                  this.props.onEdit(updatedData);
-                }}
-              />
-            </Fragment>
+            <ItemEditorComponent
+              className='flex-auto'
+              data={data}
+              onEdit={(updatedData) => {
+                this.props.onEdit(updatedData);
+              }}
+            />
           }
 
           <IconButtonComponent

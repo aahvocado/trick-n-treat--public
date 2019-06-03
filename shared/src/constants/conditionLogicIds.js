@@ -9,6 +9,7 @@ export const CONDITION_LOGIC_ID = {
   GREATER_THAN: 'CONDITION_LOGIC_ID.GREATER_THAN',
 
   HAS_ITEM: 'CONDITION_LOGIC_ID.HAS_ITEM',
+  DOES_NOT_HAVE_ITEM: 'CONDITION_LOGIC_ID.DOES_NOT_HAVE_ITEM',
 };
 /** @type {Array<ConditionLogicId>} */
 export const CONDITION_LOGIC_ID_LIST = convertObjectToArray(CONDITION_LOGIC_ID);
@@ -17,6 +18,7 @@ export const CONDITION_LOGIC_ID_LIST = convertObjectToArray(CONDITION_LOGIC_ID);
  */
 export const ITEM_CONDITION_LOGIC_ID_LIST = [
   CONDITION_LOGIC_ID.HAS_ITEM,
+  CONDITION_LOGIC_ID.DOES_NOT_HAVE_ITEM,
 ];
 /**
  * list of all triggers that utilize the numerical "value" property

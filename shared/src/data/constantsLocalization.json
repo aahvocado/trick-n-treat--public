@@ -4,6 +4,7 @@
   "CONDITION_LOGIC_ID.GREATER_THAN": "Greater Than",
   "CONDITION_LOGIC_ID.AT_LOCATION": "Character at Location",
   "CONDITION_LOGIC_ID.HAS_ITEM": "Character has Item",
+  "CONDITION_LOGIC_ID.DOES_NOT_HAVE_ITEM": "Character does not have Item",
 
   "CHOICE_ID.CONFIRM": "Confirm",
   "CHOICE_ID.GOTO": "Go To",

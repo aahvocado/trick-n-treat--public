@@ -44,9 +44,18 @@ export function getItemLogicFunction(conditionData) {
     itemId,
   } = conditionData;
 
-  return (inventoryList) => {
-    const matchingItem = inventoryList.find((itemModel) => (itemModel.get('id') === itemId));
-    return matchingItem !== undefined;
+  if (conditionLogicId === CONDITION_LOGIC_ID.HAS_ITEM) {
+    return (inventoryList) => {
+      const matchingItem = inventoryList.find((itemModel) => (itemModel.get('id') === itemId));
+      return matchingItem !== undefined;
+    }
+  }
+
+  if (conditionLogicId === CONDITION_LOGIC_ID.DOES_NOT_HAVE_ITEM) {
+    return (inventoryList) => {
+      const matchingItem = inventoryList.find((itemModel) => (itemModel.get('id') === itemId));
+      return matchingItem === undefined;
+    }
   }
 }
 /**

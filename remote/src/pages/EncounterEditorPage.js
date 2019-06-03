@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { observer } from 'mobx-react';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircle,
+  faBan,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -27,10 +26,14 @@ import TagListDropdown from 'components/TagListDropdown';
 import TriggerEditorComponent from 'components/TriggerEditorComponent';
 import TriggerLogicListDropdown from 'components/TriggerLogicListDropdown';
 
-import ENCOUNTER_DATA from 'data.shared/encounterData.json';
+import {
+  ENCOUNTER_DATA,
+  createEncounterGroupingMap,
+} from 'helpers.shared/encounterDataHelper';
 
 import remoteAppState from 'state/remoteAppState';
 
+import combineClassNames from 'utilities/combineClassNames';
 import copyToClipboard from 'utilities/copyToClipboard';
 import download from 'utilities/download';
 
@@ -59,9 +62,12 @@ class EncounterEditorPage extends Component {
     this.deleteActiveEncounter = this.deleteActiveEncounter.bind(this);
     this.deleteEncounter = this.deleteEncounter.bind(this);
     this.saveEncounter = this.saveEncounter.bind(this);
+
     this.setActiveEncounter = this.setActiveEncounter.bind(this);
+    this.setSelectedGroupId = this.setSelectedGroupId.bind(this);
 
     this.onChangeId = this.onChangeId.bind(this);
+    this.onChangeGroupId = this.onChangeGroupId.bind(this);
     this.onChangeTitle = this.onChangeTitle.bind(this);
     this.onChangeContent = this.onChangeContent.bind(this);
 
@@ -89,6 +95,8 @@ class EncounterEditorPage extends Component {
       activeEncounterData: deepClone(ENCOUNTER_DATA[0]),
       /** @type {Array<EncounterData>} */
       encounterList: ENCOUNTER_DATA,
+      /** @type {GroupId} */
+      selectedGroupId: undefined,
 
       /** @type {Boolean} */
       hasChanges: false,
@@ -113,6 +121,7 @@ class EncounterEditorPage extends Component {
     const {
       activeEncounterData,
       encounterList,
+      selectedGroupId,
       hasChanges,
       showModal,
       showPreview,
@@ -146,11 +155,12 @@ class EncounterEditorPage extends Component {
           Encounter Editor
         </h2>
 
-        <div className='flex-row height-full bg-primary-darker'>
+        <div className='flex-col height-full bg-primary-darker'>
           {/* Menu */}
           <EncounterEditorMenu
             activeEncounterData={activeEncounterData}
             encounterList={encounterList}
+            selectedGroupId={selectedGroupId}
             hasChanges={hasChanges}
 
             onClickTogglePreviewModal={this.togglePreviewModal}
@@ -158,6 +168,8 @@ class EncounterEditorPage extends Component {
             onClickCreateNew={this.createNew}
             onClickDelete={this.deleteActiveEncounter}
             onClickSave={this.saveEncounter}
+
+            onSelectEncounterGroup={this.setSelectedGroupId}
             onSelectMenuEncounter={this.setActiveEncounter}
 
             onClickCopyCurrentData={this.copyActiveEncounterToClipboard}
@@ -171,6 +183,7 @@ class EncounterEditorPage extends Component {
             encounterList={encounterList}
 
             onChangeId={this.onChangeId}
+            onChangeGroupId={this.onChangeGroupId}
             onChangeTitle={this.onChangeTitle}
             onChangeContent={this.onChangeContent}
 
@@ -312,6 +325,23 @@ class EncounterEditorPage extends Component {
 
     // change the data
     activeEncounterData.id = encounterDataUtils.formatId(value);
+
+    // update the data
+    this.setState({
+      activeEncounterData: deepClone(activeEncounterData),
+      hasChanges: true,
+    });
+  }
+  /**
+   * the `groupId` of the ActiveEncounter was changed
+   *
+   * @param {String} value
+   */
+  onChangeGroupId(value) {
+    const { activeEncounterData } = this.state;
+
+    // change the data
+    activeEncounterData.groupId = value;
 
     // update the data
     this.setState({
@@ -583,11 +613,6 @@ class EncounterEditorPage extends Component {
     const { activeEncounterData } = this.state;
     const { triggerList } = activeEncounterData;
 
-    // do not add duplicates
-    if (triggerList.find(t => t.triggerLogicId === triggerLogicId)) {
-      return;
-    }
-
     // add it
     triggerList.push({
       dataType: DATA_TYPE.TRIGGER,
@@ -688,6 +713,12 @@ class EncounterEditorPage extends Component {
     });
   }
   /**
+   * @param {GroupId} groupId
+   */
+  setSelectedGroupId(groupId) {
+    this.setState({selectedGroupId: groupId});
+  }
+  /**
    * deletes the currently viewed Encounter
    */
   deleteActiveEncounter() {
@@ -717,104 +748,157 @@ class EncounterEditorMenu extends Component {
     const {
       activeEncounterData,
       encounterList,
+      selectedGroupId,
       hasChanges,
+      onClickTogglePreviewModal,
+
       onClickCreateNew,
+      onClickDelete,
+      onClickSave,
+
+      onSelectEncounterGroup,
       onSelectMenuEncounter,
+
       onClickCopyAllData,
       onClickCopyCurrentData,
-      onClickDelete,
       onClickDownload,
-      onClickSave,
-      onClickTogglePreviewModal,
     } = this.props;
 
     const isNewEncounter = encounterList.find(encounter => encounter.id === activeEncounterData.id) === undefined;
 
+    // create the List of Groups
+    const groupedEncounterData = createEncounterGroupingMap(encounterList);
+    const encounterDataIdList = Object.keys(groupedEncounterData);
+
+    // see if we need to show only the Encounters that belong in the Group
+    const isFilteringByGroups = selectedGroupId !== undefined;
+    const filteredEncounterList = encounterList.filter((encounterData) => (encounterData.groupId === selectedGroupId));
+
     return (
       <div
-        className='flex-col aitems-center color-white bg-primary pad-2'
-        style={{
-          width: '300px',
-        }}
+        className='flex-col color-white bg-primary pad-2'
       >
-        {/* Encounters */}
-        <MenuRow>
-          <ButtonComponent
-            className='adjacent-mar-t-2'
-            onClick={onClickCreateNew}
-          >
-            Create New
-          </ButtonComponent>
+        {/* Menu Row 1 */}
+        <div className='flex-row aitems-center adjacent-mar-t-1' >
+          <MenuSection className='flex-auto'>
+            <ButtonComponent
+              className='adjacent-mar-l-2'
+              onClick={onClickCreateNew}
+            >
+              Create New
+            </ButtonComponent>
 
-          <ButtonComponent
-            className='adjacent-mar-t-2'
-            onClick={onClickSave}
-            disabled={!hasChanges || activeEncounterData.id === 'ENCOUNTER_ID.NEW' || activeEncounterData.id === ''}
-          >
-            {`Save ${isNewEncounter ? 'New' : ''}`}
-          </ButtonComponent>
+            <ButtonComponent
+              className='adjacent-mar-l-2'
+              onClick={onClickSave}
+              disabled={!hasChanges || activeEncounterData.id === 'ENCOUNTER_ID.NEW' || activeEncounterData.id === ''}
+            >
+              {`Save ${isNewEncounter ? 'New' : ''}`}
+            </ButtonComponent>
 
-          <ButtonComponent
-            className='adjacent-mar-t-2'
-            onClick={onClickDelete}
-            disabled={isNewEncounter}
-          >
-            Delete
-          </ButtonComponent>
+            <ButtonComponent
+              className='adjacent-mar-l-2'
+              onClick={onClickDelete}
+              disabled={isNewEncounter}
+            >
+              Delete
+            </ButtonComponent>
+          </MenuSection>
 
-          <h3 className='talign-center adjacent-mar-t-2'>{`Encounters (${encounterList.length})`}</h3>
+          {/* Export options */}
+          <MenuSection className='flex-none'>
+            <ButtonComponent
+              className='adjacent-mar-l-2'
+              onClick={onClickCopyCurrentData}
+            >
+              Copy Current Data
+            </ButtonComponent>
 
-          {/* List of Encounters */}
-          <DropdownComponent
-            className='fsize-4 adjacent-mar-t-2'
-            controlClassName='pad-2'
-            selectedOption={activeEncounterData}
-            options={encounterList.map((item) => ({
-              data: item,
-              id: item.id,
-              label: item.title,
-            }))}
-            onSelect={onSelectMenuEncounter}
-            canSearch
-          />
-        </MenuRow>
+            <ButtonComponent
+              className='adjacent-mar-l-2'
+              onClick={onClickCopyAllData}
+            >
+              Copy All Data
+            </ButtonComponent>
 
-        <FontAwesomeIcon className='adjacent-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
+            <ButtonComponent
+              className='adjacent-mar-l-2'
+              onClick={onClickDownload}
+            >
+              Download encounterData.json
+            </ButtonComponent>
+          </MenuSection>
+        </div>
 
-        <MenuRow>
-          <ButtonComponent
-            className='adjacent-mar-t-2'
-            onClick={onClickTogglePreviewModal}
-          >
-            Preview Encounter
-          </ButtonComponent>
-        </MenuRow>
+        {/* Menu Row 2 */}
+        <div className='flex-row aitems-center adjacent-mar-t-1' >
+          <MenuSection className='aitems-center flex-auto'>
+            <h3 className='talign-center adjacent-mar-l-2'>{`Encounters (${encounterList.length})`}</h3>
 
-        <FontAwesomeIcon className='adjacent-mar-t-3 fsize-2 color-tertiary' icon={faCircle} />
+            <IconButtonComponent
+              className='bor-1-gray borradius-1 bg-white fsize-3 flex-none adjacent-mar-l-2'
+              icon={faBan}
+              onClick={() => { onSelectEncounterGroup(undefined) }}
+            />
 
-        {/* Export options */}
-        <MenuRow>
-          <ButtonComponent
-            className='adjacent-mar-t-2'
-            onClick={onClickCopyCurrentData}
-          >
-            Copy Current Data
-          </ButtonComponent>
+            {/* List of Groups */}
+            <DropdownComponent
+              className='flex-auto fsize-4 adjacent-mar-l-2'
+              controlClassName='pad-2'
+              placeholder='Select Group...'
+              selectedOption={{id: selectedGroupId}}
+              options={encounterDataIdList.map((item) => ({
+                data: item,
+                id: item,
+                label: item,
+              }))}
+              onSelect={onSelectEncounterGroup}
+              showButton={false}
+              canSearch
+            />
 
-          <ButtonComponent
-            className='adjacent-mar-t-2'
-            onClick={onClickCopyAllData}
-          >
-            Copy All Data
-          </ButtonComponent>
+            {/* Filtered Encounters */}
+            { isFilteringByGroups &&
+              <DropdownComponent
+                className='flex-auto fsize-4 adjacent-mar-l-2'
+                controlClassName='pad-2'
+                selectedOption={activeEncounterData}
+                options={filteredEncounterList.map((item) => ({
+                  data: item,
+                  id: item.id,
+                  label: item.title,
+                }))}
+                onSelect={onSelectMenuEncounter}
+                canSearch
+              />
+            }
 
-          <ButtonComponent
-            className='adjacent-mar-t-2'
-            onClick={onClickDownload}
-          >
-            Download encounterData.json
-          </ButtonComponent>
-        </MenuRow>
+            {/* All Encounters */}
+            { !isFilteringByGroups &&
+              <DropdownComponent
+                className='flex-auto fsize-4 adjacent-mar-l-2'
+                controlClassName='pad-2'
+                selectedOption={activeEncounterData}
+                options={encounterList.map((item) => ({
+                  data: item,
+                  id: item.id,
+                  label: item.title,
+                }))}
+                onSelect={onSelectMenuEncounter}
+                canSearch
+              />
+            }
+          </MenuSection>
+
+          <MenuSection className='flex-none'>
+            <ButtonComponent
+              className='adjacent-mar-l-2'
+              onClick={onClickTogglePreviewModal}
+            >
+              Preview Encounter
+            </ButtonComponent>
+          </MenuSection>
+        </div>
       </div>
     );
   }
@@ -829,6 +913,7 @@ class EncounterEditorViewer extends Component {
       encounterList,
 
       onChangeId,
+      onChangeGroupId,
       onChangeTitle,
       onChangeContent,
 
@@ -853,6 +938,7 @@ class EncounterEditorViewer extends Component {
 
     const {
       id,
+      groupId,
       title,
       content,
       actionList,
@@ -878,6 +964,13 @@ class EncounterEditorViewer extends Component {
             label='id'
             value={encounterDataUtils.snipIdPrefix(id)}
             onChange={(e) => { onChangeId(e.target.value) }}
+          />
+
+          <TextInputComponent
+            placeholder='Input name of Grouping (optional)'
+            label='groupId'
+            value={groupId || ''}
+            onChange={(e) => { onChangeGroupId(e.target.value) }}
           />
 
           <TextInputComponent
@@ -1007,9 +1100,9 @@ class EncounterEditorViewer extends Component {
                     conditionList: actionData.conditionList,
                   })
                 }}
-                onClickRemoveCondition={() => {
+                onClickRemoveCondition={(conditionIdx) => {
                   const conditionList = actionData.conditionList || [];
-                  conditionList.splice(idx, 1);
+                  conditionList.splice(conditionIdx, 1);
 
                   onChangeActionData({
                     ...actionData,
@@ -1055,10 +1148,10 @@ class EncounterEditorViewer extends Component {
 /**
  * section in the menu
  */
-const MenuRow = (props) => (
+const MenuSection = (props) => (
   <div
-    className='adjacent-mar-t-3 width-full flex-col'
     {...props}
+    className={combineClassNames('adjacent-mar-l-3 flex-row', props.className)}
   />
 )
 // -- Viewer

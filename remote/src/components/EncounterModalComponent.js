@@ -44,7 +44,7 @@ export default class EncounterModalComponent extends PureComponent {
         }}
         {...otherProps}
       >
-        <h2 className='adjacent-mar-t-2'>{ title }</h2>
+        <h2 className='adjacent-mar-t-2'>{title}</h2>
 
         {/* trigger display */}
         { triggersToShow.length > 0 &&
@@ -61,13 +61,13 @@ export default class EncounterModalComponent extends PureComponent {
 
         {/* narrative text */}
         <div
-          className='fsize-5 talign-center flex-col-center flex-grow-only pad-3 boxsizing-border bg-primary-darker width-full mar-h-2 adjacent-mar-t-2'
+          className='fsize-5 overflow-auto whitespace-pre-line talign-center flex-col flex-auto pad-3 boxsizing-content bg-primary-darker adjacent-mar-t-2'
         >
-          { content }
+          {`${content}`}
         </div>
 
         {/* action buttons */}
-        <div className='flex-row adjacent-mar-t-2'>
+        <div className='width-full flex-col adjacent-mar-t-2'>
           { actionList.map((actionData, idx) => {
             return (
               <ChoiceButton
@@ -111,7 +111,7 @@ class ChoiceButton extends PureComponent {
     return (
       <ButtonComponent
         {...otherProps}
-        className='fsize-4 pad-2 f-bold adjacent-mar-l-2'
+        className='fsize-4 pad-2 f-bold adjacent-mar-t-1'
         theme={BUTTON_THEME.ORANGE}
         id={choiceId}
         onClick={this.onClickButton.bind(this)}
