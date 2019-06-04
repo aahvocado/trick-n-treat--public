@@ -36,7 +36,7 @@ export class RemoteStateModel extends Model {
       isInGame: false,
       /** @type {Boolean} */
       isGameInProgress: false,
-      /** @type {Array<String>} */
+      /** @type {Array<Object>} */
       lobbyData: [],
 
       // -- websocket connection status

@@ -7,7 +7,7 @@ import {
 /**
  * does a deep conversion of all given (Model) attributes to plain JS
  *
- * @param  {Observable} attributes
+ * @param   {Observable} attributes
  * @returns {Object}
  */
 export default function convertObservableToJs(attributes) {
@@ -16,7 +16,7 @@ export default function convertObservableToJs(attributes) {
 
   const keys = Object.keys(stateObject);
   keys.forEach((attributeName) => {
-    const attributeValue = get(attributes, attributeName);
+    const attributeValue = stateObject[attributeName];
 
     // no need to do anything more with null
     if (attributeValue === null || attributeValue === undefined) {
@@ -24,8 +24,8 @@ export default function convertObservableToJs(attributes) {
       return;
     }
 
-    // if value is a Model then use that Model's export
-    if (attributeValue.export !== undefined) {
+    // if value is a Model or ModelList then use the `export()` method
+    if (attributeValue.isModel || attributeValue.isModelList) {
       exportObject[attributeName] = attributeValue.export();
       return;
     }
@@ -40,12 +40,6 @@ export default function convertObservableToJs(attributes) {
 
       // export each item in array
       exportObject[attributeName] = attributeValue.map((data) => {
-        // if its a model then also use their export
-        if (data.export !== undefined) {
-          return data.export();
-        }
-
-        // otherwise it still might need to be converted
         return toJS(data);
       });
       return;

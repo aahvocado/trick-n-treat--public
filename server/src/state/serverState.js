@@ -6,6 +6,7 @@ import {SERVER_MODES} from 'constants.shared/gameModes';
 import * as clientEventHelper from 'helpers/clientEventHelper';
 
 import Model from 'models.shared/Model';
+import ModelList from 'models.shared/ModelList';
 
 import gameState from 'state/gameState';
 
@@ -22,8 +23,8 @@ export class ServerStateModel extends Model {
       mode: SERVER_MODES.LOBBY,
 
       // -- client data
-      /** @type {Array<ClientModel>} */
-      clients: [],
+      /** @type {ModelList<ClientModel>} */
+      clients: new ModelList(),
       /** @type {ClientModel} */
       screenClient: null,
 

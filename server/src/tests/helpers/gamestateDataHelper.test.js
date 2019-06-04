@@ -13,15 +13,16 @@ import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 import CharacterModel from 'models.shared/CharacterModel';
 import EncounterModel from 'models.shared/EncounterModel';
 import MapModel from 'models.shared/MapModel';
+import ModelList from 'models.shared/ModelList';
 
 import gameState from 'state/gameState';
 
 test.beforeEach((t) => {
   // reset the gamestate for each test
   gameState.set({
-    characters: [],
+    characters: new ModelList(),
     tileMapModel: new MapModel(),
-    encounters: [],
+    encounters: new ModelList(),
   });
 });
 

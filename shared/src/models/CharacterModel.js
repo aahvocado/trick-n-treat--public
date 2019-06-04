@@ -3,6 +3,8 @@ import Point from '@studiomoniker/point';
 import {STAT_ID} from 'constants.shared/statIds';
 
 import Model from 'models.shared/Model';
+import ItemModel from 'models.shared/ItemModel';
+import ModelList from 'models.shared/ModelList';
 
 import * as conditionUtils from 'utilities.shared/conditionUtils';
 
@@ -46,8 +48,8 @@ export default class CharacterModel extends Model {
 
       /** @type {Point} */
       position: new Point(),
-      /** @type {Array<ItemModel>} */
-      inventory: [],
+      /** @type {ModelList<ItemModel>} */
+      inventory: new ModelList([], ItemModel),
 
       /** @type {Object} */
       ...newAttributes,

@@ -1,6 +1,8 @@
 import Point from '@studiomoniker/point';
 
+import CharacterModel from 'models.shared/CharacterModel';
 import Model from 'models.shared/Model';
+import ModelList from 'models.shared/ModelList';
 
 import * as conditionUtils from 'utilities.shared/conditionUtils';
 
@@ -32,12 +34,12 @@ export default class EncounterModel extends Model {
       location: new Point(),
 
       // -- instance data
-      /** @type {Array<CharacterModel>} */
-      visitors: [],
-      /** @type {Array<CharacterModel>} */
-      trickers: [],
-      /** @type {Array<CharacterModel>} */
-      treaters: [],
+      /** @type {ModelList<CharacterModel>} */
+      visitors: new ModelList([], CharacterModel),
+      /** @type {ModelList<CharacterModel>} */
+      trickers: new ModelList([], CharacterModel),
+      /** @type {ModelList<CharacterModel>} */
+      treaters: new ModelList([], CharacterModel),
       /** @type {Object} */
       ...newAttributes,
     });

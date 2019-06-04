@@ -9,8 +9,11 @@ import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import * as gamestateLifecycleHelper from 'helpers/gamestateLifecycleHelper';
 import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 
+import CharacterModel from 'models.shared/CharacterModel';
+import EncounterModel from 'models.shared/EncounterModel';
 import MapModel from 'models.shared/MapModel';
 import Model from 'models.shared/Model';
+import ModelList from 'models.shared/ModelList';
 
 import logger from 'utilities/logger.game';
 
@@ -42,16 +45,16 @@ export class GamestateModel extends Model {
       round: 0,
 
       // -- Entity attributes
-      /** @type {Array<CharacterModel>} */
-      characters: [],
-      /** @type {Array<EncounterModel>} */
-      encounters: [],
+      /** @type {ModelList<CharacterModel>} */
+      characters: new ModelList([], CharacterModel),
+      /** @type {ModelList<EncounterModel>} */
+      encounters: new ModelList([], EncounterModel),
       /** @type {MapModel} */
       tileMapModel: new MapModel(),
       /** @type {MapModel} */
       fogMapModel: new MapModel(),
-      /** @type {Array<MapModel>} */
-      biomeList: [],
+      /** @type {ModelList<MapModel>} */
+      biomeList: new ModelList([], MapModel),
 
       /** @type {String} */
       seed: seed,

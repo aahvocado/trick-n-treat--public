@@ -10,6 +10,7 @@ import {
 import uuid from 'uuid/v4';
 
 import convertObservableToJs from 'utilities.shared/convertObservableToJs';
+import importModelAttributes from 'utilities.shared/importModelAttributes';
 
 /**
  * Model base class
@@ -23,8 +24,13 @@ export class Model {
    */
   constructor(newAttributes = {}) {
     /** @type {String} */
-    this.modelId = uuid();
+    this.id = uuid();
+    /** @type {Boolean} */
+    this.isModel = true;
+    /** @type {Object} */
+    this.defaultAttributes = newAttributes;
 
+    // create the model with the following attributes
     this.attributes = observable(newAttributes);
   }
   /**
@@ -95,6 +101,7 @@ export class Model {
   }
   /**
    * makes sure attributes match the schema
+   * @todo - need to implement schema
    *
    * @returns {Boolean}
    */
@@ -106,6 +113,14 @@ export class Model {
     }
 
     return valid;
+  }
+  /**
+   * helps update a whole new chunk of attributes
+   *
+   * @param {Object} newAttributes
+   */
+  import(newAttributes) {
+    importModelAttributes(this, newAttributes);
   }
   /**
    * gets all the attributes and simplifies them into a basic object
