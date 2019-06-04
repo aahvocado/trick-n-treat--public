@@ -1,11 +1,13 @@
 import Point from '@studiomoniker/point';
 
+import {extendObservable} from 'mobx';
+
+import {GAME_MODES} from 'constants.shared/gameModes';
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import Model from 'models/Model';
 import CharacterModel from 'models.shared/CharacterModel';
 import EncounterModel from 'models.shared/EncounterModel';
-import ItemModel from 'models.shared/ItemModel';
 
 import logger from 'utilities/logger.remote';
 import * as conditionUtils from 'utilities.shared/conditionUtils';
@@ -19,9 +21,13 @@ export class RemoteGamestateModel extends Model {
   constructor(newAttributes = {}) {
     super({
       // -- gamestate - from the server
-      /** @type {GamestateObject | undefined} */
-      gamestate: undefined,
-      /** @type {Object | undefined} */
+      /** @type {GameMode} */
+      mode: GAME_MODES.INACTIVE,
+      /** @type {Number} */
+      round: 0,
+      /** @type {Matrix | undefined} */
+      mapData: undefined,
+      /** @type {CharacterModel} */
       myCharacter: new CharacterModel(),
 
       /** @type {Boolean} */
@@ -35,6 +41,45 @@ export class RemoteGamestateModel extends Model {
       /** @type {Boolean} */
       useZoomedOutMap: false,
     });
+
+    // computed attributes - (have to pass in `this` as context because getters have their own context)
+    const self = this;
+    extendObservable(this.attributes, {
+      /** @type {Array<InventoryData>} */
+      get formattedInventoryList() {
+        const characterModel = self.get('myCharacter');
+        const inventory = characterModel.get('inventory');
+
+        return inventory.map((itemModel) => {
+          const canBeUsed = itemModel.canBeUsedBy(characterModel);
+          const itemData = itemModel.export();
+
+          return {
+            ...itemData,
+            canBeUsed: canBeUsed,
+          };
+        })
+      },
+      /** @type {EncounterData} */
+      get formattedEncounterData() {
+        const characterModel = self.get('myCharacter');
+        const encounterModel = self.get('activeEncounter');
+        const encounterData = encounterModel.export();
+
+        return {
+          ...encounterData,
+          canBeEncountered: encounterModel.canBeEncounteredBy(characterModel),
+          actionList: encounterData.actionList.map((actionData) => ({
+            ...actionData,
+            canUseAction: conditionUtils.doesMeetAllConditions(actionData.conditionList, characterModel, encounterModel),
+          })),
+          triggerList: encounterData.triggerList.map((triggerData) => ({
+            ...triggerData,
+            canBeTriggered: conditionUtils.doesMeetAllConditions(triggerData.conditionList, characterModel, encounterModel),
+          })),
+        }
+      },
+    });
   }
   /**
    * attach listeners to the websocket
@@ -45,15 +90,13 @@ export class RemoteGamestateModel extends Model {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.UPDATE');
 
       this.set({
-        gamestate: {
-          mode: data.mode,
-          round: data.round,
+        mode: data.mode,
+        round: data.round,
 
-          mapData: matrixUtils.map(data.mapData, ((tileData) => ({
-            ...tileData,
-            position: new Point(tileData.position.x, tileData.position.y),
-          }))),
-        },
+        mapData: matrixUtils.map(data.mapData, ((tileData) => ({
+          ...tileData,
+          position: new Point(tileData.position.x, tileData.position.y),
+        }))),
       });
     });
 
@@ -61,44 +104,17 @@ export class RemoteGamestateModel extends Model {
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, (data) => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER');
 
-      // do a little bit of organizing before creating Model
-      const convertedInventory = data.inventory.map((itemData) => new ItemModel(itemData));
-      const formattedCharacterAttributes = {
-        ...data,
-        position: new Point(data.position.x, data.position.y),
-        inventory: convertedInventory,
-      };
-
-      const newCharacterModel = new CharacterModel(formattedCharacterAttributes);
-      const formattedInventory = convertedInventory.map((itemModel) => {
-        itemModel.set({_hasMetConditions: itemModel.canBeUsedBy(newCharacterModel)});
-        return itemModel;
-      });
-      newCharacterModel.set({inventory: formattedInventory});
-
-      this.set({myCharacter: newCharacterModel});
+      const characterModel = new CharacterModel();
+      characterModel.import(data);
+      this.set({myCharacter: characterModel});
     });
 
     // Game is giving us an Encounter
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER, (data) => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER');
 
-      // do a little bit of organizing before creating Model
-      const characterModel = this.get('myCharacter');
-      const encounterModel = new EncounterModel(data);
-
-      const formattedActionList = data.actionList.map((actionData) => ({
-        ...actionData,
-        _hasMetConditions: conditionUtils.doesMeetAllConditions(actionData.conditionList, characterModel, encounterModel),
-      }));
-      encounterModel.set({actionList: formattedActionList});
-
-      const formattedTriggerList = data.triggerList.map((triggerData) => ({
-        ...triggerData,
-        _hasMetConditions: conditionUtils.doesMeetAllConditions(triggerData.conditionList, characterModel, encounterModel),
-      }));
-      encounterModel.set({triggerList: formattedTriggerList});
-
+      const encounterModel = new EncounterModel();
+      encounterModel.import(data);
       this.set({
         activeEncounter: encounterModel,
         showEncounterModal: true,
@@ -108,17 +124,39 @@ export class RemoteGamestateModel extends Model {
     // Game is closing (removing) the Encounter
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.CLOSE_ENCOUNTER, () => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.CLOSE_ENCOUNTER');
+
       this.set({showEncounterModal: false});
     });
 
+    // Game is ending
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.END, () => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.END');
 
       this.set({
-        gamestate: undefined,
+        mode: GAME_MODES.INACTIVE,
+        mapData: undefined,
+        myCharacter: new CharacterModel(),
         activeEncounter: new EncounterModel(),
+        showEncounterModal: false,
       });
     });
+
+    // clean up after disconnecting
+    socket.on('disconnect', () => {
+      this.set({
+        mode: GAME_MODES.INACTIVE,
+        showEncounterModal: false,
+      });
+    });
+  }
+  /**
+   * @returns {Boolean}
+   */
+  isGameReady() {
+    const isModeReady = this.get('mode') !== GAME_MODES.INACTIVE;
+    const isMapReady = this.get('mapData') !== undefined;
+    const isCharacterReady = this.get('myCharacter').get('characterId') !== undefined;
+    return isModeReady && isMapReady && isCharacterReady;
   }
 }
 /**

@@ -25,10 +25,11 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
 
   // check if the character on here can actually trigger this
   if (!encounterModel.canBeEncounteredBy(characterModel)) {
+    logger.verbose(`. but ${characterModel.get('name')} can not activate it.`);
     return;
   }
 
-  // cache the `activeEncounter`
+  // track the `activeEncounter`
   gameState.set({activeEncounter: encounterModel});
 
   // clear the actionQueue because we have to handle this immediately

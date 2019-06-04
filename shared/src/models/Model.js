@@ -10,7 +10,7 @@ import {
 import uuid from 'uuid/v4';
 
 import convertObservableToJs from 'utilities.shared/convertObservableToJs';
-import importModelAttributes from 'utilities.shared/importModelAttributes';
+import createImportingAttributes from 'utilities.shared/createImportingAttributes';
 
 /**
  * Model base class
@@ -118,9 +118,13 @@ export class Model {
    * helps update a whole new chunk of attributes
    *
    * @param {Object} newAttributes
+   * @returns {Model}
    */
   import(newAttributes) {
-    importModelAttributes(this, newAttributes);
+    const resultAttributes = createImportingAttributes(this.attributes, newAttributes);
+    this.set(resultAttributes);
+
+    return this;
   }
   /**
    * gets all the attributes and simplifies them into a basic object

@@ -14,7 +14,7 @@ import * as matrixUtils from 'utilities.shared/matrixUtils';
  * @returns {Boolean}
  */
 export function canMyCharacterMoveTo(endPoint) {
-  const mapData = remoteGameState.get('gamestate').mapData;
+  const mapData = remoteGameState.get('mapData');
   const tileData = matrixUtils.getTileAt(mapData, endPoint);
   if (!isWalkableTile(tileData.tileType)) {
     return false;
@@ -31,7 +31,7 @@ export function canMyCharacterMoveTo(endPoint) {
  * @returns {Matrix}
  */
 export function getTileMapData() {
-  const mapData = remoteGameState.get('gamestate').mapData;
+  const mapData = remoteGameState.get('mapData');
   const tileMapData = matrixUtils.map(mapData, (tileData) => (tileData.tileType));
   return tileMapData;
 }
@@ -41,7 +41,7 @@ export function getTileMapData() {
  * @returns {Matrix}
  */
 export function getVisibileTileMapData() {
-  const mapData = remoteGameState.get('gamestate').mapData;
+  const mapData = remoteGameState.get('mapData');
   const tileMapData = matrixUtils.map(mapData, (tileData) => {
     // hidden tiles are `null`
     if (tileData.fogType === FOG_TYPES.HIDDEN) {

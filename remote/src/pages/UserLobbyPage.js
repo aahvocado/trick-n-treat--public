@@ -26,6 +26,7 @@ class UserLobbyPage extends Component {
   }
   /** @override */
   render() {
+    // for now, we are allowed to be in the Lobby as long as we are not in the Game
     if (!remoteAppState.get('isInLobby')) {
       if (remoteAppState.get('isInGame')) {
         return <Redirect to='/game' />
@@ -34,11 +35,10 @@ class UserLobbyPage extends Component {
 
     const isConnected = remoteAppState.get('isConnected');
     const isGameInProgress = remoteAppState.get('isGameInProgress');
-    const lobbyData = remoteAppState.get('lobbyData');
     const name = remoteAppState.get('name');
 
-    const inGameClients = lobbyData.filter((client) => (client.isInGame));
-    const inLobbyClients = lobbyData.filter((client) => (client.isInLobby));
+    const gameClients = remoteAppState.get('gameClients');
+    const lobbyClients = remoteAppState.get('lobbyClients');
 
     return (
       <div className='bg-secondary pad-h-2 flex-auto flex-center flex-col talign-center'>
@@ -71,7 +71,7 @@ class UserLobbyPage extends Component {
           <div className='flex-grow-only' style={{flex: '1 1 50%'}}>
             <h3 className="color-fourth">Candy Planning</h3>
             <ul className='pad-v-2 fsize-4'>
-              { inLobbyClients.map((clientData, idx) => {
+              { lobbyClients.map((clientData, idx) => {
                 return (
                   <LobbyListRow
                     key={`lobby-name-${clientData}-${idx}-key`}
@@ -87,7 +87,7 @@ class UserLobbyPage extends Component {
           <div className='flex-grow-only' style={{flex: '1 1 50%'}}>
             <h3 className="color-fourth">Trick and Treating</h3>
             <ul className='pad-v-2 fsize-4'>
-              { inGameClients.map((clientData, idx) => {
+              { gameClients.map((clientData, idx) => {
                 return (
                   <LobbyListRow
                     key={`lobby-name-${clientData}-${idx}-key`}

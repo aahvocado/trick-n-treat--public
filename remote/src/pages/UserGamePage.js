@@ -80,22 +80,21 @@ class UserGamePage extends Component {
   // }
   /** @override */
   render() {
+    // redirect to Home page if not connected
     if (!remoteAppState.get('isConnected')) {
       remoteAppState.set({isInGame: false});
       return <Redirect to='/' />
     }
 
-    const gamestate = remoteGameState.get('gamestate');
+    // represent "loading" for now
+    if (!remoteGameState.isGameReady()) {
+      return <div className='color-white bg-secondary flex-auto pad-v-2 flex-center flex-col width-full talign-center'>(waiting for map data)</div>
+    }
+
     const myCharacter = remoteGameState.get('myCharacter');
-    const activeEncounter = remoteGameState.get('activeEncounter');
     const showEncounterModal = remoteGameState.get('showEncounterModal');
     const useZoomedOutMap = remoteGameState.get('useZoomedOutMap');
     const useFullyVisibleMap = remoteGameState.get('useFullyVisibleMap');
-
-    // represent "loading" for now
-    if (gamestate === undefined || myCharacter === undefined) {
-      return <div className='color-white bg-secondary flex-auto pad-v-2 flex-center flex-col width-full talign-center'>(waiting for map data)</div>
-    }
 
     const {
       selectedTilePos,
@@ -116,7 +115,7 @@ class UserGamePage extends Component {
           onClickOverlay={() => { this.toggleItemModal(false); }}
         >
           <InventoryComponent
-            inventory={myCharacter.get('inventory')}
+            inventory={remoteGameState.get('formattedInventoryList')}
             onClickUseItem={this.onClickUseItem}
           />
         </ModalComponent>
@@ -124,8 +123,8 @@ class UserGamePage extends Component {
         {/* Encounter Modal */}
         <EncounterModalComponent
           active={showEncounterModal}
+          encounterData={remoteGameState.get('formattedEncounterData')}
           onClickAction={this.onClickChoice}
-          encounterData={activeEncounter.export()}
         />
 
         {/* Stat Bar */}
@@ -163,12 +162,12 @@ class UserGamePage extends Component {
             <FontAwesomeIcon icon={myCharacter.get('isActiveCharacter') ? faPlay : faPause} />
           </div>
 
-          <div className='flex-none adjacent-mar-l-2' >{`Round ${gamestate.round}`}</div>
+          <div className='flex-none adjacent-mar-l-2' >{`Round ${remoteGameState.get('round')}`}</div>
         </div>
 
         {/* Map */}
         <TileMapComponent
-          mapData={gamestate.mapData}
+          mapData={remoteGameState.get('mapData')}
           myCharacter={myCharacter}
           onTileClick={this.handleOnTileClick}
           selectedTilePos={selectedTilePos}
@@ -199,11 +198,11 @@ class UserGamePage extends Component {
         </div>
 
         {/* Debugging Tools */}
-        { remoteAppState.get('isDevMode') && gamestate.mapData.length > 0 &&
+        { remoteAppState.get('isDevMode') && remoteGameState.get('mapData').length > 0 &&
           <div className='color-white flex-row-center pad-2'>
             <span className='pad-h-2'>{`Selected Tile: (x: ${selectedTilePos.x}, y: ${selectedTilePos.y})`}</span>
 
-            <span>{TILE_TYPES_NAME[gamestate.mapData[selectedTilePos.y][selectedTilePos.x].tileType]}</span>
+            <span>{TILE_TYPES_NAME[remoteGameState.get('mapData')[selectedTilePos.y][selectedTilePos.x].tileType]}</span>
           </div>
         }
       </div>

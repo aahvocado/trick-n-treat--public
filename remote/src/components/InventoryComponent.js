@@ -7,22 +7,21 @@ import ButtonComponent from 'common-components/ButtonComponent';
  */
 export default class InventoryComponent extends PureComponent {
   static defaultProps = {
-    /** @type {Array<ItemModel>} */
-    inventory: [],
+    /** @type {Array<ItemData>} */
+    inventoryList: [],
     /** @type {Function} */
     onClickUseItem: () => {},
   }
   /** @override */
   render() {
     const {
-      inventory,
+      inventoryList,
       onClickUseItem
     } = this.props;
 
     return (
       <div className='position-relative width-full mar-v-2'>
-        { inventory.map((itemModel, idx) => {
-          const itemData = itemModel.export();
+        { inventoryList.map((itemData, idx) => {
           return (
             <InventoryItem
               key={`inventory-item-${idx}-key`}
@@ -55,7 +54,7 @@ export class InventoryItem extends PureComponent {
       isUseable,
       name,
       onClick,
-      _hasMetConditions,
+      canBeUsed,
     } = this.props;
 
     return (
@@ -71,7 +70,7 @@ export class InventoryItem extends PureComponent {
           { isUseable &&
             <ButtonComponent
               className='flex-none'
-              disabled={!_hasMetConditions}
+              disabled={!canBeUsed}
               onClick={onClick}
             >
               use

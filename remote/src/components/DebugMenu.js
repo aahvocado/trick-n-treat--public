@@ -109,7 +109,7 @@ class DebugMenu extends Component {
         <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
           <ButtonComponent
             className='width-full adjacent-mar-t-2'
-            disabled={remoteGameState.get('gamestate') === undefined}
+            disabled={!remoteGameState.isGameReady()}
             onClick={this.onClickRestart}
           >
             Restart Game

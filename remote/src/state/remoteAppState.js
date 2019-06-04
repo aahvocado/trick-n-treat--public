@@ -1,3 +1,5 @@
+import {extendObservable} from 'mobx';
+
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import Model from 'models/Model';
@@ -61,6 +63,19 @@ export class RemoteStateModel extends Model {
       //
       ...newAttributes,
     });
+
+    // computed attributes - (have to pass in this model as context because getters have their own context)
+    const stateModel = this;
+    extendObservable(this.attributes, {
+      /** @type {Array<ClientModel>} */
+      get lobbyClients() {
+        return stateModel.get('lobbyData').filter((client) => (client.isInLobby));
+      },
+      /** @type {Array<ClientModel>} */
+      get gameClients() {
+        return stateModel.get('lobbyData').filter((client) => (client.isInGame));
+      },
+    });
   }
   /**
    * attach listeners to the websocket
@@ -97,21 +112,23 @@ export class RemoteStateModel extends Model {
 
     // -- connection stuff
     socket.on('connect', () => {
+      logger.server('connected to server');
+
       this.set({
         isConnected: true,
         isReconnecting: false,
       });
-
-      logger.server('connected to server');
     });
 
     socket.on('disconnect', () => {
+      logger.server('disconnected to server');
+
       this.set({
         isConnected: false,
         isReconnecting: false,
+        isGameInProgress: false,
+        lobbyData: [],
       });
-
-      logger.server('disconnected to server');
     });
 
     socket.on('reconnect_failed', () => {

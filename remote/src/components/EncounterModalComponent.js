@@ -33,7 +33,7 @@ export default class EncounterModalComponent extends PureComponent {
       triggerList = [],
     } = encounterData;
 
-    const triggersToShow = triggerList.filter((triggerData) => triggerData._hasMetConditions);
+    const triggersToShow = triggerList.filter((triggerData) => triggerData.canBeTriggered);
 
     return (
       <ModalComponent
@@ -73,7 +73,7 @@ export default class EncounterModalComponent extends PureComponent {
               <ChoiceButton
                 key={`encounter-modal-action-button-${actionData.choiceId}-${idx}-key`}
                 actionData={actionData}
-                disabled={!actionData._hasMetConditions}
+                disabled={!actionData.canUseAction}
                 onClick={onClickAction}
               />
             )

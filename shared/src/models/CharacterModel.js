@@ -17,10 +17,10 @@ export default class CharacterModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super({
-      /** @type {String} */
-      name: '',
-      /** @type {String} */
-      characterId: '',
+      /** @type {String | undefined} */
+      name: undefined,
+      /** @type {String | undefined} */
+      characterId: undefined,
       /** @type {String | undefined} */
       clientId: undefined,
       /** @type {Boolean} */
