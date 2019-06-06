@@ -9,6 +9,7 @@ import * as serviceWorker from './serviceWorker';
 import * as connectionManager from 'managers/connectionManager';
 
 // css
+import 'react-notifications/lib/notifications.css';
 import './styles/css-reset.css';
 import './build/app.css';
 

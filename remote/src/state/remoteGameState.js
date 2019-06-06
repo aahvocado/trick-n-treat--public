@@ -1,3 +1,5 @@
+import {NotificationManager} from 'react-notifications';
+
 import Point from '@studiomoniker/point';
 
 import {extendObservable} from 'mobx';
@@ -45,6 +47,11 @@ export class RemoteGamestateModel extends Model {
     // computed attributes - (have to pass in `this` as context because getters have their own context)
     const self = this;
     extendObservable(this.attributes, {
+      /** @type {Boolean} */
+      get isMyTurn() {
+        const characterModel = self.get('myCharacter');
+        return characterModel.get('isActiveCharacter');
+      },
       /** @type {Array<InventoryData>} */
       get formattedInventoryList() {
         const characterModel = self.get('myCharacter');
@@ -104,9 +111,19 @@ export class RemoteGamestateModel extends Model {
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, (data) => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER');
 
+      // hold onto if it was previously this character's turn
+      const wasMyTurn = this.get('isMyTurn');
+
+      // update the client's Character
       const characterModel = new CharacterModel();
       characterModel.import(data);
       this.set({myCharacter: characterModel});
+
+      // show notification if it was not the Player's turn but now is
+      const isMyTurn = this.get('isMyTurn');
+      if (!wasMyTurn && isMyTurn) {
+        NotificationManager.info('It is your turn!');
+      };
     });
 
     // Game is giving us an Encounter

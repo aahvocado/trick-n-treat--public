@@ -106,7 +106,7 @@ export default class EncounterModel extends Model {
    * @returns {Set}
    */
   getUniqueVisitors() {
-    const visitors = this.get('visitors');
+    const visitors = this.get('visitors').export();
     return new Set(visitors);
   }
   /**
@@ -115,7 +115,7 @@ export default class EncounterModel extends Model {
    * @returns {Set}
    */
   getUniqueTrickers() {
-    const trickers = this.get('trickers');
+    const trickers = this.get('trickers').export();
     return new Set(trickers);
   }
   /**
@@ -124,7 +124,7 @@ export default class EncounterModel extends Model {
    * @returns {Set}
    */
   getUniqueTreaters() {
-    const treaters = this.get('treaters');
+    const treaters = this.get('treaters').export();
     return new Set(treaters);
   }
   /**

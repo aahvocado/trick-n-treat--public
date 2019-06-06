@@ -1,3 +1,5 @@
+import {NotificationManager} from 'react-notifications';
+
 import {extendObservable} from 'mobx';
 
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
@@ -113,6 +115,7 @@ export class RemoteStateModel extends Model {
     // -- connection stuff
     socket.on('connect', () => {
       logger.server('connected to server');
+      NotificationManager.success(`Welcome, ${this.get('name')}!`, 'Connected!');
 
       this.set({
         isConnected: true,
@@ -121,7 +124,8 @@ export class RemoteStateModel extends Model {
     });
 
     socket.on('disconnect', () => {
-      logger.server('disconnected to server');
+      logger.server('disconnected from server');
+      NotificationManager.error('Click the indicator dot to reconnect.', 'Disconnected!');
 
       this.set({
         isConnected: false,

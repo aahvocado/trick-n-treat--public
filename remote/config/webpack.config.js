@@ -278,6 +278,7 @@ module.exports = function(webpackEnv) {
         'models.shared': path.resolve(paths.sharedPath, 'models'),
         'utilities.shared': path.resolve(paths.sharedPath, 'utilities'),
 
+        '@hapi/joi': path.resolve(paths.appNodeModules, '@hapi/joi'),
         '@studiomoniker/point': path.resolve(paths.appNodeModules, '@studiomoniker/point'),
         'pathfinding': path.resolve(paths.appNodeModules, 'pathfinding'),
         'mobx': path.resolve(paths.appNodeModules, 'mobx'),

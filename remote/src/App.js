@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import {NotificationContainer} from 'react-notifications';
+
 import {
   BrowserRouter,
   Route,
@@ -27,6 +29,8 @@ class App extends Component {
     return (
       <BrowserRouter>
         <div className='bg-primary'>
+          <NotificationContainer/>
+
           {/* connection status */}
           <WebsocketConnectionIndicator />
 

@@ -3,15 +3,21 @@ import encounterJsonList from 'data.shared/encounterData.json';
 import arrayContainsArray from 'utilities.shared/arrayContainsArray';
 import convertArrayToMap from 'utilities.shared/convertArrayToMap';
 import convertObjectToArray from 'utilities.shared/convertObjectToArray';
+import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
 
-/**
- * @type {Array}
- */
+/** @type {Array} */
 export const ENCOUNTER_DATA = encounterJsonList;
+ENCOUNTER_DATA.forEach(encounterDataUtils.validateEncounter);
 /**
  * caches an object map of the `encounterData` so it can be accessed more easily
  */
 export const ENCOUNTER_DATA_MAP = convertArrayToMap(ENCOUNTER_DATA);
+/**
+ * this is a list of the data that is generatable
+ *
+ * @type {Array}
+ */
+export const ENCOUNTER_GENERATABLE_DATA = ENCOUNTER_DATA.filter((data) => (data.isGeneratable));
 /**
  * finds the data for a loaded encounter by its id
  *
@@ -28,9 +34,15 @@ export function getEncounterDataById(id) {
  * @returns {Array<EncounterData>}
  */
 export function getEncounterDataWithTag(tagId) {
-  return ENCOUNTER_DATA.filter((encounter) =>
-    encounter.tagList.includes(tagId)
-  )
+  return ENCOUNTER_DATA.filter((encounter) => {
+    // not going to use encounters with undefined or empty tagList
+    const tagList = encounter.tagList;
+    if (tagList === undefined || tagList.length <= 0) {
+      return false;
+    }
+
+    return tagList.includes(tagId);
+  });
 }
 /**
  * finds all Encounters using options
@@ -47,8 +59,15 @@ export function findEncounterData(options) {
   } = options;
 
   return ENCOUNTER_DATA.filter((encounter) => {
-    const doesIncludeTags = arrayContainsArray(encounter.tagList, includeTags);
-    const doesExcludeTags = !arrayContainsArray(encounter.tagList, excludeTags);
+    const tagList = encounter.tagList;
+
+    // not going to use encounters with undefined or empty tagList
+    if (tagList === undefined || tagList.length <= 0) {
+      return false;
+    }
+
+    const doesIncludeTags = arrayContainsArray(tagList, includeTags);
+    const doesExcludeTags = !arrayContainsArray(tagList, excludeTags);
     return doesIncludeTags && doesExcludeTags;
   });
 }

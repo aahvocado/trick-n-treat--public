@@ -17,7 +17,7 @@ const idPrefix = 'ITEM_ID';
 /**
  * @returns {ItemData}
  */
-export function getBlankTemplate() {
+export function createBlankTemplate() {
   return {
     dataType: DATA_TYPE.ITEM,
     id: `${idPrefix}.NEW`,

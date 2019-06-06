@@ -1,9 +1,8 @@
 import React, { PureComponent } from 'react';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 
-import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
+import IconButtonComponent from 'common-components/IconButtonComponent';
 
 import combineClassNames from 'utilities/combineClassNames';
 
@@ -579,13 +578,11 @@ class DropdownControl extends PureComponent {
         />
 
         { showButton &&
-          <ButtonComponent
-            className='borcolor-transparent fsize-3 flex-none pad-h-2 pad-v-1 bor-l-1-gray color-grayer hover:color-fourth'
-            theme={BUTTON_THEME.WHITE}
+          <IconButtonComponent
+            className='borcolor-transparent flex-none'
             onClick={onClick}
-          >
-            <FontAwesomeIcon icon={faChevronDown} />
-          </ButtonComponent>
+            icon={faChevronDown}
+          />
         }
       </div>
     )

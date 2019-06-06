@@ -14,12 +14,12 @@ import CheckboxComponent from 'common-components/CheckboxComponent';
 import TextAreaComponent from 'common-components/TextAreaComponent';
 import TextInputComponent from 'common-components/TextInputComponent';
 
-import ConditionEditorComponent from 'components/ConditionEditorComponent';
+import ConditionListEditorComponent from 'components/ConditionListEditorComponent';
 import ConditionLogicDropdown from 'components/ConditionLogicDropdown';
 import ItemListDropdown from 'components/ItemListDropdown';
-import TagEditorComponent from 'components/TagEditorComponent';
+import TagListEditorComponent from 'components/TagListEditorComponent';
 import TagListDropdown from 'components/TagListDropdown';
-import TriggerEditorComponent from 'components/TriggerEditorComponent';
+import TriggerListEditorComponent from 'components/TriggerListEditorComponent';
 import TriggerLogicListDropdown from 'components/TriggerLogicListDropdown';
 
 import * as itemDataHelper from 'helpers.shared/itemDataHelper';
@@ -159,7 +159,7 @@ class ItemEditorPage extends Component {
    */
   createNew() {
     this.setState({
-      activeData: deepClone(itemDataUtils.getBlankTemplate()),
+      activeData: deepClone(itemDataUtils.createBlankTemplate()),
       hasChanges: true,
     });
   }
@@ -800,19 +800,12 @@ class ItemEditorViewer extends Component {
             onSelect={onSelectNewCondition}
           />
 
-          { conditionList.map((conditionData, idx) => (
-            <ConditionEditorComponent
-              key={`viewer-trigger-item-condition-row-${idx}-key`}
+          { conditionList.length > 0 &&
+            <ConditionListEditorComponent
               className='bor-1-gray adjacent-mar-t-2'
-              data={conditionData}
-              onEdit={(updatedData) => {
-                onChangeConditionData(updatedData, idx);
-              }}
-              onClickRemove={() => {
-                onRemoveCondition(idx);
-              }}
+              dataList={conditionList}
             />
-          ))}
+          }
         </ViewerRow>
 
         <ViewerDivider />
@@ -832,7 +825,7 @@ class ItemEditorViewer extends Component {
 
           <div className='fsize-3 flex-col adjacent-mar-t-2'>
             { triggerList.map((triggerData, idx) => (
-              <TriggerEditorComponent
+              <TriggerListEditorComponent
                 key={`trigger-item-${triggerData.triggerLogicId}-${idx}-key`}
                 data={triggerData}
                 onEdit={(updatedData) => {
@@ -861,7 +854,7 @@ class ItemEditorViewer extends Component {
 
           <div className='fsize-2 flex-row flexwrap-yes adjacent-mar-t-2'>
             { tagList.map((tagId, idx) => (
-              <TagEditorComponent
+              <TagListEditorComponent
                 key={`viewer-tag-item-${tagId}-${idx}-key`}
                 selectedTagId={tagId}
                 onClickRemove={() => { onClickRemoveTag(tagId) }}

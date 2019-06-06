@@ -38,6 +38,9 @@ export class TileMapComponent extends Component {
     selectedPath: [],
 
     /** @type {Boolean} */
+    isMyTurn: false,
+
+    /** @type {Boolean} */
     useFullyVisibleMap: false,
     /** @type {Boolean} */
     useZoomedOutMap: false,
@@ -45,14 +48,15 @@ export class TileMapComponent extends Component {
   /** @override */
   render() {
     const {
-      useFullyVisibleMap,
-      useZoomedOutMap,
+      isMyTurn,
       mapData,
       myCharacter,
       onTileClick,
       selectedTilePos,
       selectedPath,
       tileSize,
+      useFullyVisibleMap,
+      useZoomedOutMap,
     } = this.props;
 
     const charPosition = myCharacter.get('position');
@@ -64,7 +68,7 @@ export class TileMapComponent extends Component {
       <div
         className='overflow-hidden flex-none flex-col-center position-relative mar-v-2 mar-h-auto'
         style={{
-          border: myCharacter.get('isActiveCharacter') ? '4px solid #33487b' : '4px solid #c17e36',
+          border: isMyTurn ? '4px solid #33487b' : '4px solid #c17e36',
           backgroundColor: '#252525',
           height: `${MAP_CONTAINER_HEIGHT}px`,
           width: `${MAP_CONTAINER_WIDTH}px`,

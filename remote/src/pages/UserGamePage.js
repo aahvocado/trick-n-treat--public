@@ -159,7 +159,7 @@ class UserGamePage extends Component {
         {/* Info Bar */}
         <div className='flex-row-center bg-primary pad-v-1 color-tertiary'>
           <div className='flex-none adjacent-mar-l-2'>
-            <FontAwesomeIcon icon={myCharacter.get('isActiveCharacter') ? faPlay : faPause} />
+            <FontAwesomeIcon icon={remoteGameState.get('isMyTurn') ? faPlay : faPause} />
           </div>
 
           <div className='flex-none adjacent-mar-l-2' >{`Round ${remoteGameState.get('round')}`}</div>
@@ -167,6 +167,7 @@ class UserGamePage extends Component {
 
         {/* Map */}
         <TileMapComponent
+          isMyTurn={remoteGameState.get('isMyTurn')}
           mapData={remoteGameState.get('mapData')}
           myCharacter={myCharacter}
           onTileClick={this.handleOnTileClick}
@@ -226,8 +227,7 @@ class UserGamePage extends Component {
    * check if User can Move to a Tile
    */
   canMove() {
-    const myCharacter = remoteGameState.get('myCharacter');
-    if (!myCharacter.get('isActiveCharacter')) {
+    if (!remoteGameState.get('isMyTurn')) {
       return false;
     }
 
@@ -253,8 +253,7 @@ class UserGamePage extends Component {
    * Move action
    */
   handleMoveToOnClick() {
-    const myCharacter = remoteGameState.get('myCharacter');
-    if (!myCharacter.get('isActiveCharacter')) {
+    if (!remoteGameState.get('isMyTurn')) {
       return;
     }
 
