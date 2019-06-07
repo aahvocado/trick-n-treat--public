@@ -4,6 +4,8 @@ import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
 
 import IconButtonComponent from 'common-components/IconButtonComponent';
 
+import keycodes from 'constants.shared/keycodes';
+
 import combineClassNames from 'utilities/combineClassNames';
 
 /**
@@ -117,13 +119,19 @@ export default class DropdownComponent extends PureComponent {
       searchValue,
     } = this.state;
 
+    const readOnly = !canSearch;
+
     const filteredOptions = this.getFilteredOptions();
     const isOptionsEmpty = filteredOptions.length === 0;
+
+    const readOnlyClassNames = 'hover:borcolor-fourth';
+    const editableClassNames = 'hover:borcolor-fourth hover:color-fourth';
+    const modifierClassNames = readOnly ? readOnlyClassNames : editableClassNames;
 
     return (
       <div
         ref={this.containerRef}
-        className={combineClassNames(baseClassName, className)}
+        className={combineClassNames(baseClassName, className, modifierClassNames)}
         style={style}
         aria-haspopup="listbox"
       >
@@ -134,7 +142,7 @@ export default class DropdownComponent extends PureComponent {
           onFocus={this.onFocusControl}
           onBlur={this.onBlurControl}
           onChange={this.onChangeHandler}
-          readOnly={!canSearch}
+          readOnly={readOnly}
           showButton={showButton}
           placeholder={placeholder || 'Select...'}
           size={inputSize}
@@ -247,14 +255,14 @@ export default class DropdownComponent extends PureComponent {
   /**
    * keydown
    *
-   * @param {Event} e
+   * @param {Event} evt
    */
-  handleKeyDown(e) {
+  handleKeyDown(evt) {
     // enter
-    if (e.keyCode === 13) {
+    if (evt.keyCode === keycodes.enter) {
       // if this is focused, we can open this if it is focused
       if (this.state.isFocused) {
-        e.preventDefault();
+        evt.preventDefault();
         this.toggleDropdown();
       }
     }
@@ -265,16 +273,16 @@ export default class DropdownComponent extends PureComponent {
     }
 
     // esc
-    if (e.keyCode === 27) {
-      e.preventDefault();
+    if (evt.keyCode === keycodes.escape) {
+      evt.preventDefault();
       this.setState({isOpen: false});
     }
 
     const {focusedIdx} = this.state;
 
     // up
-    if (e.keyCode === 38) {
-      e.preventDefault();
+    if (evt.keyCode === keycodes.arrowup) {
+      evt.preventDefault();
 
       if (focusedIdx === null) {
         this.moveFocusUp(this.props.options.length - 1);
@@ -283,8 +291,8 @@ export default class DropdownComponent extends PureComponent {
       }
     }
     // down
-    if (e.keyCode === 40) {
-      e.preventDefault();
+    if (evt.keyCode === keycodes.arrowdown) {
+      evt.preventDefault();
 
       if (focusedIdx === null) {
         this.moveFocusDown(0);
@@ -293,13 +301,16 @@ export default class DropdownComponent extends PureComponent {
       }
     }
     // left
-    if (e.keyCode === 37) {
-      // e.preventDefault();
+    if (evt.keyCode === keycodes.arrowleft) {
+      // evt.preventDefault();
     }
     // right
-    if (e.keyCode === 37) {
-      // e.preventDefault();
+    if (evt.keyCode === keycodes.arrowright) {
+      // evt.preventDefault();
     }
+
+    // stop the bubbling of events while typing here
+    evt.stopPropagation();
   }
   /**
    * @param {Number} idx
@@ -568,10 +579,12 @@ class DropdownControl extends PureComponent {
       ...otherProps
     } = this.props;
 
+    const controlModifierClassNames = readOnly ? 'cursor-pointer' : '';
+
     return (
       <div className='flex-row'>
         <input
-          className={combineClassNames('flex-auto pad-1 text-ellipsis hover:color-fourth', readOnly ? 'cursor-pointer' : '')}
+          className={combineClassNames('flex-auto pad-1 text-ellipsis', controlModifierClassNames)}
           readOnly={readOnly}
           onClick={onClick}
           {...otherProps}

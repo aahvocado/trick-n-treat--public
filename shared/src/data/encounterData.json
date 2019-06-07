@@ -7,12 +7,13 @@
     "isGeneratable": false,
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.DEBUG"
+      "TAG_ID.DESCRIPTORS.LOSES_SANITY"
     ],
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.FREE_TAFFY",
         "label": "Go to get Free Candy",
         "conditionList": [
           {
@@ -51,20 +52,6 @@
           }
         ]
       }
-    ],
-    "conditionList": [
-      {
-        "dataType": "DATA_TYPE.CONDITION",
-        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
-        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
-        "value": 1
-      },
-      {
-        "dataType": "DATA_TYPE.CONDITION",
-        "targetId": "TARGET_ID.CHARACTER.CANDIES",
-        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
-        "value": 100
-      }
     ]
   },
   {
@@ -73,29 +60,30 @@
     "title": "Graveyard Fashion Advice (1)",
     "content": "You see a nearby patch of dirt rumble... and out pops a skeleton with round, purple frames. She rattles and gives some advice, \"You would look really good wearing orange at the Sternum Ball.\"",
     "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.ENCOUNTER",
-      "TAG_ID.PATH",
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.RARE"
+      "TAG_ID.TILE_TYPE.SWAMP",
+      "TAG_ID.TILE_TYPE.LIT_SWAMP"
     ],
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.FASHION_ADVICE_2",
         "label": "\"Thanks for the suggestion\""
       },
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.FASHION_ADVICE_3",
         "label": "\"Oh no, you need help getting back in your grave!\"",
         "conditionList": [
           {
             "dataType": "DATA_TYPE.CONDITION",
             "targetId": "TARGET_ID.CHARACTER.SANITY",
             "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
-            "value": 6
+            "value": "5"
           }
         ]
       }
@@ -108,7 +96,7 @@
         "value": 1
       }
     ],
-    "groupId": "Fashion Advice grouping"
+    "groupId": "Fashion Advice Group"
   },
   {
     "dataType": "DATA_TYPE.ENCOUNTER",
@@ -132,7 +120,7 @@
         "value": 1
       }
     ],
-    "groupId": "Fashion Advice grouping"
+    "groupId": "Fashion Advice Group"
   },
   {
     "dataType": "DATA_TYPE.ENCOUNTER",
@@ -156,7 +144,7 @@
         "value": 1
       }
     ],
-    "groupId": "Fashion Advice grouping"
+    "groupId": "Fashion Advice Group"
   },
   {
     "dataType": "DATA_TYPE.ENCOUNTER",
@@ -164,13 +152,13 @@
     "title": "The Darkness Meows",
     "content": "Oh no.. it can't be... it couldn't... not now...! A black cat with sparkling blue eyes crosses your path on the worse night imaginable! Fate has it in for you... You feel so unlucky.",
     "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.ENCOUNTER",
-      "TAG_ID.PATH",
-      "TAG_ID.GRASS",
-      "TAG_ID.ROAD",
-      "TAG_ID.UNCOMMON"
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD",
+      "TAG_ID.TILE_TYPE.LIT_ROAD",
+      "TAG_ID.TILE_TYPE.GRASS"
     ],
     "actionList": [
       {
@@ -202,61 +190,22 @@
     "title": "Blessed by the Fairy",
     "content": "You see a little glowing thing pass by in front of you. Upon closer inspection, its a fairy who's carrying a piece of candy about her size! She sees you and gives it to you and says \"I really like your costume!\"",
     "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.ENCOUNTER",
-      "TAG_ID.WOODS",
-      "TAG_ID.SWAMP",
-      "TAG_ID.COMMON"
+      "TAG_ID.TILE_TYPE.WOODS",
+      "TAG_ID.TILE_TYPE.LIT_WOODS",
+      "TAG_ID.TILE_TYPE.WOODS_TWO",
+      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO",
+      "TAG_ID.TILE_TYPE.LIT_GRASS",
+      "TAG_ID.DESCRIPTORS.ADDS_CANDY",
+      "TAG_ID.DESCRIPTORS.GIVES_ITEM"
     ],
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.CONFIRM",
-        "label": "Okay"
-      }
-    ],
-    "triggerList": [
-      {
-        "dataType": "DATA_TYPE.TRIGGER",
-        "targetId": "TARGET_ID.CHARACTER.CANDIES",
-        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
-        "value": 1
-      },
-      {
-        "dataType": "DATA_TYPE.TRIGGER",
-        "targetId": "TARGET_ID.ITEM.ALL",
-        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
-        "value": 3,
-        "itemId": "ITEM_ID.GUMMY_VIAL"
-      }
-    ],
-    "conditionList": [
-      {
-        "dataType": "DATA_TYPE.CONDITION",
-        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
-        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
-        "value": 1
-      }
-    ]
-  },
-  {
-    "dataType": "DATA_TYPE.ENCOUNTER",
-    "id": "ENCOUNTER_ID.FREE_TAFFY",
-    "title": "Free Naffy Taffy?",
-    "content": "\"Hey, I'm not a big fan of Naffy Taffy so you can have it.\"",
-    "isGeneratable": true,
-    "isDialogue": false,
-    "tagList": [
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.COMMON",
-      "TAG_ID.ENCOUNTER"
-    ],
-    "actionList": [
-      {
-        "dataType": "DATA_TYPE.ACTION",
-        "choiceId": "CHOICE_ID.CONFIRM",
-        "label": "Okay"
+        "label": "Thanks!"
       }
     ],
     "triggerList": [
@@ -285,18 +234,57 @@
   },
   {
     "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FREE_TAFFY",
+    "title": "Free Naffy Taffy?",
+    "content": "\"Hey, I'm not a big fan of Naffy Taffy so you can have it.\"",
+    "isGeneratable": true,
+    "isDialogue": false,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
+      "TAG_ID.TILE_TYPE.LIT_ROAD",
+      "TAG_ID.DESCRIPTORS.GIVES_ITEM"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Thanks!"
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "value": 1,
+        "itemId": "ITEM_ID.GUMMY_VIAL"
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_ATDOOR",
     "title": "Friendly House (at the door)",
     "content": "You come up to a nicely decorated house. There's bunch of candy corn lights leading up to the front porch, where some crudely carved jack-o-lanterns smile at you. It's a house you've been to many times before and you know they always have full-size candy bars!",
     "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.HOUSE",
-      "TAG_ID.UNCOMMON"
+      "TAG_ID.DESCRIPTORS.ADDS_SANITY"
     ],
     "actionList": [
       {
         "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TRICK",
         "label": "Trick",
         "conditionList": [
           {
@@ -308,6 +296,7 @@
       },
       {
         "choiceId": "CHOICE_ID.TREAT",
+        "gotoId": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TREAT",
         "label": "Treat"
       }
     ],
@@ -321,15 +310,15 @@
     "conditionList": [
       {
         "dataType": "DATA_TYPE.CONDITION",
-        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
         "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
         "value": 1
       }
     ],
-    "groupId": "Friendly House grouping"
+    "groupId": "Friendly House Group"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TREAT",
     "title": "Friendly House (treat)",
     "content": "You ring the doorbell and are greeted by your cheerful neighbor wearing a giant sponge outfit!\n\n\"Nya ha ha! How ya doing? Here's some candy fella!\"",
@@ -338,7 +327,7 @@
     "actionList": [
       {
         "choiceId": "CHOICE_ID.CONFIRM",
-        "label": "Okay"
+        "label": "Thanks!"
       }
     ],
     "triggerList": [
@@ -354,10 +343,10 @@
         "value": 1
       }
     ],
-    "groupId": "Friendly House grouping"
+    "groupId": "Friendly House Group"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TRICK",
     "title": "Friendly House (trick)",
     "content": "You Trick the house into opening up and spook the friendly neighbor! He spills a bunch of candy - and you greedily snatch a bunch of them up before dashing away.\n\nYou hear a cry behind you - \"You've soiled it!\".",
@@ -387,23 +376,21 @@
         "value": 1
       }
     ],
-    "groupId": "Friendly House grouping"
+    "groupId": "Friendly House Group"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_ATDOOR",
     "title": "Undecorated House (at the door)",
     "content": "You arrive in front of a completely undecorated house. There's no decorations, none. There's a bunch of other houses that aren't decorated but for some reason this one's extra upsetting. Well, at least the lights are on.",
     "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
     "isDialogue": false,
-    "tagList": [
-      "TAG_ID.HOUSE",
-      "TAG_ID.COMMON"
-    ],
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICKCHOICES",
         "label": "Trick",
         "conditionList": [
           {
@@ -416,21 +403,22 @@
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.TREAT",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TREAT",
         "label": "Treat"
       }
     ],
     "conditionList": [
       {
         "dataType": "DATA_TYPE.CONDITION",
-        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
         "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
         "value": 1
       }
     ],
-    "groupId": "Undecorated House grouping"
+    "groupId": "Undecorated House Group"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICKCHOICES",
     "title": "Undecorated House (trick choices)",
     "content": "Yeah! You could play a Trick at this unstylish house!",
@@ -440,11 +428,13 @@
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK1",
         "label": "Tell the owner"
       },
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK2",
         "label": "Place a plastic pumpkin",
         "conditionList": [
           {
@@ -457,6 +447,7 @@
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK3",
         "label": "Decorate with cobwebs",
         "conditionList": [
           {
@@ -475,10 +466,10 @@
         "value": 1
       }
     ],
-    "groupId": "Undecorated House grouping"
+    "groupId": "Undecorated House Group"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TREAT",
     "title": "Undecorated House (treat)",
     "content": "You ring the doorbell and out comes a comfy lady. She looks pretty nonchalant as she reaches into her sweatpants pocket with a handful of candy and tosses it in your bucket.",
@@ -505,10 +496,10 @@
         "value": 9
       }
     ],
-    "groupId": "Undecorated House grouping"
+    "groupId": "Undecorated House Group"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK1",
     "title": "Undecorated House (trick 1)",
     "content": "You ring the doorbell and a nonchalant lady opens the door. Just as she's reaching into sweatpants pocket you speak up, \"Hey, it would be really nice if there was a Halloween atmosphere around here.\"\n\nShe shrugs while saying, \"I guess I might have plastic pumpkin around here somewhere.\" She walks behind the door and reappears with the supposed pumpkin and hands it to you and flashes a weary smile and says \"There we go.\"\n",
@@ -530,10 +521,10 @@
         "itemId": "ITEM_ID.PLASTIC_PUMPKIN"
       }
     ],
-    "groupId": "Undecorated House grouping"
+    "groupId": "Undecorated House Group"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK2",
     "title": "Undecorated House (trick 2)",
     "content": "You place a Plastic Pumpkin on the front step of this undecorated house. You pat the pumpkin and name it Gina. With the house no longer undecorated, you feel your work here is done!",
@@ -561,10 +552,10 @@
         "value": 2
       }
     ],
-    "groupId": "Undecorated House grouping"
+    "groupId": "Undecorated House Group"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK3",
     "title": "Undecorated House (trick 3)",
     "content": "You take your Cotton Cobwebs and stretch it around the pillars around the front. You name the two plastic spiders Andy and Amy. With the house no longer undecorated, you feel your work here is done!",
@@ -592,10 +583,10 @@
         "value": 2
       }
     ],
-    "groupId": "Undecorated House grouping"
+    "groupId": "Undecorated House Group"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY1)",
     "title": "Candy Mountain to the Moon (buy1)",
     "content": "\"Many thanks, tiny neighbor!\"",
@@ -622,10 +613,10 @@
         "value": 5
       }
     ],
-    "groupId": "Quest to the Moon grouping"
+    "groupId": "Quest to the Moon"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY2)",
     "title": "Candy Mountain to the Moon (buy2)",
     "content": "\"Many thanks, tiny neighbor!\"",
@@ -652,10 +643,10 @@
         "value": 5
       }
     ],
-    "groupId": "Quest to the Moon grouping"
+    "groupId": "Quest to the Moon"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(QUESTION)",
     "title": "Candy Mountain to the Moon (question)",
     "content": "\"Mountain is tiny and moon is far. Many kind friends help me but I worry moon will go away.\"",
@@ -665,6 +656,7 @@
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(YESHELP)",
         "label": "Can I help?",
         "conditionList": [
           {
@@ -684,10 +676,10 @@
         "label": "I'll come by later, Lonnie."
       }
     ],
-    "groupId": "Quest to the Moon grouping"
+    "groupId": "Quest to the Moon"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(YESHELP)",
     "title": "Candy Mountain to the Moon (Yes Help)",
     "content": "\"You are tiny but with big heart, many thanks. Here is half moon necklace. Other half belongs to Lonnie's best friend, Monnie. Me and Monnie promise one day to go the moon together but fought over caramel candy bar at his house. Please tell Monnie that Lonnie sorry and want him go to moon together.\"",
@@ -709,23 +701,21 @@
         "itemId": "ITEM_ID.LONNIE_NECKLACE"
       }
     ],
-    "groupId": "Quest to the Moon grouping"
+    "groupId": "Quest to the Moon"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(LONNIE_MAIN)",
     "title": "Candy Mountain to the Moon (Lonnie Main)",
     "content": "\"Hello tiny neighbor! Moon is looking beautiful, yes? I making big candy mountain to go visit moon. Tiny neighbor, you give small candies to me and I give big candy to you.\"",
     "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.RARE",
     "isDialogue": false,
-    "tagList": [
-      "TAG_ID.ENCOUNTER",
-      "TAG_ID.RARE"
-    ],
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY1)",
         "label": "I want a Gummy Bear (5 candies)",
         "conditionList": [
           {
@@ -738,6 +728,7 @@
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY2)",
         "label": "I want some Chocolate Covered P&Ps (5 candies)",
         "conditionList": [
           {
@@ -750,6 +741,7 @@
       {
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(QUESTION)",
         "label": "How is your candy mountain?",
         "conditionList": [
           {
@@ -777,19 +769,16 @@
         "value": 5
       }
     ],
-    "groupId": "Quest to the Moon grouping"
+    "groupId": "Quest to the Moon"
   },
   {
-    "dataType": "DATA_TYPE.ENCOUNTER",
+    "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(MONNIE_MAIN)",
     "title": "Candy Mountain to the Moon (Monnie Main)",
     "content": "\"I am Monnie. I like caramel.\"",
     "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
     "isDialogue": false,
-    "tagList": [
-      "TAG_ID.HOUSE",
-      "TAG_ID.RARE"
-    ],
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
@@ -797,6 +786,6 @@
         "label": "I'll come by later"
       }
     ],
-    "groupId": "Quest to the Moon grouping"
+    "groupId": "Quest to the Moon"
   }
 ]

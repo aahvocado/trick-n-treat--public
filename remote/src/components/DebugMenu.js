@@ -5,9 +5,9 @@ import {
 import { observer } from 'mobx-react';
 
 import ButtonComponent from 'common-components/ButtonComponent';
-import CheckboxComponent from 'common-components/CheckboxComponent';
 import FixedMenuComponent from 'common-components/FixedMenuComponent';
 import LetterIconComponent from 'common-components/LetterIconComponent';
+import ToggleComponent from 'common-components/ToggleComponent';
 
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
@@ -89,26 +89,30 @@ class DebugMenu extends Component {
         <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
           <h3 className='fsize-3 adjacent-mar-t-2'>Game Map Options</h3>
 
-          <CheckboxComponent
-            className='width-full aitems-center jcontent-start flex-row adjacent-mar-t-2'
+          <ToggleComponent
+            className='width-full adjacent-mar-t-2 aitems-center'
             checked={remoteGameState.get('useZoomedOutMap')}
             onChange={this.onClickToggleZoom}
           >
-            <LetterIconComponent className='mar-r-1' children='z' /> Zoom Out of Map
-          </CheckboxComponent>
+            <div className='flex-row aitems-center'>
+              <LetterIconComponent className='mar-r-1' children='z' /> Zoom Out of Map
+            </div>
+          </ToggleComponent>
 
-          <CheckboxComponent
-            className='width-full aitems-center jcontent-start flex-row adjacent-mar-t-2'
+          <ToggleComponent
+            className='width-full aitems-center adjacent-mar-t-2'
             checked={remoteGameState.get('useFullyVisibleMap')}
             onChange={this.onClickToggleVisibility}
           >
-            <LetterIconComponent className='mar-r-1' children='v' /> Fully Visible Map
-          </CheckboxComponent>
+            <div className='flex-row aitems-center'>
+              <LetterIconComponent className='mar-r-1' children='v' /> Fully Visible Map
+            </div>
+          </ToggleComponent>
         </div>
 
         <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
           <ButtonComponent
-            className='width-full adjacent-mar-t-2'
+            className='width-full'
             disabled={!remoteGameState.isGameReady()}
             onClick={this.onClickRestart}
           >

@@ -144,7 +144,7 @@ export class TriggerDataEditorComponent extends PureComponent {
         <div className='bor-1-gray bg-white flex-row'>
           {/* current Trigger */}
           <TriggerLogicListDropdown
-            className='bor-0-transparent'
+            className='bor-0-transparent flex-auto'
             inputSize={16}
             showButton={false}
             selectedOption={{id: triggerLogicId}}
@@ -169,7 +169,7 @@ export class TriggerDataEditorComponent extends PureComponent {
                 className='flex-auto bor-l-1-gray pad-h-2'
                 type='number'
                 value={value}
-                onChange={(e) => onEdit({value: e.target.value})}
+                onChange={(evt) => onEdit({value: evt.target.value})}
               />
             </Fragment>
           }

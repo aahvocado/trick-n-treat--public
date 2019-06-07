@@ -10,9 +10,9 @@ import {
 import {DATA_TYPE} from 'constants.shared/dataTypes';
 
 import ButtonComponent from 'common-components/ButtonComponent';
-import CheckboxComponent from 'common-components/CheckboxComponent';
 import TextAreaComponent from 'common-components/TextAreaComponent';
 import TextInputComponent from 'common-components/TextInputComponent';
+import ToggleComponent from 'common-components/ToggleComponent';
 
 import ConditionListEditorComponent from 'components/ConditionListEditorComponent';
 import ConditionLogicDropdown from 'components/ConditionLogicDropdown';
@@ -744,14 +744,14 @@ class ItemEditorViewer extends Component {
             placeholder='Please enter a unique `id`'
             label='id'
             value={itemDataUtils.snipIdPrefix(id)}
-            onChange={(e) => { onChangeId(e.target.value) }}
+            onChange={(evt) => onChangeId(evt.target.value)}
           />
 
           <TextInputComponent
             placeholder='Name'
             label='name'
             value={name}
-            onChange={(e) => { onChangeName(e.target.value) }}
+            onChange={(evt) => onChangeName(evt.target.value)}
           />
 
           <TextAreaComponent
@@ -759,30 +759,30 @@ class ItemEditorViewer extends Component {
             placeholder='Description'
             label='description'
             value={description}
-            onChange={(e) => { onChangeDescription(e.target.value) }}
+            onChange={(evt) => onChangeDescription(evt.target.value)}
           />
         </ViewerRow>
 
         <ViewerDivider />
 
         <ViewerRow>
-          <CheckboxComponent
+          <ToggleComponent
             className='adjacent-mar-t-2'
-            children={'Useable'}
+            children='Useable'
             checked={isUseable || false}
             onChange={onToggleUseable}
           />
 
-          <CheckboxComponent
+          <ToggleComponent
             className='adjacent-mar-t-2'
-            children={'Consumable'}
+            children='Consumable'
             checked={isConsumable || false}
             onChange={onToggleConsumable}
           />
 
-          <CheckboxComponent
+          <ToggleComponent
             className='adjacent-mar-t-2'
-            children={'Key Item'}
+            children='Key Item'
             checked={isKeyItem || false}
             onChange={onToggleKeyItem}
           />

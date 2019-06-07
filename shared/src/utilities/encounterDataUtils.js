@@ -3,6 +3,9 @@ import Joi from '@hapi/joi';
 import {CHOICE_ID, GOTO_CHOICE_ID_LIST} from 'constants.shared/choiceIds';
 import {DATA_TYPE} from 'constants.shared/dataTypes';
 
+import arrayContainsArray from 'utilities.shared/arrayContainsArray';
+import convertObjectToArray from 'utilities.shared/convertObjectToArray';
+
 /**
  * here you will find the utility functions that help construct an EncounterData object
  *
@@ -48,6 +51,120 @@ export function formatId(idString) {
   // need to add the prefix
   return idPrefix + '.' + formattedString;
 }
+/**
+ * maps each EncounterData into Groups (folders)
+ *
+ * @param {Array<EncounterData>} dataList
+ * @param {Object} [options]
+ * @returns {Object}
+ */
+export function createEncounterGroupingMap(dataList, options = {}) {
+  const {
+    showUngrouped = false,
+  } = options;
+
+  let mapping = {};
+
+  dataList.forEach((encounterData) => {
+    const {id, groupId} = encounterData;
+
+    // encounters with no `groupId` need not a mapping
+    if (groupId === null || groupId === undefined || groupId === '') {
+      // unless `showUngrouped` which makes them a group of their own
+      if (showUngrouped) {
+        mapping[id] = [encounterData];
+      }
+
+      return;
+    };
+
+    // create a groupList if none exists for the `groupId`, using the encounter's id as the first element
+    const groupData = mapping[groupId];
+    if (groupData === undefined) {
+      mapping[groupId] = [encounterData];
+      return;
+    }
+
+    // otherwise, add this id to the list
+    mapping[groupId].push(encounterData);
+  });
+
+  return mapping;
+}
+/**
+ * @param {Object} data
+ * @returns {Array<Array<EncounterData.id>>}
+ */
+export function createEncounterGroupingList(data) {
+  return convertObjectToArray(data, {flatten: false});
+}
+/**
+ * @param {Array<EncounterData>} dataList
+ * @param {Object} options
+ * @returns {Array<EncounterData>}
+ */
+export function filterEncounterList(dataList, options) {
+  const {
+    includeTags = [],
+    excludeTags = [],
+    ...filteredProperties
+  } = options;
+
+  return dataList.filter((encounterData) => {
+    const {
+      dataType,
+      isDialogue,
+      isGeneratable,
+      groupId,
+      rarityId,
+      tagList,
+    } = encounterData;
+
+    // check filtering by `dataType`
+    if (filteredProperties.dataType !== undefined && dataType !== filteredProperties.dataType) {
+      return false;
+    }
+
+    // check filtering by `isDialogue`
+    if (filteredProperties.isDialogue !== undefined && isDialogue !== filteredProperties.isDialogue) {
+      return false;
+    }
+
+    // check filtering by `isGeneratable`
+    if (filteredProperties.isGeneratable !== undefined && isGeneratable !== filteredProperties.isGeneratable) {
+      return false;
+    }
+
+    // check filtering by `groupId`
+    if (filteredProperties.groupId !== undefined && groupId !== filteredProperties.groupId) {
+      return false;
+    }
+
+    // check filtering by `rarityId`
+    if (filteredProperties.rarityId !== undefined && rarityId !== filteredProperties.rarityId) {
+      return false;
+    }
+
+    // includes all of these tags
+    if (includeTags.length > 0 && tagList !== undefined) {
+      const doesIncludeTags = arrayContainsArray(tagList, includeTags);
+      if (!doesIncludeTags) {
+        return false;
+      }
+    }
+
+    // excludes all of these tags
+    if (excludeTags.length > 0 && tagList !== undefined) {
+      const doesExcludeTags = !arrayContainsArray(tagList, excludeTags);
+      if (!doesExcludeTags) {
+        return false;
+      }
+    }
+
+    // passes filter if data made it this far
+    return true;
+  });
+}
 // -- encounter
 /**
  * schema for EncounterData
@@ -60,6 +177,7 @@ const encounterSchema = Joi.object().keys({
   title: Joi.string().required(),
   content: Joi.string().required(),
   isGeneratable: Joi.boolean().required(),
+  rarityId: Joi.string().optional(),
   isDialogue: Joi.boolean().required(),
   actionList: Joi.array().min(1).required(),
   tagList: Joi.array(),
@@ -93,6 +211,7 @@ export function createEncounterData(defaultData = {}) {
     title: undefined,
     content: undefined,
     isGeneratable: true,
+    // rarityId: undefined,
     isDialogue: false,
     actionList: [createActionData()],
     // tagList: [],
@@ -134,6 +253,7 @@ export function formatEncounterData(data) {
     title: data.title,
     content: data.content,
     isGeneratable: data.isGeneratable,
+    rarityId: data.rarityId,
     isDialogue: data.isDialogue,
     tagList: data.tagList || [],
     actionList: formatActionList(data.actionList),
@@ -158,6 +278,19 @@ export function formatEncounterData(data) {
   // remove blank optional strings
   if (formattedData.groupId.length <= 0) {
     delete formattedData.groupId;
+  }
+
+  // if this is not Generatable
+  if (!formattedData.isGeneratable) {
+    // it does not need a `conditionList`
+    if (formattedData.conditionList) {
+      delete formattedData.conditionList;
+    }
+
+    // it does not need `rarityId`
+    if (formattedData.rarityId) {
+      delete formattedData.rarityId;
+    }
   }
 
   // all done
@@ -296,6 +429,7 @@ export function formatConditionList(conditionList = []) {
 const actionSchema = Joi.object().keys({
   dataType: Joi.string().required(),
   choiceId: Joi.string().required(),
+  gotoId: Joi.string().required(),
   label: Joi.string().required(),
   conditionList: Joi.array().optional(),
 });
@@ -321,8 +455,9 @@ export function validateAction(data) {
 export function createActionData(defaultData = {}) {
   const blankTemplate = {
     dataType: DATA_TYPE.ACTION,
-    label: 'Okay',
     choiceId: CHOICE_ID.CONFIRM,
+    gotoId: undefined,
+    label: 'Okay',
     // conditionList: [],
   }
 
@@ -403,12 +538,19 @@ export function formatActionData(data) {
   let formattedData = {
     dataType: data.dataType,
     choiceId: data.choiceId,
+    gotoId: data.gotoId,
     label: data.label,
     conditionList: formatConditionList(data.conditionList),
   }
 
+  // remove empty arrays
   if (formattedData.conditionList.length <= 0) {
     delete formattedData.conditionList;
+  }
+
+  // no need for a `gotoId` if `choiceId` does not support it
+  if (!GOTO_CHOICE_ID_LIST.includes(formattedData.choiceId)) {
+    delete formattedData.gotoId;
   }
 
   // all done
@@ -423,7 +565,7 @@ export function formatActionList(actionList = []) {
 }
 // -- trigger
 /**
- * schema for ActionData
+ * schema for TriggerData
  *
  * @type {Joi.Schema}
  */
@@ -472,24 +614,6 @@ export function updateTriggerDataAt(list, newData, idx) {
 
   // return updated list
   return triggerList;
-}
-/**
- * @param {EncounterData} data
- * @param {TriggerData} newData
- * @returns {EncounterData}
- */
-export function addTriggerToEncounter(data, newData) {
-  // add newData to the list
-  const triggerList = data.triggerList;
-  triggerList.push(newData);
-
-  // create data
-  const resultData = {
-    ...data,
-    triggerList: triggerList,
-  };
-
-  return resultData;
 }
 /**
  * @param {Object} data

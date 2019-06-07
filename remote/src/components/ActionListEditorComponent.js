@@ -12,7 +12,7 @@ import IconButtonComponent from 'common-components/IconButtonComponent';
 import ActionListDropdown from 'components/ActionListDropdown';
 import ConditionListEditorComponent from 'components/ConditionListEditorComponent';
 
-import {ENCOUNTER_DATA} from 'helpers.shared/encounterDataHelper'
+import {ALL_ENCOUNTER_DATA_LIST} from 'helpers.shared/encounterDataHelper'
 
 import combineClassNames from 'utilities/combineClassNames';
 
@@ -157,7 +157,7 @@ export class ActionDataEditorComponent extends PureComponent {
             type='text'
             placeholder='Label for the button...'
             value={label}
-            onChange={(e) => onEdit({label: e.target.value})}
+            onChange={(evt) => onEdit({label: evt.target.value})}
           />
 
           {/* Remove Action */}
@@ -175,7 +175,7 @@ export class ActionDataEditorComponent extends PureComponent {
             <DropdownComponent
               className='flex-auto borcolor-transparent adjacent-mar-t-2'
               selectedOption={{id: gotoId}}
-              options={ENCOUNTER_DATA.map((item) => ({
+              options={ALL_ENCOUNTER_DATA_LIST.map((item) => ({
                 data: item.id,
                 id: item.id,
                 label: item.title,

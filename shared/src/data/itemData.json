@@ -14,7 +14,7 @@
       }
     ],
     "tagList": [
-      "TAG_ID.DEBUG"
+      "TAG_ID.TYPE.DEBUG"
     ],
     "triggerList": [
       {
@@ -64,10 +64,8 @@
       }
     ],
     "tagList": [
-      "TAG_ID.ITEM",
-      "TAG_ID.COMMON",
-      "TAG_ID.CONSUMABLE",
-      "TAG_ID.HEALTH"
+      "TAG_ID.RARITY.COMMON",
+      "TAG_ID.DESCRIPTORS.ADDS_HEALTH"
     ]
   },
   {
@@ -88,10 +86,8 @@
       }
     ],
     "tagList": [
-      "TAG_ID.ITEM",
-      "TAG_ID.COMMON",
-      "TAG_ID.CONSUMABLE",
-      "TAG_ID.SANITY"
+      "TAG_ID.RARITY.COMMON",
+      "TAG_ID.DESCRIPTORS.ADDS_SANITY"
     ]
   },
   {
@@ -103,11 +99,9 @@
     "description": "Now that you've picked up a random mouse trap from on the street you can set a trap for any mice you come across.",
     "conditionList": [],
     "tagList": [
-      "TAG_ID.QUEST",
-      "TAG_ID.RARE",
-      "TAG_ID.ITEM",
-      "TAG_ID.SIDEWALK",
-      "TAG_ID.UNCOMMON"
+      "TAG_ID.RARITY.RARE",
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.RARITY.UNCOMMON"
     ],
     "triggerList": []
   },
@@ -120,7 +114,7 @@
     "description": "This is one of those store bought pumpkins with a normal triangle eyes and square-toothed smile. ",
     "conditionList": [],
     "tagList": [
-      "TAG_ID.ITEM"
+      "TAG_ID.TYPE.ITEM"
     ],
     "triggerList": [],
     "isUseable": false
@@ -134,7 +128,7 @@
     "description": "This is one of those store bought cobwebs. It even has a couple of plastic spiders on it.",
     "conditionList": [],
     "tagList": [
-      "TAG_ID.ITEM"
+      "TAG_ID.TYPE.ITEM"
     ],
     "triggerList": [],
     "isUseable": false
@@ -148,8 +142,7 @@
     "description": "Yeah, there's only one because this gummy is the size of your head. Just looking at it makes your eyes nearly just as big.",
     "conditionList": [],
     "tagList": [
-      "TAG_ID.ITEM",
-      "TAG_ID.UNCOMMON"
+      "TAG_ID.RARITY.UNCOMMON"
     ],
     "triggerList": [
       {
@@ -183,8 +176,7 @@
       }
     ],
     "tagList": [
-      "TAG_ID.ITEM",
-      "TAG_ID.UNCOMMON"
+      "TAG_ID.RARITY.UNCOMMON"
     ],
     "triggerList": [
       {

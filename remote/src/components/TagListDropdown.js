@@ -2,17 +2,19 @@ import React from 'react';
 
 import DropdownComponent from 'common-components/DropdownComponent';
 
-import { TAG_ID_LIST } from 'constants.shared/tagIds';
+import {TILE_TYPE_TAG_ID_LIST, DESCRIPTORS_TAG_ID_LIST} from 'constants.shared/tagIds';
 
 import l10n from 'utilities.shared/l10n';
 
+
+const listToUse = TILE_TYPE_TAG_ID_LIST.concat(DESCRIPTORS_TAG_ID_LIST);
 /**
  *
  */
 export default function TagListDropdown(props) {
   return (
     <DropdownComponent
-      options={TAG_ID_LIST.map((item) => ({
+      options={listToUse.map((item) => ({
         data: item,
         id: item,
         label: l10n(item),

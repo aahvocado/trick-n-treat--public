@@ -1,3 +1,4 @@
+import {DATA_TYPE} from 'constants.shared/dataTypes';
 import {TAG_ID} from 'constants.shared/tagIds';
 
 import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
@@ -7,13 +8,13 @@ import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice'
 
 const rarityTagChoices = [
   {
-    returns: TAG_ID.COMMON,
+    returns: TAG_ID.RARITY.COMMON,
     weight: 75,
   }, {
-    returns: TAG_ID.UNCOMMON,
+    returns: TAG_ID.RARITY.UNCOMMON,
     weight: 20,
   }, {
-    returns: TAG_ID.RARE,
+    returns: TAG_ID.RARITY.RARE,
     weight: 5,
   },
 ];
@@ -52,13 +53,11 @@ export function generateHouses(mapModel, biomeSettings) {
  * @returns {EncounterModel}
  */
 export function createHouseEncounter(mapModel, location) {
-  const rarityTag = pickRandomWeightedChoice(rarityTagChoices);
-  const tagsToSearch = [TAG_ID.HOUSE];
-
   const encounterModel = encounterGenerationUtils.generateRandomEncounter({
     location: location,
-    includeTags: tagsToSearch,
-    excludeTags: [TAG_ID.DEBUG, TAG_ID.ENCOUNTER],
+    dataType: DATA_TYPE.HOUSE,
+    isGeneratable: true,
+    rarityId: pickRandomWeightedChoice(rarityTagChoices),
   });
 
   // there are no matches if we get `null`

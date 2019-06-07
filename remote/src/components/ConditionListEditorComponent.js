@@ -161,7 +161,7 @@ export class ConditionDataEditorComponent extends PureComponent {
             placeholder='Value'
             type='number'
             value={value}
-            onChange={(e) => onEdit({value: e.target.value})}
+            onChange={(evt) => onEdit({value: evt.target.value})}
           />
         }
 

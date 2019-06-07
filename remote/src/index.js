@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import keycodes from 'constants.shared/keycodes';
+
 import remoteAppState from 'state/remoteAppState';
 import remoteGameState from 'state/remoteGameState';
 
@@ -34,19 +36,23 @@ ReactDOM.render(<App />, document.getElementById('root'));
 /**
  * @todo - move this to a better place
  */
-window.addEventListener('keydown', (e) => {
+window.addEventListener('keydown', (evt) => {
+  // don't use the hotkeys if trying to type
+  if (evt.srcElement.type === 'text' || evt.srcElement.type === 'textarea' || evt.srcElement.type === 'number') {
+    return;
+  }
+
   // only devs get super cool hotkeys
   if (!remoteAppState.get('isDevMode')) {
-    e.preventDefault();
     return;
   }
 
   // backquote
-  if (e.keyCode === 192) {
+  if (evt.keyCode === keycodes.backquote) {
     remoteAppState.set({isDebugMenuActive: !remoteAppState.get('isDebugMenuActive')});
   }
   // r
-  if (e.keyCode === 82) {
+  if (evt.keyCode === keycodes.r) {
     connectionManager.reconnect();
   }
 
@@ -55,15 +61,15 @@ window.addEventListener('keydown', (e) => {
     // return;
   }
   // t
-  if (e.keyCode === 84) {
+  if (evt.keyCode === keycodes.t) {
     // remoteAppState.set({isEditorMode: !remoteAppState.get('isEditorMode')});
   }
   // z
-  if (e.keyCode === 90) {
+  if (evt.keyCode === keycodes.z) {
     remoteGameState.set({useZoomedOutMap: !remoteGameState.get('useZoomedOutMap')});
   }
   // v
-  if (e.keyCode === 86) {
+  if (evt.keyCode === keycodes.v) {
     remoteGameState.set({useFullyVisibleMap: !remoteGameState.get('useFullyVisibleMap')});
   }
 });

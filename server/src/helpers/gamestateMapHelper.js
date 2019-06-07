@@ -8,6 +8,8 @@ import {
   isWalkableTile,
 } from 'constants.shared/tileTypes';
 import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
+
+import {DATA_TYPE} from 'constants.shared/dataTypes';
 import {TAG_ID} from 'constants.shared/tagIds';
 
 import gameState from 'state/gameState';
@@ -23,13 +25,13 @@ import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice'
 
 const rarityTagChoices = [
   {
-    returns: TAG_ID.COMMON,
+    returns: TAG_ID.RARITY.COMMON,
     weight: 75,
   }, {
-    returns: TAG_ID.UNCOMMON,
+    returns: TAG_ID.RARITY.UNCOMMON,
     weight: 20,
   }, {
-    returns: TAG_ID.RARE,
+    returns: TAG_ID.RARITY.RARE,
     weight: 5,
   },
 ];
@@ -225,36 +227,37 @@ export function placeDecor(mapModel, location) {
  * @param {Point} location
  */
 export function placeEncounter(mapModel, location) {
-  const rarityTag = pickRandomWeightedChoice(rarityTagChoices);
-  const tagsToSearch = [TAG_ID.ENCOUNTER, rarityTag];
+  const tagsToSearch = [];
 
   const tileOnMap = mapModel.getTileAt(location);
   if (tileOnMap === TILE_TYPES.PATH) {
-    tagsToSearch.push(TAG_ID.PATH);
+    tagsToSearch.push(TAG_ID.TILE_TYPE.PATH);
   }
   if (tileOnMap === TILE_TYPES.GRASS) {
-    tagsToSearch.push(TAG_ID.GRASS);
+    tagsToSearch.push(TAG_ID.TILE_TYPE.GRASS);
   }
   if (tileOnMap === TILE_TYPES.SIDEWALK) {
-    tagsToSearch.push(TAG_ID.SIDEWALK);
+    tagsToSearch.push(TAG_ID.TILE_TYPE.SIDEWALK);
   }
   if (tileOnMap === TILE_TYPES.ROAD) {
-    tagsToSearch.push(TAG_ID.ROAD);
+    tagsToSearch.push(TAG_ID.TILE_TYPE.ROAD);
   }
   if (tileOnMap === TILE_TYPES.SWAMP) {
-    tagsToSearch.push(TAG_ID.SWAMP);
+    tagsToSearch.push(TAG_ID.TILE_TYPE.SWAMP);
   }
   if (tileOnMap === TILE_TYPES.PLANKS) {
     tagsToSearch.push(TAG_ID.PLANKS);
   }
   if (tileOnMap === TILE_TYPES.WOODS) {
-    tagsToSearch.push(TAG_ID.WOODS);
+    tagsToSearch.push(TAG_ID.TILE_TYPE.WOODS);
   }
 
   const encounterModel = encounterGenerationUtils.generateRandomEncounter({
     location: location,
+    dataType: DATA_TYPE.ENCOUNTER,
+    isGeneratable: true,
+    rarityId: pickRandomWeightedChoice(rarityTagChoices),
     includeTags: tagsToSearch,
-    excludeTags: [TAG_ID.DEBUG, TAG_ID.HOUSE],
   });
 
   // there are no matches if we get `null`

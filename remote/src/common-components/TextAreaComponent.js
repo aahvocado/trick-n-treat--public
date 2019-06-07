@@ -17,6 +17,12 @@ export default class TextAreaComponent extends PureComponent {
     disabled: false,
     /** @type {String} */
     label: '',
+  };
+  /** @override */
+  constructor(props) {
+    super(props);
+
+    this.onChangeText = this.onChangeText.bind(this);
   }
   /** @override */
   render() {
@@ -44,8 +50,15 @@ export default class TextAreaComponent extends PureComponent {
           className={combineClassNames(baseClassName, className, modifierClassNames)}
           disabled={disabled}
           {...otherProps}
+          onChange={this.onChangeText}
         />
       </label>
     )
+  }
+  /**
+   * @param {SyntheticEvent} evt
+   */
+  onChangeText(evt) {
+    this.props.onChange(evt);
   }
 }

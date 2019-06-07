@@ -70,13 +70,13 @@ export default class ItemEditorComponent extends PureComponent {
     });
   }
   /**
-   * @param {SyntheticEvent} e
+   * @param {SyntheticEvent} evt
    */
-  onChangeValue(e) {
+  onChangeValue(evt) {
     const { data, onEdit } = this.props;
     onEdit({
       ...data,
-      value: parseInt(e.target.value),
+      value: parseInt(evt.target.value),
     });
   }
 }

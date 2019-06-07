@@ -787,10 +787,10 @@ class ImportModal extends Component {
     )
   }
   /**
-   *
+   * @param {SyntheticEvent} evt
    */
-  handleOnChangeTextarea(e) {
-    this.setState({value: e.target.value});
+  handleOnChangeTextarea(evt) {
+    this.setState({value: evt.target.value});
   }
   /**
    *
