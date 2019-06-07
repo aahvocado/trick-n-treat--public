@@ -21,7 +21,7 @@ import {
   isItemTriggerLogic,
   isNumberTriggerLogic,
 } from 'utilities.shared/triggerLogicUtils';
-import * as encounterDataUtils from 'utilities.shared/encounterDataUtils'
+import * as genericDataUtils from 'utilities.shared/genericDataUtils'
 
 /**
  * this is an Editor for a TriggerList
@@ -86,7 +86,7 @@ export default class TriggerListEditorComponent extends PureComponent {
     const {dataList, onEdit} = this.props;
 
     // update the data
-    const resultList = encounterDataUtils.updateTriggerDataAt(dataList, newData, idx);
+    const resultList = genericDataUtils.updateTriggerDataAt(dataList, newData, idx);
 
     // callback to say data has changed
     onEdit(resultList);
@@ -218,10 +218,10 @@ export class TriggerDataEditorComponent extends PureComponent {
     const { data, onEdit } = this.props;
 
     // create it
-    const newCondition = encounterDataUtils.createConditionData();
+    const newCondition = genericDataUtils.createConditionData();
 
     // add it
-    const resultData = encounterDataUtils.addConditionToData(data, newCondition);
+    const resultData = genericDataUtils.addConditionToData(data, newCondition);
 
     // update parent
     onEdit(resultData);

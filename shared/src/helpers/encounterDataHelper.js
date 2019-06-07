@@ -43,5 +43,7 @@ export function findEncounterData(options = {}) {
 }
 /** @type {Object} */
 export const ENCOUNTER_GROUPING_MAP = encounterDataUtils.createEncounterGroupingMap(ALL_ENCOUNTER_DATA_LIST);
-/** @type {Array<Array<EncounterData.id>>} */
+/** @type {Array<Array<EncounterData>>} */
 export const ENCOUNTER_GROUPING_LIST = encounterDataUtils.createEncounterGroupingList(ENCOUNTER_GROUPING_MAP);
+/** @type {Array<Array<EncounterData>>} */
+export const GROUPINGS_ID_LIST = Object.keys(ENCOUNTER_GROUPING_MAP);

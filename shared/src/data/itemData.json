@@ -1,208 +1,224 @@
 [
   {
     "id": "ITEM_ID.DEBUG_ITEM",
+    "name": "Developer Item",
+    "description": "This is the first item so you can play around with it.",
     "isUseable": false,
     "isConsumable": false,
     "isKeyItem": true,
-    "name": "Developer Item",
-    "description": "This is the first item so you can play around with it.",
-    "conditionList": [
-      {
-        "value": 5,
-        "targetId": "TARGET_ID.CHARACTER.LUCK",
-        "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN"
-      }
-    ],
     "tagList": [
-      "TAG_ID.TYPE.DEBUG"
+      "TAG_ID.DESCRIPTORS.ADDS_CANDY"
     ],
     "triggerList": [
       {
-        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
         "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
         "value": 1,
         "itemId": "ITEM_ID.GUMMY_VIAL"
       },
       {
-        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
         "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
         "value": 100,
         "conditionList": [
           {
-            "value": 3,
             "targetId": "TARGET_ID.CHARACTER.GREED",
-            "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN"
+            "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+            "value": 3
           },
           {
-            "value": 1,
             "targetId": "TARGET_ID.CHARACTER.LUCK",
-            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN"
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 1
           }
         ]
       },
       {
-        "triggerLogicId": "TRIGGER_LOGIC_ID.GREED.ADD",
+        "targetId": "TARGET_ID.CHARACTER.GREED",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
         "value": 1
+      }
+    ],
+    "conditionList": [
+      {
+        "targetId": "TARGET_ID.CHARACTER.LUCK",
+        "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+        "value": 5
       }
     ]
   },
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.GUMMY_VIAL",
+    "name": "Gummy Vial",
+    "description": "This is a gummy candy in the shape of test tube. Gee, Lycanshire Candy Co sure are trying hard to get kids into science.",
     "isUseable": true,
     "isConsumable": true,
     "isKeyItem": false,
-    "name": "Gummy Vial",
-    "description": "This is a gummy candy in the shape of test tube. Gee, Lycanshire Candy Co sure are trying hard to get kids into science.",
-    "conditionList": [],
+    "tagList": [
+      "TAG_ID.DESCRIPTORS.ADDS_HEALTH"
+    ],
     "triggerList": [
       {
         "dataType": "DATA_TYPE.TRIGGER",
-        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
         "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
         "value": 1
       }
     ],
-    "tagList": [
-      "TAG_ID.RARITY.COMMON",
-      "TAG_ID.DESCRIPTORS.ADDS_HEALTH"
-    ]
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON"
   },
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.BRAIN_FOOD",
+    "name": "Brain Food",
+    "description": "Oh no! What kind of crazy person gives out healthy food good for developing brains low on sanity on Halloween?",
     "isUseable": true,
     "isConsumable": true,
     "isKeyItem": false,
-    "name": "Brain Food",
-    "description": "Oh no! What kind of crazy person gives out healthy food good for developing brains low on sanity on Halloween?",
-    "conditionList": [],
+    "tagList": [
+      "TAG_ID.DESCRIPTORS.ADDS_SANITY"
+    ],
     "triggerList": [
       {
         "dataType": "DATA_TYPE.TRIGGER",
-        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
         "targetId": "TARGET_ID.CHARACTER.SANITY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
         "value": 1
       }
     ],
-    "tagList": [
-      "TAG_ID.RARITY.COMMON",
-      "TAG_ID.DESCRIPTORS.ADDS_SANITY"
-    ]
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON"
   },
   {
     "id": "ITEM_ID.MOUSETRAP",
-    "isUseable": false,
-    "isConsumable": true,
-    "isKeyItem": false,
     "name": "Mouse Trap",
     "description": "Now that you've picked up a random mouse trap from on the street you can set a trap for any mice you come across.",
-    "conditionList": [],
+    "isUseable": false,
+    "isConsumable": false,
+    "isKeyItem": false,
     "tagList": [
-      "TAG_ID.RARITY.RARE",
       "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.RARITY.UNCOMMON"
+      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD",
+      "TAG_ID.TILE_TYPE.LIT_ROAD",
+      "TAG_ID.TILE_TYPE.PLANKS",
+      "TAG_ID.TILE_TYPE.WOODS",
+      "TAG_ID.TILE_TYPE.WOODS_TWO",
+      "TAG_ID.TILE_TYPE.GRASS",
+      "TAG_ID.TILE_TYPE.LIT_GRASS"
     ],
-    "triggerList": []
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON"
   },
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.PLASTIC_PUMPKIN",
-    "isConsumable": false,
-    "isKeyItem": false,
     "name": "Plastic Pumpkin",
     "description": "This is one of those store bought pumpkins with a normal triangle eyes and square-toothed smile. ",
-    "conditionList": [],
+    "isUseable": false,
+    "isConsumable": false,
+    "isKeyItem": false,
     "tagList": [
-      "TAG_ID.TYPE.ITEM"
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD",
+      "TAG_ID.TILE_TYPE.LIT_ROAD"
     ],
-    "triggerList": [],
-    "isUseable": false
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON"
   },
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.COTTON_COBWEB",
-    "isConsumable": false,
-    "isKeyItem": false,
     "name": "Cotton Cobwebs",
     "description": "This is one of those store bought cobwebs. It even has a couple of plastic spiders on it.",
-    "conditionList": [],
+    "isUseable": false,
+    "isConsumable": false,
+    "isKeyItem": false,
     "tagList": [
-      "TAG_ID.TYPE.ITEM"
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
+      "TAG_ID.TILE_TYPE.WOODS",
+      "TAG_ID.TILE_TYPE.LIT_WOODS",
+      "TAG_ID.TILE_TYPE.WOODS_TWO",
+      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO"
     ],
-    "triggerList": [],
-    "isUseable": false
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON"
   },
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.BIG_GUMMY_BEAR",
-    "isConsumable": true,
-    "isKeyItem": false,
     "name": "Gummy Bear",
     "description": "Yeah, there's only one because this gummy is the size of your head. Just looking at it makes your eyes nearly just as big.",
-    "conditionList": [],
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
     "tagList": [
-      "TAG_ID.RARITY.UNCOMMON"
+      "TAG_ID.DESCRIPTORS.ADDS_HEALTH"
     ],
     "triggerList": [
       {
         "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.CHARACTER.GREED",
         "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
-        "value": 1,
-        "targetId": "TARGET_ID.CHARACTER.GREED"
+        "value": 1
       },
       {
         "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
         "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
-        "value": 3,
-        "targetId": "TARGET_ID.CHARACTER.HEALTH"
+        "value": 3
       }
     ],
-    "isUseable": true
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON"
   },
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.CHOCOLATE_COVERED_PEANUTS_N_PRETZELS",
-    "isConsumable": true,
-    "isKeyItem": false,
     "name": "Chocolate Covered P&Ps",
     "description": "Ugh, this might be candy because it's chocolate covered but it's just a smooshed chunk of peanuts and pretzels that it's going to hurt your mouth so much if you eat it.",
-    "conditionList": [
-      {
-        "dataType": "DATA_TYPE.CONDITION",
-        "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
-        "targetId": "TARGET_ID.CHARACTER.HEALTH",
-        "value": 1
-      }
-    ],
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
     "tagList": [
-      "TAG_ID.RARITY.UNCOMMON"
+      "TAG_ID.DESCRIPTORS.LOSES_HEALTH",
+      "TAG_ID.DESCRIPTORS.ADDS_SANITY"
     ],
     "triggerList": [
       {
         "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
         "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
-        "value": 2,
-        "targetId": "TARGET_ID.CHARACTER.HEALTH"
+        "value": 2
       },
       {
         "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.CHARACTER.SANITY",
         "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
-        "value": 3,
-        "targetId": "TARGET_ID.CHARACTER.SANITY"
+        "value": 3
       }
     ],
-    "isUseable": true
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON"
   },
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.LONNIE_NECKLACE",
-    "isConsumable": false,
-    "isKeyItem": true,
     "name": "Lonnie's Necklace",
     "description": "This necklace is a shiny silver color depicting a half moon. Supposedly the other half belongs to Monnie because they separated after fighting over a caramel chocolate bar at Monnie's house. ",
-    "conditionList": [],
-    "tagList": [],
-    "triggerList": []
+    "isConsumable": false,
+    "isKeyItem": true
   }
 ]

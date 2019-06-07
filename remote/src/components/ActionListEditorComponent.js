@@ -16,7 +16,7 @@ import {ALL_ENCOUNTER_DATA_LIST} from 'helpers.shared/encounterDataHelper'
 
 import combineClassNames from 'utilities/combineClassNames';
 
-import * as encounterDataUtils from 'utilities.shared/encounterDataUtils'
+import * as genericDataUtils from 'utilities.shared/genericDataUtils'
 
 /**
  * this is an Editor for a ActionList
@@ -81,7 +81,7 @@ export default class ActionListEditorComponent extends PureComponent {
     const {dataList, onEdit} = this.props;
 
     // update the data
-    const resultList = encounterDataUtils.updateActionDataAt(dataList, newData, idx);
+    const resultList = genericDataUtils.updateActionDataAt(dataList, newData, idx);
 
     // callback to say data has changed
     onEdit(resultList);
@@ -212,10 +212,10 @@ export class ActionDataEditorComponent extends PureComponent {
     const { data, onEdit } = this.props;
 
     // create it
-    const newCondition = encounterDataUtils.createConditionData(defaultData);
+    const newCondition = genericDataUtils.createConditionData(defaultData);
 
     // add it
-    const resultData = encounterDataUtils.addConditionToData(data, newCondition);
+    const resultData = genericDataUtils.addConditionToData(data, newCondition);
 
     // update parent
     onEdit(resultData);

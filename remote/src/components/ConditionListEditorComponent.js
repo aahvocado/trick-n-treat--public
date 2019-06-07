@@ -12,7 +12,7 @@ import ItemListDropdown from 'components/ItemListDropdown';
 import combineClassNames from 'utilities/combineClassNames';
 
 import * as conditionLogicUtils from 'utilities.shared/conditionLogicUtils'
-import * as encounterDataUtils from 'utilities.shared/encounterDataUtils'
+import * as genericDataUtils from 'utilities.shared/genericDataUtils'
 
 /**
  * this is an Editor for a ConditionList
@@ -77,7 +77,7 @@ export default class ConditionListEditorComponent extends PureComponent {
     const {dataList, onEdit} = this.props;
 
     // update the data
-    const resultList = encounterDataUtils.updateConditionDataAt(dataList, newData, idx);
+    const resultList = genericDataUtils.updateConditionDataAt(dataList, newData, idx);
 
     // callback to say data has changed
     onEdit(resultList);
