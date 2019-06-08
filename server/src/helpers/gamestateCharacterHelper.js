@@ -4,7 +4,6 @@ import {MAP_START} from 'constants/mapSettings';
 import {TRIGGER_LOGIC_ID} from 'constants.shared/triggerLogicIds';
 
 import * as clientEventHelper from 'helpers/clientEventHelper';
-import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 
 import {getEncounterDataById} from 'helpers.shared/encounterDataHelper';
 
@@ -135,11 +134,11 @@ export function updateCharacterPosition(characterModel, position) {
     return;
   }
 
-  // add the handler for the Encounter to the front of the `actionQueue`
+  // add the handler for the Encounter to the front of the FunctionQueue
   // (it may not necessarily trigger)
-  gameState.insertIntoActionQueue(() => {
+  gameState.insertIntoFunctionQueue(() => {
     handleCharacterTriggerEncounter(characterModel, encounterModel);
-  });
+  }, 'handleCharacterTriggerEncounter');
 }
 /**
  * attempts to move a Character tile by tile to a position
@@ -169,7 +168,7 @@ export function moveCharacterTo(characterModel, position) {
 
   // take one step at a time for moving along the path
   movePath.forEach((pathPoint) => {
-    gameState.addToActionQueue(() => {
+    gameState.addToFunctionQueue(() => {
       // subtract a Movement
       characterModel.modifyStat('movement', -1);
 
@@ -177,10 +176,10 @@ export function moveCharacterTo(characterModel, position) {
       updateCharacterPosition(characterModel, pathPoint);
 
       // handle end of action lifecycle
-      gameState.insertIntoActionQueue(() => {
+      gameState.insertIntoFunctionQueue(() => {
         gameState.handleEndOfAction(characterModel);
-      });
-    });
+      }, 'handleEndOfAction');
+    }, 'moveCharacterTo');
   });
 }
 /**
@@ -284,9 +283,9 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
     clientEventHelper.sendEncounterToClient(clientModel, null);
 
     // handle end of action lifecycle
-    gameState.insertIntoActionQueue(() => {
+    gameState.insertIntoFunctionQueue(() => {
       gameState.handleEndOfAction(characterModel);
-    });
+    }, 'handleEndOfAction');
   }
 
   // everything else goes to another Encounter
@@ -328,9 +327,9 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
   // track the `activeEncounter`
   gameState.set({activeEncounter: encounterModel});
 
-  // clear the actionQueue because we have to handle this immediately
+  // clear the FunctionQueue because we have to handle this immediately and not anything else
   //  this might cause issues and skip events, so we need to keep an eye on this
-  gamestateActionHelper.clearActionQueue();
+  gameState.clearFunctionQueue();
 
   // resolve all the triggers
   const triggerList = encounterModel.get('triggerList');

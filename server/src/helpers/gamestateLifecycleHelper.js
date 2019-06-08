@@ -38,8 +38,6 @@ export function resetState() {
 
   // reset generic attributes
   gameState.import({
-    actionQueue: [],
-    activeAction: null,
     turnQueue: [],
     round: 0,
     lightSourceList: [],
@@ -76,31 +74,31 @@ export function handleStartGame(clientList) {
   });
 
   // immediately update clients so they know they are in game
-  gameState.insertIntoActionQueue(() => {
+  gameState.insertIntoFunctionQueue(() => {
     clientEventHelper.sendLobbyUpdate();
-  });
+  }, 'sendLobbyUpdate');
 
   // proceed to generate map
-  gameState.addToActionQueue(() => {
+  gameState.addToFunctionQueue(() => {
     gamestateGenerationHelper.generateNewMap();
-  });
+  }, 'generateNewMap');
 
   // after map is generated, update the world the first time
-  gameState.addToActionQueue(() => {
+  gameState.addToFunctionQueue(() => {
     updateEncounters();
     updateLighting();
-  });
+  }, 'updateWorld');
 
   // after map is generated, update the clients
-  gameState.addToActionQueue(() => {
+  gameState.addToFunctionQueue(() => {
     clientEventHelper.sendLobbyUpdate();
-  });
+  }, 'sendLobbyUpdate');
 
   // start the round after all that
-  gameState.addToActionQueue(() => {
+  gameState.addToFunctionQueue(() => {
     gameState.set({mode: GAME_MODES.ACTIVE});
     gameState.handleStartOfRound();
-  });
+  }, 'handleStartOfRound');
 }
 /**
  * end current game
@@ -111,14 +109,13 @@ export function handleEndGame() {
   // clear some states
   gameState.set({
     mode: GAME_MODES.INACTIVE,
-    activeAction: null,
     activeEncounter: null,
   });
 
   // immediately update clients so the game is ended
-  gameState.insertIntoActionQueue(() => {
+  gameState.insertIntoFunctionQueue(() => {
     clientEventHelper.sendGameEnd();
-  });
+  }, 'sendGameEnd');
 }
 /**
  * restart game
@@ -129,14 +126,14 @@ export function handleRestartGame(clientList) {
   logger.lifecycle('handleRestartGame()');
 
   // end the game
-  gameState.addToActionQueue(() => {
+  gameState.addToFunctionQueue(() => {
     gameState.handleEndGame();
-  });
+  }, 'handleEndGame');
 
   // start the game
-  gameState.addToActionQueue(() => {
+  gameState.addToFunctionQueue(() => {
     gameState.handleStartGame(clientList);
-  });
+  }, 'handleStartGame');
 }
 // -- Character
 /**
@@ -166,16 +163,16 @@ export function handleEndOfAction(characterModel) {
 
   // if Character can no longer move, it's time to end their turn
   if (!characterModel.canMove()) {
-    gameState.addToActionQueue(() => {
+    gameState.addToFunctionQueue(() => {
       gameState.handleEndOfTurn();
-    });
+    }, 'handleEndOfTurn');
     return;
   }
 
   // immediately update clients otherwise
-  gameState.insertIntoActionQueue(() => {
+  gameState.insertIntoFunctionQueue(() => {
     clientEventHelper.sendGameUpdate();
-  });
+  }, 'sendGameUpdate');
 }
 // -- Turn
 /**
@@ -225,17 +222,17 @@ export function handleEndOfTurn() {
 
   // start the next turn if there is more in the `turnQueue`
   if (currentTurnQueue.length > 0) {
-    gameState.addToActionQueue(() => {
+    gameState.addToFunctionQueue(() => {
       gameState.handleStartOfTurn();
-    });
+    }, 'handleStartOfTurn');
     return;
   }
 
   // end the round if nothing left in the `turnQueue`
   if (currentTurnQueue.length <= 0) {
-    gameState.addToActionQueue(() => {
+    gameState.addToFunctionQueue(() => {
       gameState.handleEndOfRound();
-    });
+    }, 'handleEndOfRound');
     return;
   }
 }
@@ -254,9 +251,9 @@ export function handleStartOfRound() {
   clientEventHelper.sendGameUpdate();
 
   // create new turn queue
-  gameState.addToActionQueue(() => {
+  gameState.addToFunctionQueue(() => {
     gameState.initTurnQueue();
-  });
+  }, 'initTurnQueue');
 }
 /**
  * end round
@@ -268,9 +265,9 @@ export function handleEndOfRound() {
   clientEventHelper.sendGameUpdate();
 
   // go to next round
-  gameState.addToActionQueue(() => {
+  gameState.addToFunctionQueue(() => {
     gameState.handleStartOfRound();
-  });
+  }, 'handleStartOfRound');
 }
 /**
  * builds a Turn Queue based on stuff
@@ -287,9 +284,9 @@ export function initTurnQueue() {
   gameState.set({turnQueue: newTurnQueue});
 
   // now that turn queue is created, start the round
-  gameState.insertIntoActionQueue(() => {
+  gameState.insertIntoFunctionQueue(() => {
     gameState.handleStartOfTurn();
-  });
+  }, 'handleStartOfTurn');
 }
 // -- world update
 /**

@@ -3,9 +3,9 @@ import {extendObservable} from 'mobx';
 
 import {GAME_MODES} from 'constants.shared/gameModes';
 
-import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
+import * as gamestateFunctionQueueHelper from 'helpers/gamestateFunctionQueueHelper';
 import * as gamestateLifecycleHelper from 'helpers/gamestateLifecycleHelper';
 import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 
@@ -32,10 +32,6 @@ export class GamestateModel extends Model {
       mode: GAME_MODES.INACTIVE,
       /** @type {Array<CharacterModel>} */
       turnQueue: [],
-      /** @type {Array<GameAction>} */
-      actionQueue: [],
-      /** @type {GameAction | null} */
-      activeAction: null,
       /** @type {EncounterModel | null} */
       activeEncounter: null,
       /** @type {Number} */
@@ -241,30 +237,26 @@ export class GamestateModel extends Model {
   findEncounterAt(point) {
     return gamestateEncounterHelper.findEncounterAt(point);
   }
-  // -- Action Queue - `gamestateActionHelper.js`
+  // -- Function Queue - gamestateFunctionQueueHelper.js
   /** @override */
-  createActionFunction(action) {
-    return gamestateActionHelper.createActionFunction(action);
+  addToFunctionQueue(action, name) {
+    gamestateFunctionQueueHelper.addToFunctionQueue(action, name);
   }
   /** @override */
-  addToActionQueue(action) {
-    gamestateActionHelper.addToActionQueue(action);
+  insertIntoFunctionQueue(action, name, idx) {
+    gamestateFunctionQueueHelper.insertIntoFunctionQueue(action, name, idx);
   }
   /** @override */
-  insertIntoActionQueue(action, idx = 0) {
-    gamestateActionHelper.insertIntoActionQueue(action, idx);
+  resolveFunctionQueue() {
+    gamestateFunctionQueueHelper.resolveFunctionQueue();
   }
   /** @override */
-  resolveActionQueue() {
-    gamestateActionHelper.resolveActionQueue();
+  clearFunctionQueue() {
+    gamestateFunctionQueueHelper.clearFunctionQueue();
   }
   /** @override */
-  clearActionQueue() {
-    gamestateActionHelper.clearActionQueue();
-  }
-  /** @override */
-  shouldResolveActionQueue() {
-    return gamestateActionHelper.shouldResolveActionQueue();
+  shouldResolveFunctionQueue() {
+    return gamestateFunctionQueueHelper.shouldResolveFunctionQueue();
   }
 }
 /**

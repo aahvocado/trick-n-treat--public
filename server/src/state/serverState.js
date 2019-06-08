@@ -106,9 +106,9 @@ export class ServerStateModel extends Model {
 
     // initialize the game with the Clients that are in game
     const gameClients = this.get('gameClients');
-    gameState.addToActionQueue(() => {
+    gameState.addToFunctionQueue(() => {
       gameState.handleStartGame(gameClients);
-    });
+    }, 'handleStartGame');
   }
   /**
    * Restart the Game
@@ -117,7 +117,7 @@ export class ServerStateModel extends Model {
     logger.game('Restarting Game!');
 
     const gameClients = this.get('gameClients');
-    gameState.addToActionQueue(() => {
+    gameState.addToFunctionQueue(() => {
       gameState.handleRestartGame(gameClients);
     });
   }
