@@ -2,7 +2,6 @@ import seedrandom from 'seedrandom';
 import {extendObservable} from 'mobx';
 
 import {GAME_MODES} from 'constants.shared/gameModes';
-import {FOG_TYPES} from 'constants.shared/tileTypes';
 
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
@@ -17,9 +16,6 @@ import Model from 'models.shared/Model';
 import ModelList from 'models.shared/ModelList';
 
 import logger from 'utilities/logger.game';
-
-import * as fogUtils from 'utilities.shared/fogUtils';
-import * as mapUtils from 'utilities.shared/mapUtils';
 
 // seed for rng
 const seed = Date.now();
@@ -53,9 +49,13 @@ export class GamestateModel extends Model {
       /** @type {MapModel} */
       tileMapModel: new MapModel(),
       /** @type {MapModel} */
-      fogMapModel: new MapModel(),
+      lightMapModel: new MapModel(),
+
+      // -- Instance attributes
       /** @type {ModelList<MapModel>} */
       biomeList: new ModelList([], MapModel),
+      /** @type {Array<Point>} */
+      lightSourceList: [],
 
       /** @type {String} */
       seed: seed,
@@ -70,34 +70,40 @@ export class GamestateModel extends Model {
       get activeCharacter() {
         return _this.getActiveCharacter();
       },
-      /** @type {ModelList<EncounterModel>} */
+      /** @type {Array<EncounterModel>} */
       get visibleEncounterList() {
         // no characters mean nothing is visible
         const characterList = _this.get('characterList');
         if (characterList.length <= 0) {
-          return new ModelList([], EncounterModel);
+          return [];
         }
 
         const encounterList = _this.get('encounterList');
         const tileMapModel = _this.get('tileMapModel');
 
         // go through all the Encounters
-        const visibleEncounters = encounterList.filter((encounterModel) => {
+        const visibleEncounters = encounterList.filter((encounterModel, idx) => {
           const encounterLocation = encounterModel.get('location');
 
           // check if any of the Characters can see this Encounter
           const isVisibleToAnyCharacter = characterList.some((characterModel) => {
             const characterLocation = characterModel.get('position');
-            const characterRange = characterModel.get('vision');
+            const characterRange = characterModel.get('baseMovement');
             return tileMapModel.isWithinPathDistance(encounterLocation, characterLocation, characterRange);
           });
 
-          // this Encounter is visible as long as any character can see it
-          return isVisibleToAnyCharacter;
+          // not visible
+          if (!isVisibleToAnyCharacter) {
+            return false;
+          }
+
+          // visible, and keep track of this encounter's index from the original `encounterList``
+          encounterModel.originalListIdx = idx;
+          return true;
         });
 
-        // return the visible encounters as a ModelList
-        return new ModelList(visibleEncounters, EncounterModel);
+        // return the visible encounters
+        return visibleEncounters;
       },
     });
 
@@ -207,8 +213,16 @@ export class GamestateModel extends Model {
     return gamestateMapHelper.isWalkableAt(point);
   }
   /** @override */
-  hasNearbyEncountersOnPath(startPoint, distance) {
-    return gamestateMapHelper.hasNearbyEncountersOnPath(startPoint, distance);
+  isNearEncounterAt(startPoint, distance) {
+    return gamestateMapHelper.isNearEncounterAt(startPoint, distance);
+  }
+  /** @override */
+  getEncountersNear(startPoint, distance) {
+    return gamestateMapHelper.getEncountersNear(startPoint, distance);
+  }
+  /** @override */
+  updateLightLevelsAt(startPoint, lightLevel) {
+    gamestateMapHelper.updateLightLevelsAt(startPoint, lightLevel);
   }
   // -- Encounter methods - gamestateEncounterHelper.js
   /** @override */
@@ -251,26 +265,6 @@ export class GamestateModel extends Model {
   /** @override */
   shouldResolveActionQueue() {
     return gamestateActionHelper.shouldResolveActionQueue();
-  }
-  // -- Fog methods
-  /**
-   * updates Fog of War visibility to Fully visible at a given point
-   *
-   * @param {Point} point
-   * @param {Number} distance
-   */
-  updateToVisibleAt(point, distance) {
-    const fogMapModel = this.get('fogMapModel');
-    const tileMapModel = this.get('tileMapModel');
-
-    // given tile is now visible
-    fogMapModel.setTileAt(point, FOG_TYPES.VISIBLE);
-
-    // other tiles that are a given distance away should be partially visible, if not already
-    const nearbyPoints = mapUtils.getPointsWithinPathDistance(tileMapModel.getMatrix(), point, Math.max(distance - 3, 0));
-    nearbyPoints.forEach((point) => {
-      fogUtils.updateFogPointToVisible(fogMapModel, tileMapModel, point);
-    });
   }
 }
 /**

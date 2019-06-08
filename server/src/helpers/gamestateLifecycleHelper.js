@@ -1,11 +1,12 @@
-import {GAME_MODES} from 'constants.shared/gameModes';
+import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
 
-import MapModel from 'models.shared/MapModel';
+import {GAME_MODES} from 'constants.shared/gameModes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 import gameState from 'state/gameState';
 
 import * as clientEventHelper from 'helpers/clientEventHelper';
-import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
+import * as gamestateGenerationHelper from 'helpers/gamestateGenerationHelper';
 
 import logger from 'utilities/logger.game';
 
@@ -33,19 +34,27 @@ import randomizeArray from 'utilities.shared/randomizeArray';
  * @todo - reset Characters
  */
 export function resetState() {
-  logger.lifecycle('resetState()');
+  logger.game('Resetting GameState...');
 
+  // reset generic attributes
   gameState.import({
     actionQueue: [],
     activeAction: null,
     turnQueue: [],
     round: 0,
-    encounterList: [],
-    biomeList: [],
-    tileMapModel: new MapModel(),
-    fogMapModel: new MapModel(),
+    lightSourceList: [],
   });
 
+  // reset ModelList
+  gameState.get('characterList').import([]);
+  gameState.get('encounterList').import([]);
+  gameState.get('biomeList').import([]);
+
+  // reset Maps
+  gameState.get('tileMapModel').resetMatrix(MAP_WIDTH, MAP_HEIGHT, TILE_TYPES.EMPTY);
+  gameState.get('lightMapModel').resetMatrix(MAP_WIDTH, MAP_HEIGHT, 0);
+
+  // reset Instances
   gameState.resetEncounterHelper();
 }
 /**
@@ -66,12 +75,31 @@ export function handleStartGame(clientList) {
     gameState.get('characterList').push(newCharacterModel);
   });
 
-  // update
-  clientEventHelper.sendLobbyUpdate();
+  // immediately update clients so they know they are in game
+  gameState.insertIntoActionQueue(() => {
+    clientEventHelper.sendLobbyUpdate();
+  });
 
-  // then proceed to generate map
+  // proceed to generate map
   gameState.addToActionQueue(() => {
-    gamestateMapHelper.generateNewMap();
+    gamestateGenerationHelper.generateNewMap();
+  });
+
+  // after map is generated, update the world the first time
+  gameState.addToActionQueue(() => {
+    updateEncounters();
+    updateLighting();
+  });
+
+  // after map is generated, update the clients
+  gameState.addToActionQueue(() => {
+    clientEventHelper.sendLobbyUpdate();
+  });
+
+  // start the round after all that
+  gameState.addToActionQueue(() => {
+    gameState.set({mode: GAME_MODES.ACTIVE});
+    gameState.handleStartOfRound();
   });
 }
 /**
@@ -80,13 +108,17 @@ export function handleStartGame(clientList) {
 export function handleEndGame() {
   logger.lifecycle('handleEndGame()');
 
+  // clear some states
   gameState.set({
     mode: GAME_MODES.INACTIVE,
     activeAction: null,
     activeEncounter: null,
   });
 
-  clientEventHelper.sendGameEnd();
+  // immediately update clients so the game is ended
+  gameState.insertIntoActionQueue(() => {
+    clientEventHelper.sendGameEnd();
+  });
 }
 /**
  * restart game
@@ -96,9 +128,14 @@ export function handleEndGame() {
 export function handleRestartGame(clientList) {
   logger.lifecycle('handleRestartGame()');
 
-  gameState.addToActionQueue(handleEndGame);
+  // end the game
   gameState.addToActionQueue(() => {
-    handleStartGame(clientList);
+    gameState.handleEndGame();
+  });
+
+  // start the game
+  gameState.addToActionQueue(() => {
+    gameState.handleStartGame(clientList);
   });
 }
 // -- Character
@@ -123,20 +160,22 @@ export function handleEndOfAction(characterModel) {
 
   // not an end of Action if we are waiting on an `activeEncounter`
   if (gameState.get('activeEncounter') !== null) {
-    logger.warning('. Can handle end of action when there is an `activeEncounter`.');
+    logger.warning('. Lifecycle can not "handleEndOfAction()" when there is an `activeEncounter`.');
     return;
   }
 
-  // update client
-  clientEventHelper.sendGameUpdate();
-
   // if Character can no longer move, it's time to end their turn
   if (!characterModel.canMove()) {
-    // end their turn
     gameState.addToActionQueue(() => {
       gameState.handleEndOfTurn();
     });
+    return;
   }
+
+  // immediately update clients otherwise
+  gameState.insertIntoActionQueue(() => {
+    clientEventHelper.sendGameUpdate();
+  });
 }
 // -- Turn
 /**
@@ -152,7 +191,7 @@ export function handleStartOfTurn() {
     isActiveCharacter: true,
   });
 
-  // update
+  // update client
   logger.game(`. Turn for: "${newActiveCharacter.get('name')}"`);
   clientEventHelper.sendGameUpdate();
 }
@@ -179,8 +218,9 @@ export function handleEndOfTurn() {
 
   // update world
   updateEncounters();
+  updateLighting();
 
-  // update client
+  // immediately send a Game Update
   clientEventHelper.sendGameUpdate();
 
   // start the next turn if there is more in the `turnQueue`
@@ -191,7 +231,7 @@ export function handleEndOfTurn() {
     return;
   }
 
-  // end the round if nothing left in the turn queue
+  // end the round if nothing left in the `turnQueue`
   if (currentTurnQueue.length <= 0) {
     gameState.addToActionQueue(() => {
       gameState.handleEndOfRound();
@@ -210,7 +250,7 @@ export function handleStartOfRound() {
   gameState.set({round: gameState.get('round') + 1});
   logger.game(`Round ${gameState.get('round')} has started.`);
 
-  // update
+  // immediately send a Game Update
   clientEventHelper.sendGameUpdate();
 
   // create new turn queue
@@ -247,7 +287,7 @@ export function initTurnQueue() {
   gameState.set({turnQueue: newTurnQueue});
 
   // now that turn queue is created, start the round
-  gameState.addToActionQueue(() => {
+  gameState.insertIntoActionQueue(() => {
     gameState.handleStartOfTurn();
   });
 }
@@ -256,8 +296,34 @@ export function initTurnQueue() {
  * looks through Encounters to see if any of them needs updates
  */
 export function updateEncounters() {
-  logger.lifecycle('. updateExistingEncounters()');
+  logger.lifecycle('. updateEncounters()');
 
-  const visibleEncounterList = gameState.get('visibleEncounterList');
-  visibleEncounterList.removeBy((encounterModel) => encounterModel.get('isMarkedForDeletion'));
+  const encounterList = gameState.get('encounterList');
+  const filteredList = encounterList.filter((encounterModel) => !encounterModel.get('isMarkedForDeletion'));
+  encounterList.replace(filteredList);
+}
+/**
+ * rebuilds all the lightLevels
+ */
+export function updateLighting() {
+  logger.lifecycle('. updateLighting()');
+
+  // reset the light map first
+  gameState.get('lightMapModel').resetMatrix();
+
+  // then rebuild the light sources
+  const lightSourceList = gamestateGenerationHelper.generateLightSourceList();
+
+  // light up those Light Sources
+  lightSourceList.forEach((lightPoint) => {
+    gameState.updateLightLevelsAt(lightPoint, 5, {shouldOverride: true});
+  });
+
+  // light up Characters
+  const characterList = gameState.get('characterList');
+  characterList.forEach((characterModel) => {
+    const location = characterModel.get('position');
+    const vision = characterModel.get('vision');
+    gameState.updateLightLevelsAt(location, vision);
+  });
 }

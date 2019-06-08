@@ -19,10 +19,10 @@ import RadioButtonComponent from 'common-components/RadioButtonComponent';
 
 import {TileItemComponent} from 'components/TileMapComponent';
 
+import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
 import {
   TILE_TYPES,
   TILE_TYPES_NAME,
-  FOG_TYPES,
 } from 'constants.shared/tileTypes';
 
 import remoteAppState from 'state/remoteAppState';
@@ -175,7 +175,7 @@ class TileEditorPage extends Component {
                           tileSize={tileSize}
                           position={position}
                           tileType={tileData}
-                          fogType={FOG_TYPES.VISIBLE}
+                          lightLevel={LIGHT_LEVEL.MAX}
                           isSelected={focusedTile.equals(position)}
 
 

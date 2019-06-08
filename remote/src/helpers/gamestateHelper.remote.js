@@ -1,7 +1,5 @@
-import {
-  FOG_TYPES,
-  isWalkableTile,
-} from 'constants.shared/tileTypes';
+import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
+import {isWalkableTile} from 'constants.shared/tileTypes';
 
 import remoteGameState from 'state/remoteGameState';
 
@@ -44,7 +42,7 @@ export function getVisibileTileMapData() {
   const mapData = remoteGameState.get('mapData');
   const tileMapData = matrixUtils.map(mapData, (tileData) => {
     // hidden tiles are `null`
-    if (tileData.fogType === FOG_TYPES.HIDDEN) {
+    if (tileData.lightLevel === LIGHT_LEVEL.NONE) {
       return null;
     };
 

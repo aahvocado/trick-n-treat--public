@@ -144,36 +144,3 @@ export function isWalkableTile(tileType) {
 export function isLitTile(tileType) {
   return LIT_TILE_TYPES.includes(tileType);
 }
-/**
- * @typedef {Number} FogType
- */
-export const FOG_TYPES = {
-  HIDDEN: 0,
-  DIMMEST: 1,
-  DIMMER: 2,
-  DIM: 3,
-  VISIBLE: 4,
-};
-/**
- * @param {FogType} fogType
- * @returns {Boolean}
- */
-export function isPartiallyVisibleFog(fogType) {
-  return [FOG_TYPES.DIM, FOG_TYPES.DIMMER, FOG_TYPES.DIMMEST].includes(fogType);
-}
-/**
- * @param {FogType} fogTypeA
- * @param {FogType} fogTypeB
- * @returns {Boolean}
- */
-export function isMoreLit(fogTypeA, fogTypeB) {
-  return fogTypeA > fogTypeB;
-}
-/**
- * @param {FogType} fogTypeA
- * @param {FogType} fogTypeB
- * @returns {Boolean}
- */
-export function isLessLit(fogTypeA, fogTypeB) {
-  return fogTypeA < fogTypeB;
-}

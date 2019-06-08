@@ -43,6 +43,11 @@ export default class TriggerDisplayComponent extends PureComponent {
       value,
     } = data;
 
+    // some triggers aren't displayed
+    if (triggerLogicUtils.isHiddenTrigger(triggerLogicId)) {
+      return null;
+    }
+
     const isItem = itemId !== undefined;
     const itemDataObject = itemDataHelper.getItemDataById(itemId);
 

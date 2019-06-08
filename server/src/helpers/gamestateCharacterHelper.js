@@ -51,7 +51,7 @@ export function createCharacterForClient(clientModel) {
     health: 4,
     movement: 4,
     sanity: 4,
-    vision: 3,
+    vision: 8,
   });
 
   // set the Character on the Client
@@ -122,9 +122,12 @@ export function updateCharacterPosition(characterModel, position) {
     return;
   }
 
-  // update the character's position and map visibility
+  // update the character's position
   characterModel.set({position: position});
-  gameState.updateToVisibleAt(position, characterModel.get('vision'));
+
+  // update map visibility
+  const vision = characterModel.get('vision');
+  gameState.updateLightLevelsAt(position, vision);
 
   // finished if there is no Encounter here
   const encounterModel = gameState.findEncounterAt(position);

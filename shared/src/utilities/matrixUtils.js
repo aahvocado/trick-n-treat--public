@@ -138,7 +138,7 @@ export function map(matrix, callback) {
  */
 export function setTileAt(matrix, point, newTileData) {
   if (isPointOutOfBounds(matrix, point)) {
-    console.log('error: setTileAt() out of bounds');
+    console.log(`error: setTileAt(${point.x}, ${point.y}) out of bounds`);
     return false;
   }
 

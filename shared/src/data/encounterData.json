@@ -187,6 +187,7 @@
       }
     ],
     "isGeneratable": true,
+    "isGeneratableOnce": false,
     "rarityId": "TAG_ID.RARITY.COMMON"
   },
   {
@@ -278,7 +279,9 @@
         "value": 1
       }
     ],
-    "isGeneratable": true
+    "isGeneratable": true,
+    "isGeneratableOnce": false,
+    "rarityId": "TAG_ID.RARITY.COMMON"
   },
   {
     "dataType": "DATA_TYPE.HOUSE",

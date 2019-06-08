@@ -1,5 +1,5 @@
 import {TILE_SIZE} from 'constants/mapConstants';
-import {FOG_TYPES, TILE_TYPES} from 'constants.shared/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 export const TILE_STYLES = {
   [TILE_TYPES.EMPTY]: { backgroundColor: '#313131' },
@@ -46,29 +46,23 @@ export const TILE_STYLES = {
   [TILE_TYPES.BUSH]: { backgroundImage: 'repeating-linear-gradient(45deg, #69af4f, #69af4f 5px, #8cb9a5 5px, #8cb9a5 12px)' },
 };
 
-export const FOG_STYLES = {
-  [FOG_TYPES.HIDDEN]: {},
-  [FOG_TYPES.VISIBLE]: {},
+/**
+ * @param {Number} lightLevel
+ */
+export function createLightingStyles(lightLevel) {
+  if (lightLevel === 0 || lightLevel === 10) {
+    return {};
+  }
 
-  [FOG_TYPES.DIM]: {
-    backgroundColor: 'rgb(49, 49, 49, 0.3)',
+  const lightDecimal = 1 - (lightLevel / 10);
+  const opacity = Math.min(Math.max(lightDecimal, 0), 10);
+  return {
+    backgroundColor: `rgb(49, 49, 49, ${opacity})`,
     position: 'absolute',
     width: '100%',
     height: '100%',
-  },
-  [FOG_TYPES.DIMMER]: {
-    backgroundColor: 'rgb(49, 49, 49, 0.5)',
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-  [FOG_TYPES.DIMMEST]: {
-    backgroundColor: 'rgb(49, 49, 49, 0.7)',
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-};
+  }
+}
 /**
  *
  * @param {Number} entityIdx

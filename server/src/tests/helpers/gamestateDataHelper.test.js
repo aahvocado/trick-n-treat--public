@@ -39,7 +39,7 @@ test('getFormattedMapData() - formats gamestate data into expected object', (t) 
 
   gameState.set({
     tileMapModel: testMap,
-    fogMapModel: new MapModel(),
+    lightMapModel: new MapModel(),
     encounterList: [
       new EncounterModel({location: new Point(2, 2)}),
       new EncounterModel({location: new Point(4, 0)}),

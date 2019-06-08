@@ -51,34 +51,6 @@ export default class ModelList {
     );
   }
   /**
-   * EXPERIMENTAL
-   * removes item at given index
-   *  and then updates the list
-   *
-   * @param {Number} idx
-   */
-  removeAt(idx) {
-    // out of bounds
-    if (idx > (list.length - 1)) {
-      return;
-    }
-
-    // splice
-    this.modelList.splice(idx, 1);
-  }
-  /**
-   * EXPERIMENTAL
-   * will filter all Models in the list that do not pass the callback
-   *  and then set the list to the items that remain
-   *
-   * @param {Function} callback
-   */
-  removeBy(callback) {
-    const currentList = this.modelList.slice();
-    const resultList = currentList.filter((...args) => (!callback(...args)));
-    this.modelList.replace(resultList);
-  }
-  /**
    * updates the ModelList by creating the original Model class
    *
    * @param {Array<Object>} newList
@@ -102,6 +74,12 @@ export default class ModelList {
     return this.modelList.map((model) => {
       return model.export();
     });
+  }
+  /**
+   * @param {Array<Model>} newList
+   */
+  replace(newList) {
+    this.modelList.replace(newList);
   }
   /* eslint-disable */
   // -- Array methods

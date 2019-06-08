@@ -33,7 +33,7 @@ export function displayTurnQueue() {
  */
 export function getFormattedMapData() {
   const tileMapModel = gameState.get('tileMapModel');
-  const fogMapModel = gameState.get('fogMapModel');
+  const lightMapModel = gameState.get('lightMapModel');
   if (tileMapModel === undefined) {
     return;
   }
@@ -45,7 +45,7 @@ export function getFormattedMapData() {
     return {
       position: tilePoint,
       tileType: tileData,
-      fogType: fogMapModel.getTileAt(tilePoint),
+      lightLevel: lightMapModel.getTileAt(tilePoint),
       charactersHere: charactersHere,
       encounterHere: encounterHere && encounterHere.export(),
     };

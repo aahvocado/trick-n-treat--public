@@ -1,4 +1,5 @@
 import {
+  TRIGGER_LOGIC_ID,
   ADD_TRIGGER_LOGIC_ID_LIST,
   ITEM_TRIGGER_LOGIC_ID_LIST,
   NUMBER_TRIGGER_LOGIC_ID_LIST,
@@ -48,4 +49,19 @@ export function isStatTriggerLogic(triggerLogicId) {
  */
 export function isSubtractTriggerLogic(triggerLogicId) {
   return SUBTRACT_TRIGGER_LOGIC_ID_LIST.includes(triggerLogicId);
+}
+/**
+ * @param {TriggerLogicId} triggerLogicId
+ * @returns {Boolean}
+ */
+export function isHiddenTrigger(triggerLogicId) {
+  if (triggerLogicId === TRIGGER_LOGIC_ID.DELETE) {
+    return true;
+  }
+
+  if (triggerLogicId === TRIGGER_LOGIC_ID.MOVE) {
+    return true;
+  }
+
+  return false;
 }

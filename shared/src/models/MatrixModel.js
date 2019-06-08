@@ -16,9 +16,11 @@ export class MatrixModel extends Model {
       /** @type {Matrix} */
       matrix: [[]],
       /** @type {Number} */
-      baseWidth: 0,
+      defaultWidth: 0,
       /** @type {Number} */
-      baseHeight: 0,
+      defaultHeight: 0,
+      /** @type {*} */
+      defaultTileType: null,
       // other
       ...newAttributes,
     });
@@ -26,14 +28,14 @@ export class MatrixModel extends Model {
     // if no `matrix` was given, then we'll make one automatically
     const baseMatrix = this.get('matrix');
     if (baseMatrix === undefined || (this.getWidth() === 0 || this.getHeight() === 0)) {
-      this.generateMatrix();
+      this.resetMatrix();
     }
 
     // otherwise, we can set the base dimensions to our Matrix`
     if (baseMatrix !== undefined) {
       this.set({
-        baseWidth: baseMatrix[0].length,
-        baseHeight: baseMatrix.length,
+        defaultWidth: baseMatrix[0].length,
+        defaultHeight: baseMatrix.length,
       });
     }
   }
@@ -46,9 +48,14 @@ export class MatrixModel extends Model {
    * @param {Number} [height]
    * @param {TileType} [tileType]
    */
-  generateMatrix(width = this.get('baseWidth'), height = this.get('baseHeight'), tileType = null) {
+  resetMatrix(width = this.get('defaultWidth'), height = this.get('defaultHeight'), tileType = this.get('defaultTileType')) {
     const baseMatrix = matrixUtils.createMatrix(width, height, tileType);
-    this.set({matrix: baseMatrix});
+    this.set({
+      matrix: baseMatrix,
+      defaultWidth: width,
+      defaultHeight: height,
+      defaultTileType: tileType,
+    });
   }
   /**
    * gets a shallow copy of this Matrix

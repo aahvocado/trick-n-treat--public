@@ -138,11 +138,6 @@ export function formatEncounterData(data) {
       delete formattedData.isGeneratableOnce;
     }
 
-    // it does not need a `conditionList`
-    if (formattedData.conditionList) {
-      delete formattedData.conditionList;
-    }
-
     // it does not need `rarityId`
     if (formattedData.rarityId) {
       delete formattedData.rarityId;

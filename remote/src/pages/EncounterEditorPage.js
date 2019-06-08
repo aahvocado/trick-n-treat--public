@@ -354,24 +354,22 @@ class EncounterEditorPage extends Component {
             </SectionFormContainer>
 
             {/* Condition List */}
-            { isGeneratable &&
-              <SectionFormContainer header='Conditions'>
-                <ConditionLogicDropdown
-                  className='flex-auto bor-1-gray adjacent-mar-t-2'
-                  placeholder='New Condition...'
-                  onSelect={(conditionLogicId) => this.addCondition({conditionLogicId})}
-                />
+            <SectionFormContainer header='Conditions'>
+              <ConditionLogicDropdown
+                className='flex-auto bor-1-gray adjacent-mar-t-2'
+                placeholder='New Condition...'
+                onSelect={(conditionLogicId) => this.addCondition({conditionLogicId})}
+              />
 
-                { conditionList.length > 0 &&
-                  <ConditionListEditorComponent
-                    className='adjacent-mar-t-2'
-                    itemClassName='bor-1-gray adjacent-mar-t-2'
-                    dataList={conditionList}
-                    onEdit={(updatedData) => this.updateActiveData({conditionList: updatedData})}
-                  />
-                }
-              </SectionFormContainer>
-            }
+              { conditionList.length > 0 &&
+                <ConditionListEditorComponent
+                  className='adjacent-mar-t-2'
+                  itemClassName='bor-1-gray adjacent-mar-t-2'
+                  dataList={conditionList}
+                  onEdit={(updatedData) => this.updateActiveData({conditionList: updatedData})}
+                />
+              }
+            </SectionFormContainer>
 
             {/* Trigger List */}
             <SectionFormContainer header='Triggers'>

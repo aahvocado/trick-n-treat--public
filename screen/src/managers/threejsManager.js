@@ -14,7 +14,8 @@ import {
   ANIMATION
 } from 'constants/three.js';
 import * as threeGeometry from 'geometry/threeGeometry.js';
-import { FOG_TYPES, TILE_TYPES, isWalkableTile } from 'constants.shared/tileTypes';
+import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
+import { TILE_TYPES, isWalkableTile } from 'constants.shared/tileTypes';
 import { initInput } from 'helpers/input';
 import * as connectionManager from 'managers/connectionManager';
 
@@ -56,7 +57,7 @@ export function initScreen() {
     }
 
     // update tiles
-    generateTiles(gamestate.tileMapModel.matrix, gamestate.fogMapModel.matrix);
+    generateTiles(gamestate.tileMapModel.matrix, gamestate.lightMapModel.matrix);
   });
 }
 
@@ -142,7 +143,7 @@ function initLights() {
 function initGame(gamestate) {
   const {
     characters,
-    fogMapModel,
+    lightMapModel,
     tileMapModel,
   } = gamestate;
 
@@ -150,7 +151,7 @@ function initGame(gamestate) {
   initScene();
 
   // create tiles
-  generateTiles(tileMapModel.matrix, fogMapModel.matrix);
+  generateTiles(tileMapModel.matrix, lightMapModel.matrix);
 
   players = characters.map(function(character) {
     const newPlayer = new Player(character.id, character.position);
@@ -189,14 +190,14 @@ function generateTiles(mapMatrix, fogMatrix) {
   mapMatrix.forEach(function(row, y) {
     row.forEach(function(mapTile, x) {
       const mapPos = { x, y };
-      const fogType = fogMatrix[y][x];
-      const isHidden = fogType === FOG_TYPES.HIDDEN;
+      const lightLevel = fogMatrix[y][x];
+      const isHidden = lightLevel === LIGHT_LEVEL.HIDDEN;
 
       // add a "blank" tile if hidden,
       // but don't add additional entities if hidden
       if (isHidden) {
         handleAddTile({
-          fogType: fogType,
+          lightLevel: lightLevel,
           mapPos: mapPos,
           tileType: mapTile,
         });
@@ -206,7 +207,7 @@ function generateTiles(mapMatrix, fogMatrix) {
       // add a tile if it is walkable
       if (isWalkableTile(mapTile)) {
         handleAddTile({
-          fogType: fogType,
+          lightLevel: lightLevel,
           mapPos: mapPos,
           tileType: mapTile,
         });
@@ -231,7 +232,7 @@ function generateTiles(mapMatrix, fogMatrix) {
  */
 function handleAddTile(options) {
   const {
-    fogType,
+    lightLevel,
     mapPos,
     tileType,
   } = options;
@@ -241,7 +242,7 @@ function handleAddTile(options) {
   if (existingTile) {
     // and it is of the exact same tileType and visibility,
     // we don't have to add a tile or anything
-    if (existingTile.tileType === tileType && existingTile.fogType === fogType) {
+    if (existingTile.tileType === tileType && existingTile.lightLevel === lightLevel) {
       return;
     }
 
@@ -264,13 +265,13 @@ function handleAddTile(options) {
  */
 function Tile(options) {
   const {
-    fogType,
+    lightLevel,
     mapPos,
     tileType,
   } = options;
 
   const tile = new THREE.Group();
-  tile.fogType = fogType;
+  tile.lightLevel = lightLevel;
   tile.tileType = tileType;
 
   // positioning
@@ -281,18 +282,15 @@ function Tile(options) {
   tile.position.y = worldPos.y * -1; // invert because Positive is Up for ThreeJS
 
   // determine mesh color based on type
-  switch(fogType) {
-    case FOG_TYPES.DIM:
-    case FOG_TYPES.DIMMER:
-    case FOG_TYPES.DIMMEST:
-      tile.add(threeGeometry.createPartialTileMesh());
-      break;
-    case FOG_TYPES.HIDDEN:
+  switch(lightLevel) {
+    case LIGHT_LEVEL.NONE:
       tile.add(threeGeometry.createHiddenTileMesh());
       break;
-    case FOG_TYPES.VISIBLE:
-    default:
+    case LIGHT_LEVEL.MAX:
       tile.add(threeGeometry.createTileMesh());
+      break;
+    default:
+      tile.add(threeGeometry.createPartialTileMesh());
       break;
   }
 

@@ -13,11 +13,11 @@ import {
   calculateMapXOffset,
   calculateMapYOffset,
 } from 'constants/mapConstants';
-import {TILE_STYLES, FOG_STYLES, createEntityIconStyles} from 'constants/tileStyles';
+import {TILE_STYLES, createLightingStyles, createEntityIconStyles} from 'constants/tileStyles';
+
+import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
 import {
-  FOG_TYPES,
   TILE_TYPES,
-  isPartiallyVisibleFog,
   isWalkableTile,
 } from 'constants.shared/tileTypes';
 
@@ -100,7 +100,7 @@ export class TileMapComponent extends Component {
                     <TileItemComponent
                       key={`tile-item-${colIdx}-${rowIdx}-key`}
                       {...tileData}
-                      fogType={useFullyVisibleMap ? FOG_TYPES.VISIBLE : tileData.fogType}
+                      lightLevel={useFullyVisibleMap ? 10 : tileData.lightLevel}
                       tileSize={tileSize}
                       position={tileData.position}
                       isSelected={isSelected}
@@ -131,8 +131,8 @@ export class TileItemComponent extends Component {
     /** @type {Point} */
     position: new Point(),
 
-    /** @type {FogType} */
-    fogType: undefined,
+    /** @type {LightLevel} */
+    lightLevel: undefined,
     /** @type {TileType} */
     tileType: undefined,
     /** @type {Number} */
@@ -167,7 +167,7 @@ export class TileItemComponent extends Component {
   /** @override */
   render() {
     const {
-      fogType,
+      lightLevel,
       isTooFar,
       isSelected,
       isUserHere,
@@ -175,8 +175,7 @@ export class TileItemComponent extends Component {
       tileType,
     } = this.props;
 
-    const isHidden = fogType === FOG_TYPES.HIDDEN;
-    const isPartiallyVisible = isPartiallyVisibleFog(fogType);
+    const isHidden = lightLevel === LIGHT_LEVEL.NONE;
 
     // border highlight
     const borderStyles = isSelected ?
@@ -201,9 +200,7 @@ export class TileItemComponent extends Component {
         onMouseLeave={this.handleOnMouseLeave}
         onClick={this.handleOnTileClick}
       >
-        { isPartiallyVisible &&
-          <div style={FOG_STYLES[fogType]}></div>
-        }
+        <div style={createLightingStyles(lightLevel)}></div>
 
         { !isHidden &&
           this.renderEntityIcons()
