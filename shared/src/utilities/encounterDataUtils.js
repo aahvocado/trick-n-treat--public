@@ -25,11 +25,12 @@ const encounterSchema = Joi.object().keys({
   title: Joi.string().required(),
   content: Joi.string().required(),
   actionList: Joi.array().min(1).required(),
-  tagList: Joi.array(),
-  triggerList: Joi.array(),
+  tagList: Joi.array().optional(),
+  triggerList: Joi.array().optional(),
   conditionList: Joi.array().optional(),
   isDialogue: Joi.boolean().required(),
   isGeneratable: Joi.boolean().required(),
+  isGeneratableOnce: Joi.boolean().optional(),
   rarityId: Joi.string().optional(),
   groupId: Joi.string().optional(),
 });
@@ -64,6 +65,7 @@ export function createEncounterData(defaultData = {}) {
     // triggerList: [],
     // conditionList: [],
     isGeneratable: true,
+    // isGeneratableOnce: true,
     // rarityId: undefined,
     // groupId: undefined,
   };
@@ -106,6 +108,7 @@ export function formatEncounterData(data) {
     triggerList: genericDataUtils.formatTriggerList(data.triggerList),
     conditionList: genericDataUtils.formatConditionList(data.conditionList),
     isGeneratable: data.isGeneratable,
+    isGeneratableOnce: data.isGeneratableOnce,
     rarityId: data.rarityId,
     groupId: data.groupId || '',
   }
@@ -130,6 +133,11 @@ export function formatEncounterData(data) {
 
   // if this is not Generatable
   if (!formattedData.isGeneratable) {
+    // it does not need `isGeneratableOnce`
+    if (formattedData.isGeneratableOnce) {
+      delete formattedData.isGeneratableOnce;
+    }
+
     // it does not need a `conditionList`
     if (formattedData.conditionList) {
       delete formattedData.conditionList;
@@ -282,16 +290,28 @@ export function filterEncounterList(dataList, options) {
       return false;
     }
 
-    // includes all of these tags
-    if (includeTags.length > 0 && tagList !== undefined) {
+    // check for tag filters
+    if (includeTags.length > 0) {
+      // not going to match with no tags at all
+      if (tagList === undefined || tagList.length <= 0) {
+        return false;
+      }
+
+      // includes all of these tags
       const doesIncludeTags = arrayContainsArray(tagList, includeTags);
       if (!doesIncludeTags) {
         return false;
       }
     }
 
-    // excludes all of these tags
+    // check for tag filters
     if (excludeTags.length > 0 && tagList !== undefined) {
+      // free pass if tagList is empty
+      if (tagList === undefined || tagList.length <= 0) {
+        return true;
+      }
+
+      // excludes all of these tags
       const doesExcludeTags = !arrayContainsArray(tagList, excludeTags);
       if (!doesExcludeTags) {
         return false;

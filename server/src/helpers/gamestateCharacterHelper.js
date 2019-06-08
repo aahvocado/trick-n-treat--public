@@ -1,9 +1,10 @@
 import {CLIENT_TYPE} from 'constants.shared/clientTypes';
 import {CHOICE_ID} from 'constants.shared/choiceIds';
 import {MAP_START} from 'constants/mapSettings';
+import {TRIGGER_LOGIC_ID} from 'constants.shared/triggerLogicIds';
 
 import * as clientEventHelper from 'helpers/clientEventHelper';
-import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
+import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 
 import {getEncounterDataById} from 'helpers.shared/encounterDataHelper';
 
@@ -50,7 +51,7 @@ export function createCharacterForClient(clientModel) {
     health: 4,
     movement: 4,
     sanity: 4,
-    vision: 0,
+    vision: 3,
   });
 
   // set the Character on the Client
@@ -75,8 +76,8 @@ export function getActiveCharacter() {
   };
 
   // find the character marked with `isActiveCharacter`
-  const characters = gameState.get('characters').slice();
-  const activeCharacter = characters.find((characterModel) => {
+  const characterList = gameState.get('characterList').slice();
+  const activeCharacter = characterList.find((characterModel) => {
     return characterModel.get('isActiveCharacter');
   });
 
@@ -89,14 +90,14 @@ export function getActiveCharacter() {
  * @returns {Array<CharacterModel>}
  */
 export function getCharactersAt(point) {
-  return gameState.get('characters').filter((characterModel) => (point.equals(characterModel.get('position'))));
+  return gameState.get('characterList').filter((characterModel) => (point.equals(characterModel.get('position'))));
 }
 /**
  * @param {String} characterId
  * @returns {CharacterModel | undefined}
  */
 export function findCharacterById(characterId) {
-  return gameState.get('characters').find((characterModel) => {
+  return gameState.get('characterList').find((characterModel) => {
     return characterModel.get('characterId') === characterId;
   });
 }
@@ -105,7 +106,7 @@ export function findCharacterById(characterId) {
  * @returns {CharacterModel | undefined}
  */
 export function findCharacterByClientId(clientId) {
-  return gameState.get('characters').find((characterModel) => {
+  return gameState.get('characterList').find((characterModel) => {
     return characterModel.get('clientId') === clientId;
   });
 }
@@ -134,7 +135,7 @@ export function updateCharacterPosition(characterModel, position) {
   // add the handler for the Encounter to the front of the `actionQueue`
   // (it may not necessarily trigger)
   gameState.insertIntoActionQueue(() => {
-    gamestateEncounterHelper.handleCharacterTriggerEncounter(characterModel, encounterModel);
+    handleCharacterTriggerEncounter(characterModel, encounterModel);
   });
 }
 /**
@@ -292,16 +293,98 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
 
   // choice goes to another `Encounter`
   if (choiceId === CHOICE_ID.GOTO) {
-    gamestateEncounterHelper.handleChoiceGoTo(characterModel, nextEncounterModel);
+    gameState.handleChoiceGoTo(characterModel, nextEncounterModel);
   }
 
   // choice is a "Trick"
   if (choiceId === CHOICE_ID.TRICK) {
-    gamestateEncounterHelper.handleChoiceTrick(characterModel, nextEncounterModel);
+    gameState.handleChoiceTrick(characterModel, nextEncounterModel);
   }
 
   // choice is a "Treat"
   if (choiceId === CHOICE_ID.TREAT) {
-    gamestateEncounterHelper.handleChoiceTreat(characterModel, nextEncounterModel);
+    gameState.handleChoiceTreat(characterModel, nextEncounterModel);
   }
 }
+/**
+ * picks a random adjacent point that a given character can be on
+ *
+ * @param {CharacterModel} characterModel
+ * @param {EncounterModel} encounterModel
+ */
+export function handleCharacterTriggerEncounter(characterModel, encounterModel) {
+  const encounterLocation = encounterModel.get('location');
+  logger.verbose(`(encountered "${encounterModel.get('id')}" at [x: ${encounterLocation.x}, y: ${encounterLocation.y}])`);
+
+  // check if the character on here can actually trigger this
+  if (!encounterModel.canBeEncounteredBy(characterModel)) {
+    logger.verbose(`. but ${characterModel.get('name')} can not activate it.`);
+    return;
+  }
+
+  // track the `activeEncounter`
+  gameState.set({activeEncounter: encounterModel});
+
+  // clear the actionQueue because we have to handle this immediately
+  //  this might cause issues and skip events, so we need to keep an eye on this
+  gamestateActionHelper.clearActionQueue();
+
+  // resolve all the triggers
+  const triggerList = encounterModel.get('triggerList');
+  triggerList.forEach((triggerData) => {
+    // check if this Character meets the individual condition for this Trigger
+    if (!conditionUtils.doesMeetAllConditions(triggerData.conditionList, characterModel, encounterModel)) {
+      return;
+    }
+
+    // unique to Encounters, mark the Encounter to be deleted later
+    if (triggerData.triggerLogicId === TRIGGER_LOGIC_ID.DELETE) {
+      encounterModel.set({isMarkedForDeletion: true});
+      return;
+    }
+
+    // resolve it
+    triggerHandlerUtil.resolveTrigger(triggerData, characterModel);
+  });
+
+  // add a visit - specifically after the Triggers
+  encounterModel.get('visitors').push(characterModel);
+
+  // send the client the data of the Encounter they triggered
+  const clientModel = serverState.findClientByCharacter(characterModel);
+  clientEventHelper.sendEncounterToClient(clientModel, encounterModel);
+}
+/**
+ * the Choice takes the Character to another Encounter
+ *
+ * @param {CharacterModel} characterModel
+ * @param {EncounterModel} encounterModel
+ */
+export function handleChoiceGoTo(characterModel, encounterModel) {
+  logger.verbose(`(choice goes to ${encounterModel.get('id')})`);
+  gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
+};
+/**
+ * Trick choice
+ *
+ * @param {CharacterModel} characterModel
+ * @param {EncounterModel} encounterModel
+ */
+export function handleChoiceTrick(characterModel, encounterModel) {
+  encounterModel.get('trickers').push(characterModel);
+
+  logger.verbose(`(trick choice goes to ${encounterModel.get('id')})`);
+  gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
+};
+/**
+ * Treat choice
+ *
+ * @param {CharacterModel} characterModel
+ * @param {EncounterModel} encounterModel
+ */
+export function handleChoiceTreat(characterModel, encounterModel) {
+  encounterModel.get('treaters').push(characterModel);
+
+  logger.verbose(`(treat choice goes to ${encounterModel.get('id')})`);
+  gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
+};

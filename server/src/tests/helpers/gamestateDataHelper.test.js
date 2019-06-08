@@ -20,9 +20,9 @@ import gameState from 'state/gameState';
 test.beforeEach((t) => {
   // reset the gamestate for each test
   gameState.set({
-    characters: new ModelList(),
+    characterList: new ModelList(),
     tileMapModel: new MapModel(),
-    encounters: new ModelList(),
+    encounterList: new ModelList(),
   });
 });
 
@@ -40,7 +40,7 @@ test('getFormattedMapData() - formats gamestate data into expected object', (t) 
   gameState.set({
     tileMapModel: testMap,
     fogMapModel: new MapModel(),
-    encounters: [
+    encounterList: [
       new EncounterModel({location: new Point(2, 2)}),
       new EncounterModel({location: new Point(4, 0)}),
     ],
@@ -51,14 +51,14 @@ test('getFormattedMapData() - formats gamestate data into expected object', (t) 
     characterId: 'TEST-CHAR-ID-1',
     position: new Point(0, 0),
   });
-  testGamestate.addToArray('characters', testChar1);
+  testGamestate.get('characterList').push(testChar1);
 
   const testChar2 = new CharacterModel({
     name: 'TEST-CHAR-2',
     characterId: 'TEST-CHAR-ID-2',
     position: new Point(4, 0),
   });
-  testGamestate.addToArray('characters', testChar2);
+  testGamestate.get('characterList').push(testChar2);
 
   const formatResult = gamestateDataHelper.getFormattedMapData();
 

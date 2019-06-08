@@ -33,18 +33,20 @@ import randomizeArray from 'utilities.shared/randomizeArray';
  * @todo - reset Characters
  */
 export function resetState() {
-  logger.lifecycle('(resetState())');
+  logger.lifecycle('resetState()');
 
-  gameState.set({
+  gameState.import({
     actionQueue: [],
     activeAction: null,
     turnQueue: [],
     round: 0,
-    encounters: [],
+    encounterList: [],
     biomeList: [],
     tileMapModel: new MapModel(),
     fogMapModel: new MapModel(),
   });
+
+  gameState.resetEncounterHelper();
 }
 /**
  * set up the start of a new game
@@ -52,7 +54,7 @@ export function resetState() {
  * @param {Array<ClientModel>} clientList
  */
 export function handleStartGame(clientList) {
-  logger.lifecycle('(handleStartGame())');
+  logger.lifecycle('handleStartGame()');
 
   // first clean everything up
   gameState.set({mode: GAME_MODES.WORKING});
@@ -61,7 +63,7 @@ export function handleStartGame(clientList) {
   // create Characters for each Client that is part of the game
   clientList.forEach((clientModel) => {
     const newCharacterModel = gameState.createCharacterForClient(clientModel);
-    gameState.addToArray('characters', newCharacterModel);
+    gameState.get('characterList').push(newCharacterModel);
   });
 
   // update
@@ -76,7 +78,7 @@ export function handleStartGame(clientList) {
  * end current game
  */
 export function handleEndGame() {
-  logger.lifecycle('(handleEndGame())');
+  logger.lifecycle('handleEndGame()');
 
   gameState.set({
     mode: GAME_MODES.INACTIVE,
@@ -92,7 +94,7 @@ export function handleEndGame() {
  * @param {Array<ClientModel>} clientList
  */
 export function handleRestartGame(clientList) {
-  logger.lifecycle('(handleRestartGame())');
+  logger.lifecycle('handleRestartGame()');
 
   gameState.addToActionQueue(handleEndGame);
   gameState.addToActionQueue(() => {
@@ -106,7 +108,7 @@ export function handleRestartGame(clientList) {
  * @param {CharacterModel} characterModel
  */
 export function handleStartOfAction(characterModel) {
-  logger.lifecycle('(handleStartOfAction())');
+  logger.lifecycle('handleStartOfAction()');
 
   // update
   clientEventHelper.sendGameUpdate();
@@ -117,7 +119,7 @@ export function handleStartOfAction(characterModel) {
  * @param {CharacterModel} characterModel
  */
 export function handleEndOfAction(characterModel) {
-  logger.lifecycle('(handleEndOfAction())');
+  logger.lifecycle('handleEndOfAction()');
 
   // not an end of Action if we are waiting on an `activeEncounter`
   if (gameState.get('activeEncounter') !== null) {
@@ -125,7 +127,7 @@ export function handleEndOfAction(characterModel) {
     return;
   }
 
-  // update
+  // update client
   clientEventHelper.sendGameUpdate();
 
   // if Character can no longer move, it's time to end their turn
@@ -141,7 +143,7 @@ export function handleEndOfAction(characterModel) {
  * handles start of turn
  */
 export function handleStartOfTurn() {
-  logger.lifecycle('(handleStartOfTurn())');
+  logger.lifecycle('handleStartOfTurn()');
 
   // `activeCharacter` is the first character in the queue
   const turnQueue = gameState.get('turnQueue').slice();
@@ -158,7 +160,7 @@ export function handleStartOfTurn() {
  * end of turn
  */
 export function handleEndOfTurn() {
-  logger.lifecycle('(handleEndOfTurn())');
+  logger.lifecycle('handleEndOfTurn()');
 
   // remove the previous `activeCharacter`
   const currentTurnQueue = gameState.get('turnQueue').slice();
@@ -175,7 +177,10 @@ export function handleEndOfTurn() {
     movement: oldActiveCharacter.get('baseMovement'),
   });
 
-  // update
+  // update world
+  updateEncounters();
+
+  // update client
   clientEventHelper.sendGameUpdate();
 
   // start the next turn if there is more in the `turnQueue`
@@ -199,7 +204,7 @@ export function handleEndOfTurn() {
  * start round
  */
 export function handleStartOfRound() {
-  logger.lifecycle('(handleStartOfRound())');
+  logger.lifecycle('handleStartOfRound()');
 
   // increment round
   gameState.set({round: gameState.get('round') + 1});
@@ -217,7 +222,7 @@ export function handleStartOfRound() {
  * end round
  */
 export function handleEndOfRound() {
-  logger.lifecycle('(handleEndOfRound())');
+  logger.lifecycle('handleEndOfRound()');
 
   // update
   clientEventHelper.sendGameUpdate();
@@ -231,18 +236,28 @@ export function handleEndOfRound() {
  * builds a Turn Queue based on stuff
  */
 export function initTurnQueue() {
-  logger.lifecycle('(initTurnQueue())');
-  const characters = gameState.get('characters').slice();
-  if (characters.length <= 0) {
+  logger.lifecycle('initTurnQueue()');
+  const characterList = gameState.get('characterList').slice();
+  if (characterList.length <= 0) {
     logger.error('Why are we creating a `turnQueue` with no Characters?');
     return;
   }
 
-  const newTurnQueue = randomizeArray(characters);
+  const newTurnQueue = randomizeArray(characterList);
   gameState.set({turnQueue: newTurnQueue});
 
   // now that turn queue is created, start the round
   gameState.addToActionQueue(() => {
     gameState.handleStartOfTurn();
   });
+}
+// -- world update
+/**
+ * looks through Encounters to see if any of them needs updates
+ */
+export function updateEncounters() {
+  logger.lifecycle('. updateExistingEncounters()');
+
+  const visibleEncounterList = gameState.get('visibleEncounterList');
+  visibleEncounterList.removeBy((encounterModel) => encounterModel.get('isMarkedForDeletion'));
 }

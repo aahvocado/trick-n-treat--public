@@ -1,91 +1,82 @@
-import * as clientEventHelper from 'helpers/clientEventHelper';
-import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
+import * as encounterDataHelper from 'helpers.shared/encounterDataHelper';
+
+import EncounterModel from 'models.shared/EncounterModel';
 
 import gameState from 'state/gameState';
-import serverState from 'state/serverState';
 
-import logger from 'utilities/logger.game';
-import * as triggerHandlerUtil from 'utilities/triggerHandlerUtil';
+// import logger from 'utilities/logger.game';
 
-import * as conditionUtils from 'utilities.shared/conditionUtils';
+import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
+import * as mathUtils from 'utilities.shared/mathUtils';
 
 /**
  * this Helper is for handling data for Encounters
  */
 
+// -- encounterData functions
 /**
- * picks a random adjacent point that a given character can be on
+ * keep track of unused Encounters
  *
- * @param {CharacterModel} characterModel
- * @param {EncounterModel} encounterModel
+ * @type {Array}
  */
-export function handleCharacterTriggerEncounter(characterModel, encounterModel) {
-  const encounterLocation = encounterModel.get('location');
-  logger.verbose(`(encountered "${encounterModel.get('id')}" at [x: ${encounterLocation.x}, y: ${encounterLocation.y}])`);
-
-  // check if the character on here can actually trigger this
-  if (!encounterModel.canBeEncounteredBy(characterModel)) {
-    logger.verbose(`. but ${characterModel.get('name')} can not activate it.`);
-    return;
-  }
-
-  // track the `activeEncounter`
-  gameState.set({activeEncounter: encounterModel});
-
-  // clear the actionQueue because we have to handle this immediately
-  //  this might cause issues and skip events, so we need to keep an eye on this
-  gamestateActionHelper.clearActionQueue();
-
-  // resolve all the triggers
-  const triggerList = encounterModel.get('triggerList');
-  triggerList.forEach((triggerData) => {
-    // check if this Character meets the individual condition for this Trigger
-    if (!conditionUtils.doesMeetAllConditions(triggerData.conditionList, characterModel, encounterModel)) {
-      return;
-    }
-
-    // resolve it
-    triggerHandlerUtil.resolveTrigger(triggerData, characterModel);
-  });
-
-  // add a visit - specifically after the Triggers
-  encounterModel.addVisit(characterModel);
-
-  // send the client the data of the Encounter they triggered
-  const clientModel = serverState.findClientByCharacter(characterModel);
-  clientEventHelper.sendEncounterToClient(clientModel, encounterModel);
+let availableEncounterList = [];
+/**
+ * resets the `availableEncounterList` back to all data
+ */
+export function resetEncounterHelper() {
+  availableEncounterList = encounterDataHelper.ALL_ENCOUNTER_DATA_LIST;
+};
+/**
+ * @param {Object} options
+ * @returns {Array<EncounterData>}
+ */
+export function findAvailableEncounters(options = {}) {
+  return encounterDataUtils.filterEncounterList(availableEncounterList, options);
 }
 /**
- * the Choice takes the Character to another Encounter
+ * generates a new EncounterModel of a random Encounter that fits criteria of given options
+ * - returns `null` if there are none that match search options
  *
- * @param {CharacterModel} characterModel
- * @param {EncounterModel} encounterModel
+ * @param {Object} options
+ * @returns {EncounterModel | null}
  */
-export function handleChoiceGoTo(characterModel, encounterModel) {
-  logger.verbose(`(choice goes to ${encounterModel.get('id')})`);
-  handleCharacterTriggerEncounter(characterModel, encounterModel);
-};
-/**
- * Trick choice
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterModel} encounterModel
- */
-export function handleChoiceTrick(characterModel, encounterModel) {
-  encounterModel.addToArray('trickers', characterModel);
+export function generateRandomEncounter(options) {
+  const {
+    location,
+    ...searchOptions
+  } = options;
 
-  logger.verbose(`(trick choice goes to ${encounterModel.get('id')})`);
-  handleCharacterTriggerEncounter(characterModel, encounterModel);
-};
-/**
- * Treat choice
- *
- * @param {CharacterModel} characterModel
- * @param {EncounterModel} encounterModel
- */
-export function handleChoiceTreat(characterModel, encounterModel) {
-  encounterModel.addToArray('treaters', characterModel);
+  const potentialEncounters = findAvailableEncounters(searchOptions);
 
-  logger.verbose(`(treat choice goes to ${encounterModel.get('id')})`);
-  handleCharacterTriggerEncounter(characterModel, encounterModel);
-};
+  // then choose one randomly from the potential list
+  const chosenIdx = mathUtils.getRandomIntInclusive(0, potentialEncounters.length - 1);
+  const chosenEncounterData = potentialEncounters[chosenIdx];
+  if (chosenEncounterData === undefined) {
+    return null;
+  }
+
+  // remove chosen encounterData if it `isGeneratableOnce`
+  if (chosenEncounterData.isGeneratableOnce) {
+    availableEncounterList.splice(chosenIdx, 1);
+  }
+
+  // create and return the encounter
+  return new EncounterModel({
+    ...chosenEncounterData,
+    location: location,
+  });
+}
+// -- in game functions
+/**
+ * gets the Encounter if there is one at given point
+ *
+ * @param {Point} point
+ * @returns {EncounterModel | undefined}
+ */
+export function findEncounterAt(point) {
+  const encounterList = gameState.get('encounterList');
+  return encounterList.find((encounterModel) => {
+    const encounterLocation = encounterModel.get('location');
+    return point.equals(encounterLocation);
+  });
+}

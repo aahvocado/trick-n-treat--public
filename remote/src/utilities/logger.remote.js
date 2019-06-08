@@ -28,7 +28,7 @@ export function log(logType, args) {
     logDate: Date.now(),
   };
 
-  remoteAppState.addToArray('appLog', logData);
+  remoteAppState.get('appLog').push(logData);
 }
 /**
  * @param {Array<LogData>} logDataList

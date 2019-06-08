@@ -91,6 +91,7 @@
   "TRIGGER_LOGIC_ID.GIVE": "Give",
   "TRIGGER_LOGIC_ID.TAKE": "Take",
   "TRIGGER_LOGIC_ID.MOVE": "Move",
+  "TRIGGER_LOGIC_ID.DELETE": "Mark for Deletion",
 
   "undefined": "undefined"
 }

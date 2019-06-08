@@ -16,8 +16,6 @@ import gameState from 'state/gameState';
 
 import logger from 'utilities/logger.game';
 import * as clientEventHelper from 'helpers/clientEventHelper';
-import * as encounterGenerationUtils from 'utilities/encounterGenerationUtils';
-import * as houseGenerationUtils from 'utilities/houseGenerationUtils';
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
 
 import * as mathUtils from 'utilities.shared/mathUtils';
@@ -94,8 +92,8 @@ export function generateFogMap() {
 
   // update Visibility for where Characters are located
   logger.game('. . and updating visibility for Characters');
-  const characters = gameState.get('characters');
-  characters.forEach((characterModel) => {
+  const characterList = gameState.get('characterList');
+  characterList.forEach((characterModel) => {
     gameState.updateToVisibleAt(characterModel.get('position'), characterModel.get('vision'));
   });
 
@@ -109,16 +107,23 @@ export function generateHomeBiome() {
   const tileMapModel = gameState.get('tileMapModel');
   const biomeMapModel = mapGenerationUtils.createHomeBiomeModel(tileMapModel, HOME_BIOME_SETTINGS);
 
+  const {
+    numHouses,
+  } = HOME_BIOME_SETTINGS;
   logger.game('. . and House Encounters');
-  const houseEncounterList = houseGenerationUtils.generateHouses(biomeMapModel, HOME_BIOME_SETTINGS);
-  houseEncounterList.forEach((encounterModel) => {
-    gameState.addToArray('encounters', encounterModel);
-    biomeMapModel.setTileAt(encounterModel.get('location'), TILE_TYPES.HOUSE);
-  });
+
+  const validLocations = biomeMapModel.getPointsAdjacentToWalkableTile(1, 1, 1);
+  for (let i=0; i<numHouses; i++) {
+    const randomLocationIdx = mathUtils.getRandomIntInclusive(0, validLocations.length - 1);
+    const houseLocation = validLocations.splice(randomLocationIdx, 1)[0];
+    biomeMapModel.setTileAt(houseLocation, TILE_TYPES.HOUSE);
+
+    placeHouse(biomeMapModel, houseLocation);
+  }
 
   // merge with main map and add it to the BiomeList
   tileMapModel.mergeMatrixModel(biomeMapModel);
-  gameState.addToArray('biomeList', biomeMapModel);
+  gameState.get('biomeList').push(biomeMapModel);
   return biomeMapModel;
 }
 /**
@@ -146,7 +151,7 @@ export function generateGraveyard() {
 
   // merge with main map and add it to the BiomeList
   tileMapModel.mergeMatrixModel(biomeMapModel);
-  gameState.addToArray('biomeList', biomeMapModel);
+  gameState.get('biomeList').push(biomeMapModel);
   return biomeMapModel;
 }
 /**
@@ -174,7 +179,7 @@ export function generateSmallWoods() {
 
   // merge with main map and add it to the BiomeList
   tileMapModel.mergeMatrixModel(biomeMapModel);
-  gameState.addToArray('biomeList', biomeMapModel);
+  gameState.get('biomeList').push(biomeMapModel);
   return biomeMapModel;
 }
 /**
@@ -229,6 +234,7 @@ export function placeDecor(mapModel, location) {
 export function placeEncounter(mapModel, location) {
   const tagsToSearch = [];
 
+  // wip - use the tileType as a tag for searching
   const tileOnMap = mapModel.getTileAt(location);
   if (tileOnMap === TILE_TYPES.PATH) {
     tagsToSearch.push(TAG_ID.TILE_TYPE.PATH);
@@ -252,7 +258,8 @@ export function placeEncounter(mapModel, location) {
     tagsToSearch.push(TAG_ID.TILE_TYPE.WOODS);
   }
 
-  const encounterModel = encounterGenerationUtils.generateRandomEncounter({
+  // find an encounter and model using this criteria
+  const encounterModel = gameState.generateRandomEncounter({
     location: location,
     dataType: DATA_TYPE.ENCOUNTER,
     isGeneratable: true,
@@ -265,8 +272,32 @@ export function placeEncounter(mapModel, location) {
     return;
   }
 
-  gameState.addToArray('encounters', encounterModel);
+  // add it
+  gameState.get('encounterList').push(encounterModel);
 }
+/**
+ * picks an Encounter that is meant for houses
+ *
+ * @param {MapModel} mapModel
+ * @param {Point} location
+ */
+export function placeHouse(mapModel, location) {
+  const encounterModel = gameState.generateRandomEncounter({
+    location: location,
+    dataType: DATA_TYPE.HOUSE,
+    isGeneratable: true,
+    rarityId: pickRandomWeightedChoice(rarityTagChoices),
+  });
+
+  // there are no matches if we get `null`
+  if (encounterModel === null) {
+    return;
+  }
+
+  // add it
+  gameState.get('encounterList').push(encounterModel);
+}
+
 // -- utility
 /**
  * @param {Point} point
@@ -285,10 +316,10 @@ export function isWalkableAt(point) {
  * @returns {Boolean}
  */
 export function hasNearbyEncountersOnPath(startPoint, distance) {
-  const encounters = gameState.get('encounters');
+  const encounterList = gameState.get('encounterList');
   const tileMapModel = gameState.get('tileMapModel');
 
-  return encounters.some((encounterModel) => {
+  return encounterList.some((encounterModel) => {
     const encounterLocation = encounterModel.get('location');
     return tileMapModel.isWithinPathDistance(startPoint, encounterLocation, distance);
   });

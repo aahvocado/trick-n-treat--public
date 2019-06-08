@@ -29,11 +29,11 @@ export default class EncounterModel extends Model {
       /** @type {Array<TriggerData>} */
       triggerList: [],
 
-      // -- configured
+      // -- instance data
       /** @type {Point} */
       location: new Point(),
-
-      // -- instance data
+      /** @type {Boolean} */
+      isMarkedForDeletion: false,
       /** @type {ModelList<CharacterModel>} */
       visitors: new ModelList([], CharacterModel),
       /** @type {ModelList<CharacterModel>} */
@@ -43,14 +43,6 @@ export default class EncounterModel extends Model {
       /** @type {Object} */
       ...newAttributes,
     });
-  }
-  /**
-   * called when Character triggers this
-   *
-   * @param {CharacterModel} characterModel
-   */
-  addVisit(characterModel) {
-    this.addToArray('visitors', characterModel);
   }
   /**
    * get number of times a Character has visited

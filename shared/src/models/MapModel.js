@@ -29,7 +29,7 @@ export class MapModel extends MatrixModel {
 
     // -- keep track of changes to the map
     this.onChange('matrix', (matrix) => {
-      this.addToArray('mapHistory', matrix);
+      this.get('mapHistory').push(matrix);
     });
   }
   // -- class methods

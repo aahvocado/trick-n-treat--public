@@ -273,7 +273,7 @@ const triggerSchema = Joi.object().keys({
   dataType: Joi.string().required(),
   targetId: Joi.string().required(),
   triggerLogicId: Joi.string().required(),
-  value: Joi.number(),
+  value: Joi.number().required(),
   itemId: Joi.string().optional(),
   conditionList: Joi.array().optional(),
 });

@@ -6,6 +6,7 @@ import {FOG_TYPES} from 'constants.shared/tileTypes';
 
 import * as gamestateActionHelper from 'helpers/gamestateActionHelper';
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
+import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 import * as gamestateLifecycleHelper from 'helpers/gamestateLifecycleHelper';
 import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 
@@ -46,9 +47,9 @@ export class GamestateModel extends Model {
 
       // -- Entity attributes
       /** @type {ModelList<CharacterModel>} */
-      characters: new ModelList([], CharacterModel),
+      characterList: new ModelList([], CharacterModel),
       /** @type {ModelList<EncounterModel>} */
-      encounters: new ModelList([], EncounterModel),
+      encounterList: new ModelList([], EncounterModel),
       /** @type {MapModel} */
       tileMapModel: new MapModel(),
       /** @type {MapModel} */
@@ -63,20 +64,40 @@ export class GamestateModel extends Model {
     });
 
     // computed attributes - (have to pass in `this` as context because getters have their own context)
-    const self = this;
+    const _this = this;
     extendObservable(this.attributes, {
       /** @type {CharacterModel | null} */
       get activeCharacter() {
-        return self.getActiveCharacter();
+        return _this.getActiveCharacter();
       },
-      /** @type {Number} */
-      get remainingMoves() {
-        const activeCharacter = self.getActiveCharacter();
-        if (activeCharacter === null) {
-          return -1;
+      /** @type {ModelList<EncounterModel>} */
+      get visibleEncounterList() {
+        // no characters mean nothing is visible
+        const characterList = _this.get('characterList');
+        if (characterList.length <= 0) {
+          return new ModelList([], EncounterModel);
         }
 
-        return activeCharacter.get('movement');
+        const encounterList = _this.get('encounterList');
+        const tileMapModel = _this.get('tileMapModel');
+
+        // go through all the Encounters
+        const visibleEncounters = encounterList.filter((encounterModel) => {
+          const encounterLocation = encounterModel.get('location');
+
+          // check if any of the Characters can see this Encounter
+          const isVisibleToAnyCharacter = characterList.some((characterModel) => {
+            const characterLocation = characterModel.get('position');
+            const characterRange = characterModel.get('vision');
+            return tileMapModel.isWithinPathDistance(encounterLocation, characterLocation, characterRange);
+          });
+
+          // this Encounter is visible as long as any character can see it
+          return isVisibleToAnyCharacter;
+        });
+
+        // return the visible encounters as a ModelList
+        return new ModelList(visibleEncounters, EncounterModel);
       },
     });
 
@@ -164,6 +185,22 @@ export class GamestateModel extends Model {
   handleCharacterChoseAction(characterModel, encounterId, actionData) {
     gamestateCharacterHelper.handleCharacterChoseAction(characterModel, encounterId, actionData);
   }
+  /** @override */
+  handleCharacterTriggerEncounter(characterModel, encounterModel) {
+    gamestateCharacterHelper.handleCharacterTriggerEncounter(characterModel, encounterModel);
+  }
+  /** @override */
+  handleChoiceGoTo(characterModel, encounterModel) {
+    gamestateCharacterHelper.handleChoiceGoTo(characterModel, encounterModel);
+  }
+  /** @override */
+  handleChoiceTrick(characterModel, encounterModel) {
+    gamestateCharacterHelper.handleChoiceTrick(characterModel, encounterModel);
+  }
+  /** @override */
+  handleChoiceTreat(characterModel, encounterModel) {
+    gamestateCharacterHelper.handleChoiceTreat(characterModel, encounterModel);
+  }
   // -- Map methods - gamestateMapHelper.js
   /** @override */
   isWalkableAt(point) {
@@ -173,19 +210,22 @@ export class GamestateModel extends Model {
   hasNearbyEncountersOnPath(startPoint, distance) {
     return gamestateMapHelper.hasNearbyEncountersOnPath(startPoint, distance);
   }
-  // -- Encounter methods
-  /**
-   * gets the Encounter if there is one at given point
-   *
-   * @param {Point} point
-   * @returns {EncounterModel | undefined}
-   */
+  // -- Encounter methods - gamestateEncounterHelper.js
+  /** @override */
+  resetEncounterHelper() {
+    gamestateEncounterHelper.resetEncounterHelper();
+  }
+  /** @override */
+  findAvailableEncounters(options = {}) {
+    return gamestateEncounterHelper.findAvailableEncounters(options = {});
+  }
+  /** @override */
+  generateRandomEncounter(options) {
+    return gamestateEncounterHelper.generateRandomEncounter(options);
+  }
+  /** @override */
   findEncounterAt(point) {
-    const encounters = this.get('encounters').slice();
-    return encounters.find((encounterModel) => {
-      const encounterLocation = encounterModel.get('location');
-      return point.equals(encounterLocation);
-    });
+    return gamestateEncounterHelper.findEncounterAt(point);
   }
   // -- Action Queue - `gamestateActionHelper.js`
   /** @override */
@@ -227,7 +267,7 @@ export class GamestateModel extends Model {
     fogMapModel.setTileAt(point, FOG_TYPES.VISIBLE);
 
     // other tiles that are a given distance away should be partially visible, if not already
-    const nearbyPoints = mapUtils.getPointsWithinPathDistance(tileMapModel.getMatrix(), point, distance);
+    const nearbyPoints = mapUtils.getPointsWithinPathDistance(tileMapModel.getMatrix(), point, Math.max(distance - 3, 0));
     nearbyPoints.forEach((point) => {
       fogUtils.updateFogPointToVisible(fogMapModel, tileMapModel, point);
     });

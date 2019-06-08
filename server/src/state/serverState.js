@@ -40,16 +40,6 @@ export class ServerStateModel extends Model {
     // computed attributes - (have to pass in this model as context because getters have their own context)
     const stateModel = this;
     extendObservable(this.attributes, {
-      /** @type {ClientModel | null} */
-      get activeClient() {
-        const activeUser = gameState.get('activeUser');
-        if (activeUser === null) {
-          return null;
-        }
-
-        const matchingClient = stateModel.findClientByUser(activeUser);
-        return matchingClient;
-      },
       /** @type {Array<ClientModel>} */
       get lobbyClients() {
         return stateModel.get('clients').filter((client) => (client.get('isInLobby')));

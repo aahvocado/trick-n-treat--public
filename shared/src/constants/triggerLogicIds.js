@@ -11,6 +11,8 @@ export const TRIGGER_LOGIC_ID = {
   TAKE: 'TRIGGER_LOGIC_ID.TAKE',
 
   MOVE: 'TRIGGER_LOGIC_ID.MOVE',
+
+  DELETE: 'TRIGGER_LOGIC_ID.DELETE',
 };
 /** @type {Array<TriggerLogicId>} */
 export const TRIGGER_LOGIC_ID_LIST = convertObjectToArray(TRIGGER_LOGIC_ID);

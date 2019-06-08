@@ -35,7 +35,7 @@ export default class ModelList {
     this.defaultList = defaultList.slice();
 
     /** @type {Array<Model>} */
-    this.modelList = observable(this.defaultList);
+    this.modelList = observable.array(this.defaultList);
   }
   /**
    * wrapper for watching for a change for a specific property
@@ -52,14 +52,31 @@ export default class ModelList {
   }
   /**
    * EXPERIMENTAL
-   * will remove all Models in the list that do not pass the callback
+   * removes item at given index
+   *  and then updates the list
+   *
+   * @param {Number} idx
+   */
+  removeAt(idx) {
+    // out of bounds
+    if (idx > (list.length - 1)) {
+      return;
+    }
+
+    // splice
+    this.modelList.splice(idx, 1);
+  }
+  /**
+   * EXPERIMENTAL
+   * will filter all Models in the list that do not pass the callback
+   *  and then set the list to the items that remain
    *
    * @param {Function} callback
    */
-  remove(callback) {
+  removeBy(callback) {
     const currentList = this.modelList.slice();
     const resultList = currentList.filter((...args) => (!callback(...args)));
-    set(this.modelList, resultList);
+    this.modelList.replace(resultList);
   }
   /**
    * updates the ModelList by creating the original Model class
@@ -68,11 +85,13 @@ export default class ModelList {
    * @returns {ModelList}
    */
   import(newList) {
-    this.modelList = newList.map((data) => {
+    const importedList = newList.map((data) => {
       const newModel = new this.ModelClass();
       newModel.import(data);
       return newModel;
     });
+
+    this.modelList.replace(importedList);
 
     return this;
   }
@@ -113,6 +132,9 @@ export default class ModelList {
   }
   filter(...args) {
     return this.modelList.filter(...args);
+  }
+  find(...args) {
+    return this.modelList.find(...args);
   }
   findIndex(...args) {
     return this.modelList.findIndex(...args);

@@ -4,8 +4,13 @@ import {
   reaction,
   set,
   toJS,
+
+  isObservableArray,
 } from 'mobx';
 import uuid from 'uuid/v4';
+
+import convertObservableToJs from 'utilities.shared/convertObservableToJs';
+import createImportingAttributes from 'utilities.shared/createImportingAttributes';
 
 /**
  * Model base class
@@ -19,8 +24,13 @@ export class Model {
    */
   constructor(newAttributes = {}) {
     /** @type {String} */
-    this.modelId = uuid();
+    this.id = uuid();
+    /** @type {Boolean} */
+    this.isModel = true;
+    /** @type {Object} */
+    this.defaultAttributes = newAttributes;
 
+    // create the model with the following attributes
     this.attributes = observable(newAttributes);
   }
   /**
@@ -41,39 +51,6 @@ export class Model {
     set(this.attributes, changes);
   }
   /**
-   * EXPERIMENTAL - I'm wary of functions that are too abstract
-   *
-   * @param {String} arrayName
-   * @param {*} item
-   */
-  addToArray(arrayName, item) {
-    const currentArray = this.get(arrayName).slice();
-
-    // no add needed if array already has item
-    if (currentArray.includes(item)) {
-      return;
-    }
-
-    currentArray.push(item);
-    this.set({
-      [arrayName]: currentArray,
-    });
-  }
-  /**
-   * EXPERIMENTAL - I'm wary of functions that are too abstract
-   *
-   * @param {String} arrayName
-   * @param {*} item
-   */
-  removeFromArray(arrayName, item) {
-    const currentArray = this.get(arrayName).slice();
-    const newArray = currentArray.filter((existingItem) => (!Object.is(existingItem, item)));
-
-    this.set({
-      [arrayName]: newArray,
-    });
-  }
-  /**
    * wrapper for watching for a change for a specific property
    * @link https://mobx.js.org/refguide/reaction.html
    *
@@ -82,6 +59,14 @@ export class Model {
    * @returns {Function} - returns the `disposer` which will remove the observer
    */
   onChange(property, callback) {
+    // @see https://mobx.js.org/refguide/array.html
+    if (isObservableArray(this.attributes[property])) {
+      return reaction(
+        () => toJS(this.attributes[property]),
+        callback,
+      );
+    };
+
     return reaction(
       () => this.attributes[property],
       callback,
@@ -89,6 +74,7 @@ export class Model {
   }
   /**
    * makes sure attributes match the schema
+   * @todo - need to implement schema
    *
    * @returns {Boolean}
    */
@@ -102,45 +88,24 @@ export class Model {
     return valid;
   }
   /**
+   * helps update a whole new chunk of attributes
+   *
+   * @param {Object} newAttributes
+   * @returns {Model}
+   */
+  import(newAttributes) {
+    const resultAttributes = createImportingAttributes(this.attributes, newAttributes);
+    this.set(resultAttributes);
+
+    return this;
+  }
+  /**
    * gets all the attributes and simplifies them into a basic object
    *
    * @returns {Object}
    */
   export() {
-    const exportObject = {};
-    const stateObject = toJS(this.attributes);
-
-    const keys = Object.keys(stateObject);
-    keys.forEach((attributeName) => {
-      const attributeValue = get(this.attributes, attributeName);
-
-      // if value is a Model then use that Model's export
-      if (attributeValue.export !== undefined) {
-        exportObject[attributeName] = attributeValue.export();
-        return;
-      }
-
-      // check if we have an array of Models
-      if (Array.isArray(attributeValue)) {
-        // empty arrays don't matter
-        if (attributeValue.length <= 0) {
-          exportObject[attributeName] = attributeValue;
-          return;
-        }
-
-        // export array of models using their own export()
-        const isArrayOfModels = attributeValue[0].export !== undefined;
-        if (isArrayOfModels) {
-          exportObject[attributeName] = attributeValue.map((model) => (model.export()));
-          return;
-        }
-      }
-
-      // assign the value
-      exportObject[attributeName] = attributeValue;
-    });
-
-    return exportObject;
+    return convertObservableToJs(this.attributes);
   }
   /**
    * return a copy of this class

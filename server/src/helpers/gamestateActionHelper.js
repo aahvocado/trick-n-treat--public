@@ -53,7 +53,7 @@ export function createActionFunction(baseFunction) {
  */
 export function addToActionQueue(baseFunction) {
   const actionFunction = createActionFunction(baseFunction);
-  gameState.addToArray('actionQueue', actionFunction);
+  gameState.get('actionQueue').push(actionFunction);
 
   // check if we can start resolving
   if (shouldResolveActionQueue()) {

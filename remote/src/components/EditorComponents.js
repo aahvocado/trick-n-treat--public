@@ -21,10 +21,10 @@ export class EditorPageContainer extends Component {
 
     return (
       <div
-        className={combineClassNames('flex-center flex-col color-white bg-primary fontfamily-secondary', className)}
+        className={combineClassNames('flex-center flex-col color-white fontfamily-secondary', className)}
         {...otherProps}
       >
-        <h2 className='bg-secondary fsize-4 pad-v-1 width-full talign-center'>
+        <h2 className='fsize-4 pad-v-1 width-full talign-center'>
           {header}
         </h2>
 

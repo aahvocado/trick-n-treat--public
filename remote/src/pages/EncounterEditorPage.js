@@ -128,6 +128,7 @@ class EncounterEditorPage extends Component {
       content = '',
       dataType = '',
       isGeneratable = false,
+      isGeneratableOnce = false,
       rarityId = '',
       isDialogue = false,
       actionList = [],
@@ -144,7 +145,7 @@ class EncounterEditorPage extends Component {
     const filteredEncounterList = !hasFilters ? dataList : encounterDataUtils.filterEncounterList(dataList, dataListFilters);
 
     return (
-      <EditorPageContainer header='Encounter Editor'>
+      <EditorPageContainer className='bg-encounter-theme-primary' header='Encounter Editor'>
         {/* Encounter Preview Modal */}
         <EncounterModalComponent
           active={showPreview}
@@ -426,23 +427,32 @@ class EncounterEditorPage extends Component {
                 checked={dataType === DATA_TYPE.HOUSE}
                 onChange={() => this.updateActiveData({dataType: DATA_TYPE.HOUSE})}
               />
-            </SectionFormContainer>
 
-            {/* Generation */}
-            <SectionFormContainer header='Generation'>
               <ToggleComponent
                 className='adjacent-mar-t-2'
                 children='Dialogue'
                 checked={isDialogue}
                 onChange={(e) => this.updateActiveData({isDialogue: e.target.checked})}
               />
+            </SectionFormContainer>
 
+            {/* Generation */}
+            <SectionFormContainer header='Generation'>
               <ToggleComponent
                 className='adjacent-mar-t-2'
                 children='Generatable'
                 checked={isGeneratable}
                 onChange={(e) => this.updateActiveData({isGeneratable: e.target.checked})}
               />
+
+              { isGeneratable &&
+                <ToggleComponent
+                  className='adjacent-mar-t-2'
+                  children='Only Once'
+                  checked={isGeneratableOnce}
+                  onChange={(e) => this.updateActiveData({isGeneratableOnce: e.target.checked})}
+                />
+              }
 
               { isGeneratable &&
                 <div className='flex-col adjacent-mar-t-2'>

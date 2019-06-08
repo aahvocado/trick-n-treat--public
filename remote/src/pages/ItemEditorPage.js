@@ -124,7 +124,7 @@ class ItemEditorPage extends Component {
     const isNew = dataList.find(item => item.id === activeData.id) === undefined;
 
     return (
-      <EditorPageContainer header='Item Editor'>
+      <EditorPageContainer className='bg-item-theme-primary' header='Item Editor'>
         {/* Actionbar */}
         <EditorActionbarContainer>
           {/* Menu Row 1 */}

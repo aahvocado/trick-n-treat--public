@@ -51,33 +51,6 @@ export class Model {
     set(this.attributes, changes);
   }
   /**
-   * EXPERIMENTAL - this might be unnecessary and mess things up more than it helps
-   *
-   * @param {String} arrayName
-   * @param {*} item
-   */
-  addToArray(arrayName, item) {
-    const currentArray = this.get(arrayName).slice();
-    currentArray.push(item);
-    this.set({
-      [arrayName]: currentArray,
-    });
-  }
-  /**
-   * EXPERIMENTAL - this might be unnecessary and mess things up more than it helps
-   *
-   * @param {String} arrayName
-   * @param {*} item
-   */
-  removeFromArray(arrayName, item) {
-    const currentArray = this.get(arrayName).slice();
-    const newArray = currentArray.filter((existingItem) => (!Object.is(existingItem, item)));
-
-    this.set({
-      [arrayName]: newArray,
-    });
-  }
-  /**
    * wrapper for watching for a change for a specific property
    * @link https://mobx.js.org/refguide/reaction.html
    *

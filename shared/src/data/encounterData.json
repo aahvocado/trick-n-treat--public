@@ -4,7 +4,6 @@
     "id": "ENCOUNTER_ID.DEBUG_ENCOUNTER",
     "title": "Developer Encounter",
     "content": "This is the first Encounter in the list and we use it to mess around.",
-    "isGeneratable": false,
     "isDialogue": false,
     "tagList": [
       "TAG_ID.DESCRIPTORS.LOSES_SANITY"
@@ -52,15 +51,14 @@
           }
         ]
       }
-    ]
+    ],
+    "isGeneratable": false
   },
   {
     "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.FASHION_ADVICE",
     "title": "Graveyard Fashion Advice (1)",
     "content": "You see a nearby patch of dirt rumble... and out pops a skeleton with round, purple frames. She rattles and gives some advice, \"You would look really good wearing orange at the Sternum Ball.\"",
-    "isGeneratable": true,
-    "rarityId": "TAG_ID.RARITY.UNCOMMON",
     "isDialogue": false,
     "tagList": [
       "TAG_ID.TILE_TYPE.SWAMP",
@@ -96,6 +94,8 @@
         "value": 1
       }
     ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
     "groupId": "Fashion Advice Group"
   },
   {
@@ -103,7 +103,6 @@
     "id": "ENCOUNTER_ID.FASHION_ADVICE_2",
     "title": "Graveyard Fashion Advice (2)",
     "content": "She giggles really excitedly and it makes a rattle so joyful that you giggle, too! You both giggle until you have to wipe the tears from your face.",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -120,6 +119,7 @@
         "value": 1
       }
     ],
+    "isGeneratable": false,
     "groupId": "Fashion Advice Group"
   },
   {
@@ -127,7 +127,6 @@
     "id": "ENCOUNTER_ID.FASHION_ADVICE_3",
     "title": "Graveyard Fashion Advice (3)",
     "content": "You caress her and slowly help her lay back on her dirt bed. All while she's telling how cute you look and that orange really would suit you. I bet you're totally blushing. ",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -144,6 +143,7 @@
         "value": 1
       }
     ],
+    "isGeneratable": false,
     "groupId": "Fashion Advice Group"
   },
   {
@@ -151,8 +151,6 @@
     "id": "ENCOUNTER_ID.BLACK_CAT",
     "title": "The Darkness Meows",
     "content": "Oh no.. it can't be... it couldn't... not now...! A black cat with sparkling blue eyes crosses your path on the worse night imaginable! Fate has it in for you... You feel so unlucky.",
-    "isGeneratable": true,
-    "rarityId": "TAG_ID.RARITY.COMMON",
     "isDialogue": false,
     "tagList": [
       "TAG_ID.TILE_TYPE.SIDEWALK",
@@ -173,6 +171,11 @@
         "targetId": "TARGET_ID.CHARACTER.LUCK",
         "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
         "value": 2
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1
       }
     ],
     "conditionList": [
@@ -182,15 +185,15 @@
         "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
         "value": 1
       }
-    ]
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON"
   },
   {
     "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.CANDY_FAIRY",
     "title": "Blessed by the Fairy",
     "content": "You see a little glowing thing pass by in front of you. Upon closer inspection, its a fairy who's carrying a piece of candy about her size! She sees you and gives it to you and says \"I really like your costume!\"",
-    "isGeneratable": true,
-    "rarityId": "TAG_ID.RARITY.COMMON",
     "isDialogue": false,
     "tagList": [
       "TAG_ID.TILE_TYPE.WOODS",
@@ -230,14 +233,15 @@
         "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
         "value": 1
       }
-    ]
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON"
   },
   {
     "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.FREE_TAFFY",
     "title": "Free Naffy Taffy?",
     "content": "\"Hey, I'm not a big fan of Naffy Taffy so you can have it.\"",
-    "isGeneratable": true,
     "isDialogue": false,
     "tagList": [
       "TAG_ID.TILE_TYPE.SIDEWALK",
@@ -259,6 +263,11 @@
         "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
         "value": 1,
         "itemId": "ITEM_ID.GUMMY_VIAL"
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1
       }
     ],
     "conditionList": [
@@ -268,15 +277,14 @@
         "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
         "value": 1
       }
-    ]
+    ],
+    "isGeneratable": true
   },
   {
     "dataType": "DATA_TYPE.HOUSE",
     "id": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_ATDOOR",
     "title": "Friendly House (at the door)",
     "content": "You come up to a nicely decorated house. There's bunch of candy corn lights leading up to the front porch, where some crudely carved jack-o-lanterns smile at you. It's a house you've been to many times before and you know they always have full-size candy bars!",
-    "isGeneratable": true,
-    "rarityId": "TAG_ID.RARITY.UNCOMMON",
     "isDialogue": false,
     "tagList": [
       "TAG_ID.DESCRIPTORS.ADDS_SANITY"
@@ -315,6 +323,8 @@
         "value": 1
       }
     ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
     "groupId": "Friendly House Group"
   },
   {
@@ -322,7 +332,6 @@
     "id": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TREAT",
     "title": "Friendly House (treat)",
     "content": "You ring the doorbell and are greeted by your cheerful neighbor wearing a giant sponge outfit!\n\n\"Nya ha ha! How ya doing? Here's some candy fella!\"",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -343,6 +352,7 @@
         "value": 1
       }
     ],
+    "isGeneratable": false,
     "groupId": "Friendly House Group"
   },
   {
@@ -350,7 +360,6 @@
     "id": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TRICK",
     "title": "Friendly House (trick)",
     "content": "You Trick the house into opening up and spook the friendly neighbor! He spills a bunch of candy - and you greedily snatch a bunch of them up before dashing away.\n\nYou hear a cry behind you - \"You've soiled it!\".",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -376,6 +385,7 @@
         "value": 1
       }
     ],
+    "isGeneratable": false,
     "groupId": "Friendly House Group"
   },
   {
@@ -383,8 +393,6 @@
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_ATDOOR",
     "title": "Undecorated House (at the door)",
     "content": "You arrive in front of a completely undecorated house. There's no decorations, none. There's a bunch of other houses that aren't decorated but for some reason this one's extra upsetting. Well, at least the lights are on.",
-    "isGeneratable": true,
-    "rarityId": "TAG_ID.RARITY.COMMON",
     "isDialogue": false,
     "actionList": [
       {
@@ -415,6 +423,8 @@
         "value": 1
       }
     ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
     "groupId": "Undecorated House Group"
   },
   {
@@ -422,7 +432,6 @@
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICKCHOICES",
     "title": "Undecorated House (trick choices)",
     "content": "Yeah! You could play a Trick at this unstylish house!",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -466,6 +475,7 @@
         "value": 1
       }
     ],
+    "isGeneratable": false,
     "groupId": "Undecorated House Group"
   },
   {
@@ -473,7 +483,6 @@
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TREAT",
     "title": "Undecorated House (treat)",
     "content": "You ring the doorbell and out comes a comfy lady. She looks pretty nonchalant as she reaches into her sweatpants pocket with a handful of candy and tosses it in your bucket.",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -496,6 +505,7 @@
         "value": 9
       }
     ],
+    "isGeneratable": false,
     "groupId": "Undecorated House Group"
   },
   {
@@ -503,7 +513,6 @@
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK1",
     "title": "Undecorated House (trick 1)",
     "content": "You ring the doorbell and a nonchalant lady opens the door. Just as she's reaching into sweatpants pocket you speak up, \"Hey, it would be really nice if there was a Halloween atmosphere around here.\"\n\nShe shrugs while saying, \"I guess I might have plastic pumpkin around here somewhere.\" She walks behind the door and reappears with the supposed pumpkin and hands it to you and flashes a weary smile and says \"There we go.\"\n",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -521,6 +530,7 @@
         "itemId": "ITEM_ID.PLASTIC_PUMPKIN"
       }
     ],
+    "isGeneratable": false,
     "groupId": "Undecorated House Group"
   },
   {
@@ -528,7 +538,6 @@
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK2",
     "title": "Undecorated House (trick 2)",
     "content": "You place a Plastic Pumpkin on the front step of this undecorated house. You pat the pumpkin and name it Gina. With the house no longer undecorated, you feel your work here is done!",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -552,6 +561,7 @@
         "value": 2
       }
     ],
+    "isGeneratable": false,
     "groupId": "Undecorated House Group"
   },
   {
@@ -559,7 +569,6 @@
     "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK3",
     "title": "Undecorated House (trick 3)",
     "content": "You take your Cotton Cobwebs and stretch it around the pillars around the front. You name the two plastic spiders Andy and Amy. With the house no longer undecorated, you feel your work here is done!",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -583,6 +592,7 @@
         "value": 2
       }
     ],
+    "isGeneratable": false,
     "groupId": "Undecorated House Group"
   },
   {
@@ -590,7 +600,6 @@
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY1)",
     "title": "Candy Mountain to the Moon (buy1)",
     "content": "\"Many thanks, tiny neighbor!\"",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -613,6 +622,7 @@
         "value": 5
       }
     ],
+    "isGeneratable": false,
     "groupId": "Quest to the Moon"
   },
   {
@@ -620,7 +630,6 @@
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY2)",
     "title": "Candy Mountain to the Moon (buy2)",
     "content": "\"Many thanks, tiny neighbor!\"",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -643,6 +652,7 @@
         "value": 5
       }
     ],
+    "isGeneratable": false,
     "groupId": "Quest to the Moon"
   },
   {
@@ -650,7 +660,6 @@
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(QUESTION)",
     "title": "Candy Mountain to the Moon (question)",
     "content": "\"Mountain is tiny and moon is far. Many kind friends help me but I worry moon will go away.\"",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -676,6 +685,7 @@
         "label": "I'll come by later, Lonnie."
       }
     ],
+    "isGeneratable": false,
     "groupId": "Quest to the Moon"
   },
   {
@@ -683,7 +693,6 @@
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(YESHELP)",
     "title": "Candy Mountain to the Moon (Yes Help)",
     "content": "\"You are tiny but with big heart, many thanks. Here is half moon necklace. Other half belongs to Lonnie's best friend, Monnie. Me and Monnie promise one day to go the moon together but fought over caramel candy bar at his house. Please tell Monnie that Lonnie sorry and want him go to moon together.\"",
-    "isGeneratable": false,
     "isDialogue": true,
     "actionList": [
       {
@@ -701,6 +710,7 @@
         "itemId": "ITEM_ID.LONNIE_NECKLACE"
       }
     ],
+    "isGeneratable": false,
     "groupId": "Quest to the Moon"
   },
   {
@@ -708,8 +718,6 @@
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(LONNIE_MAIN)",
     "title": "Candy Mountain to the Moon (Lonnie Main)",
     "content": "\"Hello tiny neighbor! Moon is looking beautiful, yes? I making big candy mountain to go visit moon. Tiny neighbor, you give small candies to me and I give big candy to you.\"",
-    "isGeneratable": true,
-    "rarityId": "TAG_ID.RARITY.RARE",
     "isDialogue": false,
     "actionList": [
       {
@@ -769,6 +777,8 @@
         "value": 5
       }
     ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.RARE",
     "groupId": "Quest to the Moon"
   },
   {
@@ -776,8 +786,6 @@
     "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(MONNIE_MAIN)",
     "title": "Candy Mountain to the Moon (Monnie Main)",
     "content": "\"I am Monnie. I like caramel.\"",
-    "isGeneratable": true,
-    "rarityId": "TAG_ID.RARITY.UNCOMMON",
     "isDialogue": false,
     "actionList": [
       {
@@ -786,6 +794,8 @@
         "label": "I'll come by later"
       }
     ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
     "groupId": "Quest to the Moon"
   }
 ]

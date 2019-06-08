@@ -29,8 +29,8 @@ const itemSchema = Joi.object().keys({
   isKeyItem: Joi.boolean().required(),
   isGeneratable: Joi.boolean(),
   isKeyItem: Joi.boolean().required(),
-  tagList: Joi.array(),
-  triggerList: Joi.array(),
+  tagList: Joi.array().optional(),
+  triggerList: Joi.array().optional(),
   conditionList: Joi.array().optional(),
 });
 /**
