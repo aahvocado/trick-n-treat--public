@@ -47,6 +47,15 @@ export default class ClientModel extends Model {
       ...newAttributes,
     });
 
+    // computed attributes
+    const _this = this;
+    extendObservable(this.attributes, {
+      /** @type {CharacterModel | null} */
+      get isConnected() {
+        return _this.get('socket') !== undefined;
+      },
+    });
+
     // `addListeners()` when a Client and Character is finally set on this user
     this.onChange('characterModel', (characterModel) => {
       if (characterModel !== null && characterModel !== undefined) {
@@ -57,11 +66,15 @@ export default class ClientModel extends Model {
     // add Websocket event listeners
     this.attachServerListeners();
   }
-  /**
-   * @param {...*} args
-   */
-  emit(...args) {
-    this.get('socket').emit(...args);
+  /** @override */
+  export() {
+    const convertedData = convertObservableToJs(this.attributes);
+    return {
+      name: convertedData.name,
+      clientType: convertedData.clientType,
+      isInGame: convertedData.isInGame,
+      isInLobby: convertedData.isInLobby,
+    };
   }
   /**
    * attaches listeners related to updating information
@@ -123,16 +136,28 @@ export default class ClientModel extends Model {
     const itemModel = new ItemModel(itemData);
     gameState.handleCharacterUseItem(this.get('characterModel'), itemModel);
   }
+  // -- emit functions
+  /** @default */
+  emit(...args) {
+    this.get('socket').emit(...args);
+  }
   /**
-   * @override
+   * @param {Array<Matrix>} mapHistory
    */
-  export() {
-    const convertedData = convertObservableToJs(this.attributes);
-    return {
-      name: convertedData.name,
-      clientType: convertedData.clientType,
-      isInGame: convertedData.isInGame,
-      isInLobby: convertedData.isInLobby,
-    };
+  emitToMapHistory(mapHistory) {
+    this.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY, mapHistory);
+  }
+  /**
+   * @param {Matrix} matrix
+   */
+  emitToTileEditor(matrix) {
+    this.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_TILE_EDITOR, matrix);
+  }
+  /**
+   * send to remote's `appLog`
+   * @param {String} logString
+   */
+  emitToClientLog(logString) {
+    this.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.ADD_LOG, logString);
   }
 }

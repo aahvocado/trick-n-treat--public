@@ -89,33 +89,3 @@ export function sendGameUpdate() {
     });
   });
 }
-// -- debugging dev stuff
-/**
- * send data to a client's `appLog`
- *
- * @param {ClientModel} clientModel
- * @param {String} logString
- */
-export function sendToClientLog(clientModel, logString) {
-  clientModel.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.ADD_LOG, logString);
-}
-/**
- * send data to a client's TileEditor
- *
- * @param {String} matrix
- */
-export function sendToTileEditor(matrix) {
-  const clients = serverState.get('clients');
-  clients.forEach((clientModel) => {
-    clientModel.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_TILE_EDITOR, matrix);
-  });
-}
-/**
- * send current TileMapModel's mapHistory to client
- *
- * @param {ClientModel} clientModel
- */
-export function sendMapHistoryToClient(clientModel) {
-  const tileMapModel = gameState.get('tileMapModel');
-  clientModel.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY, tileMapModel.get('mapHistory'));
-}

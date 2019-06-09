@@ -38,15 +38,23 @@ export class ServerStateModel extends Model {
     });
 
     // computed attributes - (have to pass in this model as context because getters have their own context)
-    const stateModel = this;
+    const _this = this;
     extendObservable(this.attributes, {
       /** @type {Array<ClientModel>} */
       get lobbyClients() {
-        return stateModel.get('clients').filter((client) => (client.get('isInLobby')));
+        return _this.get('clients').filter((client) => (client.get('isInLobby')));
       },
       /** @type {Array<ClientModel>} */
       get gameClients() {
-        return stateModel.get('clients').filter((client) => (client.get('isInGame')));
+        return _this.get('clients').filter((client) => (client.get('isInGame')));
+      },
+      /** @type {Array<ClientModel>} */
+      get remoteClients() {
+        return _this.get('clients').filter((client) => (client.get('clientType') === CLIENT_TYPE.REMOTE));
+      },
+      /** @type {Array<ClientModel>} */
+      get screenClients() {
+        return _this.get('clients').filter((client) => (client.get('clientType') === CLIENT_TYPE.SCREEN));
       },
     });
   }

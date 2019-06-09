@@ -12,7 +12,10 @@ import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
 import {DATA_TYPE} from 'constants.shared/dataTypes';
 import {TAG_ID} from 'constants.shared/tagIds';
 
+import * as clientEventHelper from 'helpers/clientEventHelper';
+
 import gameState from 'state/gameState';
+import serverState from 'state/serverState';
 
 import logger from 'utilities/logger.game';
 import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
@@ -67,6 +70,10 @@ export function generateNewMap() {
   handlePlacingEntities(tileMapModel);
 
   console.timeEnd('MapGenTime');
+
+  // send map history
+  const remoteClients = serverState.get('remoteClients');
+  remoteClients.forEach((client) => client.emitToMapHistory(tileMapModel.get('mapHistory')));
 }
 /**
  * creates the `lightSourceList` based on
