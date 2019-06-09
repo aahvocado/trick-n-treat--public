@@ -115,7 +115,7 @@ class UserGamePage extends Component {
           onClickOverlay={() => { this.toggleItemModal(false); }}
         >
           <InventoryComponent
-            inventory={remoteGameState.get('formattedInventoryList')}
+            inventoryList={remoteGameState.get('formattedInventoryList')}
             onClickUseItem={this.onClickUseItem}
           />
         </ModalComponent>

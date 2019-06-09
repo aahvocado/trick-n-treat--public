@@ -1,5 +1,5 @@
-import seedrandom from 'seedrandom';
 import {extendObservable} from 'mobx';
+import seedrandom from 'seedrandom';
 
 import {GAME_MODE} from 'constants.shared/gameModes';
 
@@ -130,6 +130,10 @@ export class GamestateModel extends Model {
     return gamestateCharacterHelper.createCharacterForClient(clientModel);
   }
   /** @override */
+  handleClientRejoin(clientModel) {
+    gamestateCharacterHelper.handleClientRejoin(clientModel);
+  }
+  /** @override */
   getCurrentCharacter() {
     return gamestateCharacterHelper.getCurrentCharacter();
   }
@@ -243,7 +247,7 @@ export class GamestateModel extends Model {
   }
   /** @override */
   getFormattedMapData() {
-    gamestateDataHelper.getFormattedMapData();
+    return gamestateDataHelper.getFormattedMapData();
   }
 }
 /**

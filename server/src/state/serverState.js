@@ -2,8 +2,9 @@ import {extendObservable} from 'mobx';
 
 import {CLIENT_TYPE} from 'constants.shared/clientTypes';
 import {SERVER_MODE} from 'constants.shared/gameModes';
+import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
-import * as clientEventHelper from 'helpers/clientEventHelper';
+import ClientModel from 'models/ClientModel';
 
 import Model from 'models.shared/Model';
 import ModelList from 'models.shared/ModelList';
@@ -24,9 +25,7 @@ export class ServerStateModel extends Model {
 
       // -- client data
       /** @type {ModelList<ClientModel>} */
-      clients: new ModelList(),
-      /** @type {ClientModel} */
-      screenClient: null,
+      clientList: new ModelList([], ClientModel),
 
       // -- app session data
       /** @type {Date} */
@@ -37,44 +36,49 @@ export class ServerStateModel extends Model {
       ...newAttributes,
     });
 
-    // computed attributes - (have to pass in this model as context because getters have their own context)
+    // -- computed attributes
     const _this = this;
     extendObservable(this.attributes, {
+      /** @type {Boolean} */
+      get isGameInProgress() {
+        return _this.get('mode') === SERVER_MODE.GAME && gameState.get('isActive');
+      },
+      /** @type {ClientModel | null} */
+      get currentClient() {
+        const currentCharacter = gameState.get('currentCharacter');
+        if (currentCharacter === null) {
+          return null;
+        }
+
+        return _this.findClientByCharacter(currentCharacter);
+      },
+      // -- Client List getters
       /** @type {Array<ClientModel>} */
       get lobbyClients() {
-        return _this.get('clients').filter((client) => (client.get('isInLobby')));
+        return _this.get('clientList').filter((client) => (client.get('isInLobby')));
       },
       /** @type {Array<ClientModel>} */
       get gameClients() {
-        return _this.get('clients').filter((client) => (client.get('isInGame')));
+        return _this.get('clientList').filter((client) => (client.get('isInGame')));
       },
       /** @type {Array<ClientModel>} */
       get remoteClients() {
-        return _this.get('clients').filter((client) => (client.get('clientType') === CLIENT_TYPE.REMOTE));
+        return _this.get('clientList').filter((client) => (client.get('clientType') === CLIENT_TYPE.REMOTE));
       },
       /** @type {Array<ClientModel>} */
       get screenClients() {
-        return _this.get('clients').filter((client) => (client.get('clientType') === CLIENT_TYPE.SCREEN));
+        return _this.get('clientList').filter((client) => (client.get('clientType') === CLIENT_TYPE.SCREEN));
       },
     });
-  }
-  // --
-  /**
-   * @param {String} clientId
-   * @returns {ClientModel | undefined}
-   */
-  findClientByClientId(clientId) {
-    const clients = this.get('clients');
-    return clients.find((clientModel) => (clientModel.get('clientId') === clientId));
   }
   /**
    * @param {CharacterModel} characterModel
    * @returns {ClientModel | undefined}
    */
   findClientByCharacter(characterModel) {
-    const clients = this.get('clients');
-    return clients.find((clientModel) => {
-      const clientCharacter = clientModel.get('characterModel');
+    const clientList = this.get('clientList');
+    return clientList.find((clientModel) => {
+      const clientCharacter = clientModel.get('myCharacter');
       if (clientCharacter === null) {
         return false;
       }
@@ -96,7 +100,7 @@ export class ServerStateModel extends Model {
     }
 
     // move everyone from the Lobby to the Game
-    const clientList = this.get('clients').slice();
+    const clientList = this.get('clientList');
     clientList.forEach((clientModel) => {
       clientModel.set({
         isInLobby: false,
@@ -104,13 +108,11 @@ export class ServerStateModel extends Model {
       });
     });
 
-    this.set({
-      clients: this.get('clients').replace(clientList),
-      mode: SERVER_MODE.GAME,
-    });
+    // change to game mode
+    this.set({mode: SERVER_MODE.GAME});
 
-    // update
-    clientEventHelper.sendLobbyUpdate();
+    // update clients
+    this.emitLobbyUpdate();
 
     // initialize the game with the Clients that are in game
     const gameClients = this.get('gameClients');
@@ -127,7 +129,7 @@ export class ServerStateModel extends Model {
     const gameClients = this.get('gameClients');
     gameState.addToFunctionQueue(() => {
       gameState.handleRestartGame(gameClients);
-    });
+    }, 'handleRestartGame');
   }
   /**
    * check if everything is valid to create a game
@@ -135,14 +137,14 @@ export class ServerStateModel extends Model {
    * @returns {Boolean}
    */
   canStartGame() {
-    if (this.get('mode') === SERVER_MODE.GAME) {
+    if (this.get('isGameInProgress')) {
       logger.error('. There is already a game in progress!');
       return false;
     }
 
-    if (this.get('clients').length <= 0) {
+    if (this.get('clientList').length <= 0) {
       logger.error('. There is no one here!');
-      // return false;
+      return false;
     }
 
     if (this.get('lobbyClients').length <= 0) {
@@ -150,36 +152,54 @@ export class ServerStateModel extends Model {
       // return false;
     }
 
-    if (this.get('screenClient') === null) {
-      logger.error('. There is no Screen!');
+    if (this.get('screenClients').length <= 0) {
+      logger.error('. There are no Screen clients!');
       // return false;
     }
 
     return true;
   }
+  // -- emit functions
   /**
-   * @param {ClientModel} clientModel
+   * emit lobby data to everyone
    */
-  addClient(clientModel) {
-    const updatedClients = this.get('clients').slice();
-    updatedClients.push(clientModel);
+  emitLobbyUpdate() {
+    logger.server('emitLobbyUpdate()');
+    const clientList = this.get('clientList');
 
-    // additional steps for the Screen
-    if (clientModel.get('clientType') === CLIENT_TYPE.SCREEN) {
-      this.set({screenClient: clientModel});
-    }
+    // this will be given to everyone
+    const lobbyData = clientList.export();
+    const isGameInProgress = this.get('isGameInProgress');
 
-    this.set({clients: updatedClients});
+    // send data to all clients
+    clientList.forEach((clientModel) => {
+      clientModel.emit(SOCKET_EVENT.LOBBY.TO_CLIENT.UPDATE, {
+        lobbyData: lobbyData,
+        isGameInProgress: isGameInProgress,
+        isInLobby: clientModel.get('isInLobby'),
+        isInGame: clientModel.get('isInGame'),
+      });
+    });
   }
   /**
-   * @param {SocketClient} clientModel
+   * emit game data to all clients in game
    */
-  removeClient(clientModel) {
-    const filterClientFunction = (model) => (model.get('clientId') !== clientModel.get('clientId'));
-    const updatedClients = this.get('clients').filter(filterClientFunction);
+  emitGameUpdate() {
+    logger.server('emitGameUpdate()');
+    const gameClients = this.get('gameClients');
 
-    this.set({
-      clients: updatedClients,
+    // format the map data as it will be the same for everyone
+    const formattedMapData = gameState.getFormattedMapData();
+
+    // send each client some gamestate data along with their own character data
+    gameClients.forEach((clientModel) => {
+      clientModel.emitMyCharacter();
+
+      clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, {
+        mapData: formattedMapData,
+        mode: gameState.get('mode'),
+        round: gameState.get('round'),
+      });
     });
   }
 }

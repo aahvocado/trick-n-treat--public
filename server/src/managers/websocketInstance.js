@@ -1,7 +1,5 @@
 import SocketServer from 'socket.io';
 
-import * as clientEventHelper from 'helpers/clientEventHelper';
-
 import ClientModel from 'models/ClientModel';
 
 import serverState from 'state/serverState';
@@ -22,16 +20,7 @@ export function init(httpServer) {
   logger.server('Websocket Connection Started');
 
   // attach listener for when a socket connects
-  io.on('connection', (socket) => {
-    onSocketConnect(socket);
-
-    // -- socket.io events
-    socket.on('disconnect', () => {
-      const clientModel = serverState.get('clients').find((client) => client.get('sessionId') === socket.id);
-      logger.old(`- Client "${clientModel.get('name')}" disconnected`);
-      serverState.removeClient(clientModel);
-    });
-  });
+  io.on('connection', onSocketConnect);
 }
 /**
  * when a new socket connects
@@ -54,11 +43,10 @@ function onSocketConnect(socket) {
     sessionId: socket.id,
     isInLobby: true,
   });
-  logger.new(`+ Client "${clientModel.get('name')}" connected`);
 
   // add it to `serverState`
-  serverState.addClient(clientModel);
+  serverState.get('clientList').push(clientModel);
 
   // update everyone
-  clientEventHelper.sendLobbyUpdate();
+  serverState.emitLobbyUpdate();
 }

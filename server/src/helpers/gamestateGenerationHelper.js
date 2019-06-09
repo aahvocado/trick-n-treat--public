@@ -12,8 +12,6 @@ import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
 import {DATA_TYPE} from 'constants.shared/dataTypes';
 import {TAG_ID} from 'constants.shared/tagIds';
 
-import * as clientEventHelper from 'helpers/clientEventHelper';
-
 import gameState from 'state/gameState';
 import serverState from 'state/serverState';
 

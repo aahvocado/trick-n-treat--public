@@ -45,16 +45,16 @@ export class RemoteGamestateModel extends Model {
     });
 
     // computed attributes - (have to pass in `this` as context because getters have their own context)
-    const self = this;
+    const _this = this;
     extendObservable(this.attributes, {
       /** @type {Boolean} */
       get isMyTurn() {
-        const characterModel = self.get('myCharacter');
+        const characterModel = _this.get('myCharacter');
         return characterModel.get('isActive');
       },
       /** @type {Array<InventoryData>} */
       get formattedInventoryList() {
-        const characterModel = self.get('myCharacter');
+        const characterModel = _this.get('myCharacter');
         const inventory = characterModel.get('inventory');
 
         return inventory.map((itemModel) => {
@@ -69,8 +69,8 @@ export class RemoteGamestateModel extends Model {
       },
       /** @type {EncounterData} */
       get formattedEncounterData() {
-        const characterModel = self.get('myCharacter');
-        const encounterModel = self.get('activeEncounter');
+        const characterModel = _this.get('myCharacter');
+        const encounterModel = _this.get('activeEncounter');
         const encounterData = encounterModel.export();
 
         return {
@@ -122,7 +122,7 @@ export class RemoteGamestateModel extends Model {
       // show notification if it was not the Player's turn but now is
       const isMyTurn = this.get('isMyTurn');
       if (!wasMyTurn && isMyTurn) {
-        NotificationManager.info('It is your turn!');
+        NotificationManager.info('It\'s your turn!');
       };
     });
 

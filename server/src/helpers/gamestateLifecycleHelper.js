@@ -4,8 +4,8 @@ import {GAME_MODE} from 'constants.shared/gameModes';
 import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 import gameState from 'state/gameState';
+import serverState from 'state/serverState';
 
-import * as clientEventHelper from 'helpers/clientEventHelper';
 import * as gamestateGenerationHelper from 'helpers/gamestateGenerationHelper';
 
 import logger from 'utilities/logger.game';
@@ -73,10 +73,10 @@ export function handleStartGame(clientList) {
     gameState.get('characterList').push(newCharacterModel);
   });
 
-  // immediately update clients so they know they are in game
+  // immediately update clientList so they know they are in game
   gameState.insertIntoFunctionQueue(() => {
-    clientEventHelper.sendLobbyUpdate();
-  }, 'sendLobbyUpdate');
+    serverState.emitLobbyUpdate();
+  }, 'emitLobbyUpdate');
 
   // proceed to generate map
   gameState.addToFunctionQueue(() => {
@@ -89,10 +89,10 @@ export function handleStartGame(clientList) {
     updateLighting();
   }, 'updateWorld');
 
-  // after map is generated, update the clients
+  // after map is generated, update the clientList
   gameState.addToFunctionQueue(() => {
-    clientEventHelper.sendLobbyUpdate();
-  }, 'sendLobbyUpdate');
+    serverState.emitLobbyUpdate();
+  }, 'emitLobbyUpdate');
 
   // start the round after all that
   gameState.addToFunctionQueue(() => {
@@ -112,10 +112,10 @@ export function handleEndGame() {
     activeEncounter: null,
   });
 
-  // immediately update clients so the game is ended
+  // immediately tell all gameClients that the game has ended
   gameState.insertIntoFunctionQueue(() => {
-    clientEventHelper.sendGameEnd();
-  }, 'sendGameEnd');
+    serverState.get('gameClients').forEach((client) => client.emitGameEnd());
+  }, 'emitGameEnd');
 }
 /**
  * restart game
@@ -148,7 +148,7 @@ export function handleStartOfAction(characterModel) {
   gameState.set({mode: GAME_MODE.WORKING});
 
   // update
-  // clientEventHelper.sendGameUpdate();
+  // serverState.emitGameUpdate();
 }
 /**
  * handles what happens after a Character does an Action
@@ -157,6 +157,12 @@ export function handleStartOfAction(characterModel) {
  */
 export function handleEndOfAction(characterModel) {
   logger.lifecycle('handleEndOfAction()');
+
+  // not an end of Action if we are waiting on an `activeEncounter`
+  if (gameState.get('activeEncounter') !== null) {
+    logger.warning('. Lifecycle can not "handleEndOfAction()" when there is an `activeEncounter`.');
+    return;
+  }
 
   // if Character can no longer move, it's time to end their turn
   if (!characterModel.canMove()) {
@@ -169,10 +175,10 @@ export function handleEndOfAction(characterModel) {
   // game is ready
   gameState.set({mode: GAME_MODE.READY});
 
-  // immediately update clients otherwise
+  // immediately update clientList otherwise
   gameState.insertIntoFunctionQueue(() => {
-    clientEventHelper.sendGameUpdate();
-  }, 'sendGameUpdate');
+    serverState.emitGameUpdate();
+  }, 'emitGameUpdate');
 }
 // -- Turn
 /**
@@ -193,7 +199,7 @@ export function handleStartOfTurn() {
 
   // update client
   logger.game(`. Turn for: "${newActiveCharacter.get('name')}"`);
-  clientEventHelper.sendGameUpdate();
+  serverState.emitGameUpdate();
 }
 /**
  * end of turn
@@ -221,7 +227,7 @@ export function handleEndOfTurn() {
   updateLighting();
 
   // immediately send a Game Update
-  clientEventHelper.sendGameUpdate();
+  serverState.emitGameUpdate();
 
   // start the next turn if there is more in the `turnQueue`
   if (currentTurnQueue.length > 0) {
@@ -251,7 +257,7 @@ export function handleStartOfRound() {
   logger.game(`Round ${gameState.get('round')} has started.`);
 
   // immediately send a Game Update
-  clientEventHelper.sendGameUpdate();
+  serverState.emitGameUpdate();
 
   // create new turn queue
   gameState.addToFunctionQueue(() => {
@@ -265,7 +271,7 @@ export function handleEndOfRound() {
   logger.lifecycle('handleEndOfRound()');
 
   // update
-  clientEventHelper.sendGameUpdate();
+  serverState.emitGameUpdate();
 
   // go to next round
   gameState.addToFunctionQueue(() => {

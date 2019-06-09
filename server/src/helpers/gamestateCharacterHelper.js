@@ -1,9 +1,8 @@
 import {CLIENT_TYPE} from 'constants.shared/clientTypes';
 import {CHOICE_ID} from 'constants.shared/choiceIds';
+import {GAME_MODE} from 'constants.shared/gameModes';
 import {MAP_START} from 'constants/mapSettings';
 import {TRIGGER_LOGIC_ID} from 'constants.shared/triggerLogicIds';
-
-import * as clientEventHelper from 'helpers/clientEventHelper';
 
 import {getEncounterDataById} from 'helpers.shared/encounterDataHelper';
 
@@ -23,6 +22,7 @@ import * as mapUtils from 'utilities.shared/mapUtils';
  * this Helper is for `gameState` stuff that relates to Characters
  */
 
+// -- client-character functions
 /**
  * makes Game Users out of given Client
  *
@@ -54,12 +54,54 @@ export function createCharacterForClient(clientModel) {
   });
 
   // set the Character on the Client
-  clientModel.set({characterModel: newCharacterModel});
+  clientModel.set({myCharacter: newCharacterModel});
 
   // done
   logger.game(`User "${clientModel.get('name')}" joined the game.`);
   return newCharacterModel;
 }
+/**
+ * client wants to rejoin
+ *
+ * @param {ClientModel} clientModel
+ */
+export function handleClientRejoin(clientModel) {
+  // can't join an inactive game
+  if (!gameState.get('isActive')) {
+    return;
+  }
+
+  // only allow existing rejoins for now
+  const clientId = clientModel.get('clientId');
+  const existingCharacter = gameState.findCharacterByClientId(clientId);
+  if (existingCharacter === undefined) {
+    logger.game('Not allowing new Clients right now');
+    return;
+  };
+
+  // update and send
+  logger.game(`${clientModel.get('name')} successfully rejoined the game!`);
+  clientModel.set({
+    isInLobby: false,
+    isInGame: true,
+    myCharacter: existingCharacter,
+  });
+
+  // now that they've rejoined, update
+  serverState.emitLobbyUpdate();
+  serverState.emitGameUpdate();
+
+  // check if the user rejoined and it is actually their turn
+  const isCurrentCharacter = gameState.get('currentCharacter').get('clientId') === clientId;
+
+  // check if there is an `activeEncounter` to send them to finish
+  const activeEncounter = gameState.get('activeEncounter');
+  if (isCurrentCharacter && activeEncounter !== null) {
+    const clientModel = serverState.findClientByCharacter(characterModel);
+    clientModel.emitEncounter(activeEncounter);
+  }
+}
+// -- utility functions
 /**
  * returns the Character whose is currently acting
  * (`null` probably means the game hasn't started, `undefined` means you bad)
@@ -109,6 +151,7 @@ export function findCharacterByClientId(clientId) {
     return characterModel.get('clientId') === clientId;
   });
 }
+// -- action functions
 /**
  * changes a Character's Position to given Position
  *
@@ -129,7 +172,7 @@ export function updateCharacterPosition(characterModel, position) {
   gameState.updateLightLevelsAt(position, vision);
 
   // send a game update
-  clientEventHelper.sendGameUpdate();
+  serverState.emitGameUpdate();
 
   // finished if there is no Encounter here
   const encounterModel = gameState.findEncounterAt(position);
@@ -255,7 +298,7 @@ export function handleCharacterUseItem(characterModel, itemModel) {
   });
 
   // update
-  clientEventHelper.sendGameUpdate();
+  serverState.emitGameUpdate();
 }
 /**
  * Character has chosen an Action
@@ -300,7 +343,7 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
 
       // tell the client their encounter is now null
       const clientModel = serverState.findClientByCharacter(characterModel);
-      clientEventHelper.sendEncounterToClient(clientModel, null);
+      clientModel.emitEncounterClose();
     }, 'closeEncounter');
   }
 
@@ -379,14 +422,12 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
   // add a visit - specifically after the Triggers
   encounterModel.get('visitors').push(characterModel);
 
-  // send the client the data of the Encounter they triggered
+  // send the client the Encounter they just triggered
   const clientModel = serverState.findClientByCharacter(characterModel);
-  clientEventHelper.sendEncounterToClient(clientModel, encounterModel);
+  clientModel.emitEncounter(encounterModel);
 
-  // handle end of action lifecycle now that triggers are done and we are waiting on a response
-  gameState.addToFunctionQueue(() => {
-    gameState.handleEndOfAction(characterModel);
-  }, 'handleEndOfAction');
+  // set game mode to ready so the client can respond
+  gameState.set({mode: GAME_MODE.WAITING});
 }
 /**
  * the Choice takes the Character to another Encounter

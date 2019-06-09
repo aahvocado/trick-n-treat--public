@@ -16,7 +16,7 @@ import * as statUtils from 'utilities.shared/statUtils';
  */
 export function handleGetTargetParameter(targetId, characterModel, encounterModel) {
   if (targetId === TARGET_ID.ITEM.ALL) {
-    return characterModel.get('inventory').slice();
+    return characterModel.get('inventory');
   }
 
   if (isCharacterTarget(targetId)) {

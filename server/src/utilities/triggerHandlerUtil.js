@@ -122,7 +122,6 @@ export function getGiveLogicFunction(triggerData) {
 
   return (inventory) => {
     inventory.push(createdItemModel);
-    return inventory;
   };
 }
 /**
@@ -155,7 +154,6 @@ export function getTakeLogicFunction(triggerData) {
     // if there will be none left, remove it
     if (itemQuantity <= 1) {
       inventory.splice(foundItemIdx, 1);
-      return inventory;
     }
 
     // otherwise we can just subtract one from the item's quantity
@@ -177,10 +175,9 @@ export function handleGetApplyFunction(triggerData, characterModel) {
     targetId,
   } = triggerData;
 
+  // do nothing for items
   if (targetId === TARGET_ID.ITEM.ALL) {
-    return (newInventory) => {
-      characterModel.set({inventory: newInventory});
-    };
+    return () => {};
   }
 
   if (targetUtils.isCharacterTarget(targetId)) {

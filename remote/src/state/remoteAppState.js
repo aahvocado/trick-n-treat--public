@@ -88,10 +88,10 @@ export class RemoteStateModel extends Model {
       logger.server('SOCKET_EVENT.LOBBY.TO_CLIENT.UPDATE');
 
       this.set({
+        lobbyData: data.lobbyData,
+        isGameInProgress: data.isGameInProgress,
         isInLobby: data.isInLobby,
         isInGame: data.isInGame,
-        isGameInProgress: data.isGameInProgress,
-        lobbyData: data.lobbyData,
       });
     });
 

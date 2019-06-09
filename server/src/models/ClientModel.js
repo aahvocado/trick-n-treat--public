@@ -1,3 +1,4 @@
+import {extendObservable} from 'mobx';
 import Point from '@studiomoniker/point';
 
 import {CLIENT_TYPE} from 'constants.shared/clientTypes';
@@ -6,10 +7,10 @@ import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 import ItemModel from 'models.shared/ItemModel';
 import Model from 'models.shared/Model';
 
-import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
-
 import gameState from 'state/gameState';
 import serverState from 'state/serverState';
+
+import logger from 'utilities/logger.game';
 
 import convertObservableToJs from 'utilities.shared/convertObservableToJs';
 
@@ -42,7 +43,7 @@ export default class ClientModel extends Model {
 
       // -- Instance attributes
       /** @type {CharacterModel | null} */
-      characterModel: null,
+      myCharacter: null,
       /** @type {Object} */
       ...newAttributes,
     });
@@ -56,9 +57,9 @@ export default class ClientModel extends Model {
       },
     });
 
-    // `addListeners()` when a Client and Character is finally set on this user
-    this.onChange('characterModel', (characterModel) => {
-      if (characterModel !== null && characterModel !== undefined) {
+    // `addListeners()` when a Client and Character are finally set on this user
+    this.onChange('myCharacter', (myCharacter) => {
+      if (myCharacter !== null && myCharacter !== undefined) {
         this.attachGameListeners();
       }
     });
@@ -82,6 +83,7 @@ export default class ClientModel extends Model {
    */
   attachServerListeners() {
     const socket = this.get('socket');
+    logger.new(`+ Client "${this.get('name')}" connected.`);
 
     // client wants to "Game Start"
     socket.on(SOCKET_EVENT.LOBBY.TO_SERVER.START, () => {
@@ -90,13 +92,25 @@ export default class ClientModel extends Model {
 
     // client wants to "Join" game in session
     socket.on(SOCKET_EVENT.LOBBY.TO_SERVER.JOIN, () => {
-      gamestateUserHelper.handleJoinGame(this);
+      gameState.handleClientRejoin(this);
     });
 
     // -- debug events
     // client wants to restart the game
     socket.on(SOCKET_EVENT.DEBUG.TO_SERVER.RESTART_GAME, () => {
       serverState.handleRestartGame();
+    });
+
+    // -- generic events
+    /**
+     * disconnected, so remove client from the list
+     */
+    socket.on('disconnect', () => {
+      logger.old(`- Client "${this.get('name')}" disconnected.`);
+
+      const clientList = serverState.get('clientList');
+      const clientIdx = clientList.findIndex((client) => client.get('sessionId') === socket.id);
+      clientList.splice(clientIdx, 1);
     });
   }
   /**
@@ -120,27 +134,55 @@ export default class ClientModel extends Model {
    */
   onMoveTo(coordinates) {
     const position = new Point(coordinates.x, coordinates.y);
-    gameState.moveCharacterTo(this.get('characterModel'), position);
+    gameState.moveCharacterTo(this.get('myCharacter'), position);
   }
   /**
    * @param {EncounterId} encounterId
    * @param {ActionData} actionData
    */
   onChooseAction(encounterId, actionData) {
-    gameState.handleCharacterChoseAction(this.get('characterModel'), encounterId, actionData);
+    gameState.handleCharacterChoseAction(this.get('myCharacter'), encounterId, actionData);
   }
   /**
    * @param {ItemData} itemData
    */
   onUseItem(itemData) {
     const itemModel = new ItemModel(itemData);
-    gameState.handleCharacterUseItem(this.get('characterModel'), itemModel);
+    gameState.handleCharacterUseItem(this.get('myCharacter'), itemModel);
   }
   // -- emit functions
   /** @default */
   emit(...args) {
     this.get('socket').emit(...args);
   }
+  /**
+   * give encounter to client
+   *
+   * @param {EncounterModel} encounterModel
+   */
+  emitEncounter(encounterModel) {
+    this.emit(SOCKET_EVENT.GAME.TO_CLIENT.ENCOUNTER, encounterModel.export());
+  }
+  /**
+   * tell client to close the Encounter
+   */
+  emitEncounterClose() {
+    this.emit(SOCKET_EVENT.GAME.TO_CLIENT.CLOSE_ENCOUNTER);
+  }
+  /**
+   * give the client it's own Character data
+   */
+  emitMyCharacter() {
+    const myCharacter = this.get('myCharacter');
+    this.emit(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, myCharacter.export());
+  }
+  /**
+   * tell the client the game has ended
+   */
+  emitGameEnd() {
+    this.emit(SOCKET_EVENT.GAME.TO_CLIENT.END);
+  }
+  // -- debugger emits
   /**
    * @param {Array<Matrix>} mapHistory
    */

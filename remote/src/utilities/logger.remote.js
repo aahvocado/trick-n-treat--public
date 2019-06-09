@@ -29,6 +29,7 @@ export function log(logType, args) {
   };
 
   remoteAppState.get('appLog').push(logData);
+  // console.log(args);
 }
 /**
  * @param {Array<LogData>} logDataList
