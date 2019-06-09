@@ -2,15 +2,11 @@ import {
   HOME_BIOME_SETTINGS,
   GRAVEYARD_BIOME_SETTINGS,
 } from 'constants/biomeSettings';
-import {
-  TILE_TYPES,
-  isWalkableTile,
-  isLitTile,
-} from 'constants.shared/tileTypes';
 import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
 
 import {DATA_TYPE} from 'constants.shared/dataTypes';
 import {TAG_ID} from 'constants.shared/tagIds';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 import gameState from 'state/gameState';
 import serverState from 'state/serverState';
@@ -20,6 +16,7 @@ import * as mapGenerationUtils from 'utilities/mapGenerationUtils';
 
 import * as mathUtils from 'utilities.shared/mathUtils';
 import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
+import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
 const rarityTagChoices = [
   {
@@ -89,7 +86,7 @@ export function generateLightSourceList() {
   // simply look through the map and find tiles defined as lit
   tileMapModel.forEach((tileData, tilePoint) => {
     // if tile is defined as a lit tile, we can say it's visible
-    if (isLitTile(tileData)) {
+    if (tileTypeUtils.isLitTile(tileData)) {
       lightSourceList.push(tilePoint);
     }
   });
@@ -189,7 +186,7 @@ export function generateSmallWoods() {
 export function handlePlacingEntities(mapModel) {
   logger.game('. Generating Entities and Encounters');
   mapModel.forEach((tileType, tilePoint) => {
-    const walkableTile = isWalkableTile(tileType);
+    const walkableTile = tileTypeUtils.isWalkableTile(tileType);
 
     // add decor to unwalkable tiles
     const noDecorChance = 80;

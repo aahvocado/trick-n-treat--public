@@ -1,15 +1,13 @@
 import Pathfinding from 'pathfinding';
 import Point from '@studiomoniker/point';
 
-import {
-  TILE_TYPES,
-  isWalkableTile,
-} from 'constants.shared/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 import MatrixModel from 'models.shared/MatrixModel';
 
 import * as mathUtils from 'utilities.shared/mathUtils';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
+import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
 /**
  * @typedef {Array<Point>} Path
@@ -27,7 +25,7 @@ import * as matrixUtils from 'utilities.shared/matrixUtils';
 export function createGridForPathfinding(matrix) {
   return new Pathfinding.Grid(matrixUtils.map(matrix, (tileType, point) => {
     // treat walkable tiles as pathable
-    if (isWalkableTile(tileType)) {
+    if (tileTypeUtils.isWalkableTile(tileType)) {
       return 0;
     }
 
@@ -36,7 +34,7 @@ export function createGridForPathfinding(matrix) {
   }));
 }
 /**
- * revered with walkable tiles as walls
+ * creates pathfinding grid where walkable tiles are walls
  *
  * @param {Matrix} matrix
  * @returns {Grid}
@@ -44,7 +42,24 @@ export function createGridForPathfinding(matrix) {
 export function createGridForConnecting(matrix) {
   return new Pathfinding.Grid(matrixUtils.map(matrix, (tileType, point) => {
     // treat walkable tiles as Walls
-    if (isWalkableTile(tileType)) {
+    if (tileTypeUtils.isWalkableTile(tileType)) {
+      return 1;
+    }
+
+    // can be pathed
+    return 0;
+  }));
+}
+/**
+ * only treat walls as walls
+ *
+ * @param {Matrix} matrix
+ * @returns {Grid}
+ */
+export function createGridForLighting(matrix) {
+  return new Pathfinding.Grid(matrixUtils.map(matrix, (tileType, point) => {
+    // wow there are wall tiles
+    if (tileTypeUtils.isWallTile(tileType)) {
       return 1;
     }
 
@@ -67,6 +82,19 @@ export function getAStarPath(grid, startPoint, endPoint) {
   // finder gives us Array of Array [x, y] - we'll convert it to a more convenient Array<Point>
   const pointPath = coordinatePath.map((coordinate) => (new Point(coordinate[0], coordinate[1])));
   return pointPath;
+}
+/**
+ * find distance between two points using a given grid for pathfinding
+ *  a return value of -1 means it could not be reached
+ *
+ * @param {Grid} grid
+ * @param {Point} startPoint
+ * @param {Point} endPoint
+ * @returns {Number}
+ */
+export function getPathDistance(grid, startPoint, endPoint) {
+  const pointPath = getAStarPath(grid, startPoint, endPoint);
+  return pointPath.length - 1;
 }
 /**
  * returns a Matrix with a path created
@@ -223,7 +251,7 @@ export function findPointNearestConditionally(matrix, startPoint, callback) {
  */
 export function getPointOfNearestWalkableType(matrix, startPoint, distance) {
   return findPointNearestConditionally(matrix, startPoint, (tileType, tilePoint) => (
-    isWalkableTile(tileType) && matrixUtils.getDistanceBetween(startPoint, tilePoint) <= distance
+    tileTypeUtils.isWalkableTile(tileType) && matrixUtils.getDistanceBetween(startPoint, tilePoint) <= distance
   ));
 }
 /**
@@ -335,23 +363,23 @@ export function isBorderPoint(matrix, point) {
 
   // if this tile is not walkable, we don't need to do any other checks
   const tileType = matrixModel.getTileAt(point);
-  if (!isWalkableTile(tileType)) {
+  if (!tileTypeUtils.isWalkableTile(tileType)) {
     return false;
   }
 
   // check if surrounding tiles are walkable
   //  and account for being at a corner/edge of the matrix
   const leftTile = matrixModel.getTileLeft(point);
-  const hasLeftWalkable = isWalkableTile(leftTile) && leftTile !== undefined;
+  const hasLeftWalkable = tileTypeUtils.isWalkableTile(leftTile) && leftTile !== undefined;
 
   const rightTile = matrixModel.getTileRight(point);
-  const hasRightWalkable = isWalkableTile(rightTile) && rightTile !== undefined;
+  const hasRightWalkable = tileTypeUtils.isWalkableTile(rightTile) && rightTile !== undefined;
 
   const aboveTile = matrixModel.getTileAbove(point);
-  const hasAboveWalkable = isWalkableTile(aboveTile) && aboveTile !== undefined;
+  const hasAboveWalkable = tileTypeUtils.isWalkableTile(aboveTile) && aboveTile !== undefined;
 
   const belowTile = matrixModel.getTileBelow(point);
-  const hasBelowWalkable = isWalkableTile(belowTile) && belowTile !== undefined;
+  const hasBelowWalkable = tileTypeUtils.isWalkableTile(belowTile) && belowTile !== undefined;
 
   // count how many walkable tiles this is adjacent to
   const adjacentWalkableCount = [hasLeftWalkable, hasRightWalkable, hasAboveWalkable, hasBelowWalkable].filter(Boolean).length;

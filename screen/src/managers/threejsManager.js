@@ -15,9 +15,11 @@ import {
 } from 'constants/three.js';
 import * as threeGeometry from 'geometry/threeGeometry.js';
 import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
-import { TILE_TYPES, isWalkableTile } from 'constants.shared/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 import { initInput } from 'helpers/input';
 import * as connectionManager from 'managers/connectionManager';
+
+import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
 // Variable declaration
 let htmlContainer;
@@ -205,7 +207,7 @@ function generateTiles(mapMatrix, fogMatrix) {
       }
 
       // add a tile if it is walkable
-      if (isWalkableTile(mapTile)) {
+      if (tileTypeUtils.isWalkableTile(mapTile)) {
         handleAddTile({
           lightLevel: lightLevel,
           mapPos: mapPos,

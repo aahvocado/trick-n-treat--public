@@ -50,7 +50,7 @@ export function createCharacterForClient(clientModel) {
     health: 4,
     movement: 4,
     sanity: 4,
-    vision: 8,
+    vision: 7,
   });
 
   // set the Character on the Client

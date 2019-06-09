@@ -1,11 +1,8 @@
-import {isWalkableTile} from 'constants.shared/tileTypes';
-
 import gameState from 'state/gameState';
 
-// import logger from 'utilities/logger.game';
-
 import * as lightLevelUtils from 'utilities.shared/lightLevelUtils';
-import * as matrixUtils from 'utilities.shared/matrixUtils';
+import * as mapUtils from 'utilities.shared/mapUtils';
+import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
 /**
  * helper for Gamestate specific Map functions
@@ -19,7 +16,7 @@ import * as matrixUtils from 'utilities.shared/matrixUtils';
 export function isWalkableAt(point) {
   const tileMapModel = gameState.get('tileMapModel');
   const foundTile = tileMapModel.getTileAt(point);
-  return isWalkableTile(foundTile);
+  return tileTypeUtils.isWalkableTile(foundTile);
 }
 /**
  * determines if there is are any Encounter within path distance
@@ -108,18 +105,24 @@ export function updateLightLevelsAt(startPoint, vision, options = {}) {
   const lightMapModel = gameState.get('lightMapModel');
   const tileMapModel = gameState.get('tileMapModel');
 
-  // find all tiles that are with range of the path
-  const nearbyPathPoints = tileMapModel.getPointsWithinPathDistance(startPoint, vision);
-  nearbyPathPoints.forEach((pathPoint) => {
-    // existing strength of light at this point in the path
-    const existingLightLevel = lightMapModel.getTileAt(pathPoint);
+  // find all tiles a certain distance away
+  const nearbyPoints = tileMapModel.getPointsListOfNearbyTiles(startPoint, vision);
+  nearbyPoints.forEach((pathPoint) => {
+    // find how far the point is
+    const lightingGrid = mapUtils.createGridForLighting(tileMapModel.getMatrix());
+    const distance = mapUtils.getPathDistance(lightingGrid, startPoint, pathPoint);
+
+    // ignore this point if light can't reach it
+    if (distance === -1) {
+      return;
+    }
 
     // subtract the given light level by the distance from given point to find out how bright this tile will be
-    const distanceFromStart = matrixUtils.getDistanceBetween(startPoint, pathPoint);
-    const calculatedLightLevel = lightLevelUtils.calculateLightLevel(distanceFromStart, vision);
+    const calculatedLightLevel = lightLevelUtils.calculateLightLevel(distance, vision);
 
     // if `shouldOverride` option is off
     //  do nothing if existing light level is already brighter
+    const existingLightLevel = lightMapModel.getTileAt(pathPoint);
     if (!shouldOverride && lightLevelUtils.isMoreLit(existingLightLevel, calculatedLightLevel)) {
       return;
     }

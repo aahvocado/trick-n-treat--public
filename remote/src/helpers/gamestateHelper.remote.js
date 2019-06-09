@@ -1,10 +1,10 @@
 import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
-import {isWalkableTile} from 'constants.shared/tileTypes';
 
 import remoteGameState from 'state/remoteGameState';
 
 import * as mapUtils from 'utilities.shared/mapUtils';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
+import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
 /**
  *
@@ -14,7 +14,7 @@ import * as matrixUtils from 'utilities.shared/matrixUtils';
 export function canMyCharacterMoveTo(endPoint) {
   const mapData = remoteGameState.get('mapData');
   const tileData = matrixUtils.getTileAt(mapData, endPoint);
-  if (!isWalkableTile(tileData.tileType)) {
+  if (!tileTypeUtils.isWalkableTile(tileData.tileType)) {
     return false;
   }
 

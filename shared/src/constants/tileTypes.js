@@ -81,8 +81,7 @@ export const TILE_TYPES_NAME = (() => {
   return result;
 })();
 /**
- * @typedef {TileType} WalkableTileType
- * @type {Array<WalkableTileType>}
+ * @type {Array<TileType>}
  */
 export const WALKABLE_TILE_TYPES = [
   TILE_TYPES.DEBUG,
@@ -112,8 +111,7 @@ export const WALKABLE_TILE_TYPES = [
   TILE_TYPES.SPECIAL,
 ];
 /**
- * @typedef {TileType} WalkableTileType
- * @type {Array<WalkableTileType>}
+ * @type {Array<TileType>}
  */
 export const LIT_TILE_TYPES = [
   TILE_TYPES.LIT_DEBUG,
@@ -131,16 +129,11 @@ export const LIT_TILE_TYPES = [
   TILE_TYPES.LAMPPOST_TWO,
 ];
 /**
- * @param {TileType} tileType
- * @returns {Boolean}
+ * @type {Array<TileType>}
  */
-export function isWalkableTile(tileType) {
-  return WALKABLE_TILE_TYPES.includes(tileType);
-}
-/**
- * @param {TileType} tileType
- * @returns {Boolean}
- */
-export function isLitTile(tileType) {
-  return LIT_TILE_TYPES.includes(tileType);
-}
+export const WALL_TILE_TYPE_LIST = [
+  TILE_TYPES.EMPTY,
+  TILE_TYPES.TREE_ONE,
+  TILE_TYPES.TREE_TWO,
+  TILE_TYPES.TREE_THREE,
+];

@@ -224,7 +224,7 @@ export function handleEndOfTurn() {
 
   // update world
   updateEncounters();
-  updateLighting();
+  // updateLighting();
 
   // immediately send a Game Update
   serverState.emitGameUpdate();
@@ -322,7 +322,7 @@ export function updateLighting() {
 
   // light up those Light Sources
   lightSourceList.forEach((lightPoint) => {
-    gameState.updateLightLevelsAt(lightPoint, 5, {shouldOverride: true});
+    gameState.updateLightLevelsAt(lightPoint, 6, {shouldOverride: true});
   });
 
   // light up Characters

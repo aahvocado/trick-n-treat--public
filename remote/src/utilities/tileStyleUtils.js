@@ -1,11 +1,11 @@
 import {TILE_SIZE} from 'constants/mapConstants';
 
 import {TILE_TYPES} from 'constants.shared/tileTypes';
-import {isWalkableTile} from 'constants.shared/tileTypes';
 
 import hexToRgba from 'utilities/hexToRgba';
 
 import * as lightLevelUtils from 'utilities.shared/lightLevelUtils';
+import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
 export const TILE_COLOR_MAP = {
   [TILE_TYPES.EMPTY]: '#313131',
@@ -80,7 +80,7 @@ export function createTileStyles(options = {}) {
   } = options;
 
   // calculate some values
-  const isWalkable = isWalkableTile(tileType);
+  const isWalkable = tileTypeUtils.isWalkableTile(tileType);
   const isHidden = lightLevelUtils.isHidden(lightLevel);
   const isMostlyHidden = lightLevelUtils.isMostlyHidden(lightLevel);
 
