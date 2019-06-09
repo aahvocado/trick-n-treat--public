@@ -1,17 +1,20 @@
 /**
  * @typedef {String} GameMode
  */
-export const GAME_MODES = {
-  INACTIVE: 'GAME_MODES.INACTIVE',
-  ACTIVE: 'GAME_MODES.ACTIVE',
-  PAUSED: 'GAME_MODES.PAUSED',
-  WORKING: 'GAME_MODES.WORKING',
-  CUTSCENE: 'GAME_MODES.CUTSCENE',
+export const GAME_MODE = {
+  // inactive
+  INACTIVE: 'GAME_MODE.INACTIVE',
+  PAUSED: 'GAME_MODE.PAUSED',
+
+  // active
+  READY: 'GAME_MODE.READY',
+  WORKING: 'GAME_MODE.WORKING',
+  WAITING: 'GAME_MODE.WAITING',
 };
 /**
  * @typedef {String} ServerMode
  */
-export const SERVER_MODES = {
-  LOBBY: 'SERVER_MODES.LOBBY',
-  GAME: 'SERVER_MODES.GAME',
+export const SERVER_MODE = {
+  LOBBY: 'SERVER_MODE.LOBBY',
+  GAME: 'SERVER_MODE.GAME',
 };

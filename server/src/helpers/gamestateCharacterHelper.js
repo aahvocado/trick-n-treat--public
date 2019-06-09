@@ -66,21 +66,21 @@ export function createCharacterForClient(clientModel) {
  *
  * @returns {CharacterModel | null}
  */
-export function getActiveCharacter() {
-  // `activeCharacter` is usually the first character in the `turnQueue`
+export function getCurrentCharacter() {
+  // `currentCharacter` is usually the first character in the `turnQueue`
   //  but if the queue is empty then there's no character either
   const turnQueue = gameState.get('turnQueue').slice();
   if (turnQueue.length <= 0) {
     return null;
   };
 
-  // find the character marked with `isActiveCharacter`
+  // find the character marked with `isActive`
   const characterList = gameState.get('characterList').slice();
-  const activeCharacter = characterList.find((characterModel) => {
-    return characterModel.get('isActiveCharacter');
+  const currentCharacter = characterList.find((characterModel) => {
+    return characterModel.get('isActive');
   });
 
-  return activeCharacter;
+  return currentCharacter;
 }
 /**
  * finds all Characters at a given map Location
@@ -128,16 +128,18 @@ export function updateCharacterPosition(characterModel, position) {
   const vision = characterModel.get('vision');
   gameState.updateLightLevelsAt(position, vision);
 
+  // send a game update
+  clientEventHelper.sendGameUpdate();
+
   // finished if there is no Encounter here
   const encounterModel = gameState.findEncounterAt(position);
   if (encounterModel === undefined) {
     return;
   }
 
-  // add the handler for the Encounter to the front of the FunctionQueue
-  // (it may not necessarily trigger)
+  // there is an Encounter, so add the handler to the front of the FunctionQueue
   gameState.insertIntoFunctionQueue(() => {
-    handleCharacterTriggerEncounter(characterModel, encounterModel);
+    gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
   }, 'handleCharacterTriggerEncounter');
 }
 /**
@@ -147,6 +149,11 @@ export function updateCharacterPosition(characterModel, position) {
  * @param {Point} position
  */
 export function moveCharacterTo(characterModel, position) {
+  if (!gameState.canCharacterDoStuff(characterModel)) {
+    logger.warning(`"${characterModel.get('name')}" cannot do stuff right now.`);
+    return;
+  }
+
   // do nothing if destination is unwalkable
   if (!gameState.isWalkableAt(position)) {
     return;
@@ -164,7 +171,7 @@ export function moveCharacterTo(characterModel, position) {
     return;
   }
 
-  logger.verbose(`(moving "${characterModel.get('name')}" to [x: ${position.x}, y: ${position.y}])`);
+  logger.verbose(`(moving "${characterModel.get('name')}" from [${characterPos.toArray()}] to [${position.toArray()}])`);
 
   // take one step at a time for moving along the path
   movePath.forEach((pathPoint) => {
@@ -174,12 +181,13 @@ export function moveCharacterTo(characterModel, position) {
 
       // attempt to update the character's position
       updateCharacterPosition(characterModel, pathPoint);
-
-      // handle end of action lifecycle
-      gameState.insertIntoFunctionQueue(() => {
-        gameState.handleEndOfAction(characterModel);
-      }, 'handleEndOfAction');
     }, 'moveCharacterTo');
+
+    // lifecycle handle end of action between every step
+    // (but if there is an Encounter, it will go in front of this)
+    gameState.addToFunctionQueue(() => {
+      gameState.handleEndOfAction(characterModel);
+    }, 'handleEndOfAction');
   });
 }
 /**
@@ -190,6 +198,11 @@ export function moveCharacterTo(characterModel, position) {
  * @param {ItemModel} itemModel
  */
 export function handleCharacterUseItem(characterModel, itemModel) {
+  if (!gameState.canCharacterDoStuff(characterModel)) {
+    logger.warning(`"${characterModel.get('name')}" cannot not do stuff right now.`);
+    return;
+  }
+
   if (!itemModel.get('isUseable')) {
     logger.warning(`"${characterModel.get('name')}" tried to use an unuseable item.`);
     return;
@@ -254,6 +267,11 @@ export function handleCharacterUseItem(characterModel, itemModel) {
  * @param {ActionData} actionData
  */
 export function handleCharacterChoseAction(characterModel, encounterId, actionData) {
+  if (!gameState.canCharacterDoStuff(characterModel)) {
+    logger.warning(`"${characterModel.get('name')}" cannot do stuff right now.`);
+    return;
+  }
+
   // check if the encounter they clicked on actually is the current one
   const activeEncounter = gameState.get('activeEncounter');
   if (activeEncounter.get('id') !== encounterId) {
@@ -267,46 +285,55 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
     return;
   }
 
-  // finally, we can handle the action
-  const {
-    choiceId,
-    gotoId,
-  } = actionData;
+  // finally, this action is valid but we need to handle that lifecycle first
+  gameState.addToFunctionQueue(() => {
+    gameState.handleStartOfAction();
+  }, 'handleStartOfAction');
 
-  // just a basic confirmation to close the `Encounter`
+  // look at the choice, if it's a basic confirmation to close the `Encounter`
+  const {choiceId} = actionData;
   if (choiceId === CHOICE_ID.CONFIRM) {
-    // clear out `activeEncounter`
-    gameState.set({activeEncounter: null});
+    // add the simple function of closing the encounter to the queue
+    gameState.addToFunctionQueue(() => {
+      // clear out `activeEncounter`
+      gameState.set({activeEncounter: null});
 
-    // tell the client their encounter is now null
-    const clientModel = serverState.findClientByCharacter(characterModel);
-    clientEventHelper.sendEncounterToClient(clientModel, null);
-
-    // handle end of action lifecycle
-    gameState.insertIntoFunctionQueue(() => {
-      gameState.handleEndOfAction(characterModel);
-    }, 'handleEndOfAction');
+      // tell the client their encounter is now null
+      const clientModel = serverState.findClientByCharacter(characterModel);
+      clientEventHelper.sendEncounterToClient(clientModel, null);
+    }, 'closeEncounter');
   }
 
   // everything else goes to another Encounter
   //  so we're going to find the data of the Encounter it is going to and create a Model out of it
-  const nextEncounterData = getEncounterDataById(gotoId);
+  const nextEncounterData = getEncounterDataById(actionData.gotoId);
   const nextEncounterModel = new EncounterModel(nextEncounterData);
 
   // choice goes to another `Encounter`
   if (choiceId === CHOICE_ID.GOTO) {
-    gameState.handleChoiceGoTo(characterModel, nextEncounterModel);
+    gameState.addToFunctionQueue(() => {
+      gameState.handleChoiceGoTo(characterModel, nextEncounterModel);
+    }, 'handleChoiceGoTo');
   }
 
   // choice is a "Trick"
   if (choiceId === CHOICE_ID.TRICK) {
-    gameState.handleChoiceTrick(characterModel, nextEncounterModel);
+    gameState.addToFunctionQueue(() => {
+      gameState.handleChoiceTrick(characterModel, nextEncounterModel);
+    }, 'handleChoiceTrick');
   }
 
   // choice is a "Treat"
   if (choiceId === CHOICE_ID.TREAT) {
-    gameState.handleChoiceTreat(characterModel, nextEncounterModel);
+    gameState.addToFunctionQueue(() => {
+      gameState.handleChoiceTreat(characterModel, nextEncounterModel);
+    }, 'handleChoiceTreat');
   }
+
+  // always handle end of action lifecycle
+  gameState.addToFunctionQueue(() => {
+    gameState.handleEndOfAction(characterModel);
+  }, 'handleEndOfAction');
 }
 /**
  * picks a random adjacent point that a given character can be on
@@ -316,7 +343,7 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
  */
 export function handleCharacterTriggerEncounter(characterModel, encounterModel) {
   const encounterLocation = encounterModel.get('location');
-  logger.verbose(`(encountered "${encounterModel.get('id')}" at [x: ${encounterLocation.x}, y: ${encounterLocation.y}])`);
+  logger.verbose(`(encountered "${encounterModel.get('id')}" at [${encounterLocation.toArray()}])`);
 
   // check if the character on here can actually trigger this
   if (!encounterModel.canBeEncounteredBy(characterModel)) {
@@ -331,7 +358,7 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
   //  this might cause issues and skip events, so we need to keep an eye on this
   gameState.clearFunctionQueue();
 
-  // resolve all the triggers
+  // resolve all the triggers (at once)
   const triggerList = encounterModel.get('triggerList');
   triggerList.forEach((triggerData) => {
     // check if this Character meets the individual condition for this Trigger
@@ -355,6 +382,11 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
   // send the client the data of the Encounter they triggered
   const clientModel = serverState.findClientByCharacter(characterModel);
   clientEventHelper.sendEncounterToClient(clientModel, encounterModel);
+
+  // handle end of action lifecycle now that triggers are done and we are waiting on a response
+  gameState.addToFunctionQueue(() => {
+    gameState.handleEndOfAction(characterModel);
+  }, 'handleEndOfAction');
 }
 /**
  * the Choice takes the Character to another Encounter
@@ -363,7 +395,7 @@ export function handleCharacterTriggerEncounter(characterModel, encounterModel) 
  * @param {EncounterModel} encounterModel
  */
 export function handleChoiceGoTo(characterModel, encounterModel) {
-  logger.verbose(`(choice goes to ${encounterModel.get('id')})`);
+  logger.verbose(`. (Choice goes to ${encounterModel.get('id')})`);
   gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
 };
 /**
@@ -375,7 +407,7 @@ export function handleChoiceGoTo(characterModel, encounterModel) {
 export function handleChoiceTrick(characterModel, encounterModel) {
   encounterModel.get('trickers').push(characterModel);
 
-  logger.verbose(`(trick choice goes to ${encounterModel.get('id')})`);
+  logger.verbose(`. (Trick choice goes to ${encounterModel.get('id')})`);
   gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
 };
 /**
@@ -387,6 +419,6 @@ export function handleChoiceTrick(characterModel, encounterModel) {
 export function handleChoiceTreat(characterModel, encounterModel) {
   encounterModel.get('treaters').push(characterModel);
 
-  logger.verbose(`(treat choice goes to ${encounterModel.get('id')})`);
+  logger.verbose(`. (Treat choice goes to "${encounterModel.get('id')}")`);
   gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
 };

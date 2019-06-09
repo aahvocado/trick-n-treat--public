@@ -1,4 +1,4 @@
-import {GAME_MODES} from 'constants.shared/gameModes';
+import {GAME_MODE} from 'constants.shared/gameModes';
 
 import * as clientEventHelper from 'helpers/clientEventHelper';
 
@@ -17,7 +17,7 @@ import logger from 'utilities/logger.game';
  */
 export function handleJoinGame(clientModel) {
   // can't join an inactive game
-  if (gameState.get('mode') === GAME_MODES.INACTIVE) {
+  if (gameState.get('mode') === GAME_MODE.INACTIVE) {
     return;
   }
 
@@ -44,12 +44,12 @@ export function handleJoinGame(clientModel) {
   clientEventHelper.sendGameUpdate();
 
   // check if the user rejoined and it is actually their turn
-  const activeCharacter = gameState.get('activeCharacter');
-  const isActiveCharacter = activeCharacter.get('clientId') === clientId;
+  const currentCharacter = gameState.get('currentCharacter');
+  const isActive = currentCharacter.get('clientId') === clientId;
 
   // check if there is an `activeEncounter` to send them to finish
   const activeEncounter = gameState.get('activeEncounter');
-  if (isActiveCharacter && activeEncounter !== null) {
+  if (isActive && activeEncounter !== null) {
     clientEventHelper.sendEncounterToClient(clientModel, activeEncounter);
   }
 }

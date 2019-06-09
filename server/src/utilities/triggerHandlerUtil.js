@@ -22,7 +22,7 @@ export function resolveTrigger(triggerData, characterModel) {
     triggerLogicId,
     targetId,
   } = triggerData;
-  logger.verbose(`. [[resolving trigger "${triggerLogicId}" targeting "${targetId}"]]`);
+  logger.verbose(`. [[triggering "${triggerLogicId}" > "${targetId}"]]`);
 
   // get the function that will do the work of making the trigger work
   const logicFunction = handleGetLogicFunction(triggerData);

@@ -1,6 +1,6 @@
-import {GAME_MODES} from 'constants.shared/gameModes';
+import {GAME_MODE} from 'constants.shared/gameModes';
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
-import {SERVER_MODES} from 'constants.shared/gameModes';
+import {SERVER_MODE} from 'constants.shared/gameModes';
 
 import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 
@@ -57,7 +57,7 @@ export function sendLobbyUpdate() {
 
   // format the data - these are the same for everyone
   const formattedLobbyData = clients.map((model) => (model.export()));
-  const isGameInProgress = serverState.get('mode') === SERVER_MODES.GAME && gameState.get('mode') === GAME_MODES.ACTIVE;
+  const isGameInProgress = serverState.get('mode') === SERVER_MODE.GAME && gameState.get('mode') === GAME_MODE.READY;
 
   // send each Client the data and individual info
   clients.forEach((clientModel) => {

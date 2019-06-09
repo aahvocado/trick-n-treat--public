@@ -1,6 +1,6 @@
 import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
 
-import {GAME_MODES} from 'constants.shared/gameModes';
+import {GAME_MODE} from 'constants.shared/gameModes';
 import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 import gameState from 'state/gameState';
@@ -64,7 +64,7 @@ export function handleStartGame(clientList) {
   logger.lifecycle('handleStartGame()');
 
   // first clean everything up
-  gameState.set({mode: GAME_MODES.WORKING});
+  gameState.set({mode: GAME_MODE.WORKING});
   resetState();
 
   // create Characters for each Client that is part of the game
@@ -96,7 +96,7 @@ export function handleStartGame(clientList) {
 
   // start the round after all that
   gameState.addToFunctionQueue(() => {
-    gameState.set({mode: GAME_MODES.ACTIVE});
+    gameState.set({mode: GAME_MODE.READY});
     gameState.handleStartOfRound();
   }, 'handleStartOfRound');
 }
@@ -108,7 +108,7 @@ export function handleEndGame() {
 
   // clear some states
   gameState.set({
-    mode: GAME_MODES.INACTIVE,
+    mode: GAME_MODE.INACTIVE,
     activeEncounter: null,
   });
 
@@ -144,8 +144,11 @@ export function handleRestartGame(clientList) {
 export function handleStartOfAction(characterModel) {
   logger.lifecycle('handleStartOfAction()');
 
+  // set mode to working
+  gameState.set({mode: GAME_MODE.WORKING});
+
   // update
-  clientEventHelper.sendGameUpdate();
+  // clientEventHelper.sendGameUpdate();
 }
 /**
  * handles what happens after a Character does an Action
@@ -155,12 +158,6 @@ export function handleStartOfAction(characterModel) {
 export function handleEndOfAction(characterModel) {
   logger.lifecycle('handleEndOfAction()');
 
-  // not an end of Action if we are waiting on an `activeEncounter`
-  if (gameState.get('activeEncounter') !== null) {
-    logger.warning('. Lifecycle can not "handleEndOfAction()" when there is an `activeEncounter`.');
-    return;
-  }
-
   // if Character can no longer move, it's time to end their turn
   if (!characterModel.canMove()) {
     gameState.addToFunctionQueue(() => {
@@ -168,6 +165,9 @@ export function handleEndOfAction(characterModel) {
     }, 'handleEndOfTurn');
     return;
   }
+
+  // game is ready
+  gameState.set({mode: GAME_MODE.READY});
 
   // immediately update clients otherwise
   gameState.insertIntoFunctionQueue(() => {
@@ -181,11 +181,14 @@ export function handleEndOfAction(characterModel) {
 export function handleStartOfTurn() {
   logger.lifecycle('handleStartOfTurn()');
 
-  // `activeCharacter` is the first character in the queue
+  // game is ready
+  gameState.set({mode: GAME_MODE.READY});
+
+  // `currentCharacter` will be the first character from the `turnQueue`
   const turnQueue = gameState.get('turnQueue').slice();
   const newActiveCharacter = turnQueue[0];
   newActiveCharacter.set({
-    isActiveCharacter: true,
+    isActive: true,
   });
 
   // update client
@@ -198,19 +201,19 @@ export function handleStartOfTurn() {
 export function handleEndOfTurn() {
   logger.lifecycle('handleEndOfTurn()');
 
-  // remove the previous `activeCharacter`
+  // remove the previous `currentCharacter`
   const currentTurnQueue = gameState.get('turnQueue').slice();
-  const oldActiveCharacter = currentTurnQueue.shift();
+  const previousCharacter = currentTurnQueue.shift();
 
   // set the new `turnQueue`
   gameState.set({turnQueue: currentTurnQueue});
 
-  // clean up the previous `activeCharacter`,
+  // clean up the previously active character,
   // - they are longer active
   // - reset their movement
-  oldActiveCharacter.set({
-    isActiveCharacter: false,
-    movement: oldActiveCharacter.get('baseMovement'),
+  previousCharacter.set({
+    isActive: false,
+    movement: previousCharacter.get('baseMovement'),
   });
 
   // update world

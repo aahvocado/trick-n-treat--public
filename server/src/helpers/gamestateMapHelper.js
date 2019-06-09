@@ -53,6 +53,45 @@ export function getEncountersNear(startPoint, distance = 2) {
     return tileMapModel.isWithinPathDistance(startPoint, encounterLocation, distance);
   });
 }
+/**
+ * gets Encounters that are within movement distance of any character
+ *
+ * @returns {Array<EncounterModel>}
+ */
+export function getVisibleEncounterList() {
+  // no characters mean nothing is visible
+  const characterList = gameState.get('characterList');
+  if (characterList.length <= 0) {
+    return [];
+  }
+
+  const encounterList = gameState.get('encounterList');
+  const tileMapModel = gameState.get('tileMapModel');
+
+  // go through all the Encounters
+  const visibleEncounters = encounterList.filter((encounterModel, idx) => {
+    const encounterLocation = encounterModel.get('location');
+
+    // check if any of the Characters can see this Encounter
+    const isVisibleToAnyCharacter = characterList.some((characterModel) => {
+      const characterLocation = characterModel.get('position');
+      const characterRange = characterModel.get('baseMovement');
+      return tileMapModel.isWithinPathDistance(encounterLocation, characterLocation, characterRange);
+    });
+
+    // not visible
+    if (!isVisibleToAnyCharacter) {
+      return false;
+    }
+
+    // visible, and keep track of this encounter's index from the original `encounterList``
+    encounterModel.originalListIdx = idx;
+    return true;
+  });
+
+  // return the visible encounters
+  return visibleEncounters;
+};
 // -- Light
 /**
  * updates visibility at a given point

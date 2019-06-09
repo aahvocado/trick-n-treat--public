@@ -1,24 +1,31 @@
+import {GAME_MODE} from 'constants.shared/gameModes';
+
 import gameState from 'state/gameState';
 
-import logger from 'utilities/logger.game';
+// import logger from 'utilities/logger.game';
 
 /**
  * this Helper should try to organize the data (to be fleshed out later)
  */
 
 /**
- * logs the current order of turns
+ * @param {CharacterModel} characterModel
+ * @returns {Boolean}
  */
-export function displayTurnQueue() {
-  let displayList = '';
-
-  const turnQueue = gameState.get('turnQueue');
-  for (let i = 0; i < turnQueue.length; i++) {
-    const characterModel = turnQueue[i];
-    displayList += `\n${i + 1}. "${characterModel.get('name')}"`;
+export function canCharacterDoStuff(characterModel) {
+  // can't do anything if game is not active, or if it is currently working
+  if (!gameState.get('isActive') || gameState.get('mode') === GAME_MODE.WORKING) {
+    return false;
   }
 
-  logger.game('Turn Order' + displayList);
+  // not if it is not the character's turn
+  const isActive = characterModel.get('isActive');
+  if (!isActive) {
+    return false;
+  }
+
+  // ok
+  return true;
 }
 /**
  * formats TileMapModel and the entities on the map into something more convenient

@@ -4,7 +4,7 @@ import Point from '@studiomoniker/point';
 
 import {extendObservable} from 'mobx';
 
-import {GAME_MODES} from 'constants.shared/gameModes';
+import {GAME_MODE} from 'constants.shared/gameModes';
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import Model from 'models/Model';
@@ -24,7 +24,7 @@ export class RemoteGamestateModel extends Model {
     super({
       // -- gamestate - from the server
       /** @type {GameMode} */
-      mode: GAME_MODES.INACTIVE,
+      mode: GAME_MODE.INACTIVE,
       /** @type {Number} */
       round: 0,
       /** @type {Matrix | undefined} */
@@ -50,7 +50,7 @@ export class RemoteGamestateModel extends Model {
       /** @type {Boolean} */
       get isMyTurn() {
         const characterModel = self.get('myCharacter');
-        return characterModel.get('isActiveCharacter');
+        return characterModel.get('isActive');
       },
       /** @type {Array<InventoryData>} */
       get formattedInventoryList() {
@@ -150,7 +150,7 @@ export class RemoteGamestateModel extends Model {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.END');
 
       this.set({
-        mode: GAME_MODES.INACTIVE,
+        mode: GAME_MODE.INACTIVE,
         mapData: undefined,
         myCharacter: new CharacterModel(),
         activeEncounter: new EncounterModel(),
@@ -161,7 +161,7 @@ export class RemoteGamestateModel extends Model {
     // clean up after disconnecting
     socket.on('disconnect', () => {
       this.set({
-        mode: GAME_MODES.INACTIVE,
+        mode: GAME_MODE.INACTIVE,
         showEncounterModal: false,
       });
     });
@@ -170,7 +170,7 @@ export class RemoteGamestateModel extends Model {
    * @returns {Boolean}
    */
   isGameReady() {
-    const isModeReady = this.get('mode') !== GAME_MODES.INACTIVE;
+    const isModeReady = this.get('mode') !== GAME_MODE.INACTIVE;
     const isMapReady = this.get('mapData') !== undefined;
     const isCharacterReady = this.get('myCharacter').get('characterId') !== undefined;
     return isModeReady && isMapReady && isCharacterReady;

@@ -24,7 +24,7 @@ export default class CharacterModel extends Model {
       /** @type {String | undefined} */
       clientId: undefined,
       /** @type {Boolean} */
-      isActiveCharacter: false,
+      isActive: false,
 
       /** @type {Number} */
       health: 0,

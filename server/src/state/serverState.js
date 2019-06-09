@@ -1,7 +1,7 @@
 import {extendObservable} from 'mobx';
 
 import {CLIENT_TYPE} from 'constants.shared/clientTypes';
-import {SERVER_MODES} from 'constants.shared/gameModes';
+import {SERVER_MODE} from 'constants.shared/gameModes';
 
 import * as clientEventHelper from 'helpers/clientEventHelper';
 
@@ -20,7 +20,7 @@ export class ServerStateModel extends Model {
   constructor(newAttributes = {}) {
     super({
       /** @type {ServerMode} */
-      mode: SERVER_MODES.LOBBY,
+      mode: SERVER_MODE.LOBBY,
 
       // -- client data
       /** @type {ModelList<ClientModel>} */
@@ -98,7 +98,7 @@ export class ServerStateModel extends Model {
 
     this.set({
       clients: this.get('clients').replace(clientList),
-      mode: SERVER_MODES.GAME,
+      mode: SERVER_MODE.GAME,
     });
 
     // update
@@ -127,7 +127,7 @@ export class ServerStateModel extends Model {
    * @returns {Boolean}
    */
   canStartGame() {
-    if (this.get('mode') === SERVER_MODES.GAME) {
+    if (this.get('mode') === SERVER_MODE.GAME) {
       logger.error('. There is already a game in progress!');
       return false;
     }

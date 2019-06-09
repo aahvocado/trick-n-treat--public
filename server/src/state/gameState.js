@@ -1,9 +1,10 @@
 import seedrandom from 'seedrandom';
 import {extendObservable} from 'mobx';
 
-import {GAME_MODES} from 'constants.shared/gameModes';
+import {GAME_MODE} from 'constants.shared/gameModes';
 
 import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
+import * as gamestateDataHelper from 'helpers/gamestateDataHelper';
 import * as gamestateEncounterHelper from 'helpers/gamestateEncounterHelper';
 import * as gamestateFunctionQueueHelper from 'helpers/gamestateFunctionQueueHelper';
 import * as gamestateLifecycleHelper from 'helpers/gamestateLifecycleHelper';
@@ -29,7 +30,7 @@ export class GamestateModel extends Model {
     super({
       // -- State attributes
       /** @type {GameMode} */
-      mode: GAME_MODES.INACTIVE,
+      mode: GAME_MODE.INACTIVE,
       /** @type {Array<CharacterModel>} */
       turnQueue: [],
       /** @type {EncounterModel | null} */
@@ -63,43 +64,16 @@ export class GamestateModel extends Model {
     const _this = this;
     extendObservable(this.attributes, {
       /** @type {CharacterModel | null} */
-      get activeCharacter() {
-        return _this.getActiveCharacter();
+      get isActive() {
+        return _this.get('mode') !== GAME_MODE.INACTIVE && _this.get('mode') !== GAME_MODE.PAUSED;
+      },
+      /** @type {CharacterModel | null} */
+      get currentCharacter() {
+        return _this.getCurrentCharacter();
       },
       /** @type {Array<EncounterModel>} */
       get visibleEncounterList() {
-        // no characters mean nothing is visible
-        const characterList = _this.get('characterList');
-        if (characterList.length <= 0) {
-          return [];
-        }
-
-        const encounterList = _this.get('encounterList');
-        const tileMapModel = _this.get('tileMapModel');
-
-        // go through all the Encounters
-        const visibleEncounters = encounterList.filter((encounterModel, idx) => {
-          const encounterLocation = encounterModel.get('location');
-
-          // check if any of the Characters can see this Encounter
-          const isVisibleToAnyCharacter = characterList.some((characterModel) => {
-            const characterLocation = characterModel.get('position');
-            const characterRange = characterModel.get('baseMovement');
-            return tileMapModel.isWithinPathDistance(encounterLocation, characterLocation, characterRange);
-          });
-
-          // not visible
-          if (!isVisibleToAnyCharacter) {
-            return false;
-          }
-
-          // visible, and keep track of this encounter's index from the original `encounterList``
-          encounterModel.originalListIdx = idx;
-          return true;
-        });
-
-        // return the visible encounters
-        return visibleEncounters;
+        return _this.getVisibleEncounterList();
       },
     });
 
@@ -156,8 +130,8 @@ export class GamestateModel extends Model {
     return gamestateCharacterHelper.createCharacterForClient(clientModel);
   }
   /** @override */
-  getActiveCharacter() {
-    return gamestateCharacterHelper.getActiveCharacter();
+  getCurrentCharacter() {
+    return gamestateCharacterHelper.getCurrentCharacter();
   }
   /** @override */
   getCharactersAt(point) {
@@ -217,6 +191,10 @@ export class GamestateModel extends Model {
     return gamestateMapHelper.getEncountersNear(startPoint, distance);
   }
   /** @override */
+  getVisibleEncounterList() {
+    return gamestateMapHelper.getVisibleEncounterList();
+  }
+  /** @override */
   updateLightLevelsAt(startPoint, lightLevel) {
     gamestateMapHelper.updateLightLevelsAt(startPoint, lightLevel);
   }
@@ -257,6 +235,15 @@ export class GamestateModel extends Model {
   /** @override */
   shouldResolveFunctionQueue() {
     return gamestateFunctionQueueHelper.shouldResolveFunctionQueue();
+  }
+  // -- General utility functions - gamestateDataHelper.js
+  /** @override */
+  canCharacterDoStuff(characterModel) {
+    return gamestateDataHelper.canCharacterDoStuff(characterModel);
+  }
+  /** @override */
+  getFormattedMapData() {
+    gamestateDataHelper.getFormattedMapData();
   }
 }
 /**

@@ -8,9 +8,8 @@ import Model from 'models.shared/Model';
 
 import * as gamestateUserHelper from 'helpers/gamestateUserHelper';
 
+import gameState from 'state/gameState';
 import serverState from 'state/serverState';
-
-import * as gamestateCharacterHelper from 'helpers/gamestateCharacterHelper';
 
 import convertObservableToJs from 'utilities.shared/convertObservableToJs';
 
@@ -41,7 +40,7 @@ export default class ClientModel extends Model {
       /** @type {Boolean} */
       isInLobby: false,
 
-      // -- Game attributes
+      // -- Instance attributes
       /** @type {CharacterModel | null} */
       characterModel: null,
       /** @type {Object} */
@@ -108,21 +107,21 @@ export default class ClientModel extends Model {
    */
   onMoveTo(coordinates) {
     const position = new Point(coordinates.x, coordinates.y);
-    gamestateCharacterHelper.moveCharacterTo(this.get('characterModel'), position);
+    gameState.moveCharacterTo(this.get('characterModel'), position);
   }
   /**
    * @param {EncounterId} encounterId
    * @param {ActionData} actionData
    */
   onChooseAction(encounterId, actionData) {
-    gamestateCharacterHelper.handleCharacterChoseAction(this.get('characterModel'), encounterId, actionData);
+    gameState.handleCharacterChoseAction(this.get('characterModel'), encounterId, actionData);
   }
   /**
    * @param {ItemData} itemData
    */
   onUseItem(itemData) {
     const itemModel = new ItemModel(itemData);
-    gamestateCharacterHelper.handleCharacterUseItem(this.get('characterModel'), itemModel);
+    gameState.handleCharacterUseItem(this.get('characterModel'), itemModel);
   }
   /**
    * @override
