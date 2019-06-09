@@ -13,13 +13,9 @@ import {
   calculateMapXOffset,
   calculateMapYOffset,
 } from 'constants/mapConstants';
-import {TILE_STYLES, createLightingStyles, createEntityIconStyles} from 'constants/tileStyles';
 
-import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
-import {
-  TILE_TYPES,
-  isWalkableTile,
-} from 'constants.shared/tileTypes';
+import * as tileStyleUtils from 'utilities/tileStyleUtils';
+import * as lightLevelUtils from 'utilities.shared/lightLevelUtils';
 
 /**
  * 2D matrix visualizer
@@ -68,12 +64,13 @@ export class TileMapComponent extends Component {
       <div
         className='overflow-hidden flex-none flex-col-center position-relative mar-v-2 mar-h-auto'
         style={{
-          border: isMyTurn ? '4px solid #33487b' : '4px solid #c17e36',
           backgroundColor: '#252525',
+          border: isMyTurn ? '5px solid #33487b' : '5px solid #c17e36',
           height: `${MAP_CONTAINER_HEIGHT}px`,
           width: `${MAP_CONTAINER_WIDTH}px`,
         }}
       >
+        {/** inner container */}
         <div
           className='position-absolute'
           style={{
@@ -175,34 +172,27 @@ export class TileItemComponent extends Component {
       tileType,
     } = this.props;
 
-    const isHidden = lightLevel === LIGHT_LEVEL.NONE;
-
-    // border highlight
-    const borderStyles = isSelected ?
-      { border: (!isWalkableTile(tileType) || isTooFar) ? '1px solid #ff4747' : '2px solid #0cd2ff' } :
-      { border: isUserHere ? '2px solid yellow' : '' };
+    const isMostlyHidden = lightLevelUtils.isMostlyHidden(lightLevel);
 
     // make hidden tiles just look like empty tiles
-    const modifierStyles = {
-      ...TILE_STYLES[isHidden ? TILE_TYPES.EMPTY : tileType],
-      ...borderStyles,
-    };
+    const tileStyles = tileStyleUtils.createTileStyles({
+      lightLevel,
+      isTooFar,
+      isSelected,
+      isUserHere,
+      tileSize,
+      tileType,
+    });
 
     return (
       <div
         className='position-relative boxsizing-border'
-        style={{
-          width: `${tileSize}px`,
-          height: `${tileSize}px`,
-          ...modifierStyles,
-        }}
+        style={tileStyles}
         onMouseEnter={this.handleOnMouseEnter}
         onMouseLeave={this.handleOnMouseLeave}
         onClick={this.handleOnTileClick}
       >
-        <div style={createLightingStyles(lightLevel)}></div>
-
-        { !isHidden &&
+        { !isMostlyHidden &&
           this.renderEntityIcons()
         }
       </div>
@@ -281,7 +271,7 @@ class MapEntityIconComponent extends PureComponent {
     return (
       <div
         className='color-primary'
-        style={createEntityIconStyles(entityIdx)}
+        style={tileStyleUtils.createEntityIconStyles(entityIdx)}
       >
         <FontAwesomeIcon icon={icon} />
       </div>

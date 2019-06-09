@@ -12,6 +12,7 @@ import * as connectionManager from 'managers/connectionManager';
 
 // css
 import 'react-notifications/lib/notifications.css';
+import './styles/spinner.css';
 import './styles/css-reset.css';
 import './build/app.css';
 

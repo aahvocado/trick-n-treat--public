@@ -1,7 +1,6 @@
 /**
  * @typedef {Number} LightLevel
  */
-
 export const LIGHT_LEVEL = {
   NONE: 0,
 

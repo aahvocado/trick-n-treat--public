@@ -26,6 +26,20 @@ export function isPartialLighting(lightLevel) {
   return lightLevel > 0 && lightLevel < 10;
 }
 /**
+ * @param {LightLevel} lightLevel
+ * @returns {Boolean}
+ */
+export function isMostlyHidden(lightLevel) {
+  return lightLevel < 5;
+}
+/**
+ * @param {LightLevel} lightLevel
+ * @returns {Boolean}
+ */
+export function isHidden(lightLevel) {
+  return lightLevel === 0;
+}
+/**
  * @param {LightLevel} lightLevelA
  * @param {LightLevel} lightLevelB
  * @returns {Boolean}

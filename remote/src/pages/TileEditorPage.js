@@ -160,7 +160,8 @@ class TileEditorPage extends Component {
             className='flex-row-center mar-h-auto mar-t-5'
           >
             <div
-              className='overflow-hidden flex-auto flex-col aitems-center position-relative bor-4-primary bg-gray'
+              className='overflow-hidden flex-auto flex-col aitems-center position-relative bor-4-primary'
+              style={{backgroundColor: '#252525'}}
             >
               { mapMatrix.map((mapRowData, rowIdx) => {
                 return (

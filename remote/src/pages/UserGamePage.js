@@ -21,6 +21,7 @@ import {STAT_ID} from 'constants.shared/statIds';
 
 import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 import ModalComponent from 'common-components/ModalComponent';
+import SpinnerComponent from 'common-components/SpinnerComponent';
 
 import EncounterModalComponent from 'components/EncounterModalComponent';
 import GameIconComponent from 'components/GameIconComponent';
@@ -68,16 +69,6 @@ class UserGamePage extends Component {
       showModal: false,
     }
   }
-  // /** @override */
-  // componentDidUpdate(prevProps, prevState) {
-  //   const hasNewActiveEncounter = prevProps.activeEncounter === null && this.props.activeEncounter !== null;
-  //   if (hasNewActiveEncounter && this.state.selectedTilePos !== this.props.myCharacter.position) {
-  //     this.setState({
-  //       selectedTilePos: this.props.myCharacter.position,
-  //       selectedPath: [],
-  //     });
-  //   }
-  // }
   /** @override */
   render() {
     // redirect to Home page if not connected
@@ -86,9 +77,12 @@ class UserGamePage extends Component {
       return <Redirect to='/' />
     }
 
-    // represent "loading" for now
+    // show loading
     if (!remoteGameState.isGameReady()) {
-      return <div className='color-white bg-secondary flex-auto pad-v-2 flex-center flex-col width-full talign-center'>(waiting for map data)</div>
+      return <div className='color-white bg-secondary flex-auto pad-v-2 flex-col-center width-full'>
+        (waiting for map data)
+        <SpinnerComponent className='mar-v-3' />
+      </div>
     }
 
     const myCharacter = remoteGameState.get('myCharacter');
@@ -194,7 +188,7 @@ class UserGamePage extends Component {
             disabled={!this.canMove()}
             onClick={this.handleMoveToOnClick}
           >
-            Move To
+            Move
           </ButtonComponent>
         </div>
 
@@ -236,9 +230,14 @@ class UserGamePage extends Component {
       return false;
     }
 
-    // if we are allowed to move, check if we can actually move to the location we selected
-    const {selectedTilePos} = this.state;
-    return gamestateHelper.canMyCharacterMoveTo(selectedTilePos);
+    // as long as the selectedPath is long enough
+    //  we will allow User to request this movement
+    const {selectedPath} = this.state;
+    if(selectedPath.length > 0) {
+      return true;
+    }
+
+    return false;
   }
   /**
    * @returns {Boolean}
@@ -257,10 +256,21 @@ class UserGamePage extends Component {
       return;
     }
 
-    const {selectedTilePos} = this.state;
-    connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.MOVE_TO, selectedTilePos);
+    // we'll use the `selectedPath` to determine what point we're going to request to try to move to
+    //  we'll find the point that is within range since that path can be longer than character's movement
+    const {selectedPath} = this.state;
+    const movement = remoteGameState.get('myCharacter').get('movement');
 
-    this.setState({selectedPath: []});
+    const pathEndPoint = selectedPath[selectedPath.length - 1];
+    const chosenPoint = (selectedPath.length - 1) < movement ? pathEndPoint : selectedPath[movement];
+
+    connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.MOVE_TO, chosenPoint);
+
+    // reset selections
+    this.setState({
+      selectedTilePos: new Point(),
+      selectedPath: [],
+    });
   }
   /**
    * selected an action from the Encounter
@@ -272,6 +282,11 @@ class UserGamePage extends Component {
 
     logger.user(`User selected "${actionData.choiceId}" for encounter "${activeEncounter.get('id')}"`);
     connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.CHOSE_ACTION, activeEncounter.get('id'), actionData);
+
+    this.setState({
+      selectedTilePos: new Point(),
+      selectedPath: [],
+    });
   }
   /**
    * toggles visibility of the Modal
