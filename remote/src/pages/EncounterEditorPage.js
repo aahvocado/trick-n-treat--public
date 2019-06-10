@@ -17,7 +17,6 @@ import ToggleComponent from 'common-components/ToggleComponent';
 import ActionListDropdown from 'components/ActionListDropdown';
 import ActionListEditorComponent from 'components/ActionListEditorComponent';
 import ConditionListEditorComponent from 'components/ConditionListEditorComponent';
-import ConditionLogicDropdown from 'components/ConditionLogicDropdown';
 import EncounterModalComponent from 'components/EncounterModalComponent';
 import {
   EditorActionbarContainer,
@@ -27,6 +26,7 @@ import {
 } from 'components/EditorComponents';
 import TagListEditorComponent from 'components/TagListEditorComponent';
 import TagListDropdown from 'components/TagListDropdown';
+import TargetListDropdown from 'components/TargetListDropdown';
 import TriggerListEditorComponent from 'components/TriggerListEditorComponent';
 import TriggerLogicListDropdown from 'components/TriggerLogicListDropdown';
 
@@ -232,7 +232,6 @@ class EncounterEditorPage extends Component {
                     label: l10n(item),
                   }))}
                   onSelect={(dataType) => this.updateListFilters({dataType: dataType})}
-                  canSearch
                 />
                 <IconButtonComponent
                   className='bor-r-1-gray bg-white'
@@ -251,7 +250,6 @@ class EncounterEditorPage extends Component {
                     label: item,
                   }))}
                   onSelect={(groupId) => this.updateListFilters({groupId: groupId})}
-                  canSearch
                 />
                 <IconButtonComponent
                   className='bor-r-1-gray bg-white'
@@ -266,7 +264,6 @@ class EncounterEditorPage extends Component {
                   placeholder='Filter by Tags...'
                   selectedOption={{id: dataListFilters.includeTags && dataListFilters.includeTags[0]}}
                   onSelect={(tagId) => this.updateListFilters({includeTags: [tagId]})}
-                  canSearch
                 />
                 <IconButtonComponent
                   className='bor-r-1-gray bg-white'
@@ -303,7 +300,6 @@ class EncounterEditorPage extends Component {
                     label: item.title,
                   }))}
                   onSelect={this.setActiveData}
-                  canSearch
                 />
               </form>
             </div>
@@ -371,10 +367,10 @@ class EncounterEditorPage extends Component {
                 children: '2',
               }}
             >
-              <ConditionLogicDropdown
+              <TargetListDropdown
                 className='flex-auto bor-1-gray adjacent-mar-t-2'
                 placeholder='New Condition...'
-                onSelect={(conditionLogicId) => this.addCondition({conditionLogicId: conditionLogicId})}
+                onSelect={(targetId) => this.addCondition({targetId: targetId})}
               />
 
               { conditionList.length > 0 &&
@@ -399,7 +395,6 @@ class EncounterEditorPage extends Component {
               <TriggerLogicListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Trigger...'
-                canSearch={true}
                 onSelect={(triggerLogicId) => this.addTrigger({triggerLogicId: triggerLogicId})}
               />
 
@@ -423,7 +418,6 @@ class EncounterEditorPage extends Component {
               <ActionListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Action...'
-                canSearch={true}
                 onSelect={(choiceId) => this.addAction({choiceId: choiceId})}
               />
 
@@ -521,7 +515,6 @@ class EncounterEditorPage extends Component {
               <TagListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Tag...'
-                canSearch={true}
                 onSelect={this.addTag}
               />
 

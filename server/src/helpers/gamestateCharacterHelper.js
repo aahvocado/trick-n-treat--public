@@ -360,6 +360,8 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
 
   // choice is a "Trick"
   if (choiceId === CHOICE_ID.TRICK) {
+    activeEncounter.get('trickers').push(characterModel);
+
     gameState.addToFunctionQueue(() => {
       gameState.handleChoiceTrick(characterModel, nextEncounterModel);
     }, 'handleChoiceTrick');
@@ -367,6 +369,8 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
 
   // choice is a "Treat"
   if (choiceId === CHOICE_ID.TREAT) {
+    activeEncounter.get('treaters').push(characterModel);
+
     gameState.addToFunctionQueue(() => {
       gameState.handleChoiceTreat(characterModel, nextEncounterModel);
     }, 'handleChoiceTreat');
@@ -445,8 +449,6 @@ export function handleChoiceGoTo(characterModel, encounterModel) {
  * @param {EncounterModel} encounterModel
  */
 export function handleChoiceTrick(characterModel, encounterModel) {
-  encounterModel.get('trickers').push(characterModel);
-
   logger.verbose(`. (Trick choice goes to ${encounterModel.get('id')})`);
   gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
 };
@@ -457,8 +459,6 @@ export function handleChoiceTrick(characterModel, encounterModel) {
  * @param {EncounterModel} encounterModel
  */
 export function handleChoiceTreat(characterModel, encounterModel) {
-  encounterModel.get('treaters').push(characterModel);
-
   logger.verbose(`. (Treat choice goes to "${encounterModel.get('id')}")`);
   gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
 };

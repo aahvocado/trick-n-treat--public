@@ -324,6 +324,12 @@
         "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
         "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
         "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
       }
     ],
     "isGeneratable": true,
@@ -422,6 +428,12 @@
       {
         "dataType": "DATA_TYPE.CONDITION",
         "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
         "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
         "value": 1
       }
@@ -819,7 +831,7 @@
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
-        "choiceId": "CHOICE_ID.GOTO",
+        "choiceId": "CHOICE_ID.TRICK",
         "gotoId": "ENCOUNTER_ID.RANDOM_CANDY_BAR_2",
         "label": "Pick it up"
       },
@@ -839,7 +851,20 @@
             "dataType": "DATA_TYPE.CONDITION",
             "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
             "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
-            "value": 1
+            "value": 0
+          }
+        ]
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 0
           }
         ]
       }
@@ -1012,6 +1037,12 @@
         "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TREATS",
         "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
         "value": 3
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
       }
     ],
     "isGeneratable": true,
@@ -1073,5 +1104,407 @@
     ],
     "isGeneratable": false,
     "groupId": "The Fudging Tree grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FUDGE_SEED",
+    "title": "Fudge Boy",
+    "content": "\"Save the environment! Start using sustainable agriculture!\" yells a little boy wearing a brown cap.\n\nHe hands you a little sandwich bag that has \"fudge seed\" labeled and says \"Here, free sample.\"",
+    "isDialogue": true,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD",
+      "TAG_ID.TILE_TYPE.LIT_ROAD"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Oh, cool"
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.FUDGE_PIECE",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.FUDGE_SEED",
+        "value": 1
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TRIGGER_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "groupId": "The Fudging Tree grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.COCOA_PATCH_MAIN",
+    "title": "Cocoa Patch",
+    "content": "There's a clearing in the woods where you see a perfect patch of dirt. You get closer and find out it's actually cocoa powder! You don't see that everyday!",
+    "isDialogue": false,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.WOODS",
+      "TAG_ID.TILE_TYPE.LIT_WOODS",
+      "TAG_ID.TILE_TYPE.WOODS_TWO",
+      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.COCOA_PATCH_1",
+        "label": "Take-a lil' bit of cocoa"
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.COCOA_PATCH_2",
+        "label": "Plant a fudge seed",
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ITEM.ALL",
+            "itemId": "ITEM_ID.FUDGE_SEED",
+            "conditionLogicId": "CONDITION_LOGIC_ID.HAS_ITEM",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Leave the dirt alone"
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
+    "groupId": "Cocoa Patch grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.COCOA_PATCH_1",
+    "title": "Cocoa Patch (1)",
+    "content": "You grab a handful of chocolate dirt - and brush up against something hard. You shove aside the powder and dig up a big jawbreaker!",
+    "isDialogue": true,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.WOODS",
+      "TAG_ID.TILE_TYPE.LIT_WOODS",
+      "TAG_ID.TILE_TYPE.WOODS_TWO",
+      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Cool!"
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Cocoa Patch grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.COCOA_PATCH_2",
+    "title": "Cocoa Patch (2)",
+    "content": "You make a little hole in the cocoa powder and drop in your fudge seed.\n\nI bet this'll grow up a bit in say... 20 turns. (this doesn't do anything right now so have a chunk of fudge instead)",
+    "isDialogue": true,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.WOODS",
+      "TAG_ID.TILE_TYPE.LIT_WOODS",
+      "TAG_ID.TILE_TYPE.WOODS_TWO",
+      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Cool!"
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.FUDGE_CHUNK",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Cocoa Patch grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.RUSTIC_HOUSE_(MAIN)",
+    "title": "Rustic House (door)",
+    "content": "You walk up to a rustic home that looks like it was once lovingly cared for but has now been without maintenance. There's still some decorations and the lights are on.",
+    "isDialogue": false,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.RUSTIC_HOUSE_(TRICK)",
+        "label": "Trick"
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TREAT",
+        "gotoId": "ENCOUNTER_ID.RUSTIC_HOUSE_(TREAT)",
+        "label": "Treat"
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "isGeneratableOnce": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "groupId": "Rustic House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.RUSTIC_HOUSE_(TRICK)",
+    "title": "Rustic House (trick)",
+    "content": "todo",
+    "isDialogue": true,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay"
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TRICKY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.LOLLI_SHOVEL",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Rustic House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.RUSTIC_HOUSE_(TREAT)",
+    "title": "Rustic House (treat)",
+    "content": "todo",
+    "isDialogue": true,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay"
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TREATY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 7
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Rustic House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(MAIN)",
+    "title": "Sports Fan House (door)",
+    "content": "You hear cheers coming from the other side of the door. It sounds like they're watching a rowdy game of Galaxy Ball.",
+    "isDialogue": false,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(TRICK)",
+        "label": "Trick"
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TREAT",
+        "gotoId": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(TREAT)",
+        "label": "Treat"
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "isGeneratableOnce": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "groupId": "Sports Fan House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(TRICK)",
+    "title": "Sports Fan House (trick)",
+    "content": "todo",
+    "isDialogue": true,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "label": "I want that gigantic candy rope (5 fudge chunks)",
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ITEM.ALL",
+            "itemId": "ITEM_ID.FUDGE_CHUNK",
+            "conditionLogicId": "CONDITION_LOGIC_ID.HAS_ITEM",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay"
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TRICKY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.SANITY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Sports Fan House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(TREAT)",
+    "title": "Sports Fan House (treat)",
+    "content": "todo",
+    "isDialogue": true,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.SIDEWALK",
+      "TAG_ID.TILE_TYPE.ROAD"
+    ],
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay"
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TREATY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 3
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Sports Fan House grouping"
   }
 ]

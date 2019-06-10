@@ -29,7 +29,7 @@ export default class DropdownComponent extends PureComponent {
     selectedOption: null,
 
     /** @type {Boolean} */
-    canSearch: false,
+    canSearch: true,
     /** @type {Boolean} */
     disabled: false,
 

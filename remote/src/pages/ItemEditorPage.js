@@ -204,7 +204,6 @@ class ItemEditorPage extends Component {
                   controlClassName='pad-2'
                   selectedOption={activeData}
                   onSelect={this.setActiveData}
-                  canSearch
                 />
               </form>
             </div>
@@ -282,7 +281,6 @@ class ItemEditorPage extends Component {
               <TriggerLogicListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Trigger...'
-                canSearch={true}
                 onSelect={(triggerLogicId) => this.addTrigger({triggerLogicId: triggerLogicId})}
               />
 
@@ -371,7 +369,6 @@ class ItemEditorPage extends Component {
               <TagListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Tag...'
-                canSearch={true}
                 onSelect={this.addTag}
               />
 

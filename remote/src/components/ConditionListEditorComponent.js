@@ -13,6 +13,7 @@ import combineClassNames from 'utilities/combineClassNames';
 
 import * as conditionLogicUtils from 'utilities.shared/conditionLogicUtils'
 import * as genericDataUtils from 'utilities.shared/genericDataUtils'
+import * as targetUtils from 'utilities.shared/targetUtils'
 
 /**
  * this is an Editor for a ConditionList
@@ -129,6 +130,8 @@ export class ConditionDataEditorComponent extends PureComponent {
       value,
     } = data;
 
+    const isNumberTarget = targetUtils.isNumberTarget(targetId);
+
     return (
       <div className={combineClassNames(baseClassName, className)}>
         <div className='flex-none pad-1 bor-r-1-gray color-grayer'>
@@ -136,17 +139,16 @@ export class ConditionDataEditorComponent extends PureComponent {
         </div>
 
         {/* Target - for now only shows up for stats */}
-        { conditionLogicUtils.isNumberConditionLogic(conditionLogicId) &&
-          <TargetListDropdown
-            className='flex-auto bor-r-1-gray'
-            selectedOption={{id: targetId}}
-            onSelect={(targetId) => onEdit({targetId: targetId})}
-          />
-        }
+        <TargetListDropdown
+          className='flex-auto bor-r-1-gray'
+          selectedOption={{id: targetId}}
+          onSelect={(targetId) => onEdit({targetId: targetId})}
+        />
 
         {/* Logic check */}
         <ConditionLogicDropdown
           className='flex-auto'
+          type={isNumberTarget ? 'number' : 'item'}
           selectedOption={{id: conditionLogicId}}
           onSelect={(conditionLogicId) => onEdit({conditionLogicId: conditionLogicId})}
         />

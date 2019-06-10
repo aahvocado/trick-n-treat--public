@@ -13,8 +13,8 @@
       {
         "targetId": "TARGET_ID.ITEM.ALL",
         "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
-        "value": 1,
-        "itemId": "ITEM_ID.GUMMY_VIAL"
+        "itemId": "ITEM_ID.GUMMY_VIAL",
+        "value": 1
       },
       {
         "targetId": "TARGET_ID.CHARACTER.CANDIES",
@@ -240,7 +240,7 @@
         "dataType": "DATA_TYPE.CONDITION",
         "targetId": "TARGET_ID.CHARACTER.TRICKY",
         "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
-        "value": "6"
+        "value": 6
       }
     ],
     "isGeneratable": true,
@@ -269,14 +269,14 @@
         "dataType": "DATA_TYPE.TRIGGER",
         "targetId": "TARGET_ID.CHARACTER.HEALTH",
         "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
-        "value": "2"
+        "value": 2
       },
       {
         "dataType": "DATA_TYPE.TRIGGER",
         "targetId": "TARGET_ID.ITEM.ALL",
         "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
-        "value": 2,
-        "itemId": "ITEM_ID.FUDGE_PIECE"
+        "itemId": "ITEM_ID.FUDGE_PIECE",
+        "value": 2
       }
     ],
     "isGeneratable": false
@@ -294,7 +294,7 @@
         "dataType": "DATA_TYPE.TRIGGER",
         "targetId": "TARGET_ID.CHARACTER.HEALTH",
         "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
-        "value": "1"
+        "value": 1
       }
     ],
     "isGeneratable": true,
@@ -341,7 +341,7 @@
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.MILKY_WAY",
     "name": "Aadnix Way Bar",
-    "description": "Aadnix - the cosmic persuader",
+    "description": "Aadnix - the cosmic travler",
     "isUseable": true,
     "isConsumable": true,
     "isKeyItem": false,
@@ -377,9 +377,10 @@
     "triggerList": [
       {
         "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
         "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
-        "value": 4,
-        "itemId": "ITEM_ID.KIT_KAT_BAR_PIECE"
+        "itemId": "ITEM_ID.KIT_KAT_BAR_PIECE",
+        "value": 4
       }
     ],
     "isGeneratable": true
@@ -387,11 +388,12 @@
   {
     "dataType": "DATA_TYPE.ITEM",
     "id": "ITEM_ID.KIT_KAT_BAR_PIECE",
-    "name": "Breaky Breaky piece",
+    "name": "Breaky Breaky finger",
     "isUseable": true,
     "isConsumable": true,
     "isKeyItem": false,
-    "isGeneratable": false
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON"
   },
   {
     "dataType": "DATA_TYPE.ITEM",
@@ -401,5 +403,35 @@
     "isConsumable": true,
     "isKeyItem": false,
     "isGeneratable": true
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.FUDGE_SEED",
+    "name": "Fudge Seed",
+    "description": "",
+    "isUseable": false,
+    "isConsumable": false,
+    "isKeyItem": false,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.PATH",
+      "TAG_ID.TILE_TYPE.GRASS",
+      "TAG_ID.TILE_TYPE.LIT_GRASS"
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.RARE"
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.LOLLI_SHOVEL",
+    "name": "Lollishovel",
+    "isUseable": false,
+    "isConsumable": false,
+    "isKeyItem": false,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.PATH",
+      "TAG_ID.TILE_TYPE.WOODS_TWO"
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.RARE"
   }
 ]

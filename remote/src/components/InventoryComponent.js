@@ -20,7 +20,7 @@ export default class InventoryComponent extends PureComponent {
     } = this.props;
 
     return (
-      <div className='position-relative width-full mar-v-2'>
+      <div className='position-relative overflow-auto width-full mar-v-2'>
         { inventoryList.map((itemData, idx) => {
           return (
             <InventoryItem

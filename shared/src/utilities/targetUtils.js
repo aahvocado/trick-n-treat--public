@@ -2,6 +2,7 @@ import {
   TARGET_ID,
   CHARACTER_TARGET_ID_LIST,
   ENCOUNTER_TARGET_ID_LIST,
+  NUMBER_TARGET_ID_LIST,
 } from 'constants.shared/targetIds';
 
 import * as statUtils from 'utilities.shared/statUtils';
@@ -101,4 +102,13 @@ export function isCharacterTarget(targetId) {
  */
 export function isEncounterTarget(targetId) {
   return ENCOUNTER_TARGET_ID_LIST.includes(targetId);
+}
+/**
+ * does target depend on a Number
+ *
+ * @param {TargetId} targetId
+ * @returns {Boolean}
+ */
+export function isNumberTarget(targetId) {
+  return NUMBER_TARGET_ID_LIST.includes(targetId);
 }
