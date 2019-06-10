@@ -146,7 +146,6 @@ export class ActionDataEditorComponent extends PureComponent {
           {/* current Action */}
           <ActionListDropdown
             className='bor-0-transparent adjacent-mar-t-2'
-            showButton={false}
             selectedOption={{id: choiceId}}
             onSelect={(choiceId) => onEdit({choiceId: choiceId})}
           />
@@ -198,7 +197,7 @@ export class ActionDataEditorComponent extends PureComponent {
         <ButtonComponent
           className='fsize-2 aself-start flex-none borradius-b-2 borwidth-t-0 bor-h-1-gray bor-b-1-gray'
           theme={BUTTON_THEME.WHITE}
-          onClick={this.onClickAddCondition}
+          onClick={() => this.onClickAddCondition()}
         >
           Add Condition
         </ButtonComponent>

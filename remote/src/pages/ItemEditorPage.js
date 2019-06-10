@@ -5,6 +5,7 @@ import {observer} from 'mobx-react';
 
 import ButtonComponent from 'common-components/ButtonComponent';
 import DropdownComponent from 'common-components/DropdownComponent';
+import LetterIconComponent from 'common-components/LetterIconComponent';
 import TextAreaComponent from 'common-components/TextAreaComponent';
 import TextInputComponent from 'common-components/TextInputComponent';
 import ToggleComponent from 'common-components/ToggleComponent';
@@ -58,6 +59,7 @@ class ItemEditorPage extends Component {
     this.createNew = this.createNew.bind(this);
     this.deleteData = this.deleteData.bind(this);
     this.saveData = this.saveData.bind(this);
+    this.canSave = this.canSave.bind(this);
 
     this.addAction = this.addAction.bind(this);
     this.addCondition = this.addCondition.bind(this);
@@ -104,7 +106,7 @@ class ItemEditorPage extends Component {
     const {
       activeData,
       dataList,
-      hasChanges,
+      // hasChanges,
     } = this.state;
 
     const {
@@ -141,7 +143,7 @@ class ItemEditorPage extends Component {
               <ButtonComponent
                 className='adjacent-mar-l-2'
                 title='Save (Shortcut: S)'
-                disabled={!hasChanges || activeData.id === 'ITEM_ID.NEW' || activeData.id === ''}
+                disabled={!this.canSave()}
                 onClick={this.saveData}
               >
                 {`Save ${isNew ? 'New' : ''}`}
@@ -188,7 +190,12 @@ class ItemEditorPage extends Component {
           {/* Menu Row 2 */}
           <div className='flex-row aitems-center adjacent-mar-t-2'>
             <div className='flex-auto flex-col adjacent-mar-l-2'>
-              <div className='flex-row adjacent-mar-t-1'>
+              <form className='flex-row adjacent-mar-t-1' name='form0' onSubmit={(evt) => evt.preventDefault()}>
+                <LetterIconComponent
+                  className='aself-center mar-r-2'
+                  children='0'
+                />
+
                 <div className='flex-none mar-v-auto mar-r-2'>{`Items (${dataList.length})`}</div>
 
                 {/* List of Items */}
@@ -199,7 +206,7 @@ class ItemEditorPage extends Component {
                   onSelect={this.setActiveData}
                   canSearch
                 />
-              </div>
+              </form>
             </div>
           </div>
         </EditorActionbarContainer>
@@ -209,7 +216,13 @@ class ItemEditorPage extends Component {
           {/* Main pane */}
           <div className='flex-col flex-none' style={{minWidth: '575px'}}>
             {/* Basic Info */}
-            <SectionFormContainer header='Information'>
+            <SectionFormContainer header='Information' name='form1'
+              showIcon
+              iconOptions={{
+                style: {left: '-40px', top: '0'},
+                children: '1',
+              }}
+            >
               <TextInputComponent
                 placeholder='Please enter a unique `id`'
                 label='id'
@@ -235,7 +248,13 @@ class ItemEditorPage extends Component {
             </SectionFormContainer>
 
             {/* Condition List */}
-            <SectionFormContainer header='Use Conditions'>
+            <SectionFormContainer header='Use Conditions' name='form2'
+              showIcon
+              iconOptions={{
+                style: {left: '-40px', top: '0'},
+                children: '2',
+              }}
+            >
               <ConditionLogicDropdown
                 className='flex-auto bor-1-gray adjacent-mar-t-2'
                 placeholder='New Condition...'
@@ -253,7 +272,13 @@ class ItemEditorPage extends Component {
             </SectionFormContainer>
 
             {/* Trigger List */}
-            <SectionFormContainer header='Triggers'>
+            <SectionFormContainer header='Triggers' name='form3'
+              showIcon
+              iconOptions={{
+                style: {left: '-40px', top: '0'},
+                children: '3',
+              }}
+            >
               <TriggerLogicListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Trigger...'
@@ -274,36 +299,48 @@ class ItemEditorPage extends Component {
           {/* Side pane */}
           <div className='flex-col flex-none mar-l-1' style={{width: '150px'}}>
             {/* Modifiers */}
-            <SectionFormContainer header='Modifiers'>
+            <SectionFormContainer header='Modifiers' name='form5'
+              showIcon
+              iconOptions={{
+                style: {right: '-40px', top: '0'},
+                children: '5',
+              }}
+            >
               <ToggleComponent
                 className='adjacent-mar-t-2'
                 children='Useable'
                 checked={isUseable}
-                onChange={(e) => this.updateActiveData({isUseable: e.target.checked})}
+                onChange={() => this.updateActiveData({isUseable: !isUseable})}
               />
 
               <ToggleComponent
                 className='adjacent-mar-t-2'
                 children='Consumable'
                 checked={isConsumable}
-                onChange={(e) => this.updateActiveData({isConsumable: e.target.checked})}
+                onChange={() => this.updateActiveData({isConsumable: !isConsumable})}
               />
 
               <ToggleComponent
                 className='adjacent-mar-t-2'
                 children='Key Item'
                 checked={isKeyItem}
-                onChange={(e) => this.updateActiveData({isKeyItem: e.target.checked})}
+                onChange={() => this.updateActiveData({isKeyItem: !isKeyItem})}
               />
             </SectionFormContainer>
 
             {/* Generation */}
-            <SectionFormContainer header='Generation'>
+            <SectionFormContainer header='Generation' name='form6'
+              showIcon
+              iconOptions={{
+                style: {right: '-40px', top: '0'},
+                children: '6',
+              }}
+            >
               <ToggleComponent
                 className='adjacent-mar-t-2'
                 children='Generatable'
                 checked={isGeneratable}
-                onChange={(e) => this.updateActiveData({isGeneratable: e.target.checked})}
+                onChange={() => this.updateActiveData({isGeneratable: !isGeneratable})}
               />
 
               { isGeneratable &&
@@ -324,7 +361,13 @@ class ItemEditorPage extends Component {
             </SectionFormContainer>
 
             {/* Tag List */}
-            <SectionFormContainer header='Tags'>
+            <SectionFormContainer header='Tags' name='form7'
+              showIcon
+              iconOptions={{
+                style: {right: '-40px', top: '0'},
+                children: '7',
+              }}
+            >
               <TagListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Tag...'
@@ -350,9 +393,19 @@ class ItemEditorPage extends Component {
    * @param {Event} evt
    */
   handleKeyDown(evt) {
+    // EXPERIMENTAL - stop focusing element
+    if (evt.keyCode === keycodes.escape) {
+      document.activeElement.blur();
+    }
+
     // don't use the hotkeys if trying to type
     if (evt.srcElement.type === 'text' || evt.srcElement.type === 'textarea' || evt.srcElement.type === 'number') {
       return;
+    }
+
+    // create new shortcut
+    if (evt.keyCode === keycodes.n) {
+      this.createNew();
     }
 
     // save shortcut
@@ -368,6 +421,41 @@ class ItemEditorPage extends Component {
     // preview item
     if (evt.keyCode === keycodes.p) {
       this.togglePreviewModal();
+    }
+
+    // EXPERIMENTAL - Form shorcuts
+    //  focus the first input in a form, preventDefault stops it from typing the number
+    if (evt.keyCode === keycodes[0]) {
+      document.form0.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[1]) {
+      document.form1.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[2]) {
+      document.form2.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[3]) {
+      document.form3.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[4]) {
+      // document.form4.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[5]) {
+      document.form5.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[6]) {
+      document.form6.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[7]) {
+      document.form7.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
     }
   }
   /**
@@ -471,11 +559,10 @@ class ItemEditorPage extends Component {
     const {
       activeData,
       dataList,
-      hasChanges,
     } = this.state;
 
     // no need to save if we did not indicate there are changes made
-    if (!hasChanges) {
+    if (!this.canSave()) {
       return;
     }
 
@@ -508,9 +595,20 @@ class ItemEditorPage extends Component {
     });
   }
   /**
+   * @returns {Boolean}
+   */
+  canSave() {
+    const {activeData, hasChanges} = this.state;
+    return hasChanges && activeData.id !== 'ITEM_ID.NEW' && activeData.id !== '';
+  }
+  /**
    * set `activeItem` to a blank template
    */
   createNew() {
+    if (this.state.hasChanges) {
+      this.saveData();
+    }
+
     this.setState({
       activeData: deepClone(itemDataUtils.createItemData()),
       hasChanges: true,

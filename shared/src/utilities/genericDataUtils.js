@@ -2,6 +2,10 @@ import Joi from '@hapi/joi';
 
 import {CHOICE_ID, GOTO_CHOICE_ID_LIST} from 'constants.shared/choiceIds';
 import {DATA_TYPE} from 'constants.shared/dataTypes';
+import {TARGET_ID} from 'constants.shared/targetIds';
+
+import * as conditionLogicUtils from 'utilities.shared/conditionLogicUtils'
+import * as triggerLogicUtils from 'utilities.shared/triggerLogicUtils';
 
 // -- condition
 /**
@@ -35,14 +39,16 @@ export function validateCondition(data) {
  * @returns {ConditionData}
  */
 export function createConditionData(defaultData = {}) {
-  const blankTemplate = {
+  const createdTemplate = {
     dataType: DATA_TYPE.CONDITION,
     targetId: undefined,
+    itemId: undefined,
     conditionLogicId: undefined,
-    value: 1
+    value: 1,
+    ...defaultData,
   };
 
-  return updateConditionData(blankTemplate, defaultData);
+  return createdTemplate;
 }
 /**
  * @param {ConditionData} data
@@ -106,8 +112,16 @@ export function formatConditionData(data) {
   let formattedData = {
     dataType: data.dataType,
     targetId: data.targetId,
+    itemId: data.itemId || '',
     conditionLogicId: data.conditionLogicId,
-    value: data.value,
+    value: Number(data.value),
+  }
+
+  const isItemConditionLogic = conditionLogicUtils.isItemConditionLogic(formattedData.conditionLogicId);
+  if (isItemConditionLogic) {
+    formattedData.targetId = TARGET_ID.ITEM.ALL;
+  } else {
+    delete formattedData.itemId;
   }
 
   // all done
@@ -153,15 +167,29 @@ export function validateAction(data) {
  * @returns {ActionData}
  */
 export function createActionData(defaultData = {}) {
-  const blankTemplate = {
+  const createdTemplate = {
     dataType: DATA_TYPE.ACTION,
     choiceId: CHOICE_ID.CONFIRM,
     gotoId: undefined,
     label: 'Okay',
     // conditionList: [],
+    ...defaultData,
   }
 
-  return {...blankTemplate, ...defaultData}
+  const isGoto = GOTO_CHOICE_ID_LIST.includes(createdTemplate.choiceId);
+  if (!isGoto) {
+    createdTemplate.gotoId = undefined;
+  }
+
+  if (isGoto && createdTemplate.choiceId === CHOICE_ID.TRICK) {
+    createdTemplate.label = 'Trick';
+  }
+
+  if (isGoto && createdTemplate.choiceId === CHOICE_ID.TREAT) {
+    createdTemplate.label = 'Treat';
+  }
+
+  return createdTemplate;
 }
 /**
  * @param {ActionData} data
@@ -173,19 +201,6 @@ export function updateActionData(data, changes) {
     ...data,
     ...changes,
   };
-
-  const isGoto = GOTO_CHOICE_ID_LIST.includes(resultData.choiceId);
-  if (!isGoto) {
-    resultData.gotoId = undefined;
-  }
-
-  if (isGoto && resultData.choiceId === CHOICE_ID.TRICK) {
-    resultData.label = 'Trick';
-  }
-
-  if (isGoto && resultData.choiceId === CHOICE_ID.TREAT) {
-    resultData.label = 'Treat';
-  }
 
   return resultData;
 }
@@ -346,12 +361,15 @@ export function formatTriggerData(data) {
     dataType: data.dataType,
     targetId: data.targetId,
     triggerLogicId: data.triggerLogicId,
-    value: data.value,
     itemId: data.itemId || '',
+    value: Number(data.value),
     conditionList: formatConditionList(data.conditionList),
   }
 
-  if (formattedData.itemId.length <= 0) {
+  const isItemTriggerLogic = triggerLogicUtils.isItemTriggerLogic(formattedData.triggerLogicId);
+  if (isItemTriggerLogic) {
+    formattedData.targetId = TARGET_ID.ITEM.ALL;
+  } else {
     delete formattedData.itemId;
   }
 

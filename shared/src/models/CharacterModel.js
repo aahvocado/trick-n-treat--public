@@ -49,7 +49,7 @@ export default class CharacterModel extends Model {
       /** @type {Point} */
       position: new Point(),
       /** @type {ModelList<ItemModel>} */
-      inventory: new ModelList([], ItemModel),
+      inventoryList: new ModelList([], ItemModel),
 
       /** @type {Object} */
       ...newAttributes,
@@ -196,16 +196,16 @@ export default class CharacterModel extends Model {
    * @returns {Boolean}
    */
   hasItem(itemModel) {
-    const inventory = this.get('inventory');
+    const inventoryList = this.get('inventoryList');
 
     // "exact item" means the itemModel is from their inventory
-    const foundExactItem = inventory.find((item) => (item.id === itemModel.id));
+    const foundExactItem = inventoryList.find((item) => (item.id === itemModel.id));
     if (foundExactItem !== undefined) {
       return true;
     }
 
     // "similar item" means it does the exact thing but is not the one we own
-    const foundSimilarItem = inventory.find((item) => (item.get('id') === itemModel.get('id')));
+    const foundSimilarItem = inventoryList.find((item) => (item.get('id') === itemModel.get('id')));
     if (foundSimilarItem !== undefined) {
       return true;
     }

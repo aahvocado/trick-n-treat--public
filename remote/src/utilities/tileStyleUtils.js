@@ -142,6 +142,10 @@ export function createTileStyles(options = {}) {
  * @returns {Object} style
  */
 export function createEntityIconStyles(entityIdx, options = {}) {
+  const {
+    opacity = 1,
+  } = options;
+
   const padding = 5;
   const oddOrEven = entityIdx % 2;
   const iconOffsetX = padding + (TILE_SIZE / 2.2) * oddOrEven;
@@ -151,5 +155,6 @@ export function createEntityIconStyles(entityIdx, options = {}) {
     position: 'absolute',
     left: `${iconOffsetX}px`,
     top: `${iconOffsetY}px`,
+    opacity: opacity,
   }
 }

@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 
+import LetterIconComponent from 'common-components/LetterIconComponent';
+
 import combineClassNames from 'utilities/combineClassNames';
 
 /**
@@ -89,21 +91,31 @@ export class SectionFormContainer extends Component {
       children,
       className,
       header,
+      iconOptions = {},
+      showIcon,
+      name,
       ...otherProps
     } = this.props;
 
     return (
       <section
-        className={combineClassNames('pad-2 flex-col flex-none bor-3-tertiary borradius-2 bg-light-beige adjacent-mar-t-1', className)}
+        className={combineClassNames('pad-2 flex-col flex-none bor-3-tertiary borradius-2 bg-light-beige adjacent-mar-t-1 position-relative', className)}
         {...otherProps}
       >
+        { showIcon &&
+          <LetterIconComponent
+            className='position-absolute'
+            {...iconOptions}
+          />
+        }
+
         <h3 className='fsize-3 f-bold color-grayer adjacent-mar-t-2'>
           {header}
         </h3>
 
-        <div className='adjacent-mar-t-2'>
+        <form className='adjacent-mar-t-2' name={name} onSubmit={(evt) => evt.preventDefault()}>
           {children}
-        </div>
+        </form>
       </section>
     )
   }

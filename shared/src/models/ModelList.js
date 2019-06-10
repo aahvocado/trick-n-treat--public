@@ -76,6 +76,15 @@ export default class ModelList {
     });
   }
   /**
+   * this is the way to get an element at an index, since you can't use the array[idx]
+   *
+   * @param {Number} idx
+   * @returns {Model}
+   */
+  at(idx) {
+    return this.modelList[idx];
+  }
+  /**
    * @param {Array<Model>} newList
    */
   replace(newList) {

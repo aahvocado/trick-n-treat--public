@@ -18,6 +18,12 @@ export default class ToggleComponent extends PureComponent {
     checked: false,
     /** @type {String} */
     children: '',
+  };
+  /** @override */
+  constructor(props) {
+    super(props);
+
+    this.checkboxRef = React.createRef();
   }
   /** @override */
   render() {
@@ -34,6 +40,11 @@ export default class ToggleComponent extends PureComponent {
       <label
         className={combineClassNames(baseClassName, className)}
         style={style}
+        tabIndex={0}
+        onKeyPress={(evt) => {
+          evt.preventDefault();
+          this.props.onChange(evt); // important: I'm lazily using `onChange` but it's not the same
+        }}
       >
         <div className='flex-auto'>{children}</div>
 
@@ -41,6 +52,7 @@ export default class ToggleComponent extends PureComponent {
           type='checkbox'
           className='display-none'
           checked={checked}
+          ref={this.checkboxRef}
           {...otherProps}
         />
 

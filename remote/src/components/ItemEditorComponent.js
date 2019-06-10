@@ -44,7 +44,6 @@ export default class ItemEditorComponent extends PureComponent {
           className='flex-auto bor-l-1-gray'
           selectedOption={{id: itemId}}
           onSelect={this.onSelectItemId}
-          showButton={false}
         />
 
         {/* Value */}

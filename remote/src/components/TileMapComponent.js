@@ -225,6 +225,7 @@ export class TileItemComponent extends Component {
           key={`entity-icon-${character.characterId}-key`}
           entityIdx={renderedEntities.length}
           icon={faUser}
+          isCharacter
         />
       )
     });
@@ -266,12 +267,17 @@ class MapEntityIconComponent extends PureComponent {
     const {
       entityIdx,
       icon,
+      isCharacter,
     } = this.props;
+
+    const styleOptions = {
+      opacity: isCharacter ? 1 : 0.7
+    };
 
     return (
       <div
-        className='color-primary'
-        style={tileStyleUtils.createEntityIconStyles(entityIdx)}
+        className='color-black'
+        style={tileStyleUtils.createEntityIconStyles(entityIdx, styleOptions)}
       >
         <FontAwesomeIcon icon={icon} />
       </div>

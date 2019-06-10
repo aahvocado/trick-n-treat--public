@@ -55,9 +55,9 @@ export class RemoteGamestateModel extends Model {
       /** @type {Array<InventoryData>} */
       get formattedInventoryList() {
         const characterModel = _this.get('myCharacter');
-        const inventory = characterModel.get('inventory');
+        const inventoryList = characterModel.get('inventoryList');
 
-        return inventory.map((itemModel) => {
+        return inventoryList.map((itemModel) => {
           const canBeUsed = itemModel.canBeUsedBy(characterModel);
           const itemData = itemModel.export();
 

@@ -8,6 +8,7 @@ import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import ButtonComponent, {BUTTON_THEME} from 'common-components/ButtonComponent';
 import DropdownComponent from 'common-components/DropdownComponent';
 import IconButtonComponent from 'common-components/IconButtonComponent';
+import LetterIconComponent from 'common-components/LetterIconComponent';
 import RadioButtonComponent from 'common-components/RadioButtonComponent';
 import TextAreaComponent from 'common-components/TextAreaComponent';
 import TextInputComponent from 'common-components/TextInputComponent';
@@ -69,6 +70,7 @@ class EncounterEditorPage extends Component {
     this.createNew = this.createNew.bind(this);
     this.deleteData = this.deleteData.bind(this);
     this.saveData = this.saveData.bind(this);
+    this.canSave = this.canSave.bind(this);
 
     this.addAction = this.addAction.bind(this);
     this.addCondition = this.addCondition.bind(this);
@@ -117,7 +119,7 @@ class EncounterEditorPage extends Component {
       activeData,
       dataList,
       dataListFilters,
-      hasChanges,
+      // hasChanges,
       showPreview,
     } = this.state;
 
@@ -170,7 +172,7 @@ class EncounterEditorPage extends Component {
                 className='adjacent-mar-l-2'
                 title='Save (Shortcut: S)'
                 onClick={this.saveData}
-                disabled={!hasChanges || activeData.id === 'ENCOUNTER_ID.NEW' || activeData.id === ''}
+                disabled={!this.canSave()}
               >
                 {`Save ${isNewEncounter ? 'New' : ''}`}
               </ButtonComponent>
@@ -230,7 +232,6 @@ class EncounterEditorPage extends Component {
                     label: l10n(item),
                   }))}
                   onSelect={(dataType) => this.updateListFilters({dataType: dataType})}
-                  showButton={false}
                   canSearch
                 />
                 <IconButtonComponent
@@ -250,7 +251,6 @@ class EncounterEditorPage extends Component {
                     label: item,
                   }))}
                   onSelect={(groupId) => this.updateListFilters({groupId: groupId})}
-                  showButton={false}
                   canSearch
                 />
                 <IconButtonComponent
@@ -266,7 +266,6 @@ class EncounterEditorPage extends Component {
                   placeholder='Filter by Tags...'
                   selectedOption={{id: dataListFilters.includeTags && dataListFilters.includeTags[0]}}
                   onSelect={(tagId) => this.updateListFilters({includeTags: [tagId]})}
-                  showButton={false}
                   canSearch
                 />
                 <IconButtonComponent
@@ -285,7 +284,12 @@ class EncounterEditorPage extends Component {
                 </ButtonComponent>
               </div>
 
-              <div className='flex-row adjacent-mar-t-1'>
+              <form className='flex-row adjacent-mar-t-1' name='form0' onSubmit={(evt) => evt.preventDefault()}>
+                <LetterIconComponent
+                  className='aself-center mar-r-2'
+                  children='0'
+                />
+
                 <div className='flex-none mar-v-auto mar-r-2'>{`Encounters (${filteredEncounterList.length})`}</div>
 
                 {/* Filtered Encounters */}
@@ -301,7 +305,7 @@ class EncounterEditorPage extends Component {
                   onSelect={this.setActiveData}
                   canSearch
                 />
-              </div>
+              </form>
             </div>
 
             <div className='flex-none flex-row aself-start adjacent-mar-l-2'>
@@ -321,7 +325,13 @@ class EncounterEditorPage extends Component {
           {/* Main pane */}
           <div className='flex-col flex-none' style={{minWidth: '575px'}}>
             {/* Basic Info */}
-            <SectionFormContainer header='Information'>
+            <SectionFormContainer header='Information' name='form1'
+              showIcon
+              iconOptions={{
+                style: {left: '-40px', top: '0'},
+                children: '1',
+              }}
+            >
               <TextInputComponent
                 placeholder='Please enter a unique `id`'
                 label='id'
@@ -354,11 +364,17 @@ class EncounterEditorPage extends Component {
             </SectionFormContainer>
 
             {/* Condition List */}
-            <SectionFormContainer header='Conditions'>
+            <SectionFormContainer header='Conditions' name='form2'
+              showIcon
+              iconOptions={{
+                style: {left: '-40px', top: '0'},
+                children: '2',
+              }}
+            >
               <ConditionLogicDropdown
                 className='flex-auto bor-1-gray adjacent-mar-t-2'
                 placeholder='New Condition...'
-                onSelect={(conditionLogicId) => this.addCondition({conditionLogicId})}
+                onSelect={(conditionLogicId) => this.addCondition({conditionLogicId: conditionLogicId})}
               />
 
               { conditionList.length > 0 &&
@@ -372,7 +388,14 @@ class EncounterEditorPage extends Component {
             </SectionFormContainer>
 
             {/* Trigger List */}
-            <SectionFormContainer header='Triggers'>
+            <SectionFormContainer header='Triggers' name='form3'
+              showIcon
+              iconOptions={{
+                style: {left: '-40px', top: '0'},
+                children: '3',
+              }}
+            >
+
               <TriggerLogicListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Trigger...'
@@ -390,12 +413,18 @@ class EncounterEditorPage extends Component {
             </SectionFormContainer>
 
             {/* Action List */}
-            <SectionFormContainer header='Actions'>
+            <SectionFormContainer header='Actions' name='form4'
+              showIcon
+              iconOptions={{
+                style: {left: '-40px', top: '0'},
+                children: '4',
+              }}
+            >
               <ActionListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Action...'
                 canSearch={true}
-                onSelect={this.addAction}
+                onSelect={(choiceId) => this.addAction({choiceId: choiceId})}
               />
 
               { actionList.length > 0 &&
@@ -411,7 +440,13 @@ class EncounterEditorPage extends Component {
           {/* Side pane */}
           <div className='flex-col flex-none mar-l-1' style={{width: '150px'}}>
             {/* Additional options */}
-            <SectionFormContainer header='Type'>
+            <SectionFormContainer header='Type' name='form5'
+              showIcon
+              iconOptions={{
+                style: {right: '-40px', top: '0'},
+                children: '5',
+              }}
+            >
               <RadioButtonComponent
                 className='adjacent-mar-t-2'
                 children={'Encounter'}
@@ -430,17 +465,23 @@ class EncounterEditorPage extends Component {
                 className='adjacent-mar-t-2'
                 children='Dialogue'
                 checked={isDialogue}
-                onChange={(e) => this.updateActiveData({isDialogue: e.target.checked})}
+                onChange={() => this.updateActiveData({isDialogue: !isDialogue})}
               />
             </SectionFormContainer>
 
             {/* Generation */}
-            <SectionFormContainer header='Generation'>
+            <SectionFormContainer header='Generation' name='form6'
+              showIcon
+              iconOptions={{
+                style: {right: '-40px', top: '0'},
+                children: '6',
+              }}
+            >
               <ToggleComponent
                 className='adjacent-mar-t-2'
                 children='Generatable'
                 checked={isGeneratable}
-                onChange={(e) => this.updateActiveData({isGeneratable: e.target.checked})}
+                onChange={() => this.updateActiveData({isGeneratable: !isGeneratable})}
               />
 
               { isGeneratable &&
@@ -448,7 +489,7 @@ class EncounterEditorPage extends Component {
                   className='adjacent-mar-t-2'
                   children='Only Once'
                   checked={isGeneratableOnce}
-                  onChange={(e) => this.updateActiveData({isGeneratableOnce: e.target.checked})}
+                  onChange={() => this.updateActiveData({isGeneratableOnce: !isGeneratableOnce})}
                 />
               }
 
@@ -470,7 +511,13 @@ class EncounterEditorPage extends Component {
             </SectionFormContainer>
 
             {/* Tag List */}
-            <SectionFormContainer header='Tags'>
+            <SectionFormContainer header='Tags' name='form7'
+              showIcon
+              iconOptions={{
+                style: {right: '-40px', top: '0'},
+                children: '7',
+              }}
+            >
               <TagListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Tag...'
@@ -496,9 +543,19 @@ class EncounterEditorPage extends Component {
    * @param {Event} evt
    */
   handleKeyDown(evt) {
+    // EXPERIMENTAL - stop focusing element
+    if (evt.keyCode === keycodes.escape) {
+      document.activeElement.blur();
+    }
+
     // don't use the hotkeys if trying to type
     if (evt.srcElement.type === 'text' || evt.srcElement.type === 'textarea' || evt.srcElement.type === 'number') {
       return;
+    }
+
+    // create new shortcut
+    if (evt.keyCode === keycodes.n) {
+      this.createNew();
     }
 
     // save shortcut
@@ -514,6 +571,41 @@ class EncounterEditorPage extends Component {
     // preview encounter
     if (evt.keyCode === keycodes.p) {
       this.togglePreviewModal();
+    }
+
+    // EXPERIMENTAL - Form shorcuts
+    //  focus the first input in a form, preventDefault stops it from typing the number
+    if (evt.keyCode === keycodes[0]) {
+      document.form0.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[1]) {
+      document.form1.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[2]) {
+      document.form2.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[3]) {
+      document.form3.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[4]) {
+      document.form4.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[5]) {
+      document.form5.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[6]) {
+      document.form6.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
+    }
+    if (evt.keyCode === keycodes[7]) {
+      document.form7.getElementsByTagName('input')[0].focus();
+      evt.preventDefault();
     }
   }
   /**
@@ -630,11 +722,10 @@ class EncounterEditorPage extends Component {
     const {
       activeData,
       dataList,
-      hasChanges,
     } = this.state;
 
     // no need to save if we did not indicate there are changes made
-    if (!hasChanges) {
+    if (!this.canSave()) {
       return;
     }
 
@@ -667,9 +758,20 @@ class EncounterEditorPage extends Component {
     });
   }
   /**
+   * @returns {Boolean}
+   */
+  canSave() {
+    const {activeData, hasChanges} = this.state;
+    return hasChanges && activeData.id !== 'ENCOUNTER_ID.NEW' && activeData.id !== '';
+  }
+  /**
    * set `activeEncounter` to a blank template
    */
   createNew() {
+    if (this.state.hasChanges) {
+      this.saveData();
+    }
+
     this.setState({
       activeData: deepClone(encounterDataUtils.createEncounterData()),
       hasChanges: true,

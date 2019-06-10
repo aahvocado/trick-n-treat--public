@@ -17,10 +17,7 @@ import TriggerLogicListDropdown from 'components/TriggerLogicListDropdown';
 
 import combineClassNames from 'utilities/combineClassNames';
 
-import {
-  isItemTriggerLogic,
-  isNumberTriggerLogic,
-} from 'utilities.shared/triggerLogicUtils';
+import * as triggerLogicUtils from 'utilities.shared/triggerLogicUtils';
 import * as genericDataUtils from 'utilities.shared/genericDataUtils'
 
 /**
@@ -146,21 +143,19 @@ export class TriggerDataEditorComponent extends PureComponent {
           <TriggerLogicListDropdown
             className='bor-0-transparent flex-auto'
             inputSize={16}
-            showButton={false}
             selectedOption={{id: triggerLogicId}}
             onSelect={(triggerLogicId) => onEdit({
-              targetId: isItemTriggerLogic(triggerLogicId) ? TARGET_ID.ITEM.ALL : data.targetId,
+              targetId: triggerLogicUtils.isItemTriggerLogic(triggerLogicId) ? TARGET_ID.ITEM.ALL : data.targetId,
               triggerLogicId: triggerLogicId,
             })}
           />
 
           {/* trigger changes a Number */}
-          { isNumberTriggerLogic(triggerLogicId) &&
+          { triggerLogicUtils.isNumberTriggerLogic(triggerLogicId) &&
             <Fragment>
               <TriggerTargetListDropdown
                 className='bor-l-1-gray'
                 inputSize={16}
-                showButton={false}
                 selectedOption={{id: targetId}}
                 onSelect={(targetId) => onEdit({targetId: targetId})}
               />
@@ -175,7 +170,7 @@ export class TriggerDataEditorComponent extends PureComponent {
           }
 
           {/* trigger gives an Item */}
-          { isItemTriggerLogic(triggerLogicId) &&
+          { triggerLogicUtils.isItemTriggerLogic(triggerLogicId) &&
             <ItemEditorComponent
               className='flex-auto'
               data={data}

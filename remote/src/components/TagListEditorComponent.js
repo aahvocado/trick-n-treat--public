@@ -128,7 +128,6 @@ export class TagDataEditorComponent extends PureComponent {
       <div className={combineClassNames(baseClassName, className)}>
         <TagListDropdown
           className='fsize-3 flex-auto borcolor-transparent bor-r-1-gray'
-          showButton={false}
           selectedOption={l10n(selectedTagId)}
           onSelect={(selectedTagId) => onEdit(selectedTagId)}
         />

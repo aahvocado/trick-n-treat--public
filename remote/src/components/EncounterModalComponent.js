@@ -44,7 +44,7 @@ export default class EncounterModalComponent extends PureComponent {
         }}
         {...otherProps}
       >
-        <h2 className='adjacent-mar-t-2'>{title}</h2>
+        <h2 className='talign-center adjacent-mar-t-2'>{title}</h2>
 
         {/* trigger display */}
         { triggersToShow.length > 0 &&
@@ -61,7 +61,7 @@ export default class EncounterModalComponent extends PureComponent {
 
         {/* narrative text */}
         <div
-          className='fsize-5 overflow-auto whitespace-pre-line talign-center flex-col flex-auto pad-3 boxsizing-content bg-primary-darker adjacent-mar-t-2'
+          className='fsize-5 width-full overflow-auto whitespace-pre-line talign-center flex-col flex-auto pad-3 boxsizing-border bg-primary-darker adjacent-mar-t-2'
         >
           {`${content}`}
         </div>

@@ -267,26 +267,25 @@ export function handleCharacterUseItem(characterModel, itemModel) {
   if (itemModel.get('isConsumable')) {
     // find the "exact match" item in Character's inventory
     // (using index in case we want to remove it completely)
-    const inventory = characterModel.get('inventory');
-    const foundItemIdx = inventory.findIndex((inventoryItem) => inventoryItem.get('id') === itemModel.get('id'));
+    const inventoryList = characterModel.get('inventoryList');
+    const foundItemIdx = inventoryList.findIndex((inventoryItem) => inventoryItem.get('id') === itemModel.get('id'));
 
     // not found
     if (foundItemIdx < 0) {
       logger.warning(`"${characterModel.get('name')}" does not have "${itemModel.get('name')}" to remove.`);
     } else {
       // grab the actual ItemModel and its quantity
-      const exactItemModel = inventory[foundItemIdx];
-      const itemQuantity = exactItemModel.get('quantity');
+      const exactItemModel = inventoryList.at(foundItemIdx);
+      const quantity = exactItemModel.get('quantity');
 
       // if there will be none left, remove it
-      if (itemQuantity <= 1) {
-        inventory.splice(foundItemIdx, 1);
-        characterModel.set({inventory: inventory});
+      if (quantity <= 1) {
+        inventoryList.splice(foundItemIdx, 1);
       }
 
       // otherwise we can just subtract one from the item's quantity
-      if (itemQuantity > 1) {
-        exactItemModel.set({quantity: itemQuantity - 1});
+      if (quantity > 1) {
+        exactItemModel.set({quantity: quantity - 1});
       }
     }
   }

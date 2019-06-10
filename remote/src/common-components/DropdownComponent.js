@@ -1,8 +1,7 @@
 import React, { PureComponent } from 'react';
 
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
-
-import IconButtonComponent from 'common-components/IconButtonComponent';
 
 import keycodes from 'constants.shared/keycodes';
 
@@ -33,8 +32,6 @@ export default class DropdownComponent extends PureComponent {
     canSearch: false,
     /** @type {Boolean} */
     disabled: false,
-    /** @type {Boolean} */
-    showButton: true,
 
     /** @type {Function} */
     onChange: () => {},
@@ -74,7 +71,7 @@ export default class DropdownComponent extends PureComponent {
       /** @type {String} */
       searchValue: '',
       /** @type {Number} */
-      focusedIdx: props.selectedIdx || selectedOptionIdx,
+      focusedIdx: props.selectedIdx || selectedOptionIdx || null,
     }
   }
   /** @override */
@@ -94,6 +91,15 @@ export default class DropdownComponent extends PureComponent {
   }
   /** @override */
   componentDidUpdate(prevProps, prevState) {
+    //
+    if (prevProps.options.length !== this.props.options.length && !this.state.isOpen) {
+      this.setState({
+        searchValue: '',
+        focusedIdx: null,
+      });
+      return;
+    }
+
     // if this received new props that define the value of the control, update to that
     if (prevProps.selectedIdx !== this.props.selectedIdx || prevProps.selectedOption !== this.props.selectedOption) {
       this.resetSearchValue();
@@ -109,7 +115,6 @@ export default class DropdownComponent extends PureComponent {
       inputSize,
       maxHeight,
       placeholder,
-      showButton,
       style,
     } = this.props;
 
@@ -143,7 +148,6 @@ export default class DropdownComponent extends PureComponent {
           onBlur={this.onBlurControl}
           onChange={this.onChangeHandler}
           readOnly={readOnly}
-          showButton={showButton}
           placeholder={placeholder || 'Select...'}
           size={inputSize}
         />
@@ -258,17 +262,23 @@ export default class DropdownComponent extends PureComponent {
    * @param {Event} evt
    */
   handleKeyDown(evt) {
+    const {
+      focusedIdx,
+      isFocused,
+      isOpen,
+    } = this.state;
+
     // enter
     if (evt.keyCode === keycodes.enter) {
       // if this is focused, we can open this if it is focused
-      if (this.state.isFocused) {
+      if (isFocused && !isOpen) {
         evt.preventDefault();
         this.toggleDropdown();
       }
     }
 
-    // do nothing if dropdown is not open
-    if (!this.state.isOpen) {
+    // do nothing if dropdown is neither focused nor open
+    if (!isFocused && !isOpen) {
       return;
     }
 
@@ -278,11 +288,10 @@ export default class DropdownComponent extends PureComponent {
       this.setState({isOpen: false});
     }
 
-    const {focusedIdx} = this.state;
-
     // up
     if (evt.keyCode === keycodes.arrowup) {
       evt.preventDefault();
+      this.setState({isOpen: true});
 
       if (focusedIdx === null) {
         this.moveFocusUp(this.props.options.length - 1);
@@ -293,20 +302,13 @@ export default class DropdownComponent extends PureComponent {
     // down
     if (evt.keyCode === keycodes.arrowdown) {
       evt.preventDefault();
+      this.setState({isOpen: true});
 
       if (focusedIdx === null) {
         this.moveFocusDown(0);
       } else {
         this.moveFocusDown(focusedIdx + 1);
       }
-    }
-    // left
-    if (evt.keyCode === keycodes.arrowleft) {
-      // evt.preventDefault();
-    }
-    // right
-    if (evt.keyCode === keycodes.arrowright) {
-      // evt.preventDefault();
     }
 
     // stop the bubbling of events while typing here
@@ -554,8 +556,8 @@ export default class DropdownComponent extends PureComponent {
 
     this.setState({
       searchValue: selectedOptionLabel || '',
-      focusedIdx: selectedOptionIdx || undefined,
-  });
+      focusedIdx: selectedOptionIdx || null,
+    });
   }
 }
 /**
@@ -565,8 +567,6 @@ class DropdownControl extends PureComponent {
   static defaultProps = {
     /** @type {Boolean} */
     readOnly: false,
-    /** @type {Boolean} */
-    showButton: false,
     /** @type {Function} */
     onClick: () => {},
   };
@@ -575,14 +575,13 @@ class DropdownControl extends PureComponent {
     const {
       onClick,
       readOnly,
-      showButton,
       ...otherProps
     } = this.props;
 
     const controlModifierClassNames = readOnly ? 'cursor-pointer' : '';
 
     return (
-      <div className='flex-row'>
+      <div className='flex-row-center position-relative'>
         <input
           className={combineClassNames('flex-auto pad-1 text-ellipsis', controlModifierClassNames)}
           readOnly={readOnly}
@@ -590,13 +589,12 @@ class DropdownControl extends PureComponent {
           {...otherProps}
         />
 
-        { showButton &&
-          <IconButtonComponent
-            className='borcolor-transparent flex-none'
-            onClick={onClick}
-            icon={faChevronDown}
-          />
-        }
+        <div
+          className='position-absolute pad-1 fsize-2 color-gray pevents-none flex-none'
+          style={{right: '2px'}}
+        >
+          <FontAwesomeIcon icon={faChevronDown} />
+        </div>
       </div>
     )
   }

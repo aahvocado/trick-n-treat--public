@@ -220,5 +220,186 @@
     "description": "This necklace is a shiny silver color depicting a half moon. Supposedly the other half belongs to Monnie because they separated after fighting over a caramel chocolate bar at Monnie's house. ",
     "isConsumable": false,
     "isKeyItem": true
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.LOLLIPOP_AXE",
+    "name": "Lollipop Axe",
+    "description": "Chop chop",
+    "isUseable": true,
+    "isConsumable": false,
+    "isKeyItem": false,
+    "tagList": [
+      "TAG_ID.TILE_TYPE.LIT_WOODS",
+      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO",
+      "TAG_ID.TILE_TYPE.PATH",
+      "TAG_ID.TILE_TYPE.WOODS"
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.CHARACTER.TRICKY",
+        "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+        "value": "6"
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON"
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.GINGERBREAD_DOLL",
+    "name": "Gingerbread Doll",
+    "isUseable": false,
+    "isConsumable": false,
+    "isKeyItem": false,
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON"
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.FUDGE_CHUNK",
+    "name": "Fudge Chunk",
+    "description": "Ooh, it's big chunk of fudge.",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": "2"
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "value": 2,
+        "itemId": "ITEM_ID.FUDGE_PIECE"
+      }
+    ],
+    "isGeneratable": false
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.FUDGE_PIECE",
+    "name": "Fudge Piece",
+    "description": "It's a tiny piece of fudge.",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": "1"
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON"
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.SNICKERSNACK_BAR",
+    "name": "Snicker-Snack Bar",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "tagList": [
+      "TAG_ID.DESCRIPTORS.ADDS_HEALTH",
+      "TAG_ID.DESCRIPTORS.ADDS_SANITY"
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.SANITY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON"
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.REESES_PEANUT_BUTTER",
+    "name": "Sweet n Salty Cuppins",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "isGeneratable": true
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.MILKY_WAY",
+    "name": "Aadnix Way Bar",
+    "description": "Aadnix - the cosmic persuader",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "isGeneratable": true
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.HERSHEYS_BAR",
+    "name": "Deilanorz Bar",
+    "description": "Deilanorz - the cosmic believer",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "isGeneratable": true
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.CADBURY_DAIRY_MILK",
+    "name": "Sleifmerry Dairy Milk",
+    "description": "Sleifmerry - the cosmic foreigner",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "isGeneratable": true
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.KIT_KAT_BAR",
+    "name": "Breaky Breaky Candy Bar",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "value": 4,
+        "itemId": "ITEM_ID.KIT_KAT_BAR_PIECE"
+      }
+    ],
+    "isGeneratable": true
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.KIT_KAT_BAR_PIECE",
+    "name": "Breaky Breaky piece",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "isGeneratable": false
+  },
+  {
+    "dataType": "DATA_TYPE.ITEM",
+    "id": "ITEM_ID.M_AND_MS",
+    "name": "Mosey and Posey pieces",
+    "isUseable": true,
+    "isConsumable": true,
+    "isKeyItem": false,
+    "isGeneratable": true
   }
 ]

@@ -139,7 +139,6 @@ export class ConditionDataEditorComponent extends PureComponent {
         { conditionLogicUtils.isNumberConditionLogic(conditionLogicId) &&
           <TargetListDropdown
             className='flex-auto bor-r-1-gray'
-            showButton={false}
             selectedOption={{id: targetId}}
             onSelect={(targetId) => onEdit({targetId: targetId})}
           />
@@ -148,7 +147,6 @@ export class ConditionDataEditorComponent extends PureComponent {
         {/* Logic check */}
         <ConditionLogicDropdown
           className='flex-auto'
-          showButton={false}
           selectedOption={{id: conditionLogicId}}
           onSelect={(conditionLogicId) => onEdit({conditionLogicId: conditionLogicId})}
         />
