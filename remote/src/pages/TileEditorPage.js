@@ -156,16 +156,14 @@ class TileEditorPage extends Component {
             onNewMatrix={this.handleNewMatrix}
           />
 
-          <div
-            className='flex-row-center mar-h-auto mar-t-5'
-          >
-            <div
-              className='overflow-hidden flex-auto flex-col aitems-center position-relative bor-4-primary'
-              style={{backgroundColor: '#252525'}}
-            >
+          <div className='flex-row-center mar-h-auto mar-t-5'>
+            <div className='overflow-hidden bg-grayest flex-auto flex-col aitems-center position-relative bor-4-primary'>
               { mapMatrix.map((mapRowData, rowIdx) => {
                 return (
-                  <div className='flex-row flex-grow-only' key={`tile-map-row-${rowIdx}-key`} >
+                  <div
+                    className='flex-row flex-grow-only'
+                    key={`tile-map-row-${rowIdx}-key`}
+                  >
                     { mapRowData.map((tileData, colIdx) => {
                       const position = new Point(colIdx, rowIdx);
 

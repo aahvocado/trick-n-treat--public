@@ -36,12 +36,6 @@ export class RemoteGamestateModel extends Model {
       showEncounterModal: false,
       /** @type {EncounterModel} */
       activeEncounter: new EncounterModel(),
-
-      // -- tile map options
-      /** @type {Boolean} */
-      useFullyVisibleMap: false,
-      /** @type {Boolean} */
-      useZoomedOutMap: false,
     });
 
     // computed attributes - (have to pass in `this` as context because getters have their own context)
@@ -96,6 +90,8 @@ export class RemoteGamestateModel extends Model {
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, (data) => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.UPDATE');
 
+      this.updateMyCharacterData(data.myCharacter);
+
       this.set({
         mode: data.mode,
         round: data.round,
@@ -111,19 +107,7 @@ export class RemoteGamestateModel extends Model {
     socket.on(SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER, (data) => {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.MY_CHARACTER');
 
-      // hold onto if it was previously this character's turn
-      const wasMyTurn = this.get('isMyTurn');
-
-      // update the client's Character
-      const characterModel = new CharacterModel();
-      characterModel.import(data);
-      this.set({myCharacter: characterModel});
-
-      // show notification if it was not the Player's turn but now is
-      const isMyTurn = this.get('isMyTurn');
-      if (!wasMyTurn && isMyTurn) {
-        NotificationManager.info('It\'s your turn!');
-      };
+      this.updateMyCharacterData(data);
     });
 
     // Game is giving us an Encounter
@@ -174,6 +158,24 @@ export class RemoteGamestateModel extends Model {
     const isMapReady = this.get('mapData') !== undefined;
     const isCharacterReady = this.get('myCharacter').get('characterId') !== undefined;
     return isModeReady && isMapReady && isCharacterReady;
+  }
+  /**
+   * @param {Object} data
+   */
+  updateMyCharacterData(data) {
+    // hold onto if it was previously this character's turn
+    const wasMyTurn = this.get('isMyTurn');
+
+    // update the client's Character
+    const characterModel = new CharacterModel();
+    characterModel.import(data);
+    this.set({myCharacter: characterModel});
+
+    // show notification if it was not the Player's turn but now is
+    const isMyTurn = this.get('isMyTurn');
+    if (!wasMyTurn && isMyTurn) {
+      NotificationManager.info('It\'s your turn!');
+    };
   }
 }
 /**

@@ -1,4 +1,6 @@
-import {TILE_SIZE} from 'constants/mapConstants';
+import {
+  TILE_SIZE,
+} from 'constants/styleConstants';
 
 import {TILE_TYPES} from 'constants.shared/tileTypes';
 
@@ -7,6 +9,39 @@ import hexToRgba from 'utilities/hexToRgba';
 import * as lightLevelUtils from 'utilities.shared/lightLevelUtils';
 import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
+/**
+ * creates the styles for moving the map
+ *
+ * @param {Object} options
+ * @returns {Object}
+ */
+export function createMapTransformStyles(options = {}) {
+  const {
+    containerWidth,
+    containerHeight,
+
+    tileSize,
+    mapWidth,
+    mapHeight,
+
+    focalPoint,
+    isZoomedOut,
+  } = options;
+
+  // zoomed out has different logic - fOR NOW
+  if (isZoomedOut) {
+    return `translate(-${(mapWidth * 39) / 2}px, -${(mapHeight * 39.5) / 2}px) scale(${0.2}, ${0.2})`;
+  }
+
+  const baseOffsetX = ((tileSize * focalPoint.x) - (containerWidth / 2) + (tileSize / 2)) * -1;
+  const baseOffsetY = ((tileSize * focalPoint.y) - (containerHeight / 2) + (tileSize / 2)) * -1;
+
+  return `translate(${baseOffsetX}px, ${baseOffsetY}px)`;
+}
+/**
+ * maps the TileType to a color
+ * @todo - create css
+ */
 export const TILE_COLOR_MAP = {
   [TILE_TYPES.EMPTY]: '#313131',
 
@@ -48,7 +83,6 @@ export const TILE_COLOR_MAP = {
   [TILE_TYPES.SPOOKY_TREE_ONE]: '#5a2e2e',
   [TILE_TYPES.BUSH]: '#3a7d3a',
 };
-
 /**
  * @param {Color} color
  * @returns {String}
@@ -72,9 +106,10 @@ function calculateOpacity(percent) {
 export function createTileStyles(options = {}) {
   const {
     lightLevel,
+    isHighlighted,
     isTooFar,
     isSelected,
-    isUserHere,
+    isMyPosition,
     tileSize,
     tileType,
   } = options;
@@ -89,15 +124,15 @@ export function createTileStyles(options = {}) {
 
   // border color depends on visibility and distance
   const borderColor = (() => {
-    if (isUserHere) {
+    if (isMyPosition) {
       return '#f9e358';
     }
 
-    if (isSelected && isTooFar) {
+    if (isHighlighted && isTooFar) {
       return '#b7246f';
     }
 
-    if (isSelected && isWalkable) {
+    if (isHighlighted && isWalkable) {
       return 'white';
     }
 
@@ -126,6 +161,18 @@ export function createTileStyles(options = {}) {
     return createGradient(`rgba(27, 27, 27, 0.4)`);
   })();
 
+  const boxShadow = (() => {
+    if (isSelected && isTooFar) {
+      return 'inset 0 0 2px 2px rgba(234,98,98,1)';
+    }
+
+    if (isSelected) {
+      return 'inset 0 0 3px 3px rgba(255,255,255,1)';
+    }
+
+    return undefined;
+  })();
+
   return {
     backgroundColor: backgroundColor,
     backgroundImage: backgroundImage,
@@ -134,6 +181,7 @@ export function createTileStyles(options = {}) {
     borderColor: borderColor,
     width: tileSize,
     height: tileSize,
+    boxShadow: boxShadow,
   }
 }
 /**

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { observer } from 'mobx-react';
 
-import Point from '@studiomoniker/point';
+// import Point from '@studiomoniker/point';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {
   faCircle,
@@ -12,14 +12,11 @@ import {
 
 import {
   TILE_SIZE,
-} from 'constants/mapConstants';
+} from 'constants/styleConstants';
 
-import {
-  TILE_TYPES_NAME,
-} from 'constants.shared/tileTypes';
 import {STAT_ID} from 'constants.shared/statIds';
 
-import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
+import ButtonComponent, {BUTTON_THEME} from 'common-components/ButtonComponent';
 import ModalComponent from 'common-components/ModalComponent';
 import SpinnerComponent from 'common-components/SpinnerComponent';
 
@@ -28,8 +25,9 @@ import GameIconComponent from 'components/GameIconComponent';
 import InventoryComponent from 'components/InventoryComponent';
 import TileMapComponent from 'components/TileMapComponent';
 
-import {MAP_CONTAINER_WIDTH} from 'constants/mapConstants';
+import {MAP_CONTAINER_WIDTH} from 'constants/styleConstants';
 
+import keycodes from 'constants.shared/keycodes';
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import remoteAppState from 'state/remoteAppState';
@@ -51,23 +49,36 @@ class UserGamePage extends Component {
   constructor(props) {
     super(props);
 
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+
     this.toggleItemModal = this.toggleItemModal.bind(this);
-    this.onClickUseItem = this.onClickUseItem.bind(this);
 
     this.handleOnTileClick = this.handleOnTileClick.bind(this);
-
     this.handleMoveToOnClick = this.handleMoveToOnClick.bind(this);
     this.onClickChoice = this.onClickChoice.bind(this);
+    this.onClickUseItem = this.onClickUseItem.bind(this);
 
     this.state = {
       /** @type {Point} */
-      selectedTilePos: new Point(0, 0),
+      selectedTilePos: null,
       /** @type {Path} */
       selectedPath: [],
 
       /** @type {Boolean} */
       showModal: false,
+      /** @type {Boolean} */
+      isFullyVisibleMap: false,
+      /** @type {Boolean} */
+      isZoomedOut: false,
     }
+  }
+  /** @override */
+  componentDidMount() {
+    document.addEventListener('keydown', this.handleKeyDown);
+  }
+  /** @override */
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleKeyDown);
   }
   /** @override */
   render() {
@@ -87,13 +98,13 @@ class UserGamePage extends Component {
 
     const myCharacter = remoteGameState.get('myCharacter');
     const showEncounterModal = remoteGameState.get('showEncounterModal');
-    const useZoomedOutMap = remoteGameState.get('useZoomedOutMap');
-    const useFullyVisibleMap = remoteGameState.get('useFullyVisibleMap');
 
     const {
       selectedTilePos,
       selectedPath,
       showModal,
+      isFullyVisibleMap,
+      isZoomedOut,
     } = this.state;
 
     return (
@@ -161,47 +172,97 @@ class UserGamePage extends Component {
 
         {/* Map */}
         <TileMapComponent
-          isMyTurn={remoteGameState.get('isMyTurn')}
+          className={remoteGameState.get('isMyTurn') ? 'bor-5-fourth' : 'bor-5-primary-darker'}
           mapData={remoteGameState.get('mapData')}
-          myCharacter={myCharacter}
-          onTileClick={this.handleOnTileClick}
+          myPosition={myCharacter.get('position')}
+          myRange={myCharacter.get('movement')}
           selectedTilePos={selectedTilePos}
           selectedPath={selectedPath}
           tileSize={TILE_SIZE}
-          useFullyVisibleMap={useFullyVisibleMap}
-          useZoomedOutMap={useZoomedOutMap}
+          isFullyVisibleMap={isFullyVisibleMap}
+          isZoomedOut={isZoomedOut}
+          onTileClick={this.handleOnTileClick}
         />
 
-        {/* Action Menu */}
-        <div className='flex-row-center'>
-          <ButtonComponent
-            className='adjacent-mar-l-2'
-            theme={BUTTON_THEME.ORANGE}
-            onClick={() => { this.toggleItemModal(true); }}
-          >
-            Items
-          </ButtonComponent>
+        {/* Action Buttons */}
+        <ButtonComponent
+          className='position-fixed fsize-5 f-bold adjacent-mar-l-2'
+          style={{
+            top: '515px',
+            left: '35px',
+            width: '90px',
+            height: '90px',
+          }}
+          theme={BUTTON_THEME.ORANGE_CIRCLE}
+          onClick={() => { this.toggleItemModal(true)}}
+        >
+          Items
+        </ButtonComponent>
 
-          <ButtonComponent
-            className='adjacent-mar-l-2'
-            theme={BUTTON_THEME.ORANGE}
-            disabled={!this.canMove()}
-            onClick={this.handleMoveToOnClick}
-          >
-            Move
-          </ButtonComponent>
-        </div>
-
-        {/* Debugging Tools */}
-        { remoteAppState.get('isDevMode') && remoteGameState.get('mapData').length > 0 &&
-          <div className='color-white flex-row-center pad-2'>
-            <span className='pad-h-2'>{`Selected Tile: (x: ${selectedTilePos.x}, y: ${selectedTilePos.y})`}</span>
-
-            <span>{TILE_TYPES_NAME[remoteGameState.get('mapData')[selectedTilePos.y][selectedTilePos.x].tileType]}</span>
-          </div>
-        }
+        <ButtonComponent
+          className='position-fixed fsize-5 f-bold adjacent-mar-l-2'
+          style={{
+            top: '515px',
+            right: '35px',
+            width: '100px',
+            height: '100px',
+          }}
+          theme={BUTTON_THEME.ORANGE_CIRCLE}
+          disabled={!this.canMove()}
+          onClick={this.handleMoveToOnClick}
+        >
+          Move
+        </ButtonComponent>
       </div>
     )
+  }
+  /**
+   * @param {Event} evt
+   */
+  handleKeyDown(evt) {
+    // EXPERIMENTAL - stop focusing element
+    if (evt.keyCode === keycodes.escape) {
+      document.activeElement.blur();
+    }
+
+    // spacebar - confirm move
+    if (evt.keyCode === keycodes.space) {
+      if (this.canMove()) {
+        this.handleMoveToOnClick();
+      }
+    }
+
+    // f - focus `selectedTilePos` onto character
+    if (evt.keyCode === keycodes.f) {
+      this.setState({selectedTilePos: remoteGameState.get('myCharacter').get('position').clone()});
+    }
+    // z - zoom out
+    if (evt.keyCode === keycodes.z) {
+      this.setState({isZoomedOut: !this.state.isZoomedOut});
+    }
+    // v - toggle lighting levels
+    if (evt.keyCode === keycodes.v) {
+      this.setState({isFullyVisibleMap: !this.state.isFullyVisibleMap});
+    }
+
+    // arrow keys to nav
+    const {selectedTilePos} = this.state;
+    if (selectedTilePos === null) {
+      return;
+    }
+
+    if (evt.keyCode === keycodes.arrowup) {
+      this.handleOnTileClick(selectedTilePos.clone().subtractY(1));
+    }
+    if (evt.keyCode === keycodes.arrowdown) {
+      this.handleOnTileClick(selectedTilePos.clone().addY(1));
+    }
+    if (evt.keyCode === keycodes.arrowright) {
+      this.handleOnTileClick(selectedTilePos.clone().addX(1));
+    }
+    if (evt.keyCode === keycodes.arrowleft) {
+      this.handleOnTileClick(selectedTilePos.clone().subtractX(1));
+    }
   }
   /**
    * selection of a Tile
@@ -225,28 +286,30 @@ class UserGamePage extends Component {
       return false;
     }
 
+    // can't move if a modal is open,
+    //  most likely there's an encounter you have to address
+    if (this.state.showModal) {
+      return false;
+    }
+
+    // selected tile is not defined
+    const {selectedTilePos, selectedPath} = this.state;
+    if (selectedTilePos === null) {
+      return false;
+    }
+
     // no need to move to same spot
-    if (this.isOnSelectedTile()) {
+    if (selectedTilePos.equals(remoteGameState.get('myCharacter').get('position'))) {
       return false;
     }
 
     // as long as the selectedPath is long enough
     //  we will allow User to request this movement
-    const {selectedPath} = this.state;
     if(selectedPath.length > 0) {
       return true;
     }
 
     return false;
-  }
-  /**
-   * @returns {Boolean}
-   */
-  isOnSelectedTile() {
-    const myCharacter = remoteGameState.get('myCharacter');
-    const {selectedTilePos} = this.state;
-
-    return myCharacter.get('position').equals(selectedTilePos);
   }
   /**
    * Move action
@@ -268,7 +331,7 @@ class UserGamePage extends Component {
 
     // reset selections
     this.setState({
-      selectedTilePos: new Point(),
+      selectedTilePos: null,
       selectedPath: [],
     });
   }
@@ -278,13 +341,17 @@ class UserGamePage extends Component {
    * @param {ChoiceId} choiceId
    */
   onClickChoice(actionData) {
+    if (!remoteGameState.get('isMyTurn')) {
+      return;
+    }
+
     const activeEncounter = remoteGameState.get('activeEncounter');
 
     logger.user(`User selected "${actionData.choiceId}" for encounter "${activeEncounter.get('id')}"`);
     connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.CHOSE_ACTION, activeEncounter.get('id'), actionData);
 
     this.setState({
-      selectedTilePos: new Point(),
+      selectedTilePos: null,
       selectedPath: [],
     });
   }

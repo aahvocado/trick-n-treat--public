@@ -193,10 +193,9 @@ export class ServerStateModel extends Model {
 
     // send each client some gamestate data along with their own character data
     gameClients.forEach((clientModel) => {
-      clientModel.emitMyCharacter();
-
       clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, {
         mapData: formattedMapData,
+        myCharacter: clientModel.get('myCharacter').export(),
         mode: gameState.get('mode'),
         round: gameState.get('round'),
       });

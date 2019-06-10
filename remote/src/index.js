@@ -59,18 +59,10 @@ window.addEventListener('keydown', (evt) => {
 
   // following codes only work if debug menu is open
   if (!remoteAppState.get('isDebugMenuActive')) {
-    // return;
+    return;
   }
   // t
   if (evt.keyCode === keycodes.t) {
     // remoteAppState.set({isEditorMode: !remoteAppState.get('isEditorMode')});
-  }
-  // z
-  if (evt.keyCode === keycodes.z) {
-    remoteGameState.set({useZoomedOutMap: !remoteGameState.get('useZoomedOutMap')});
-  }
-  // v
-  if (evt.keyCode === keycodes.v) {
-    remoteGameState.set({useFullyVisibleMap: !remoteGameState.get('useFullyVisibleMap')});
   }
 });

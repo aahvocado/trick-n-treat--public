@@ -6,8 +6,6 @@ import { observer } from 'mobx-react';
 
 import ButtonComponent from 'common-components/ButtonComponent';
 import FixedMenuComponent from 'common-components/FixedMenuComponent';
-import LetterIconComponent from 'common-components/LetterIconComponent';
-import ToggleComponent from 'common-components/ToggleComponent';
 
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
@@ -35,9 +33,6 @@ class DebugMenu extends Component {
   /** @override */
   constructor(props) {
     super(props);
-
-    this.onClickToggleZoom = this.onClickToggleZoom.bind(this);
-    this.onClickToggleVisibility = this.onClickToggleVisibility.bind(this);
 
     this.onClickRestart = this.onClickRestart.bind(this);
   }
@@ -87,30 +82,6 @@ class DebugMenu extends Component {
         </div>
 
         <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
-          <h3 className='fsize-3 adjacent-mar-t-2'>Game Map Options</h3>
-
-          <ToggleComponent
-            className='width-full adjacent-mar-t-2 aitems-center'
-            checked={remoteGameState.get('useZoomedOutMap')}
-            onChange={this.onClickToggleZoom}
-          >
-            <div className='flex-row aitems-center'>
-              <LetterIconComponent className='mar-r-1' children='z' /> Zoom Out of Map
-            </div>
-          </ToggleComponent>
-
-          <ToggleComponent
-            className='width-full aitems-center adjacent-mar-t-2'
-            checked={remoteGameState.get('useFullyVisibleMap')}
-            onChange={this.onClickToggleVisibility}
-          >
-            <div className='flex-row aitems-center'>
-              <LetterIconComponent className='mar-r-1' children='v' /> Fully Visible Map
-            </div>
-          </ToggleComponent>
-        </div>
-
-        <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
           <ButtonComponent
             className='width-full'
             disabled={!remoteGameState.isGameReady()}
@@ -135,18 +106,6 @@ class DebugMenu extends Component {
 
       </FixedMenuComponent>
     )
-  }
-  /**
-   *
-   */
-  onClickToggleZoom() {
-    remoteGameState.set({useZoomedOutMap: !remoteGameState.get('useZoomedOutMap')});
-  }
-  /**
-   *
-   */
-  onClickToggleVisibility() {
-    remoteGameState.set({useFullyVisibleMap: !remoteGameState.get('useFullyVisibleMap')});
   }
   /**
    *

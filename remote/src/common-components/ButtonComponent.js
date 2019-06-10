@@ -23,6 +23,11 @@ export const BUTTON_THEME = {
     enabled: 'color-white',
     disabled: 'color-grayer',
   },
+  ORANGE_CIRCLE: {
+    base: 'borradius-round bor-l-2-fourth bor-r-2-fourth bor-t-2-fourth bor-b-5-fourth',
+    enabled: 'color-primary bg-fifth hover:color-secondary focus:color-secondary active:color-secondary',
+    disabled: 'color-tertiary bg-secondary',
+  },
 }
 
 /**

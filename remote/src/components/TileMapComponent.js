@@ -8,24 +8,33 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
-  MAP_CONTAINER_HEIGHT,
   MAP_CONTAINER_WIDTH,
-  calculateMapXOffset,
-  calculateMapYOffset,
-} from 'constants/mapConstants';
+  MAP_CONTAINER_HEIGHT,
+} from 'constants/styleConstants';
 
+import combineClassNames from 'utilities/combineClassNames';
 import * as tileStyleUtils from 'utilities/tileStyleUtils';
+
 import * as lightLevelUtils from 'utilities.shared/lightLevelUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * 2D matrix visualizer
  */
-export class TileMapComponent extends Component {
+export default class TileMapComponent extends Component {
   static defaultProps = {
+    /** @type {String} */
+    baseClassName: 'overflow-hidden bg-grayest flex-none flex-col-center position-relative mar-v-2 mar-h-auto',
+    /** @type {String} */
+    className: '',
+
     /** @type {Matrix} */
     mapData: undefined,
-    /** @type {CharacterModel.export} */
-    myCharacter: undefined,
+    /** @type {Point} */
+    myPosition: new Point(),
+    /** @type {Number} */
+    myRange: 0,
+
     /** @type {Function} */
     onTileClick: () => {},
     /** @type {Point} */
@@ -33,76 +42,92 @@ export class TileMapComponent extends Component {
     /** @type {Path} */
     selectedPath: [],
 
+    /** @type {Number} */
+    tileSize: 15,
     /** @type {Boolean} */
-    isMyTurn: false,
-
+    isFullyVisibleMap: false,
     /** @type {Boolean} */
-    useFullyVisibleMap: false,
-    /** @type {Boolean} */
-    useZoomedOutMap: false,
+    isZoomedOut: false,
   };
   /** @override */
   render() {
     const {
-      isMyTurn,
+      baseClassName,
+      className,
       mapData,
-      myCharacter,
+      myPosition,
+      myRange,
       onTileClick,
       selectedTilePos,
       selectedPath,
       tileSize,
-      useFullyVisibleMap,
-      useZoomedOutMap,
+      isFullyVisibleMap,
+      isZoomedOut,
     } = this.props;
 
-    const charPosition = myCharacter.get('position');
-    const mapContainerTransform = useZoomedOutMap ?
-      `translate(-${(mapData[0].length * 39) / 2}px, -${(mapData.length * 39.5) / 2}px) scale(${0.2}, ${0.2})` :
-      `translate(${calculateMapXOffset(charPosition.x)}px, ${calculateMapYOffset(charPosition.y)}px)`;
+    const transformStyle = tileStyleUtils.createMapTransformStyles({
+      focalPoint: myPosition,
+      containerWidth: MAP_CONTAINER_WIDTH,
+      containerHeight: MAP_CONTAINER_HEIGHT,
+      tileSize: tileSize,
+      mapWidth: matrixUtils.getWidth(mapData),
+      mapHeight: matrixUtils.getHeight(mapData),
+      isZoomedOut: isZoomedOut,
+    });
 
     return (
       <div
-        className='overflow-hidden flex-none flex-col-center position-relative mar-v-2 mar-h-auto'
+        className={combineClassNames(baseClassName, className)}
         style={{
-          backgroundColor: '#252525',
-          border: isMyTurn ? '5px solid #33487b' : '5px solid #c17e36',
-          height: `${MAP_CONTAINER_HEIGHT}px`,
           width: `${MAP_CONTAINER_WIDTH}px`,
+          height: `${MAP_CONTAINER_HEIGHT}px`,
         }}
       >
-        {/** inner container */}
+        {/** inner container - this will move around, so it's effectively the "camera" */}
         <div
           className='position-absolute'
           style={{
+            transform: transformStyle,
+            transition: 'transform 400ms',
             top: '0',
             left: '0',
-            transition: 'transform 400ms',
-            transform: mapContainerTransform,
           }}
         >
           { mapData.map((mapRowData, rowIdx) => {
             return (
               <div className='flex-row' key={`tile-map-row-${rowIdx}-key`} >
                 { mapRowData.map((tileData, colIdx) => {
-                  // is `myCharacter` one of the characters on this tile`
-                  const isUserHere = tileData.charactersHere.some((character) => (character.position.x === charPosition.x && character.position.y === charPosition.y))
+                  const tilePosition = tileData.position;
 
                   // assuming the path is in order, finding the index of this point on the path will tell us how far it is
-                  const distanceFromMyCharacter = selectedPath.findIndex((pathPoint) => (pathPoint.equals(tileData.position)));
+                  const pathIdx = selectedPath.findIndex((pathPoint) => pathPoint.equals(tilePosition));
+                  const tileDistance = pathIdx;
 
-                  // tile is considered selected if it is the `selectedTilePos`, or is in the path
-                  const isSelected = (selectedTilePos !== null && selectedTilePos.equals(tileData.position)) || distanceFromMyCharacter >= 0;
+                  const isMyPosition = myPosition.equals(tileData.position);
+
+                  const isOnPath = pathIdx >= 0;
+                  const isSelected = (selectedTilePos !== null && selectedTilePos.equals(tilePosition));
+                  const isTooFar = (tileDistance > myRange) || !isOnPath;
 
                   return (
                     <TileItemComponent
                       key={`tile-item-${colIdx}-${rowIdx}-key`}
-                      {...tileData}
-                      lightLevel={useFullyVisibleMap ? 10 : tileData.lightLevel}
-                      tileSize={tileSize}
+                      // -- props already in data
+                      charactersHere={tileData.charactersHere}
+                      encounterHere={tileData.encounterHere}
+                      tileType={tileData.tileType}
                       position={tileData.position}
+                      lightLevel={isFullyVisibleMap ? 10 : tileData.lightLevel}
+
+                      // -- props from parent
+                      tileSize={tileSize}
+
+                      // -- computed props
+                      tileDistance={tileDistance}
+                      isHighlighted={isOnPath}
                       isSelected={isSelected}
-                      isTooFar={distanceFromMyCharacter > myCharacter.get('movement') || (!isUserHere && selectedPath.length === 0)}
-                      isUserHere={isUserHere}
+                      isTooFar={isTooFar}
+                      isMyPosition={isMyPosition}
                       onTileClick={onTileClick}
                     />
                   )
@@ -115,7 +140,6 @@ export class TileMapComponent extends Component {
     )
   }
 }
-export default TileMapComponent;
 /**
  * a single cell in the Matrix
  */
@@ -127,6 +151,8 @@ export class TileItemComponent extends Component {
     encounterHere: undefined,
     /** @type {Point} */
     position: new Point(),
+    /** @type {Number} */
+    tileDistance: 0,
 
     /** @type {LightLevel} */
     lightLevel: undefined,
@@ -136,11 +162,13 @@ export class TileItemComponent extends Component {
     tileSize: 15,
 
     /** @type {Boolean} */
+    isHighlighted: false,
+    /** @type {Boolean} */
     isSelected: false,
     /** @type {Boolean} */
     isTooFar: false,
     /** @type {Boolean} */
-    isUserHere: false,
+    isMyPosition: false,
     /** @type {Function} */
     onTileClick: () => {},
     /** @type {Function} */
@@ -165,9 +193,10 @@ export class TileItemComponent extends Component {
   render() {
     const {
       lightLevel,
+      isHighlighted,
       isTooFar,
       isSelected,
-      isUserHere,
+      isMyPosition,
       tileSize,
       tileType,
     } = this.props;
@@ -177,9 +206,10 @@ export class TileItemComponent extends Component {
     // make hidden tiles just look like empty tiles
     const tileStyles = tileStyleUtils.createTileStyles({
       lightLevel,
+      isHighlighted,
       isTooFar,
       isSelected,
-      isUserHere,
+      isMyPosition,
       tileSize,
       tileType,
     });
