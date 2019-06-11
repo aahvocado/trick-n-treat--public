@@ -72,7 +72,7 @@ export function getVisibleEncounterList() {
     // check if any of the Characters can see this Encounter
     const isVisibleToAnyCharacter = characterList.some((characterModel) => {
       const characterLocation = characterModel.get('position');
-      const characterRange = characterModel.get('baseMovement');
+      const characterRange = characterModel.get('movementBase');
       return tileMapModel.isWithinPathDistance(encounterLocation, characterLocation, characterRange);
     });
 

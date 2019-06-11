@@ -219,7 +219,7 @@ export function handleEndOfTurn() {
   // - reset their movement
   previousCharacter.set({
     isActive: false,
-    movement: previousCharacter.get('baseMovement'),
+    movement: previousCharacter.get('movementBase'),
   });
 
   // update world

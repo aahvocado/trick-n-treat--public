@@ -8,6 +8,7 @@ import {
   faCircle,
   faPause,
   faPlay,
+  faSearch,
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -15,6 +16,7 @@ import {
 } from 'constants/styleConstants';
 
 import {STAT_ID} from 'constants.shared/statIds';
+import {TILE_TYPES_NAME} from 'constants.shared/tileTypes';
 
 import ButtonComponent, {BUTTON_THEME} from 'common-components/ButtonComponent';
 import SpinnerComponent from 'common-components/SpinnerComponent';
@@ -36,6 +38,7 @@ import * as connectionManager from 'managers/connectionManager';
 
 import logger from 'utilities/logger.remote';
 import * as mapUtils from 'utilities.shared/mapUtils';
+import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * page for the game
@@ -50,12 +53,15 @@ class UserGamePage extends Component {
 
     this.toggleItemModal = this.toggleItemModal.bind(this);
 
+    this.onTileHoverHandler = this.onTileHoverHandler.bind(this);
     this.handleOnTileClick = this.handleOnTileClick.bind(this);
     this.handleMoveToOnClick = this.handleMoveToOnClick.bind(this);
     this.onClickChoice = this.onClickChoice.bind(this);
     this.onClickUseItem = this.onClickUseItem.bind(this);
 
     this.state = {
+      /** @type {Point} */
+      hoveredTilePos: null,
       /** @type {Point} */
       selectedTilePos: null,
       /** @type {Path} */
@@ -65,6 +71,8 @@ class UserGamePage extends Component {
       showModal: false,
       /** @type {Boolean} */
       isFullyVisibleMap: false,
+      /** @type {Boolean} */
+      isTileInspecting: remoteAppState.get('isDevMode'),
       /** @type {Boolean} */
       isZoomedOut: false,
     }
@@ -86,26 +94,30 @@ class UserGamePage extends Component {
     }
 
     // show loading
-    if (!remoteGameState.isGameReady()) {
+    if (!remoteGameState.get('isGameReady')) {
       return <div className='color-white bg-secondary flex-auto pad-v-2 flex-col-center width-full'>
         (waiting for map data)
         <SpinnerComponent className='mar-v-3' />
       </div>
     }
 
+    const mapData = remoteGameState.get('mapData');
     const myCharacter = remoteGameState.get('myCharacter');
     const showEncounterModal = remoteGameState.get('showEncounterModal');
 
     const {
+      hoveredTilePos,
       selectedTilePos,
       selectedPath,
       showModal,
       isFullyVisibleMap,
+      isTileInspecting,
       isZoomedOut,
     } = this.state;
 
+
     return (
-      <div className='bg-secondary flex-auto flex-center flex-col width-full talign-center'>
+      <div className='bg-secondary flex-auto flex-center flex-col width-full talign-center position-relative'>
         {/* Inventory Modal */}
         <InventoryComponent
           active={showModal}
@@ -149,19 +161,23 @@ class UserGamePage extends Component {
           </span>
         </div>
 
-        {/* Info Bar */}
-        <div className='flex-row-center bg-primary pad-v-1 color-tertiary'>
-          <div className='flex-none adjacent-mar-l-2'>
-            <FontAwesomeIcon icon={remoteGameState.get('isMyTurn') ? faPlay : faPause} />
-          </div>
+        {/* Tile Inspection */}
+        { isTileInspecting && hoveredTilePos !== null &&
+          <TileInspectorContainer
+            tileData={matrixUtils.getTileAt(mapData, hoveredTilePos)}
+          />
+        }
 
+        {/* Info Bar */}
+        <div className='bg-primary pad-v-1 flex-row-center color-tertiary'>
+          <FontAwesomeIcon className='flex-none adjacent-mar-l-2' icon={remoteGameState.get('isMyTurn') ? faPlay : faPause} />
           <div className='flex-none adjacent-mar-l-2' >{`Round ${remoteGameState.get('round')}`}</div>
         </div>
 
         {/* Map */}
         <TileMapComponent
           className={remoteGameState.get('isMyTurn') ? 'bor-5-fourth' : 'bor-5-primary-darker'}
-          mapData={remoteGameState.get('mapData')}
+          mapData={mapData}
           myPosition={myCharacter.get('position')}
           myRange={myCharacter.get('movement')}
           selectedTilePos={selectedTilePos}
@@ -170,6 +186,7 @@ class UserGamePage extends Component {
           isFullyVisibleMap={isFullyVisibleMap}
           isZoomedOut={isZoomedOut}
           onTileClick={this.handleOnTileClick}
+          onTileHover={this.onTileHoverHandler}
         />
 
         {/* Action Buttons */}
@@ -233,6 +250,10 @@ class UserGamePage extends Component {
     if (evt.keyCode === keycodes.i) {
       this.toggleItemModal();
     }
+    // t - toggle tile inspection
+    if (evt.keyCode === keycodes.t) {
+      this.setState({isTileInspecting: !this.state.isTileInspecting});
+    }
     // v - toggle lighting levels
     if (evt.keyCode === keycodes.v) {
       this.setState({isFullyVisibleMap: !this.state.isFullyVisibleMap});
@@ -274,6 +295,12 @@ class UserGamePage extends Component {
       selectedTilePos: tilePosition,
       selectedPath: aStarPath,
     });
+  }
+  /**
+   * hovered over a Tile
+   */
+  onTileHoverHandler(tilePosition) {
+    this.setState({hoveredTilePos: tilePosition});
   }
   /**
    * check if User can Move to a Tile
@@ -376,4 +403,42 @@ class UserGamePage extends Component {
     logger.user(`user used ${itemData.name}`);
     connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, itemData);
   }
-})
+});
+/**
+ *
+ */
+class TileInspectorContainer extends React.PureComponent {
+  render() {
+    const {
+      tileData,
+    } = this.props;
+
+    const {
+      charactersHere = [],
+      encounterHere,
+      lightLevel,
+      position,
+      tileType,
+    } = tileData;
+
+    return (
+      <div className='position-absolute zindex-1 pad-2 pevents-none flex-row-center color-white'
+        style={{
+          left: '10px',
+          top: '70px',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)'
+        }}
+      >
+        <FontAwesomeIcon className='flex-none aself-start adjacent-mar-l-2' icon={faSearch} />
+
+        <div className='flex-col flex-auto aitems-start adjacent-mar-l-2'>
+          <div className='adjacent-mar-t-1'>{`Position: ${position.x}, ${position.y}`}</div>
+          <div className='adjacent-mar-t-1'>{`Tile Type: ${TILE_TYPES_NAME[tileType]}`}</div>
+          <div className='adjacent-mar-t-1'>{`Light Level: ${lightLevel}`}</div>
+          <div className='adjacent-mar-t-1'>{`Characters: ${charactersHere.length}`}</div>
+          <div className='adjacent-mar-t-1'>{`Has Encounter: ${encounterHere !== undefined}`}</div>
+        </div>
+      </div>
+    )
+  }
+}

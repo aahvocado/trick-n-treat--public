@@ -58,6 +58,7 @@ export default class TileMapComponent extends Component {
       myPosition,
       myRange,
       onTileClick,
+      onTileHover,
       selectedTilePos,
       selectedPath,
       tileSize,
@@ -117,6 +118,8 @@ export default class TileMapComponent extends Component {
 
                       // -- props from parent
                       tileSize={tileSize}
+                      onTileClick={onTileClick}
+                      onTileHover={onTileHover}
 
                       // -- computed props
                       tileDistance={tileDistance}
@@ -124,7 +127,6 @@ export default class TileMapComponent extends Component {
                       isSelected={isSelected}
                       isTooFar={isTooFar}
                       isMyPosition={isMyPosition}
-                      onTileClick={onTileClick}
                     />
                   )
                 })}

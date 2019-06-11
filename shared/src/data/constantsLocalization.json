@@ -24,6 +24,20 @@
   "STAT_ID.TREATY": "Treaty",
   "STAT_ID.LUCK": "Luck",
 
+  "STAT_ID.BASE.HEALTH": "Health (Base)",
+  "STAT_ID.BASE.GREED": "Greed (Base)",
+  "STAT_ID.BASE.MOVEMENT": "Movement (Base)",
+  "STAT_ID.BASE.SANITY": "Sanity (Base)",
+  "STAT_ID.BASE.VISION": "Vision (Base)",
+  "STAT_ID.BASE.LUCK": "Luck (Base)",
+
+  "STAT_ID.DEFAULT.HEALTH": "Health (Default)",
+  "STAT_ID.DEFAULT.GREED": "Greed (Default)",
+  "STAT_ID.DEFAULT.MOVEMENT": "Movement (Default)",
+  "STAT_ID.DEFAULT.SANITY": "Sanity (Default)",
+  "STAT_ID.DEFAULT.VISION": "Vision (Default)",
+  "STAT_ID.DEFAULT.LUCK": "Luck (Default)",
+
   "TAG_ID.TYPE.DEBUG": "Debug",
   "TAG_ID.TYPE.ENCOUNTER": "Encounter",
   "TAG_ID.TYPE.HOUSE": "House",
@@ -67,10 +81,6 @@
   "TARGET_ID.CHARACTER.TRICKY": "Tricky",
   "TARGET_ID.CHARACTER.TREATY": "Treaty",
   "TARGET_ID.CHARACTER.LUCK": "Luck",
-
-  "TARGET_ID.CHARACTER.INVENTORY": "Inventory",
-
-  "TARGET_ID.CHARACTER.NEIGHBORS_FAVOR": "Luck",
 
   "TARGET_ID.ENCOUNTER.CHARACTER_TRIGGER_COUNT": "Character Trigger Count",
   "TARGET_ID.ENCOUNTER.CHARACTER_TRICK_COUNT": "Character Trick Count",

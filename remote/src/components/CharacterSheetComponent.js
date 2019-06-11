@@ -3,11 +3,8 @@ import React, {PureComponent} from 'react';
 import GameIconComponent from 'components/GameIconComponent';
 
 import {STAT_ID} from 'constants.shared/statIds';
-import {TARGET_ID} from 'constants.shared/targetIds';
 
 import combineClassNames from 'utilities/combineClassNames';
-
-import * as statUtils from 'utilities.shared/statUtils';
 
 /**
  *

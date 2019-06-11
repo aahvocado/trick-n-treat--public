@@ -42,6 +42,10 @@ export class RemoteGamestateModel extends Model {
     const _this = this;
     extendObservable(this.attributes, {
       /** @type {Boolean} */
+      get isGameReady() {
+        return _this.isGameReady();
+      },
+      /** @type {Boolean} */
       get isMyTurn() {
         const characterModel = _this.get('myCharacter');
         return characterModel.get('isActive');

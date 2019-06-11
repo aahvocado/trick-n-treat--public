@@ -161,6 +161,7 @@ export function findCharacterByClientId(clientId) {
 export function updateCharacterPosition(characterModel, position) {
   // nothing to do if given direction is not walkable
   if (!gameState.isWalkableAt(position)) {
+    logger.warning(`Invalid location - ${position.toArray()} is unwalkable.`);
     return;
   }
 

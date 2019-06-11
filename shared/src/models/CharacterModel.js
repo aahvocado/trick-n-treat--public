@@ -34,6 +34,10 @@ export default class CharacterModel extends Model {
       sanity: 0,
       /** @type {Number} */
       vision: 3,
+      /** @type {Number} */
+      luck: 0,
+      /** @type {Number} */
+      greed: 0,
 
       /** @type {Number} */
       candies: 0,
@@ -41,10 +45,6 @@ export default class CharacterModel extends Model {
       tricky: 0,
       /** @type {Number} */
       treaty: 0,
-      /** @type {Number} */
-      luck: 0,
-      /** @type {Number} */
-      greed: 0,
 
       /** @type {Point} */
       position: new Point(),
@@ -57,12 +57,33 @@ export default class CharacterModel extends Model {
 
     // define some base values based on what was given
     this.set({
+      // -- base values are the non-modified value
       /** @type {Number} */
-      baseHealth: this.get('health'),
+      greedBase: this.get('greed'),
       /** @type {Number} */
-      baseMovement: this.get('movement'),
+      healthBase: this.get('health'),
       /** @type {Number} */
-      baseCandies: this.get('candies'),
+      luckBase: this.get('luck'),
+      /** @type {Number} */
+      movementBase: this.get('movement'),
+      /** @type {Number} */
+      sanityBase: this.get('sanity'),
+      /** @type {Number} */
+      visionBase: this.get('vision'),
+
+      // -- default values are what are defined at the start, and should never change
+      /** @type {Number} */
+      greedDefault: this.get('greed'),
+      /** @type {Number} */
+      healthDefault: this.get('health'),
+      /** @type {Number} */
+      luckDefault: this.get('luck'),
+      /** @type {Number} */
+      movementDefault: this.get('movement'),
+      /** @type {Number} */
+      sanityDefault: this.get('sanity'),
+      /** @type {Number} */
+      visionDefault: this.get('vision'),
     });
   }
   /**
@@ -96,40 +117,75 @@ export default class CharacterModel extends Model {
    * @returns {*}
    */
   getStatById(statId) {
+    if (statId === STAT_ID.GREED) {
+      return this.get('greed');
+    }
     if (statId === STAT_ID.HEALTH) {
       return this.get('health');
     }
-
-    if (statId === STAT_ID.MOVEMENT) {
-      return this.get('movement');
-    }
-
-    if (statId === STAT_ID.SANITY) {
-      return this.get('sanity');
-    }
-
-    if (statId === STAT_ID.VISION) {
-      return this.get('vision');
-    }
-
-    if (statId === STAT_ID.CANDIES) {
-      return this.get('candies');
-    }
-
-    if (statId === STAT_ID.TRICKY) {
-      return this.get('tricky');
-    }
-
-    if (statId === STAT_ID.TREATY) {
-      return this.get('treaty');
-    }
-
     if (statId === STAT_ID.LUCK) {
       return this.get('luck');
     }
+    if (statId === STAT_ID.MOVEMENT) {
+      return this.get('movement');
+    }
+    if (statId === STAT_ID.SANITY) {
+      return this.get('sanity');
+    }
+    if (statId === STAT_ID.VISION) {
+      return this.get('vision');
+    }
+    if (statId === STAT_ID.CANDIES) {
+      return this.get('candies');
+    }
+    if (statId === STAT_ID.TRICKY) {
+      return this.get('tricky');
+    }
+    if (statId === STAT_ID.TREATY) {
+      return this.get('treaty');
+    }
+    if (statId === STAT_ID.POSITION) {
+      return this.get('position');
+    }
 
-    if (statId === STAT_ID.GREED) {
-      return this.get('greed');
+    // -- base
+    if (statId === STAT_ID.BASE.GREED) {
+      return this.get('greedBase');
+    }
+    if (statId === STAT_ID.BASE.HEALTH) {
+      return this.get('healthBase');
+    }
+    if (statId === STAT_ID.BASE.LUCK) {
+      return this.get('luckBase');
+    }
+    if (statId === STAT_ID.BASE.MOVEMENT) {
+      return this.get('movementBase');
+    }
+    if (statId === STAT_ID.BASE.SANITY) {
+      return this.get('sanityBase');
+    }
+    if (statId === STAT_ID.BASE.VISION) {
+      return this.get('visionBase');
+    }
+
+    // -- default
+    if (statId === STAT_ID.DEFAULT.GREED) {
+      return this.get('greedDefault');
+    }
+    if (statId === STAT_ID.DEFAULT.HEALTH) {
+      return this.get('healthDefault');
+    }
+    if (statId === STAT_ID.DEFAULT.LUCK) {
+      return this.get('luckDefault');
+    }
+    if (statId === STAT_ID.DEFAULT.MOVEMENT) {
+      return this.get('movementDefault');
+    }
+    if (statId === STAT_ID.DEFAULT.SANITY) {
+      return this.get('sanityDefault');
+    }
+    if (statId === STAT_ID.DEFAULT.VISION) {
+      return this.get('visionDefault');
     }
   }
   /**
@@ -138,40 +194,72 @@ export default class CharacterModel extends Model {
    * @returns {*}
    */
   setStatById(statId, value) {
+    if (statId === STAT_ID.GREED) {
+      return this.set({greed: value});
+    }
     if (statId === STAT_ID.HEALTH) {
       return this.set({health: value});
     }
-
+    if (statId === STAT_ID.LUCK) {
+      return this.set({luck: value});
+    }
     if (statId === STAT_ID.MOVEMENT) {
       return this.set({movement: value});
     }
-
     if (statId === STAT_ID.SANITY) {
       return this.set({sanity: value});
     }
-
     if (statId === STAT_ID.VISION) {
       return this.set({vision: value});
     }
-
     if (statId === STAT_ID.CANDIES) {
       return this.set({candies: value});
     }
-
     if (statId === STAT_ID.TRICKY) {
       return this.set({tricky: value});
     }
-
     if (statId === STAT_ID.TREATY) {
       return this.set({treaty: value});
     }
 
-    if (statId === STAT_ID.LUCK) {
-      return this.set({luck: value});
+    // -- base
+    if (statId === STAT_ID.BASE.GREED) {
+      return this.set({greedBase: value});
+    }
+    if (statId === STAT_ID.BASE.HEALTH) {
+      return this.set({healthBase: value});
+    }
+    if (statId === STAT_ID.BASE.LUCK) {
+      return this.set({luckBase: value});
+    }
+    if (statId === STAT_ID.BASE.MOVEMENT) {
+      return this.set({movementBase: value});
+    }
+    if (statId === STAT_ID.BASE.SANITY) {
+      return this.set({sanityBase: value});
+    }
+    if (statId === STAT_ID.BASE.VISION) {
+      return this.set({visionBase: value});
     }
 
-    if (statId === STAT_ID.GREED) {
-      return this.set({greed: value});
+    // -- default
+    if (statId === STAT_ID.DEFAULT.GREED) {
+      return this.set({greedDefault: value});
+    }
+    if (statId === STAT_ID.DEFAULT.HEALTH) {
+      return this.set({healthDefault: value});
+    }
+    if (statId === STAT_ID.DEFAULT.LUCK) {
+      return this.set({luckDefault: value});
+    }
+    if (statId === STAT_ID.DEFAULT.MOVEMENT) {
+      return this.set({movementDefault: value});
+    }
+    if (statId === STAT_ID.DEFAULT.SANITY) {
+      return this.set({sanityDefault: value});
+    }
+    if (statId === STAT_ID.DEFAULT.VISION) {
+      return this.set({visionDefault: value});
     }
   }
   /**

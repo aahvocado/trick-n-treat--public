@@ -157,10 +157,24 @@ export default class ClientModel extends Model {
    * @param {Object} consoleData
    */
   handleConsoleCommand(consoleData) {
-    const {action, target, value} = consoleData;
+    if (!gameState.get('isActive')) {
+      return;
+    }
+
+    const {action, statId, value} = consoleData;
+    logger.new(`${this.get('name')} used a console command - "${action}"`);
+
+    // set stat attribute
     if (action === 'set') {
-      this.get('myCharacter').setStatById(target, value);
+      this.get('myCharacter').setStatById(statId, value);
       this.emitMyCharacter();
+    }
+
+    // move position
+    if (action === 'move') {
+      const positionParts = value.split(',');
+      const location = new Point(Number(positionParts[0]), Number(positionParts[1]));
+      gameState.updateCharacterPosition(this.get('myCharacter'), location);
     }
   }
   // -- emit functions

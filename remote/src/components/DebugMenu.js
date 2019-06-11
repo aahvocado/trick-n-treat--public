@@ -74,7 +74,7 @@ class DebugMenu extends Component {
         shouldUseOverlay={false}
         onClickOverlay={this.props.onClickOverlay}
       >
-        <div className='fsize-4 flex-row jcontent-center width-full adjacent-mar-t-2'>
+        <div className='fsize-4 f-bold flex-row jcontent-center width-full'>
           {remoteAppState.get('name')}
         </div>
 
@@ -127,6 +127,13 @@ class DebugMenu extends Component {
           </form>
         </div>
 
+        <ButtonComponent
+          className='width-full adjacent-mar-t-2'
+          onClick={this.props.onClickClose}
+        >
+          Close Debug Menu
+        </ButtonComponent>
+
         <div className='width-full flex-col aitems-center adjacent-mar-t-2'>
           <h3 className='fsize-3 adjacent-mar-t-2'>Logs</h3>
 
@@ -139,13 +146,6 @@ class DebugMenu extends Component {
             value={parseLogData(remoteAppState.get('appLog'))}
           />
         </div>
-
-        <ButtonComponent
-          className='width-full adjacent-mar-t-2'
-          onClick={this.props.onClickClose}
-        >
-          Close Debug Menu
-        </ButtonComponent>
       </FixedMenuComponent>
     )
   }
@@ -166,14 +166,13 @@ class DebugMenu extends Component {
   onSubmitConsole(evt) {
     evt.preventDefault();
     const {consoleText} = this.state;
-    const consoleData = consoleUtils.createConsoleData(consoleText);
 
     // empty command
     if (consoleText === '') {
       return;
     }
-
     // not valid console command
+    const consoleData = consoleUtils.createConsoleData(consoleText);
     if (consoleData === null) {
       NotificationManager.error('Invalid command.', 'Console', 1000);
       return;
@@ -194,6 +193,14 @@ class DebugMenu extends Component {
       this.setState({consoleText: ''});
       return;
     }
+
+    // ex: "move 10,10"
+    if (consoleData.action === 'move') {
+      connectionManager.socket.emit(SOCKET_EVENT.DEBUG.TO_SERVER.CONSOLE_COMMAND, consoleData);
+      NotificationManager.success('Requesting to move...', 'Console');
+      this.setState({consoleText: ''});
+      return;
+    }
   }
 })
 /**
@@ -201,7 +208,7 @@ class DebugMenu extends Component {
  */
 const CloseMenuButton = withRouter(({label, history}) => (
   <ButtonComponent
-    className='width-full flex-row aitems-center adjacent-mar-t-2'
+    className='width-full aitems-center adjacent-mar-t-2'
     disabled={
       history.location.pathname !== '/encounter_editor' &&
       history.location.pathname !== '/item_editor' &&
@@ -223,7 +230,7 @@ const CloseMenuButton = withRouter(({label, history}) => (
  */
 const RouteToEncounterEditorButton = withRouter(({label, history}) => (
   <ButtonComponent
-    className='width-full flex-row aitems-center adjacent-mar-t-2'
+    className='width-full adjacent-mar-t-2'
     disabled={history.location.pathname === '/encounter_editor'}
     onClick={() => {
       remoteAppState.set({
@@ -241,7 +248,7 @@ const RouteToEncounterEditorButton = withRouter(({label, history}) => (
  */
 const RouteToItemEditorButton = withRouter(({label, history}) => (
   <ButtonComponent
-    className='width-full flex-row aitems-center adjacent-mar-t-2'
+    className='width-full adjacent-mar-t-2'
     disabled={history.location.pathname === '/item_editor'}
     onClick={() => {
       remoteAppState.set({
@@ -259,7 +266,7 @@ const RouteToItemEditorButton = withRouter(({label, history}) => (
  */
 const RouteToTileEditorButton = withRouter(({label, history}) => (
   <ButtonComponent
-    className='width-full flex-row aitems-center adjacent-mar-t-2'
+    className='width-full adjacent-mar-t-2'
     disabled={history.location.pathname === '/tile_editor'}
     onClick={() => {
       remoteAppState.set({
