@@ -97,7 +97,6 @@ export function handleClientRejoin(clientModel) {
   // check if there is an `activeEncounter` to send them to finish
   const activeEncounter = gameState.get('activeEncounter');
   if (isCurrentCharacter && activeEncounter !== null) {
-    const clientModel = serverState.findClientByCharacter(characterModel);
     clientModel.emitEncounter(activeEncounter);
   }
 }

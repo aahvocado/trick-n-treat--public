@@ -1200,7 +1200,7 @@
     "dataType": "DATA_TYPE.ENCOUNTER",
     "id": "ENCOUNTER_ID.COCOA_PATCH_1",
     "title": "Cocoa Patch (1)",
-    "content": "You grab a handful of chocolate dirt - and brush up against something hard. You shove aside the powder and dig up a big jawbreaker!",
+    "content": "You grab a handful of chocolate dirt - and brush up against something hard. You shove aside the powder and dig up a big jawbreaker!\n\n(wip)",
     "isDialogue": true,
     "tagList": [
       "TAG_ID.TILE_TYPE.WOODS",
@@ -1220,8 +1220,8 @@
         "dataType": "DATA_TYPE.TRIGGER",
         "targetId": "TARGET_ID.ITEM.ALL",
         "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
-        "itemId": "",
-        "value": 1
+        "itemId": "ITEM_ID.FUDGE_PIECE",
+        "value": 2
       }
     ],
     "isGeneratable": false,
