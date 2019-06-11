@@ -127,6 +127,9 @@ export default class ClientModel extends Model {
 
     // client used an Item
     socket.on(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, this.onUseItem.bind(this));
+
+    // -- console command
+    socket.on(SOCKET_EVENT.DEBUG.TO_SERVER.CONSOLE_COMMAND, this.handleConsoleCommand.bind(this));
   }
   // -- Game Listener methods
   /**
@@ -149,6 +152,16 @@ export default class ClientModel extends Model {
   onUseItem(itemData) {
     const itemModel = new ItemModel(itemData);
     gameState.handleCharacterUseItem(this.get('myCharacter'), itemModel);
+  }
+  /**
+   * @param {Object} consoleData
+   */
+  handleConsoleCommand(consoleData) {
+    const {action, target, value} = consoleData;
+    if (action === 'set') {
+      this.get('myCharacter').setStatById(target, value);
+      this.emitMyCharacter();
+    }
   }
   // -- emit functions
   /** @default */

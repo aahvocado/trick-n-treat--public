@@ -314,8 +314,14 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
     return;
   }
 
-  // check if the encounter they clicked on actually is the current one
+  // no encounter
   const activeEncounter = gameState.get('activeEncounter');
+  if (activeEncounter === null) {
+    logger.warning(`"${characterModel.get('name')}" seems to have chose an action when there is no "ActiveEncounter"`);
+    return;
+  }
+
+  // check if the encounter they clicked on actually is the current one
   if (activeEncounter.get('id') !== encounterId) {
     logger.warning(`"${characterModel.get('name')}" clicked on an action in an Encounter that was not the "ActiveEncounter".`);
     return;

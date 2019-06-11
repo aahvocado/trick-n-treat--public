@@ -8,8 +8,7 @@ import {
 } from 'react-router-dom';
 import { observer } from 'mobx-react';
 
-import remoteAppState from 'state/remoteAppState';
-// import remoteGameState from 'state/remoteGameState';
+import ButtonComponent from 'common-components/ButtonComponent';
 
 import DebugMenu from 'components/DebugMenu';
 import WebsocketConnectionIndicator from 'components/WebsocketConnectionIndicator';
@@ -20,6 +19,9 @@ import TileEditorPage from 'pages/TileEditorPage';
 import UserGamePage from 'pages/UserGamePage';
 import UserLobbyPage from 'pages/UserLobbyPage';
 
+import remoteAppState from 'state/remoteAppState';
+// import remoteGameState from 'state/remoteGameState';
+//
 /**
  *
  */
@@ -39,6 +41,17 @@ class App extends Component {
             active={remoteAppState.get('isDebugMenuActive')}
             onClickClose={() => { remoteAppState.set({isDebugMenuActive: false}); }}
           />
+
+          {/* Debug toggler */}
+          { remoteAppState.get('isDevMode') &&
+            <ButtonComponent
+              className='opacity-0 pad-2 position-absolute sibling-mar-l-2'
+              style={{left: '10px', bottom: '10px'}}
+              onClick={() => remoteAppState.set({isDebugMenuActive: true})}
+            >
+              Debugger
+            </ButtonComponent>
+          }
 
           {/* Title */}
           <TitleRouteButton />

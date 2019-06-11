@@ -17,15 +17,12 @@ import {
 import {STAT_ID} from 'constants.shared/statIds';
 
 import ButtonComponent, {BUTTON_THEME} from 'common-components/ButtonComponent';
-import ModalComponent from 'common-components/ModalComponent';
 import SpinnerComponent from 'common-components/SpinnerComponent';
 
 import EncounterModalComponent from 'components/EncounterModalComponent';
 import GameIconComponent from 'components/GameIconComponent';
 import InventoryComponent from 'components/InventoryComponent';
 import TileMapComponent from 'components/TileMapComponent';
-
-import {MAP_CONTAINER_WIDTH} from 'constants/styleConstants';
 
 import keycodes from 'constants.shared/keycodes';
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
@@ -109,21 +106,12 @@ class UserGamePage extends Component {
 
     return (
       <div className='bg-secondary flex-auto flex-center flex-col width-full talign-center'>
-        {/* Modal */}
-        <ModalComponent
-          className='flex-col-center color-black bg-white pad-2 mar-v-5'
-          style={{
-            width: `${MAP_CONTAINER_WIDTH}px`,
-            height: '300px',
-          }}
+        {/* Inventory Modal */}
+        <InventoryComponent
           active={showModal}
-          onClickOverlay={() => { this.toggleItemModal(false); }}
-        >
-          <InventoryComponent
-            inventoryList={remoteGameState.get('formattedInventoryList')}
-            onClickUseItem={this.onClickUseItem}
-          />
-        </ModalComponent>
+          inventoryList={remoteGameState.get('formattedInventoryList')}
+          onClickUseItem={this.onClickUseItem}
+        />
 
         {/* Encounter Modal */}
         <EncounterModalComponent
@@ -194,7 +182,7 @@ class UserGamePage extends Component {
             height: '90px',
           }}
           theme={BUTTON_THEME.ORANGE_CIRCLE}
-          onClick={() => { this.toggleItemModal(true)}}
+          onClick={() => { this.toggleItemModal()}}
         >
           Items
         </ButtonComponent>
@@ -225,6 +213,11 @@ class UserGamePage extends Component {
       document.activeElement.blur();
     }
 
+    // don't use the hotkeys if trying to type
+    if (evt.srcElement.type === 'text' || evt.srcElement.type === 'textarea' || evt.srcElement.type === 'number') {
+      return;
+    }
+
     // spacebar - confirm move
     if (evt.keyCode === keycodes.space) {
       if (this.canMove()) {
@@ -236,13 +229,17 @@ class UserGamePage extends Component {
     if (evt.keyCode === keycodes.f) {
       this.setState({selectedTilePos: remoteGameState.get('myCharacter').get('position').clone()});
     }
-    // z - zoom out
-    if (evt.keyCode === keycodes.z) {
-      this.setState({isZoomedOut: !this.state.isZoomedOut});
+    // i - toggle inventory
+    if (evt.keyCode === keycodes.i) {
+      this.toggleItemModal();
     }
     // v - toggle lighting levels
     if (evt.keyCode === keycodes.v) {
       this.setState({isFullyVisibleMap: !this.state.isFullyVisibleMap});
+    }
+    // z - zoom out
+    if (evt.keyCode === keycodes.z) {
+      this.setState({isZoomedOut: !this.state.isZoomedOut});
     }
 
     // arrow keys to nav

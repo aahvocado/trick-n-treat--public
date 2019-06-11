@@ -1,11 +1,49 @@
 import React, { PureComponent } from 'react';
 
 import ButtonComponent from 'common-components/ButtonComponent';
+import FixedMenuComponent from 'common-components/FixedMenuComponent';
 
+/**
+ * slidey menu for inventory
+ */
+export default class InventoryComponent extends PureComponent {
+  static defaultProps = {
+    /** @type {Array<ItemData>} */
+    inventoryList: [],
+    /** @type {Function} */
+    onClickUseItem: () => {},
+  }
+  /** @override */
+  render() {
+    const {
+      inventoryList,
+      onClickUseItem,
+      ...otherProps
+    } = this.props;
+
+    return (
+      <FixedMenuComponent
+        className='bg-secondary flex-col aitems-center width-full talign-center'
+        style={{
+          boxShadow: '0 5px 3px 3px rgba(0, 0, 0, 0.4)',
+          width: '150px',
+        }}
+        direction='right'
+        location='right'
+        {...otherProps}
+      >
+        <InventoryList
+          inventoryList={inventoryList}
+          onClickUseItem={onClickUseItem}
+        />
+      </FixedMenuComponent>
+    )
+  }
+}
 /**
  * displays list of inventory items
  */
-export default class InventoryComponent extends PureComponent {
+export class InventoryList extends PureComponent {
   static defaultProps = {
     /** @type {Array<ItemData>} */
     inventoryList: [],
@@ -36,6 +74,7 @@ export default class InventoryComponent extends PureComponent {
     )
   }
 }
+
 /**
  *
  */

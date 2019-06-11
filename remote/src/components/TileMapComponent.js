@@ -65,15 +65,11 @@ export default class TileMapComponent extends Component {
       isZoomedOut,
     } = this.props;
 
-    const transformStyle = tileStyleUtils.createMapTransformStyles({
-      focalPoint: myPosition,
-      containerWidth: MAP_CONTAINER_WIDTH,
-      containerHeight: MAP_CONTAINER_HEIGHT,
-      tileSize: tileSize,
-      mapWidth: matrixUtils.getWidth(mapData),
-      mapHeight: matrixUtils.getHeight(mapData),
-      isZoomedOut: isZoomedOut,
-    });
+    // create `transform` styles
+    const baseOffsetX = ((tileSize * myPosition.x) - (MAP_CONTAINER_WIDTH / 2) + (tileSize / 2)) * -1;
+    const baseOffsetY = ((tileSize * myPosition.y) - (MAP_CONTAINER_HEIGHT / 2) + (tileSize / 2)) * -1;
+    const transformStyle = `translate(${baseOffsetX}px, ${baseOffsetY}px)`;
+    const zoomedOutStyles = `translate(-${(matrixUtils.getWidth(mapData) * 39) / 2}px, -${(matrixUtils.getHeight(mapData) * 39.5) / 2}px) scale(${0.2}, ${0.2})`;
 
     return (
       <div
@@ -87,7 +83,7 @@ export default class TileMapComponent extends Component {
         <div
           className='position-absolute'
           style={{
-            transform: transformStyle,
+            transform: isZoomedOut ? zoomedOutStyles : transformStyle,
             transition: 'transform 400ms',
             top: '0',
             left: '0',

@@ -11,6 +11,7 @@ import {
   faHeartbeat,
   faKissBeam,
   faPlusSquare,
+  faMapMarked,
   faRunning,
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -52,6 +53,9 @@ function getIconOfStat(statId) {
   }
   if (statId === STAT_ID.TREATY) {
     return faKissBeam;
+  }
+  if (statId === STAT_ID.POSITION) {
+    return faMapMarked;
   }
 }
 /**

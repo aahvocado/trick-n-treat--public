@@ -10,35 +10,6 @@ import * as lightLevelUtils from 'utilities.shared/lightLevelUtils';
 import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
 /**
- * creates the styles for moving the map
- *
- * @param {Object} options
- * @returns {Object}
- */
-export function createMapTransformStyles(options = {}) {
-  const {
-    containerWidth,
-    containerHeight,
-
-    tileSize,
-    mapWidth,
-    mapHeight,
-
-    focalPoint,
-    isZoomedOut,
-  } = options;
-
-  // zoomed out has different logic - fOR NOW
-  if (isZoomedOut) {
-    return `translate(-${(mapWidth * 39) / 2}px, -${(mapHeight * 39.5) / 2}px) scale(${0.2}, ${0.2})`;
-  }
-
-  const baseOffsetX = ((tileSize * focalPoint.x) - (containerWidth / 2) + (tileSize / 2)) * -1;
-  const baseOffsetY = ((tileSize * focalPoint.y) - (containerHeight / 2) + (tileSize / 2)) * -1;
-
-  return `translate(${baseOffsetX}px, ${baseOffsetY}px)`;
-}
-/**
  * maps the TileType to a color
  * @todo - create css
  */
