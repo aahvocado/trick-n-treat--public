@@ -10,15 +10,6 @@ import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
 // -- Map
 /**
- * @param {Point} point
- * @returns {Boolean}
- */
-export function isWalkableAt(point) {
-  const tileMapModel = gameState.get('tileMapModel');
-  const foundTile = tileMapModel.getTileAt(point);
-  return tileTypeUtils.isWalkableTile(foundTile);
-}
-/**
  * determines if there is are any Encounter within path distance
  *
  * @param {Point} startPoint

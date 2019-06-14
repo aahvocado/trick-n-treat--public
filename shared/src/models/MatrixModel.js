@@ -16,9 +16,9 @@ export class MatrixModel extends Model {
       /** @type {Matrix} */
       matrix: [[]],
       /** @type {Number} */
-      defaultWidth: 0,
+      defaultWidth: 1,
       /** @type {Number} */
-      defaultHeight: 0,
+      defaultHeight: 1,
       /** @type {*} */
       defaultTileType: null,
       // other
@@ -26,20 +26,38 @@ export class MatrixModel extends Model {
     });
 
     // if no `matrix` was given, then we'll make one automatically
-    const baseMatrix = this.get('matrix');
-    if (baseMatrix === undefined || (this.getWidth() === 0 || this.getHeight() === 0)) {
+    const hasDefaultMatrix = !this.hasUndefinedDefaultMatrix();
+    if (!hasDefaultMatrix) {
       this.resetMatrix();
     }
 
     // otherwise, we can set the base dimensions to our Matrix`
-    if (baseMatrix !== undefined) {
+    if (hasDefaultMatrix) {
+      const matrix = this.get('matrix');
       this.set({
-        defaultWidth: baseMatrix[0].length,
-        defaultHeight: baseMatrix.length,
+        defaultWidth: matrixUtils.getWidth(matrix),
+        defaultHeight: matrixUtils.getHeight(matrix),
       });
     }
   }
   // -- unique class methods
+  /**
+   * replaces this matrix with another
+   * use this to maintain the observable reference
+   *
+   * @param {Matrix} newMatrix
+   */
+  replace(newMatrix) {
+    this.get('matrix').replace(newMatrix);
+  }
+  /**
+   * finds if the current matrix is not yet defined
+   *
+   * @returns {Boolean}
+   */
+  hasUndefinedDefaultMatrix() {
+    return this.get('matrix') === undefined || this.getMatrix().toString() === '' || (this.getWidth() === 0 && this.getHeight() === 0);
+  }
   /**
    * creates a Matrix and sets the attribute,
    *  if no parameters are passed it will use base attributes
@@ -50,8 +68,9 @@ export class MatrixModel extends Model {
    */
   resetMatrix(width = this.get('defaultWidth'), height = this.get('defaultHeight'), tileType = this.get('defaultTileType')) {
     const baseMatrix = matrixUtils.createMatrix(width, height, tileType);
+    this.get('matrix').clear();
+    this.get('matrix').replace(baseMatrix);
     this.set({
-      matrix: baseMatrix,
       defaultWidth: width,
       defaultHeight: height,
       defaultTileType: tileType,
@@ -72,9 +91,9 @@ export class MatrixModel extends Model {
    * @param {Point} [point] - where to merge, by default at the top-left
    */
   mergeMatrix(childMatrix, point = new Point(0, 0)) {
-    const myMatrix = this.get('matrix');
+    const myMatrix = this.get('matrix').slice();
     const resultMatrix = matrixUtils.mergeMatrices(myMatrix, childMatrix, point);
-    this.set({matrix: resultMatrix});
+    this.get('matrix').replace(resultMatrix);
   }
   /**
    * replaces a portion of a matrix with another MatrixModel
@@ -83,7 +102,7 @@ export class MatrixModel extends Model {
    * @param {Point} [point] - where to merge, by default at the top-left
    */
   mergeMatrixModel(childMatrixModel, point = new Point(0, 0)) {
-    const childMatrix = childMatrixModel.get('matrix');
+    const childMatrix = childMatrixModel.get('matrix').slice();
     this.mergeMatrix(childMatrix, point);
   }
   // -- implements `matrixUtils.js`
@@ -157,18 +176,28 @@ export class MatrixModel extends Model {
    * @returns {Boolean} - returns true if successfully set
    */
   setTileAt(point, newTileData) {
-    return matrixUtils.setTileAt(this.get('matrix'), point, newTileData);
+    if (this.isPointOutOfBounds(point)) {
+      console.log(`error: setTileAt(${point.x}, ${point.y}) out of bounds`);
+      return false;
+    }
+
+    this.get('matrix')[point.y][point.x] = newTileData;
   }
   /**
    * updates the value of Tiles from an Array of Points
    *
    * @param {Array<Point>} pointList
-   * @param {TileData} tileData
+   * @param {TileType} tileType
    */
-  setTileList(pointList, tileData) {
-    pointList.forEach((point) => {
-      this.setTileAt(point, tileData);
-    });
+  setTileList(pointList, tileType) {
+    const matrixClone = this.getMatrix();
+    matrixUtils.setTileList(matrixClone, pointList, tileType);
+    this.get('matrix').replace(matrixClone);
+  }
+  /** @override */
+  createSubmatrixAt(point, width, height, tileType) {
+    const mergedMatrix = matrixUtils.createSubmatrixAt(this.getMatrix(), point, width, height, tileType);
+    this.get('matrix').replace(mergedMatrix);
   }
   /**
    * returns the Tile located at a given Point
@@ -289,6 +318,10 @@ export class MatrixModel extends Model {
   getSubmatrixByDistance(point, distance) {
     return matrixUtils.getSubmatrixByDistance(this.getMatrix(), point, distance);
   }
+  /** @override */
+  getNeighboringPoints(point) {
+    return matrixUtils.getNeighboringPoints(this.getMatrix(), point);
+  }
   /**
    * returns a LIST of Points within given distance away from a point
    *  but only by adjacent tiles (so diagonals are 2 spaces away)
@@ -312,6 +345,24 @@ export class MatrixModel extends Model {
    */
   getPointsMatrixOfNearbyTiles(point, distance) {
     return matrixUtils.getPointsMatrixOfNearbyTiles(this.getMatrix(), point, distance);
+  }
+  /**
+   * returns adjacent cells in top, right, bottom, left order
+   *
+   * @param  {Point} point
+   * @returns {Array<CellModel>}
+   */
+  getNeighborsAt(point) {
+    return [
+      this.getTileAbove(point),
+      this.getTileRight(point),
+      this.getTileBelow(point),
+      this.getTileLeft(point),
+    ].filter(Boolean);
+  }
+  /** @override */
+  getAvailablePoint(point, canLoop) {
+    return matrixUtils.getAvailablePoint(this.getMatrix(), point, canLoop);
   }
   /**
    * finds if there are any tiles around a Point of given Type

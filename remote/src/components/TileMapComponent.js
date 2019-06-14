@@ -38,6 +38,8 @@ export default class TileMapComponent extends Component {
     /** @type {Function} */
     onTileClick: () => {},
     /** @type {Point} */
+    focalPoint: new Point(),
+    /** @type {Point} */
     selectedTilePos: undefined,
     /** @type {Path} */
     selectedPath: [],
@@ -54,6 +56,7 @@ export default class TileMapComponent extends Component {
     const {
       baseClassName,
       className,
+      focalPoint,
       mapData,
       myPosition,
       myRange,
@@ -66,11 +69,21 @@ export default class TileMapComponent extends Component {
       isZoomedOut,
     } = this.props;
 
+    const scale = isZoomedOut ? 0.35 : 1;
+    const mapWidth = matrixUtils.getWidth(mapData);
+    const mapHeight = matrixUtils.getHeight(mapData);
+
+    const xDistanceFromMiddle = focalPoint.x - mapWidth / 2;
+    const yDistanceFromMiddle = focalPoint.y - mapHeight / 2;
+
+    const xAdjust = xDistanceFromMiddle < 0 ? 1 : -1;
+    const yAdjust = yDistanceFromMiddle < 0 ? 1 : -1;
+
+    const baseOffsetX = ((tileSize * Math.abs(xDistanceFromMiddle)) + ((tileSize / 2) * -xAdjust)) * xAdjust;
+    const baseOffsetY = ((tileSize * Math.abs(yDistanceFromMiddle)) + ((tileSize / 2) * -yAdjust)) * yAdjust;
+
     // create `transform` styles
-    const baseOffsetX = ((tileSize * myPosition.x) - (MAP_CONTAINER_WIDTH / 2) + (tileSize / 2)) * -1;
-    const baseOffsetY = ((tileSize * myPosition.y) - (MAP_CONTAINER_HEIGHT / 2) + (tileSize / 2)) * -1;
-    const transformStyle = `translate(${baseOffsetX}px, ${baseOffsetY}px)`;
-    const zoomedOutStyles = `translate(-${(matrixUtils.getWidth(mapData) * 39) / 2}px, -${(matrixUtils.getHeight(mapData) * 39.5) / 2}px) scale(${0.2}, ${0.2})`;
+    const transformStyle = `translate(${baseOffsetX * scale}px, ${baseOffsetY * scale}px) scale(${scale})`;
 
     return (
       <div
@@ -82,12 +95,9 @@ export default class TileMapComponent extends Component {
       >
         {/** inner container - this will move around, so it's effectively the "camera" */}
         <div
-          className='position-absolute'
           style={{
-            transform: isZoomedOut ? zoomedOutStyles : transformStyle,
+            transform: transformStyle,
             transition: 'transform 400ms',
-            top: '0',
-            left: '0',
           }}
         >
           { mapData.map((mapRowData, rowIdx) => {

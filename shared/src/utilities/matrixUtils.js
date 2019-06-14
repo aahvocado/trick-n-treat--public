@@ -2,6 +2,8 @@ import Point from '@studiomoniker/point';
 
 import {TILE_TYPES} from 'constants.shared/tileTypes';
 
+import * as pointUtils from 'utilities.shared/pointUtils';
+
 /**
  * Matrix represents 2D array
  *
@@ -110,7 +112,7 @@ export function forEach(matrix, callback) {
   });
 }
 /**
- * helper function for running map through a 2D array
+ * helper function for running `map()` through a 2D array
  *
  * @param {Matrix} matrix
  * @param {Function} callback
@@ -119,6 +121,25 @@ export function forEach(matrix, callback) {
 export function map(matrix, callback) {
   return matrix.map((row, y) => {
     return row.map((tileData, x) => {
+      /**
+       * callback arguments:
+       * @param {TileData} tileData
+       * @param {Point} tilePoint
+       */
+      return callback(tileData, new Point(x, y));
+    });
+  });
+}
+/**
+ * helper function for running `some()` through a 2D array
+ *
+ * @param {Matrix} matrix
+ * @param {Function} callback
+ * @returns {Matrix}
+ */
+export function some(matrix, callback) {
+  return matrix.some((row, y) => {
+    return row.some((tileData, x) => {
       /**
        * callback arguments:
        * @param {TileData} tileData
@@ -146,15 +167,15 @@ export function setTileAt(matrix, point, newTileData) {
   return true;
 }
 /**
- * updates all points in an list to given `tileData`
+ * updates all points in an list to a `tileType`
  *
  * @param {Matrix} matrix
  * @param {Array<Point>} pointList
- * @param {TileData} tileData
+ * @param {TileType} tileType
  */
-export function setTileList(matrix, pointList, tileData) {
+export function setTileList(matrix, pointList, tileType) {
   pointList.forEach((point) => {
-    setTileAt(matrix, point, tileData);
+    setTileAt(matrix, point, tileType);
   });
 }
 /**
@@ -181,6 +202,21 @@ export function mergeMatrices(parentMatrix, childMatrix, point = new Point(0, 0)
   });
 
   return parentMatrix;
+}
+/**
+ * creates a new submatrix in another matrix
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @param {Number} width
+ * @param {Number} height
+ * @param {TileData} [tileType]
+ * @returns {Matrix}
+ */
+export function createSubmatrixAt(matrix, point, width, height, tileType) {
+  const newMatrix = createMatrix(width, height, tileType);
+  const mergedMatrix = mergeMatrices(matrix, newMatrix, point);
+  return mergedMatrix;
 }
 // --- finding Tile data
 /**
@@ -232,7 +268,7 @@ export function getTileRight(matrix, point, distance = 1) {
  * @returns {TileData | undefined}
  */
 export function getTileAbove(matrix, point, distance = 1) {
-  const newPoint = point.clone().addY(distance);
+  const newPoint = point.clone().subtractY(distance);
 
   if (isPointOutOfBounds(matrix, newPoint)) {
     return;
@@ -247,7 +283,7 @@ export function getTileAbove(matrix, point, distance = 1) {
  * @returns {TileData | undefined}
  */
 export function getTileBelow(matrix, point, distance = 1) {
-  const newPoint = point.clone().subtractY(distance);
+  const newPoint = point.clone().addY(distance);
 
   if (isPointOutOfBounds(matrix, newPoint)) {
     return;
@@ -427,6 +463,42 @@ export function getSubmatrixByDistance(matrix, centerPoint, distance) {
 }
 // -- finding Points (coordinates)
 /**
+ * returns neighboring points immediately adjacent
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point - where to start looking from
+ * @returns {Array<Point>}
+ */
+export function getNeighboringPoints(matrix, point) {
+  const neighboringPoints = [];
+
+  const pointAbove = pointUtils.createPointAbove(point);
+  const tileAbove = matrixUtils.getTileAbove(matrix, pointAbove);
+  if (tileAbove !== undefined) {
+    neighboringPoints.push(pointAbove);
+  }
+
+  const pointRight = pointUtils.createPointRight(point);
+  const tileRight = matrixUtils.getTileRight(matrix, pointRight);
+  if (tileRight !== undefined) {
+    neighboringPoints.push(pointRight);
+  }
+
+  const pointBelow = pointUtils.createPointBelow(point);
+  const tileBelow = matrixUtils.getTileBelow(matrix, pointBelow);
+  if (tileBelow !== undefined) {
+    neighboringPoints.push(pointBelow);
+  }
+
+  const pointLeft = pointUtils.createPointLeft(point);
+  const tileLeft = matrixUtils.getTileLeft(matrix, pointLeft);
+  if (tileLeft !== undefined) {
+    neighboringPoints.push(pointLeft);
+  }
+
+  return neighboringPoints;
+}
+/**
  * returns a LIST of Points within given distance away from a point
  *  but only by adjacent tiles (so diagonals are 2 spaces away)
  *
@@ -435,7 +507,7 @@ export function getSubmatrixByDistance(matrix, centerPoint, distance) {
  * @param {Number} distance - how many tiles further to check
  * @returns {Array<Point>}
  */
-export function getPointsListOfNearbyTiles(matrix, point, distance) {
+export function getPointsListOfNearbyTiles(matrix, point, distance = 1) {
   const pointsList = [];
 
   forEach(matrix, (tile, tilePoint) => {
@@ -445,7 +517,7 @@ export function getPointsListOfNearbyTiles(matrix, point, distance) {
     };
   });
 
-  return pointsList;
+  return pointsList.filter((tile) => tile !== undefined);
 }
 /**
  * returns a MATRIX of Points within given distance away from a point
@@ -552,6 +624,55 @@ export function getPointOfNearestTileType(matrix, startPoint, type, distance) {
 
   // after going through the process, we can finally return the Point of the Tile with the asked for Type
   return currentNearestPoint;
+}
+/**
+ * checks if given Point is a valid point
+ *  and loops around if it was out of bounds
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @param {Boolean} [canLoop]
+ * @returns {Point}
+ */
+export function getAvailablePoint(matrix, point, canLoop = false) {
+  let {x, y} = point;
+
+  const leftBounds = 0;
+  const rightBounds = matrixUtils.getWidth(matrix) - 1;
+  const topBounds = 0;
+  const bottomBounds = matrixUtils.getHeight(matrix) - 1;
+
+  // handle loopable pathing
+  if (canLoop) {
+    if (x > rightBounds) {
+      x = leftBounds;
+    } else if (x < leftBounds) {
+      x = rightBounds;
+    }
+
+    if (y > bottomBounds) {
+      y = topBounds;
+    } else if (y < topBounds) {
+      y = bottomBounds;
+    }
+
+    return new Point(x, y);
+  }
+
+  // constrained pathing - return the boundary if the point is beyond it
+  if (x > rightBounds) {
+    x = rightBounds;
+  } else if (x < leftBounds) {
+    x = leftBounds;
+  }
+
+  if (y > bottomBounds) {
+    y = bottomBounds;
+  } else if (y < topBounds) {
+    y = topBounds;
+  }
+
+  return new Point(x, y);
 }
 // -- distance methods
 /**

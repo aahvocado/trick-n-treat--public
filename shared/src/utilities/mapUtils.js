@@ -1,10 +1,12 @@
 import Pathfinding from 'pathfinding';
 import Point from '@studiomoniker/point';
 
+import {POINTS} from 'constants.shared/points';
 import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 import MatrixModel from 'models.shared/MatrixModel';
 
+import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
 import * as mathUtils from 'utilities.shared/mathUtils';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
 import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
@@ -175,6 +177,139 @@ export function getPointsWithinPathDistance(matrix, startPoint, distance) {
 
   return submatrixPoints;
 }
+// -- utilities
+/**
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @returns {Boolean}
+ */
+export function isWalkableAt(matrix, point) {
+  const foundTile = matrixUtils.getTileAt(matrix, point);
+  if (foundTile === undefined) {
+    return false;
+  }
+
+  return tileTypeUtils.isWalkableTile(foundTile);
+}
+/**
+ * gets a point in a random direction that is not a wall or off map
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @returns {Point}
+ */
+export function getRandomDirection(matrix, point) {
+  const tileLeft = matrixUtils.getTileLeft(matrix, point);
+  const isLeftAvailable = tileLeft !== undefined && !tileTypeUtils.isWallTile(tileLeft);
+
+  const tileRight = matrixUtils.getTileRight(matrix, point);
+  const isRightAvailable = tileRight !== undefined && !tileTypeUtils.isWallTile(tileRight);
+
+  const tileAbove = matrixUtils.getTileAbove(matrix, point);
+  const isAboveAvailable = tileAbove !== undefined && !tileTypeUtils.isWallTile(tileAbove);
+
+  const tileBelow = matrixUtils.getTileBelow(matrix, point);
+  const isBelowAvailable = tileBelow !== undefined && !tileTypeUtils.isWallTile(tileBelow);
+
+  // everything is unavailable
+  if (!isLeftAvailable && !isRightAvailable && !isAboveAvailable && !isBelowAvailable) {
+    return undefined;
+  }
+
+  const choiceList = [
+    {
+      returns: POINTS.LEFT.clone(),
+      weight: isLeftAvailable ? 1 : 0,
+    }, {
+      returns: POINTS.RIGHT.clone(),
+      weight: isRightAvailable ? 1 : 0,
+    }, {
+      returns: POINTS.UP.clone(),
+      weight: isAboveAvailable ? 1 : 0,
+    }, {
+      returns: POINTS.DOWN.clone(),
+      weight: isBelowAvailable ? 1 : 0,
+    },
+  ];
+
+  return pickRandomWeightedChoice(choiceList);
+}
+/**
+ * creates a Point that indicates a direction to go
+ *  but weighted based on how close they are to the edge of the Matrix
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point
+ * @returns {Point}
+ */
+export function getRandomWeightedDirection(matrix, point) {
+  // anonymous function to calculate adjust weight
+  const calculateWeight = (val) => {
+    return Math.pow((val * 100), 2);
+  };
+
+  // wip set up some variables
+  const xMaxIdx = matrix[0].length - 1;
+  const yMaxIdx = matrix.length - 1;
+
+  const distanceFromLeft = point.x;
+  const distanceFromRight = xMaxIdx - point.x;
+  const distanceFromTop = point.y;
+  const distanceFromBottom = yMaxIdx - point.y;
+
+  // pick a direction based on its weight
+  return pickRandomWeightedChoice([
+    {
+      returns: POINTS.LEFT.clone(),
+      weight: calculateWeight(distanceFromLeft / xMaxIdx),
+    }, {
+      returns: POINTS.RIGHT.clone(),
+      weight: calculateWeight(distanceFromRight / xMaxIdx),
+    }, {
+      returns: POINTS.UP.clone(),
+      weight: calculateWeight(distanceFromTop / yMaxIdx),
+    }, {
+      returns: POINTS.DOWN.clone(),
+      weight: calculateWeight(distanceFromBottom / yMaxIdx),
+    },
+  ]);
+}
+/**
+ * returns neighboring points immediately adjacent that are not walls
+ *
+ * @param {Matrix} matrix
+ * @param {Point} point - where to start looking from
+ * @returns {Array<Point>}
+ */
+export function getNonWallNeighboringPoints(matrix, point) {
+  const neighboringPoints = [];
+
+  const pointAbove = pointUtils.createPointAbove(point);
+  const tileAbove = matrixUtils.getTileAbove(matrix, pointAbove);
+  if (tileAbove !== undefined && !tileTypeUtils.isWallTile(tileAbove)) {
+    neighboringPoints.push(pointAbove);
+  }
+
+  const pointRight = pointUtils.createPointRight(point);
+  const tileRight = matrixUtils.getTileRight(matrix, pointRight);
+  if (tileRight !== undefined && !tileTypeUtils.isWallTile(tileRight)) {
+    neighboringPoints.push(pointRight);
+  }
+
+  const pointBelow = pointUtils.createPointBelow(point);
+  const tileBelow = matrixUtils.getTileBelow(matrix, pointBelow);
+  if (tileBelow !== undefined && !tileTypeUtils.isWallTile(tileBelow)) {
+    neighboringPoints.push(pointBelow);
+  }
+
+  const pointLeft = pointUtils.createPointLeft(point);
+  const tileLeft = matrixUtils.getTileLeft(matrix, pointLeft);
+  if (tileLeft !== undefined && !tileTypeUtils.isWallTile(tileLeft)) {
+    neighboringPoints.push(pointLeft);
+  }
+
+  return neighboringPoints;
+}
 // -- map searching
 /**
  * iterates through each point and returns anything that fulfils the given callback with condition
@@ -282,7 +417,8 @@ export function getValidEmptyLocations(matrix, width = 1, height = 1) {
 
     // are there enough empty spaces here?
     const typeCounts = matrixUtils.getTypeCounts(submatrix);
-    if (typeCounts[TILE_TYPES.EMPTY] < (width * height)) {
+    const emptyCount = typeCounts[TILE_TYPES.EMPTY];
+    if (emptyCount === undefined || emptyCount < (width * height)) {
       return;
     }
 
@@ -299,12 +435,40 @@ export function getValidEmptyLocations(matrix, width = 1, height = 1) {
  * @param {Matrix} matrix
  * @param {Number} [width]
  * @param {Number} [height]
+ * @param {Number} [attempts]
  * @returns {Point}
  */
-export function getRandomEmptyLocation(matrix, width = 1, height = 1) {
-  const potentialLocations = getValidEmptyLocations(matrix, width, height);
-  const randomPotentialIndex = mathUtils.getRandomIntInclusive(0, potentialLocations.length - 1);
-  return potentialLocations[randomPotentialIndex];
+export function getRandomEmptyLocation(matrix, width, height, attempts) {
+  const calculatedAttempts = attempts || Math.ceil(width * height * 0.66);
+  const matrixWidth = matrixUtils.getWidth(matrix);
+  const matrixHeight = matrixUtils.getHeight(matrix);
+
+  // let foundPoint = undefined;
+  for (let i=0; i<calculatedAttempts; i++) {
+    const randomPoint = new Point(
+      mathUtils.getRandomIntInclusive(0, matrixWidth - width),
+      mathUtils.getRandomIntInclusive(0, matrixHeight - height),
+    );
+
+    // will this fit?
+    const topLeftPoint = new Point(randomPoint.x, randomPoint.y);
+    const bottomRightPoint = new Point(randomPoint.x + width - 1, randomPoint.y + height - 1);
+    const submatrix = matrixUtils.getSubmatrixSquare(matrix, topLeftPoint, bottomRightPoint);
+    if (submatrix === undefined || matrixUtils.getHeight(submatrix) < height || matrixUtils.getWidth(submatrix) < width) {
+      continue;
+    }
+
+    // are is this intersecting a wall?
+    const hasAnyWalls = matrixUtils.some(submatrix, (tileType) => {
+      return tileTypeUtils.isWallTile(tileType);
+    });
+    if (hasAnyWalls) {
+      continue;
+    }
+
+    // viable location
+    return randomPoint;
+  }
 }
 /**
  * tries to finds a random location and near a given TileType

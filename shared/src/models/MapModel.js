@@ -1,4 +1,4 @@
-import Point from '@studiomoniker/point';
+// import Point from '@studiomoniker/point';
 
 import {TILE_TYPES} from 'constants.shared/tileTypes';
 
@@ -11,7 +11,7 @@ import * as mapUtils from 'utilities.shared/mapUtils';
  *
  * @typedef {Model} MapModel
  */
-export class MapModel extends MatrixModel {
+export default class MapModel extends MatrixModel {
   /** @override */
   constructor(newAttributes = {}) {
     super({
@@ -19,13 +19,16 @@ export class MapModel extends MatrixModel {
       matrix: [[]],
       /** @type {Object} */
       mapSettings: undefined,
-      /** @type {Point} */
-      start: new Point(),
       /** @type {Array<Matrix>} */
       mapHistory: [],
       // other
       ...newAttributes,
     });
+
+    // if there is a matrix defined, the first one in the history is it
+    if (!this.hasUndefinedDefaultMatrix()) {
+      this.set({mapHistory: [this.getMatrix()]});
+    };
 
     // -- keep track of changes to the map
     this.onChange('matrix', (matrix) => {
@@ -67,6 +70,72 @@ export class MapModel extends MatrixModel {
     const newPath = mapUtils.getAStarPath(grid, startPoint, endPoint);
     this.setTileList(newPath, tileType);
   }
+  /**
+   * gets unvisited cells in this maze
+   *
+   * @returns {Array<CellModel>}
+   */
+  getUnvisitedCells() {
+    const cellList = [];
+    this.forEach((cell) => {
+      if (!cell.get('visited')) {
+        cellList.push(cell);
+      }
+    })
+    return cellList;
+  }
+  /**
+   * returns neighboring cells that are not walled off
+   *
+   * @param  {Point} point
+   * @returns {Array<CellModel>}
+   */
+  getNonWalledNeighbors(point) {
+    const neighborCells = [];
+
+    const cell = this.getTileAt(point);
+    if (!cell.get('top')) {
+      const cellAbove = this.getTileAbove(point);
+      if (cellAbove !== undefined) {
+        neighborCells.push(cellAbove);
+      }
+    }
+
+    if (!cell.get('right')) {
+      const cellRight = this.getTileRight(point);
+      if (cellRight !== undefined) {
+        neighborCells.push(cellRight);
+      }
+    }
+
+    if (!cell.get('bottom')) {
+      const cellBelow = this.getTileBelow(point);
+      if (cellBelow !== undefined) {
+        neighborCells.push(cellBelow);
+      }
+    }
+
+    if (!cell.get('left')) {
+      const cellLeft = this.getTileLeft(point);
+      if (cellLeft !== undefined) {
+        neighborCells.push(cellLeft);
+      }
+    }
+
+    return neighborCells;
+  }
+  /**
+   * gets number of unvisited cells in this maze
+   *
+   * @returns {Number}
+   */
+  getUnvisitedCount() {
+    return this.getUnvisitedCells().length;
+  }
+  /** @override */
+  export() {
+    return this.map((cell) => cell.export());
+  }
   // -- implements `mapUtils.js`
   /**
    * @param {Point} startPoint
@@ -84,6 +153,22 @@ export class MapModel extends MatrixModel {
    */
   getPointsWithinPathDistance(startPoint, distance) {
     return mapUtils.getPointsWithinPathDistance(this.getMatrix(), startPoint, distance);
+  }
+  /** @override */
+  isWalkableAt(point) {
+    return mapUtils.isWalkableAt(this.getMatrix(), point);
+  }
+  /** @override */
+  getRandomDirection(point) {
+    return mapUtils.getRandomDirection(this.getMatrix(), point);
+  }
+  /** @override */
+  getRandomWeightedDirection(point) {
+    return mapUtils.getRandomWeightedDirection(this.getMatrix(), point);
+  }
+  /** @override */
+  getNonWallNeighboringPoints(point) {
+    return mapUtils.getNonWallNeighboringPoints(this.getMatrix(), point);
   }
   /**
    * finds the closest point of the Tile that is walkable
@@ -112,10 +197,11 @@ export class MapModel extends MatrixModel {
    *
    * @param {Number} [width]
    * @param {Number} [height]
+   * @param {Number} [attempts]
    * @returns {Point}
    */
-  getRandomEmptyLocation(width = 1, height = 1) {
-    return mapUtils.getRandomEmptyLocation(this.getMatrix(), width, height);
+  getRandomEmptyLocation(width = 1, height = 1, attempts) {
+    return mapUtils.getRandomEmptyLocation(this.getMatrix(), width, height, attempts);
   }
   /**
    * tries to finds a random location and near a given TileType
@@ -160,5 +246,3 @@ export class MapModel extends MatrixModel {
     return mapUtils.getBorderPoints(this.getMatrix());
   }
 }
-
-export default MapModel;

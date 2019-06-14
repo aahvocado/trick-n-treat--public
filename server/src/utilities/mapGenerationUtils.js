@@ -2,9 +2,7 @@ import Point from '@studiomoniker/point';
 
 import {graveyardBiomeBaseMatrix} from 'collections/biomeCollection';
 
-import {
-  TILE_TYPES,
-} from 'constants.shared/tileTypes';
+import {TILE_TYPES} from 'constants.shared/tileTypes';
 
 import MapModel from 'models.shared/MapModel';
 
@@ -12,7 +10,7 @@ import MapModel from 'models.shared/MapModel';
 import * as mathUtils from 'utilities.shared/mathUtils';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
 
-import randomWalk from 'utilities/randomWalk';
+import randomWalk from 'utilities.shared/randomWalk';
 
 /**
  * @param {MapModel} tileMapModel
@@ -101,41 +99,33 @@ export function createSmallWoodsBiomeModel(tileMapModel) {
   return fullBiomeMapModel;
 }
 /**
- * generates potential encounter tiles
- *
- * @param {MapModel} mapModel
- * @param {Object} options
+ * @param {MapModel} tileMapModel
+ * @param {BiomeSettings} biomeSettings
+ * @returns {MapModel}
  */
-export function generateEncounterTiles(mapModel, options) {
-  const {encounterRangeDistance} = options;
+export function createFancyBiomeModel(tileMapModel, biomeSettings) {
+  const {
+    width,
+    height,
+    spawnPoint,
+  } = biomeSettings;
 
-  // go through every single point on the map
-  // (at some point we can do better than this)
-  mapModel.forEach((tile, point) => {
-    // if tile is not a path, don't do anything
-    if (tile !== TILE_TYPES.PATH) {
-      return;
-    }
+  const centerPoint = new Point(
+    Math.floor(width / 2),
+    Math.floor(height / 2),
+  );
 
-    // grab a chunk of the map to ease calculations
-    const localizedSubmatrix = mapModel.getSubmatrixByDistance(point, 1);
-    localizedSubmatrix[1][1] = 'center';
+  // use recursion to create path
+  const baseMatrix = matrixUtils.createMatrix(width, height, null);
+  randomWalk(baseMatrix, centerPoint, 200, 3);
 
-    // see if we are surrounded by many paths
-    //  if so, lets put an encounter here
-    const typeCounts = matrixUtils.getTypeCounts(localizedSubmatrix);
-    if (typeCounts[TILE_TYPES.PATH] >= 3 && typeCounts[TILE_TYPES.ENCOUNTER] === undefined) {
-      mapModel.setTileAt(point, TILE_TYPES.ENCOUNTER);
-      return;
-    }
-
-    // if too close to another encounter, don't use this tile
-    const minDistance = mathUtils.getRandomIntInclusive(encounterRangeDistance[0], encounterRangeDistance[1]);
-    if (mapModel.hasNearbyTileType(point, TILE_TYPES.ENCOUNTER, minDistance)) {
-      return;
-    }
-
-    // otherwise we can make this an Encounter tile
-    mapModel.setTileAt(point, TILE_TYPES.ENCOUNTER);
+  // make a MapModel with the same dimensions as the full map
+  const fullBiomeMapModel = new MapModel({
+    start: spawnPoint,
+    defaultWidth: tileMapModel.getWidth(),
+    defaultHeight: tileMapModel.getHeight(),
   });
+  fullBiomeMapModel.mergeMatrix(baseMatrix, spawnPoint);
+
+  return fullBiomeMapModel;
 }

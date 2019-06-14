@@ -107,7 +107,7 @@ export default class NumericalMenuComponent extends PureComponent {
     } = this.state;
 
     // nothing here
-    if (maxIdx <= 0) {
+    if (maxIdx <= -1) {
       return <div>?</div>
     }
 

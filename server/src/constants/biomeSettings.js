@@ -22,7 +22,7 @@ import * as mathUtils from 'utilities.shared/mathUtils';
  * @type {BiomeSettings}
  */
 const homeBiomeWidth = Math.floor(MAP_WIDTH * 0.7);
-const homeBiomeHeight = Math.floor(MAP_HEIGHT * 0.7);
+const homeBiomeHeight = Math.floor(MAP_HEIGHT * 0.6);
 const homeSpawnPoint = new Point(
   mathUtils.getRandomIntInclusive(MAP_START.x - Math.floor(homeBiomeWidth / 2), MAP_START.x - Math.floor(homeBiomeWidth / 2)),
   mathUtils.getRandomIntInclusive(MAP_START.y - Math.floor(homeBiomeHeight / 2), MAP_START.y - Math.floor(homeBiomeHeight / 2)),
@@ -48,9 +48,26 @@ const graveyardSpawnPoint = new Point(
   mathUtils.getRandomIntInclusive(0, Math.floor((HALF_MAP_HEIGHT - graveyardHeight) / 2)),
 );
 export const GRAVEYARD_BIOME_SETTINGS = {
-  width: graveyardHeight,
-  height: graveyardWidth,
+  width: graveyardWidth,
+  height: graveyardHeight,
   spawnPoint: graveyardSpawnPoint,
+};
+/**
+ * settings for Fancy Neighborhood Biome
+ *  will try to be near the bottommost
+ *
+ * @type {BiomeSettings}
+ */
+const fancyBiomeWidth = Math.floor(MAP_WIDTH * 0.85);
+const fancyBiomeHeight = 4;
+const fancyBiomeSpawnPoint = new Point(
+  mathUtils.getRandomIntInclusive(0, MAP_WIDTH - fancyBiomeWidth),
+  mathUtils.getRandomIntInclusive(MAP_HEIGHT - fancyBiomeHeight - 3, MAP_HEIGHT - fancyBiomeHeight),
+);
+export const FANCY_BIOME_SETTINGS = {
+  width: fancyBiomeWidth,
+  height: fancyBiomeHeight,
+  spawnPoint: fancyBiomeSpawnPoint,
 };
 /**
  * settings for all Biomes
@@ -60,4 +77,5 @@ export const GRAVEYARD_BIOME_SETTINGS = {
 export const BIOME_SETTINGS = {
   HOME: HOME_BIOME_SETTINGS,
   GRAVEYARD: GRAVEYARD_BIOME_SETTINGS,
+  FANCY: FANCY_BIOME_SETTINGS,
 };

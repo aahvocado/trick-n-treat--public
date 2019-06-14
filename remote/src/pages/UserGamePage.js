@@ -8,7 +8,6 @@ import {
   faCircle,
   faPause,
   faPlay,
-  faSearch,
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -16,7 +15,6 @@ import {
 } from 'constants/styleConstants';
 
 import {STAT_ID} from 'constants.shared/statIds';
-import {TILE_TYPES_NAME} from 'constants.shared/tileTypes';
 
 import ButtonComponent, {BUTTON_THEME} from 'common-components/ButtonComponent';
 import SpinnerComponent from 'common-components/SpinnerComponent';
@@ -24,6 +22,7 @@ import SpinnerComponent from 'common-components/SpinnerComponent';
 import EncounterModalComponent from 'components/EncounterModalComponent';
 import GameIconComponent from 'components/GameIconComponent';
 import InventoryComponent from 'components/InventoryComponent';
+import TileInspectorComponent from 'components/TileInspectorComponent';
 import TileMapComponent from 'components/TileMapComponent';
 
 import keycodes from 'constants.shared/keycodes';
@@ -163,7 +162,8 @@ class UserGamePage extends Component {
 
         {/* Tile Inspection */}
         { isTileInspecting && hoveredTilePos !== null &&
-          <TileInspectorContainer
+          <TileInspectorComponent
+            style={{left: '10px', top: '70px'}}
             tileData={matrixUtils.getTileAt(mapData, hoveredTilePos)}
           />
         }
@@ -180,6 +180,7 @@ class UserGamePage extends Component {
           mapData={mapData}
           myPosition={myCharacter.get('position')}
           myRange={myCharacter.get('movement')}
+          focalPoint={myCharacter.get('position')}
           selectedTilePos={selectedTilePos}
           selectedPath={selectedPath}
           tileSize={TILE_SIZE}
@@ -404,41 +405,3 @@ class UserGamePage extends Component {
     connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, itemData);
   }
 });
-/**
- *
- */
-class TileInspectorContainer extends React.PureComponent {
-  render() {
-    const {
-      tileData,
-    } = this.props;
-
-    const {
-      charactersHere = [],
-      encounterHere,
-      lightLevel,
-      position,
-      tileType,
-    } = tileData;
-
-    return (
-      <div className='position-absolute zindex-1 pad-2 pevents-none flex-row-center color-white'
-        style={{
-          left: '10px',
-          top: '70px',
-          backgroundColor: 'rgba(0, 0, 0, 0.6)'
-        }}
-      >
-        <FontAwesomeIcon className='flex-none aself-start adjacent-mar-l-2' icon={faSearch} />
-
-        <div className='flex-col flex-auto aitems-start adjacent-mar-l-2'>
-          <div className='adjacent-mar-t-1'>{`Position: ${position.x}, ${position.y}`}</div>
-          <div className='adjacent-mar-t-1'>{`Tile Type: ${TILE_TYPES_NAME[tileType]}`}</div>
-          <div className='adjacent-mar-t-1'>{`Light Level: ${lightLevel}`}</div>
-          <div className='adjacent-mar-t-1'>{`Characters: ${charactersHere.length}`}</div>
-          <div className='adjacent-mar-t-1'>{`Has Encounter: ${encounterHere !== undefined}`}</div>
-        </div>
-      </div>
-    )
-  }
-}

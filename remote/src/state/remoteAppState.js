@@ -8,9 +8,10 @@ import Model from 'models/Model';
 
 import logger from 'utilities/logger.remote';
 
-const createDate = new Date();
+import * as mapGenerationUtils from 'utilities.shared/mapGenerationUtils';
 
 // TESTING
+const createDate = new Date();
 const _name = (() => {
   const firsts = ['amazing', 'cool', 'ticklish', 'rainbow', 'cheerful', 'sleepy', 'poopy', 'rectangular', 'transparent', 'plaid', 'laughing'];
   const seconds = ['diamond', 'jello', 'treater', 'tricker', 'pumpkin', 'ghost', 'vampire', 'muppet', 'tattler', 'cowboy', 'pokemon', 'triangle'];
@@ -78,6 +79,9 @@ export class RemoteStateModel extends Model {
         return stateModel.get('lobbyData').filter((client) => (client.isInGame));
       },
     });
+
+    // test
+    this.generateNewMap();
   }
   /**
    * attach listeners to the websocket
@@ -142,7 +146,16 @@ export class RemoteStateModel extends Model {
       });
     });
   }
+  /**
+   * generates a New Map for the current Gamestate
+   *
+   */
+  generateNewMap() {
+    const testHistory = mapGenerationUtils.generateMap();
+    this.set({mapHistory: testHistory});
+  }
 }
+
 // prepare default state based on current path
 const currentPath = window.location.pathname;
 const isPathEditorMode = currentPath === '/encounter_editor' || currentPath === '/tile_editor';

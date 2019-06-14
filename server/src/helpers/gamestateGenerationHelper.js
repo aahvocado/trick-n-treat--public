@@ -1,6 +1,7 @@
 import {
   HOME_BIOME_SETTINGS,
   GRAVEYARD_BIOME_SETTINGS,
+  FANCY_BIOME_SETTINGS,
 } from 'constants/biomeSettings';
 import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
 
@@ -54,6 +55,7 @@ export function generateNewMap() {
 
   // -- generate biomes
   generateGraveyard();
+  generateFancyNeighborhood();
 
   generateSmallWoods();
   generateSmallWoods();
@@ -103,17 +105,27 @@ export function generateHomeBiome() {
   const tileMapModel = gameState.get('tileMapModel');
   const biomeMapModel = mapGenerationUtils.createHomeBiomeModel(tileMapModel, HOME_BIOME_SETTINGS);
 
+  logger.game('. . and House Encounters');
   const {
     numHouses,
   } = HOME_BIOME_SETTINGS;
-  logger.game('. . and House Encounters');
 
-  const validLocations = biomeMapModel.getPointsAdjacentToWalkableTile(1, 1, 1);
-  for (let i=0; i<numHouses; i++) {
-    const randomLocationIdx = mathUtils.getRandomIntInclusive(0, validLocations.length - 1);
-    const houseLocation = validLocations.splice(randomLocationIdx, 1)[0];
+  // in an attempt to be more efficient, we'll find potential locations first
+  const potentialLocations = biomeMapModel.getPointsAdjacentToWalkableTile(1, 1, 1);
+
+  let housesGenerated = 0;
+  while (housesGenerated < numHouses) {
+    const randomLocationIdx = mathUtils.getRandomIntInclusive(0, potentialLocations.length - 1);
+    const houseLocation = potentialLocations.splice(randomLocationIdx, 1)[0];
+
+    // try not to create a house near another house
+    if (biomeMapModel.hasAdjacentTileType(houseLocation, TILE_TYPES.HOUSE)) {
+      continue;
+    }
+
+    // good location, place it
+    housesGenerated += 1;
     biomeMapModel.setTileAt(houseLocation, TILE_TYPES.HOUSE);
-
     placeHouse(biomeMapModel, houseLocation);
   }
 
@@ -142,8 +154,8 @@ export function generateGraveyard() {
 
   // generate the path (and for now mark some points with a different tile type)
   tileMapModel.generatePath(nearestPoint, connectingPoint, TILE_TYPES.DEBUG);
-  biomeMapModel.setTileAt(connectingPoint, TILE_TYPES.CONNECTOR);
-  biomeMapModel.setTileAt(nearestPoint, TILE_TYPES.CONNECTOR);
+  biomeMapModel.setTileAt(connectingPoint, TILE_TYPES.DEBUG_WHITE);
+  biomeMapModel.setTileAt(nearestPoint, TILE_TYPES.DEBUG_WHITE);
 
   // merge with main map and add it to the BiomeList
   tileMapModel.mergeMatrixModel(biomeMapModel);
@@ -170,8 +182,58 @@ export function generateSmallWoods() {
 
   // generate the path (and for now mark some points with a different tile type)
   tileMapModel.generatePath(nearestPoint, connectingPoint, TILE_TYPES.DEBUG);
-  biomeMapModel.setTileAt(connectingPoint, TILE_TYPES.CONNECTOR);
-  biomeMapModel.setTileAt(nearestPoint, TILE_TYPES.CONNECTOR);
+  biomeMapModel.setTileAt(connectingPoint, TILE_TYPES.DEBUG_WHITE);
+  biomeMapModel.setTileAt(nearestPoint, TILE_TYPES.DEBUG_WHITE);
+
+  // merge with main map and add it to the BiomeList
+  tileMapModel.mergeMatrixModel(biomeMapModel);
+  gameState.get('biomeList').push(biomeMapModel);
+  return biomeMapModel;
+}
+/**
+ * @returns {MapModel}
+ */
+export function generateFancyNeighborhood() {
+  logger.game('. Generating Fancy Biome');
+  const tileMapModel = gameState.get('tileMapModel');
+  const biomeMapModel = mapGenerationUtils.createFancyBiomeModel(tileMapModel, FANCY_BIOME_SETTINGS);
+
+  logger.game('. . and House Encounters');
+  // in an attempt to be more efficient, we'll find potential locations first
+  const potentialLocations = biomeMapModel.getPointsAdjacentToWalkableTile(1, 1, 1);
+
+  const numHouses = 10;
+  let housesGenerated = 0;
+  while (housesGenerated < numHouses) {
+    const randomLocationIdx = mathUtils.getRandomIntInclusive(0, potentialLocations.length - 1);
+    const houseLocation = potentialLocations.splice(randomLocationIdx, 1)[0];
+
+    // try not to create a house near another house
+    if (biomeMapModel.hasAdjacentTileType(houseLocation, TILE_TYPES.HOUSE)) {
+      continue;
+    }
+
+    // good location, place it
+    housesGenerated += 1;
+    biomeMapModel.setTileAt(houseLocation, TILE_TYPES.HOUSE);
+    placeHouse(biomeMapModel, houseLocation);
+  }
+
+  // pick a random border point as the point to start connecting from
+  logger.game('. . and trying to connect it');
+  const borderPoints = biomeMapModel.getBorderPoints();
+  for (let i=0; i<4; i++) {
+    const randomPointIdx = mathUtils.getRandomIntInclusive(0, borderPoints.length - 1);
+    const connectingPoint = borderPoints.splice(randomPointIdx, 1)[0];
+
+    // find the nearest tile on the main map to connect to
+    const nearestPoint = tileMapModel.getPointOfNearestWalkableType(connectingPoint, 12);
+
+    // generate the path (and for now mark some points with a different tile type)
+    tileMapModel.generatePath(nearestPoint, connectingPoint, TILE_TYPES.DEBUG);
+    biomeMapModel.setTileAt(connectingPoint, TILE_TYPES.DEBUG_WHITE);
+    biomeMapModel.setTileAt(nearestPoint, TILE_TYPES.DEBUG_WHITE);
+  }
 
   // merge with main map and add it to the BiomeList
   tileMapModel.mergeMatrixModel(biomeMapModel);

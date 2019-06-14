@@ -16,11 +16,6 @@ import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 export const TILE_COLOR_MAP = {
   [TILE_TYPES.EMPTY]: '#313131',
 
-  [TILE_TYPES.DEBUG]: '#e5fdf4',
-  [TILE_TYPES.LIT_DEBUG]: '#e5fdf4',
-  [TILE_TYPES.CONNECTOR]: '#edf7c4',
-  [TILE_TYPES.LIT_CONNECTOR]: '#edf7c4',
-
   [TILE_TYPES.PATH]: '#8e3e3e',
   [TILE_TYPES.LIT_PATH]: '#8e3e3e',
 
@@ -53,6 +48,27 @@ export const TILE_COLOR_MAP = {
   [TILE_TYPES.TREE_THREE]: '#3a7d3a',
   [TILE_TYPES.SPOOKY_TREE_ONE]: '#5a2e2e',
   [TILE_TYPES.BUSH]: '#3a7d3a',
+
+  // -- debugging styles
+  [TILE_TYPES.DEBUG_RED]: '#f44253',
+  [TILE_TYPES.DEBUG_ORANGE]: '#ffaa32',
+  [TILE_TYPES.DEBUG_YELLOW]: '#f1ff3a',
+  [TILE_TYPES.DEBUG_GREEN]: '#4aef55',
+  [TILE_TYPES.DEBUG_BLUE]: '#4150f2',
+  [TILE_TYPES.DEBUG_INDIGO]: '#4b0082',
+  [TILE_TYPES.DEBUG_VIOLET]: '#8A2BE2',
+  [TILE_TYPES.DEBUG_BLACK]: '#212020',
+  [TILE_TYPES.DEBUG_WHITE]: '#ffffff',
+
+  [TILE_TYPES.DEBUG_WALL_RED]: '#f44253',
+  [TILE_TYPES.DEBUG_WALL_ORANGE]: '#ffaa32',
+  [TILE_TYPES.DEBUG_WALL_YELLOW]: '#f1ff3a',
+  [TILE_TYPES.DEBUG_WALL_GREEN]: '#4aef55',
+  [TILE_TYPES.DEBUG_WALL_BLUE]: '#4150f2',
+  [TILE_TYPES.DEBUG_WALL_INDIGO]: '#4b0082',
+  [TILE_TYPES.DEBUG_WALL_VIOLET]: '#8A2BE2',
+  [TILE_TYPES.DEBUG_WALL_BLACK]: '#212020',
+  [TILE_TYPES.DEBUG_WALL_WHITE]: '#ffffff',
 };
 /**
  * @param {Color} color

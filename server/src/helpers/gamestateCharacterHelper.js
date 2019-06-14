@@ -91,12 +91,20 @@ export function handleClientRejoin(clientModel) {
   serverState.emitLobbyUpdate();
   serverState.emitGameUpdate();
 
-  // check if the user rejoined and it is actually their turn
-  const isCurrentCharacter = gameState.get('currentCharacter').get('clientId') === clientId;
+  // check if there is a `currentCharacter`
+  const currentCharacter = gameState.get('currentCharacter');
+  if (currentCharacter === null) {
+    return;
+  }
+
+  // is it the user that just rejoined?
+  if (currentCharacter.get('clientId') !== clientId) {
+    return;
+  }
 
   // check if there is an `activeEncounter` to send them to finish
   const activeEncounter = gameState.get('activeEncounter');
-  if (isCurrentCharacter && activeEncounter !== null) {
+  if (activeEncounter !== null) {
     clientModel.emitEncounter(activeEncounter);
   }
 }
@@ -159,7 +167,7 @@ export function findCharacterByClientId(clientId) {
  */
 export function updateCharacterPosition(characterModel, position) {
   // nothing to do if given direction is not walkable
-  if (!gameState.isWalkableAt(position)) {
+  if (!gameState.get('tileMapModel').isWalkableAt(position)) {
     logger.warning(`Invalid location - ${position.toArray()} is unwalkable.`);
     return;
   }
@@ -198,7 +206,7 @@ export function moveCharacterTo(characterModel, position) {
   }
 
   // do nothing if destination is unwalkable
-  if (!gameState.isWalkableAt(position)) {
+  if (!gameState.get('tileMapModel').isWalkableAt(position)) {
     return;
   }
 

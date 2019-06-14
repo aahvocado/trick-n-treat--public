@@ -166,7 +166,7 @@ export default class ClientModel extends Model {
 
     // set stat attribute
     if (action === 'set') {
-      this.get('myCharacter').setStatById(statId, value);
+      this.get('myCharacter').setStatById(statId, Number(value));
       this.emitMyCharacter();
     }
 
