@@ -4,7 +4,7 @@ import {extendObservable} from 'mobx';
 
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
-import Model from 'models/Model';
+import Model from 'models/Model'; // todo - use shared
 
 import logger from 'utilities/logger.remote';
 

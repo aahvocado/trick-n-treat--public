@@ -1,8 +1,9 @@
 // import Point from '@studiomoniker/point';
+import array2D from 'array2d';
 
 import {TILE_TYPES} from 'constants.shared/tileTypes';
 
-import MatrixModel from 'models.shared/MatrixModel';
+import Model from 'models.shared/Model';
 
 import * as mapUtils from 'utilities.shared/mapUtils';
 
@@ -11,31 +12,97 @@ import * as mapUtils from 'utilities.shared/mapUtils';
  *
  * @typedef {Model} MapModel
  */
-export default class MapModel extends MatrixModel {
+export default class MapModel extends Model {
   /** @override */
   constructor(newAttributes = {}) {
     super({
       /** @type {Matrix} */
-      matrix: [[]],
-      /** @type {Object} */
-      mapSettings: undefined,
+      matrix: undefined,
+      /** @type {Number} */
+      defaultWidth: 1,
+      /** @type {Number} */
+      defaultHeight: 1,
+      /** @type {*} */
+      defaultTileType: null,
+      /** @type {Grid} */
+      grid: undefined,
+
       /** @type {Array<Matrix>} */
       mapHistory: [],
-      // other
+      /** @type {Object} */
       ...newAttributes,
     });
 
-    // if there is a matrix defined, the first one in the history is it
-    if (!this.hasUndefinedDefaultMatrix()) {
-      this.set({mapHistory: [this.getMatrix()]});
-    };
+    // if no `matrix` was given, then we'll make one automatically
+    const hasDefinendGrid = !this.hasUndefinedGrid();
+    if (!hasDefinendGrid) {
+      this.resetMatrix();
+    }
+
+    // otherwise, we can set the base dimensions to our Matrix`
+    if (hasDefinendGrid) {
+      const matrix = this.get('matrix');
+      this.set({
+        defaultWidth: matrixUtils.getWidth(matrix),
+        defaultHeight: matrixUtils.getHeight(matrix),
+      });
+    }
 
     // -- keep track of changes to the map
+    // this.set({mapHistory: [this.get('matrix')]});
     this.onChange('matrix', (matrix) => {
       this.get('mapHistory').push(matrix);
     });
   }
+  /**
+   * replaces this matrix with another
+   * use this to maintain the observable reference
+   *
+   * @param {Grid} newGrid
+   */
+  replace(newGrid) {
+    this.get('grid').replace(newGrid);
+  }
   // -- class methods
+  /**
+   * finds if the current matrix is not yet defined
+   *
+   * @returns {Boolean}
+   */
+  hasUndefinedGrid() {
+    return this.get('matrix') === undefined || this.getMatrix().toString() === '' || (this.getWidth() === 0 && this.getHeight() === 0);
+  }
+  /**
+   * creates a Matrix and sets the attribute,
+   *  if no parameters are passed it will use base attributes
+   *
+   * @param {Number} [width]
+   * @param {Number} [height]
+   * @param {TileType} [tileType]
+   */
+  resetMatrix(width = this.get('defaultWidth'), height = this.get('defaultHeight'), tileType = this.get('defaultTileType')) {
+    if (width * height > 1000) {
+      console.error('Don\t do it bro!');
+      return;
+    }
+
+    const baseMatrix = matrixUtils.createMatrix(width, height, tileType);
+    this.get('matrix').clear();
+    this.get('matrix').replace(baseMatrix);
+    this.set({
+      defaultWidth: width,
+      defaultHeight: height,
+      defaultTileType: tileType,
+    });
+  }
+  /**
+   * gets a shallow copy of this Matrix
+   *
+   * @returns {Matrix}
+   */
+  getMatrix() {
+    return this.get('matrix').slice();
+  }
   /**
    * finds if a matrix contains a type
    *
@@ -131,10 +198,6 @@ export default class MapModel extends MatrixModel {
    */
   getUnvisitedCount() {
     return this.getUnvisitedCells().length;
-  }
-  /** @override */
-  export() {
-    return this.map((cell) => cell.export());
   }
   // -- implements `mapUtils.js`
   /**

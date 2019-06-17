@@ -4,7 +4,7 @@ import Point from '@studiomoniker/point';
 import {POINTS} from 'constants.shared/points';
 import {TILE_TYPES} from 'constants.shared/tileTypes';
 
-import MatrixModel from 'models.shared/MatrixModel';
+import MapModel from 'models.shared/MapModel';
 
 import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
 import * as mathUtils from 'utilities.shared/mathUtils';
@@ -523,7 +523,7 @@ export function getRandomEmptyLocationNearWalkableTile(matrix, width = 1, height
  * @returns {Boolean}
  */
 export function isBorderPoint(matrix, point) {
-  const matrixModel = new MatrixModel({matrix: matrix});
+  const matrixModel = new MapModel({matrix: matrix});
 
   // if this tile is not walkable, we don't need to do any other checks
   const tileType = matrixModel.getTileAt(point);
@@ -564,7 +564,7 @@ export function isBorderPoint(matrix, point) {
 export function getBorderPoints(matrix) {
   let borderPointsList = [];
 
-  const matrixModel = new MatrixModel({matrix: matrix});
+  const matrixModel = new MapModel({matrix: matrix});
   matrixModel.forEach((tileType, tilePoint) => {
     if (isBorderPoint(matrix, tilePoint)) {
       borderPointsList.push(tilePoint);

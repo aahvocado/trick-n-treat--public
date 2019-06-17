@@ -18,6 +18,7 @@
     "@studiomoniker/point": "^2.0.0",
     "@svgr/webpack": "4.1.0",
     "aah-util-css": "^0.2.2",
+    "array2d": "0.0.5",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "9.0.0",
     "babel-jest": "23.6.0",

@@ -31,7 +31,6 @@ import remoteAppState from 'state/remoteAppState';
 
 import debounce from 'utilities.shared/debounce';
 import * as matrixUtils from 'utilities.shared/matrixUtils';
-import {TILE_COLOR_MAP} from 'utilities/tileStyleUtils';
 
 /**
  * page for tile editing
@@ -175,7 +174,7 @@ class TileEditorPage extends Component {
                 style={{right: '10px', top: '70px'}}
                 tileData={{
                   position: hoveredTilePos,
-                  tileType: matrixUtils.getTileAt(mapMatrix, hoveredTilePos),
+                  tileType: matrixUtils.getTileAt(mapMatrix, hoveredTilePos).tileType,
                 }}
               />
             }
@@ -188,30 +187,19 @@ class TileEditorPage extends Component {
                     key={`tile-map-row-${rowIdx}-key`}
                   >
                     {/* Cells */}
-                    { useCells && mapRowData.map((tileData, colIdx) => {
-                      return (
-                        <div
-                          className='boxsizing-border'
-                          key={`tile-item-${colIdx}-${rowIdx}-key`}
-                          style={{
-                            backgroundColor: TILE_COLOR_MAP[tileData.tileType],
-                            width: `${tileSize}px`,
-                            height: `${tileSize}px`,
-                            borderStyle: 'solid',
-                            borderWidth: '2px',
-                            borderLeftColor: tileData.left ? 'black' : 'transparent',
-                            borderRightColor: tileData.right ? 'black' : 'transparent',
-                            borderTopColor: tileData.top ? 'black' : 'transparent',
-                            borderBottomColor: tileData.bottom ? 'black' : 'transparent',
-                          }}
-                        >
-                        </div>
-                      )
-                    })}
-
-                    {/* Tiles */}
-                    { !useCells && mapRowData.map((tileType, colIdx) => {
+                    { mapRowData.map((cellData, colIdx) => {
                       const position = new Point(colIdx, rowIdx);
+
+                      const tileType = useCells ? cellData.tileType : cellData;
+                      // const style = useCells ? {
+                      //   borderStyle: 'solid',
+                      //   borderWidth: '2px',
+                      //   borderLeftColor: cellData.get('left') ? 'black' : 'transparent',
+                      //   borderRightColor: cellData.get('right') ? 'black' : 'transparent',
+                      //   borderTopColor: cellData.get('top') ? 'black' : 'transparent',
+                      //   borderBottomColor: cellData.get('bottom') ? 'black' : 'transparent',
+                      // } : undefined;
+
                       return (
                         <TileItemComponent
                           key={`tile-item-${colIdx}-${rowIdx}-key`}
@@ -222,7 +210,7 @@ class TileEditorPage extends Component {
 
                           // -- props from parent
                           tileSize={tileSize}
-                          onTileClick={this.handleOnClickTile}
+                          // onTileClick={this.handleOnClickTile}
                           onTileHover={this.handleOnHoverTile}
                           // onTileLeave={this.handleOnLeaveTile}
                         />
