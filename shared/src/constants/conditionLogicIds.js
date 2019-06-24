@@ -34,7 +34,7 @@ export const NUMBER_CONDITION_LOGIC_ID_LIST = [
 export const POINT_CONDITION_LOGIC_ID_LIST = [
 ];
 /**
- * list of all triggers that utilize a "tileType" property
+ * list of all triggers that utilize a "tile" property
  */
 export const TILETYPE_CONDITION_LOGIC_ID_LIST = [
 ];

@@ -1,7 +1,7 @@
 import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
 
 import {GAME_MODE} from 'constants.shared/gameModes';
-import {TILE_TYPES} from 'constants.shared/tileTypes';
+import {TILE_ID} from 'constants.shared/tileIds';
 
 import gameState from 'state/gameState';
 import serverState from 'state/serverState';
@@ -49,8 +49,8 @@ export function resetState() {
   gameState.get('biomeList').import([]);
 
   // reset Maps
-  gameState.get('tileMapModel').resetMatrix(MAP_WIDTH, MAP_HEIGHT, TILE_TYPES.EMPTY);
-  gameState.get('lightMapModel').resetMatrix(MAP_WIDTH, MAP_HEIGHT, 0);
+  gameState.get('mapGridModel').reset(MAP_WIDTH, MAP_HEIGHT, TILE_ID.EMPTY);
+  gameState.get('lightingModel').reset(MAP_WIDTH, MAP_HEIGHT, 0);
 
   // reset Instances
   gameState.resetEncounterHelper();
@@ -315,15 +315,15 @@ export function updateLighting() {
   logger.lifecycle('. updateLighting()');
 
   // reset the light map first
-  gameState.get('lightMapModel').resetMatrix();
+  gameState.get('lightingModel').reset();
 
-  // then rebuild the light sources
-  const lightSourceList = gamestateGenerationHelper.generateLightSourceList();
+  // // then rebuild the light sources
+  // const lightSourceList = gamestateGenerationHelper.generateLightSourceList();
 
-  // light up those Light Sources
-  lightSourceList.forEach((lightPoint) => {
-    gameState.updateLightLevelsAt(lightPoint, 6, {shouldOverride: true});
-  });
+  // // light up those Light Sources
+  // lightSourceList.forEach((lightPoint) => {
+  //   gameState.updateLightLevelsAt(lightPoint, 6, {shouldOverride: true});
+  // });
 
   // light up Characters
   const characterList = gameState.get('characterList');

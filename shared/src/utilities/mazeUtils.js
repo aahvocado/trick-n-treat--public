@@ -1,18 +1,12 @@
 import Point from '@studiomoniker/point';
 
-import {TILE_TYPES} from 'constants.shared/tileTypes';
-import {POINTS} from 'constants.shared/points';
+import {TILE_ID} from 'constants.shared/tileIds';
 
-import CellModel from 'models.shared/CellModel';
+// import CellModel from 'models.shared/CellModel';
 
-// import randomizeArray from 'utilities.shared/randomizeArray';
-import convertObservableToJs from 'utilities.shared/convertObservableToJs';
-import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
-import * as mapUtils from 'utilities.shared/mapUtils';
 import * as mathUtils from 'utilities.shared/mathUtils';
-import * as matrixUtils from 'utilities.shared/matrixUtils';
 import * as pointUtils from 'utilities.shared/pointUtils';
-import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
+import * as tileUtils from 'utilities.shared/tileUtils';
 
 /**
  * todo
@@ -20,57 +14,68 @@ import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
  * @param {GridModel} gridModel
  * @param {Point} startingPoint
  * @param {Object} [options]
- * @property {TileType} [options.stepType]
+ * @property {TileId} [options.tileToUse]
  *
  * @returns {GridModel}
  */
-export function generateMaze(gridModel, startingPoint, options = {}) {
+export function generateMaze(gridModel, startingPoint = new Point(0, 0), options = {}) {
   const {
-    // stepType = TILE_TYPES.DEBUG_WALL_WHITE,
+    tileToUse = TILE_ID.DEBUG.GREEN,
   } = options;
+
+  const isCarvable = (tile) => {
+    return tile === TILE_ID.EMPTY_WALL;
+  };
+
+  let iterationCount = 0;
 
   // keep track of points for backtracking
   const startingCell = gridModel.getAt(startingPoint);
   const path = [startingCell];
   while (path.length > 0) {
+    iterationCount++;
     const currentCell = path.pop();
     const currentPoint = currentCell.get('point');
     currentCell.set({
-      tileType: TILE_TYPES.DEBUG_WHITE,
+      tile: TILE_ID.DEBUG.WHITE,
       visited: true,
     });
-    gridModel.snapshot();
+
+    // take a snapshot every third iteration
+    if (iterationCount % 3 === 0) {
+      gridModel.snapshot();
+    }
 
     // find potential points that are valid when two spaces away
     const potentialPoints = [];
 
     const pointAbove = pointUtils.createPointAbove(currentPoint, 2);
     const cellAbove = gridModel.getAt(pointAbove);
-    if (cellAbove !== undefined && cellAbove.get('visited') === false && tileTypeUtils.isWallTile(cellAbove.get('tileType'))) {
+    if (cellAbove !== undefined && cellAbove.get('visited') === false && isCarvable(cellAbove.get('tile'))) {
       potentialPoints.push(cellAbove);
     }
 
     const pointRight = pointUtils.createPointRight(currentPoint, 2);
     const cellRight = gridModel.getAt(pointRight);
-    if (cellRight !== undefined && cellRight.get('visited') === false && tileTypeUtils.isWallTile(cellRight.get('tileType'))) {
+    if (cellRight !== undefined && cellRight.get('visited') === false && isCarvable(cellRight.get('tile'))) {
       potentialPoints.push(cellRight);
     }
 
     const pointBelow = pointUtils.createPointBelow(currentPoint, 2);
     const cellBelow = gridModel.getAt(pointBelow);
-    if (cellBelow !== undefined && cellBelow.get('visited') === false && tileTypeUtils.isWallTile(cellBelow.get('tileType'))) {
+    if (cellBelow !== undefined && cellBelow.get('visited') === false && isCarvable(cellBelow.get('tile'))) {
       potentialPoints.push(cellBelow);
     }
 
     const pointLeft = pointUtils.createPointLeft(currentPoint, 2);
     const cellLeft = gridModel.getAt(pointLeft);
-    if (cellLeft !== undefined && cellLeft.get('visited') === false && tileTypeUtils.isWallTile(cellLeft.get('tileType'))) {
+    if (cellLeft !== undefined && cellLeft.get('visited') === false && isCarvable(cellLeft.get('tile'))) {
       potentialPoints.push(cellLeft);
     }
 
     // if there are no available potentialPoints, we can start backtracking
     if (potentialPoints.length <= 0) {
-      currentCell.set({tileType: TILE_TYPES.DEBUG_GREEN});
+      currentCell.set({tile: tileToUse});
 
       if (path.length <= 0) {
         // console.log('. Done.');
@@ -81,7 +86,7 @@ export function generateMaze(gridModel, startingPoint, options = {}) {
     };
 
     // randomly pick one of the potential points
-    const nextCell = potentialPoints[mathUtils.getRandomIntInclusive(0, potentialPoints.length - 1)];
+    const nextCell = potentialPoints[mathUtils.getRandomInt(0, potentialPoints.length - 1)];
 
     // current is above the next
     if (pointUtils.isPointAbove(currentCell.get('point'), nextCell.get('point'))) {
@@ -89,7 +94,7 @@ export function generateMaze(gridModel, startingPoint, options = {}) {
       const neighborBelow = gridModel.getAt(pointBelow1);
       if (neighborBelow !== undefined) {
         neighborBelow.set({
-          tileType: TILE_TYPES.DEBUG_GREEN,
+          tile: tileToUse,
           visited: true,
         });
       }
@@ -100,7 +105,7 @@ export function generateMaze(gridModel, startingPoint, options = {}) {
       const neighborLeft = gridModel.getAt(pointLeft1);
       if (neighborLeft !== undefined) {
         neighborLeft.set({
-          tileType: TILE_TYPES.DEBUG_GREEN,
+          tile: tileToUse,
           visited: true,
         });
       }
@@ -111,7 +116,7 @@ export function generateMaze(gridModel, startingPoint, options = {}) {
       const neighborAbove = gridModel.getAt(pointAbove1);
       if (neighborAbove !== undefined) {
         neighborAbove.set({
-          tileType: TILE_TYPES.DEBUG_GREEN,
+          tile: tileToUse,
           visited: true,
         });
       }
@@ -122,7 +127,7 @@ export function generateMaze(gridModel, startingPoint, options = {}) {
       const neighborRight = gridModel.getAt(pointRight1);
       if (neighborRight !== undefined) {
         neighborRight.set({
-          tileType: TILE_TYPES.DEBUG_GREEN,
+          tile: tileToUse,
           visited: true,
         });
       }
@@ -133,55 +138,111 @@ export function generateMaze(gridModel, startingPoint, options = {}) {
     path.push(nextCell);
 
     // track history
-    gridModel.snapshot()
+    gridModel.snapshot();
   }
 
   // finished
-  gridModel.snapshot()
+  gridModel.snapshot();
   return gridModel;
 }
 /**
- * opens the different regions to the maze
- * @link https://github.com/dstromberg2/maze-generator
+ * generates a maze in all available regions
  *
  * @param {GridModel} gridModel
- * @param {Object} [options]
- * @property {Number} [options.numToOpen]
+ * @param {Object} options
  */
-export function connectRegions(gridModel, options = {}) {
-  const {
-    numToOpen = 10,
-  } = options;
+export function generateMazeEverywhere(gridModel, options = {}) {
+  gridModel.nthCell(2, 0, (cell) => {
+    const neighboringCells = gridModel.neighbors(cell.get('point'));
 
-  const possibleConnectors = [];
+    // if every single cell surrounding this is a Wall, we can carve a maze through it
+    const isNearExistingTile = neighboringCells.some((neighborCell) => neighborCell !== undefined && !tileUtils.isWallTile(neighborCell.get('tile')));
+    if (!isNearExistingTile) {
+      generateMaze(gridModel, cell.get('point'), options);
+    }
+  });
+}
+/**
+ * @param {GridModel} gridModel
+ * @param {Point} point
+ * @param {Function} fillFunction
+ * @returns {GridModel}
+ */
+export function floodfill(gridModel, point, fillFunction) {
+  const queue = [gridModel.getAt(point)];
 
-  // go through each cell and see if one their adjacent walls
-  //  is next to a cell of a different region,
-  //  if so, then it can be opened up
-  gridModel.forEach((cell) => {
-    const point = cell.get('point');
-    const tile = cell.get('tileType');
+  while (queue.length > 0) {
+    const currentCell = queue.pop();
+    const currentPoint = currentCell.get('point');
 
-    // only walls can become connectors
-    if (!tileTypeUtils.isWallTile(tile)) {
-      return;
+    // if this tile is unfilled (which it 100% of the time should be or something went wrong), fill it
+    if (!currentCell.get('filled')) {
+      fillFunction(currentCell);
+      currentCell.set({
+        filled: true,
+      });
     }
 
-    // find the tiles adjacent to this that are not walls
-    const adjacentTiles = gridModel.getAdjacent(point)
-      .map((adjacentCell) => adjacentCell.get('tileType'))
-      .filter((adjacentTile) => !tileTypeUtils.isWallTile(adjacentTile));
+    // get the points of neighbors that are not yet filled
+    const adjacentCells = gridModel.orthogonals(currentPoint)
+      .filter((adjacentCell) => adjacentCell !== undefined)
+      .filter((adjacentCell) => !adjacentCell.get('filled'))
+      .filter((adjacentCell) => !tileUtils.isWallTile(adjacentCell.get('tile')));
 
-    // find unique tiles (which represent unique regions),
-    //  and it can be a connector if there are at least two unique regions
-    const distinctTiles = new Set(adjacentTiles);
-    if (distinctTiles.size >= 2) {
-      possibleConnectors.push(cell);
-    };
+    // add any unfilled neighbors to continue on to check
+    queue.push(...adjacentCells);
+  }
+
+  return gridModel;
+}
+/**
+ * @param {GridModel} gridModel
+ * @returns {GridModel}
+ */
+export function removeDeadEnds(gridModel) {
+  // start by finding dead ends on the map
+  const deadendPoints = gridModel.find((cell) => {
+    if (tileUtils.isWallTile(cell.get('tile'))) {
+      return false;
+    }
+
+    const cellPoint = cell.get('point');
+    const adjacentWalkableCells = gridModel.orthogonals(cellPoint)
+      .filter((adjacentCell) => adjacentCell !== undefined)
+      .filter((adjacentCell) => !tileUtils.isWallTile(adjacentCell.get('tile')));
+
+    return adjacentWalkableCells.length === 1;
   });
 
-  // make note of it
-  possibleConnectors.forEach((possibleCell) => {
-    possibleCell.set({tileType: TILE_TYPES.DEBUG_WALL_BLUE});
-  });
+  // start running through each point and their neighbors and setting them as walls
+  const queue = [...deadendPoints];
+  while (queue.length > 0) {
+    const currentPoint = queue.pop();
+    const currentCell = gridModel.getAt(currentPoint);
+    currentCell.set({
+      // tile: currentCell.get('tile') + 1,
+      tile: TILE_ID.EMPTY_WALL,
+      region: undefined,
+    });
+
+    // find that one neighbor
+    const adjacentWalkableCells = gridModel.orthogonals(currentPoint)
+      .filter((adjacentCell) => adjacentCell !== undefined)
+      .filter((adjacentCell) => !tileUtils.isWallTile(adjacentCell.get('tile')));
+    const neighborCell = adjacentWalkableCells[0];
+
+    // check if the neighbor is a dead end
+    const neighborAdjacentCells = gridModel.orthogonals(neighborCell.get('point'))
+      .filter((adjacentCell) => adjacentCell !== undefined)
+      .filter((adjacentCell) => !tileUtils.isWallTile(adjacentCell.get('tile')));
+
+    // add it to the queue if so
+    if (neighborAdjacentCells.length === 1) {
+      queue.push(neighborCell.get('point'));
+    }
+
+    gridModel.snapshot();
+  }
+
+  return gridModel;
 }

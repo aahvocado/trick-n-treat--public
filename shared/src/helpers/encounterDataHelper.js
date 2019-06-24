@@ -1,8 +1,7 @@
 import encounterJsonList from 'data.shared/encounterData.json';
 
-import {DATA_TYPE} from 'constants.shared/dataTypes';
+// import {DATA_TYPE} from 'constants.shared/dataTypes';
 
-import arrayContainsArray from 'utilities.shared/arrayContainsArray';
 import convertArrayToMap from 'utilities.shared/convertArrayToMap';
 import * as encounterDataUtils from 'utilities.shared/encounterDataUtils';
 

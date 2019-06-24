@@ -13,7 +13,7 @@ import {
  */
 export default function createImportingAttributes(oldAttributes, newAttributes) {
   // collect the other attributes to be set at once
-  let setAttributes = {};
+  const setAttributes = {};
 
   // iterate through the attributes to see if we handle setting it differently
   const attributeKeys = Object.keys(newAttributes);
@@ -23,7 +23,7 @@ export default function createImportingAttributes(oldAttributes, newAttributes) 
 
     const resultValue = handleImportingValue(oldValue, newValue);
     setAttributes[key] = resultValue;
-  })
+  });
 
   return setAttributes;
 }
@@ -72,7 +72,7 @@ export function handleImportingValue(oldValue, newValue) {
     const oldArrayValue = (wasArray && oldValue.length > 0) ? oldValue[0] : undefined;
     return newValue.map((itemValue) => {
       return handleImportingValue(oldArrayValue, itemValue);
-    })
+    });
   }
 
   // case of oldValue being a Class of some sort

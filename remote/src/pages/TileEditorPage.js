@@ -1,7 +1,9 @@
 import React, { Component, Fragment, PureComponent } from 'react';
+import {NotificationManager} from 'react-notifications';
 import { Redirect } from 'react-router-dom';
 import { observer } from 'mobx-react';
 
+import array2d from 'array2d';
 import Point from '@studiomoniker/point';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -23,14 +25,16 @@ import TileInspectorComponent from 'components/TileInspectorComponent';
 
 import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
 import {
-  TILE_TYPES,
-  TILE_TYPES_NAME,
-} from 'constants.shared/tileTypes';
+  TILE_ID,
+  TILE_ID_NAME,
+} from 'constants.shared/tileIds';
+import {SOCKET_EVENT} from 'constants.shared/socketEvents';
+
+import * as connectionManager from 'managers/connectionManager';
 
 import remoteAppState from 'state/remoteAppState';
 
 import debounce from 'utilities.shared/debounce';
-import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * page for tile editing
@@ -44,8 +48,8 @@ class TileEditorPage extends Component {
     this.handleOnChangeHeightValue = this.handleOnChangeHeightValue.bind(this);
     this.handleOnChangeWidthValue = this.handleOnChangeWidthValue.bind(this);
     this.handleOnChangeTileSizeValue = this.handleOnChangeTileSizeValue.bind(this);
-    this.handleNewMatrix = this.handleNewMatrix.bind(this);
-    this.updateMatrix = debounce(this.updateMatrix.bind(this), 350);
+    this.handleNewGrid = this.handleNewGrid.bind(this);
+    this.updateGrid = debounce(this.updateGrid.bind(this), 350);
 
     this.handleOnClickTile = this.handleOnClickTile.bind(this);
     this.handleOnHoverTile = this.handleOnHoverTile.bind(this);
@@ -54,37 +58,40 @@ class TileEditorPage extends Component {
 
     this.onChangeMapHistoryIdx = this.onChangeMapHistoryIdx.bind(this);
     this.onToggleAutoplayHistory = this.onToggleAutoplayHistory.bind(this);
+    this.onClickRequestHistory = this.onClickRequestHistory.bind(this);
 
-    const mapHistory = remoteAppState.get('mapHistory');
-    const currentTileMatrix = remoteAppState.get('currentTileMatrix');
-    const defaultMapHistoryIdx = mapHistory.length - 1;
-    const defaultMatrix = mapHistory[defaultMapHistoryIdx] || currentTileMatrix || matrixUtils.createMatrix(10, 10, null);
+    const history = remoteAppState.get('history');
+    const currentTileGrid = remoteAppState.get('currentTileGrid');
+    const defaultMapHistoryIdx = history.length - 1;
+    const defaultGrid = history[defaultMapHistoryIdx] || currentTileGrid || array2d.build(10, 10, null);
 
     this.state = {
       /** @type {Point} */
       hoveredTilePos: null,
 
       selectedEditorTile: 'GRASS_EDITOR_TILE',
-      mapMatrix: defaultMatrix,
-      mapWidth: matrixUtils.getWidth(defaultMatrix),
-      mapHeight: matrixUtils.getHeight(defaultMatrix),
-      tileSize: this.getAutoAdjustedTileSize(defaultMatrix),
+      mapGrid: defaultGrid,
+      mapWidth: array2d.width(defaultGrid),
+      mapHeight: array2d.height(defaultGrid),
+      tileSize: this.getAutoAdjustedTileSize(defaultGrid),
 
       /** @type {Boolean} */
       isAutoplayHistory: false,
       /** @type {Number} */
-      mapHistoryIdx: defaultMapHistoryIdx,
+      historyIdx: defaultMapHistoryIdx,
+      /** @type {Boolean} */
+      loading: false,
     }
   }
   /** @override */
   componentDidMount() {
     setInterval(() => {
       if (this.state.isAutoplayHistory) {
-        const mapHistory = remoteAppState.get('mapHistory');
-        const nextIdx = this.state.mapHistoryIdx + 1;
+        const history = remoteAppState.get('history');
+        const nextIdx = this.state.historyIdx + 1;
 
         // if autoplay is about to go above idx, then we have to stop;
-        if (nextIdx > mapHistory.length - 1) {
+        if (nextIdx > history.length - 1) {
           this.onToggleAutoplayHistory();
           return;
         }
@@ -109,10 +116,11 @@ class TileEditorPage extends Component {
     const {
       hoveredTilePos,
       isAutoplayHistory,
-      mapMatrix,
+      loading,
+      mapGrid,
       mapWidth,
       mapHeight,
-      mapHistoryIdx,
+      historyIdx,
       selectedEditorTile,
       tileSize,
     } = this.state;
@@ -120,8 +128,8 @@ class TileEditorPage extends Component {
     const useCells = true;
     const showEditor = false;
 
-    const mapHistory = remoteAppState.get('mapHistory');
-    const isEndOfHistory = mapHistoryIdx === mapHistory.length - 1;
+    const history = remoteAppState.get('history');
+    const isEndOfHistory = historyIdx === history.length - 1;
 
     return (
       <div className='flex-center flex-col color-white bg-primary'>
@@ -134,7 +142,15 @@ class TileEditorPage extends Component {
 
           <ButtonComponent
             className='flex-none adjacent-mar-l-2'
-            disabled={mapHistory.length <= 0}
+            disabled={!remoteAppState.get('isGameInProgress') || loading}
+            onClick={this.onClickRequestHistory}
+          >
+            Request
+          </ButtonComponent>
+
+          <ButtonComponent
+            className='flex-none adjacent-mar-l-2'
+            disabled={history.length <= 0}
             onClick={this.onToggleAutoplayHistory}
           >
             <FontAwesomeIcon className='fsize-3' icon={isAutoplayHistory ? faPause : isEndOfHistory ? faRetweet : faPlay} />
@@ -142,9 +158,9 @@ class TileEditorPage extends Component {
 
           <NumericalMenuComponent
             className='fsize-4 adjacent-mar-l-2'
-            defaultIdx={mapHistoryIdx}
+            defaultIdx={historyIdx}
             maxToShow={7}
-            maxIdx={mapHistory.length - 1}
+            maxIdx={history.length - 1}
             onChange={this.onChangeMapHistoryIdx}
           />
         </div>
@@ -152,7 +168,7 @@ class TileEditorPage extends Component {
         <div className='flex-row height-full bg-primary-darker'>
           { showEditor &&
             <EditorPanel
-              mapMatrix={mapMatrix}
+              mapGrid={mapGrid}
               mapWidth={mapWidth}
               mapHeight={mapHeight}
               tileSize={tileSize}
@@ -163,7 +179,7 @@ class TileEditorPage extends Component {
               onChangeTileSizeValue={this.handleOnChangeTileSizeValue}
               onChangeEditorTile={this.handleOnChangeEditorTile}
 
-              onNewMatrix={this.handleNewMatrix}
+              onNewGrid={this.handleNewGrid}
             />
           }
 
@@ -172,15 +188,12 @@ class TileEditorPage extends Component {
             { hoveredTilePos !== null &&
               <TileInspectorComponent
                 style={{right: '10px', top: '70px'}}
-                tileData={{
-                  position: hoveredTilePos,
-                  tileType: matrixUtils.getTileAt(mapMatrix, hoveredTilePos).tileType,
-                }}
+                tileData={array2d.get(mapGrid, hoveredTilePos.y, hoveredTilePos.x)}
               />
             }
 
             <div className='overflow-hidden bg-grayest flex-auto flex-col aitems-center position-relative bor-4-primary'>
-              { mapMatrix.map((mapRowData, rowIdx) => {
+              { mapGrid.map((mapRowData, rowIdx) => {
                 return (
                   <div
                     className='flex-row flex-grow-only'
@@ -190,7 +203,7 @@ class TileEditorPage extends Component {
                     { mapRowData.map((cellData, colIdx) => {
                       const position = new Point(colIdx, rowIdx);
 
-                      const tileType = useCells ? cellData.tileType : cellData;
+                      const tile = cellData === null ? null : (useCells ? cellData.tile : cellData);
                       // const style = useCells ? {
                       //   borderStyle: 'solid',
                       //   borderWidth: '2px',
@@ -204,7 +217,7 @@ class TileEditorPage extends Component {
                         <TileItemComponent
                           key={`tile-item-${colIdx}-${rowIdx}-key`}
                           // -- props already in data
-                          tileType={tileType}
+                          tile={tile}
                           position={position}
                           lightLevel={LIGHT_LEVEL.MAX}
 
@@ -231,29 +244,29 @@ class TileEditorPage extends Component {
   handleOnClickTile(point) {
     const {
       selectedEditorTile,
-      mapMatrix,
+      mapGrid,
     } = this.state;
 
     const translatedEditorTile = (() => {
       switch(selectedEditorTile) {
         case 'EMPTY_EDITOR_TILE':
-          return TILE_TYPES.EMPTY;
+          return TILE_ID.EMPTY;
         case 'GRASS_EDITOR_TILE':
-          return TILE_TYPES.GRASS;
+          return TILE_ID.GRASS;
         case 'SIDEWALK_EDITOR_TILE':
-          return TILE_TYPES.SIDEWALK;
+          return TILE_ID.SIDEWALK;
         case 'ROAD_EDITOR_TILE':
-          return TILE_TYPES.ROAD;
+          return TILE_ID.ROAD;
         case 'SWAMP_EDITOR_TILE':
-          return TILE_TYPES.SWAMP;
+          return TILE_ID.SWAMP;
         case 'PLANKS_EDITOR_TILE':
-          return TILE_TYPES.PLANKS;
+          return TILE_ID.PLANKS;
         case 'WOODS_EDITOR_TILE':
-          return TILE_TYPES.WOODS;
+          return TILE_ID.WOODS;
         case 'WATER_EDITOR_TILE':
-          return TILE_TYPES.WATER;
+          return TILE_ID.WATER;
         case 'FOREST_EDITOR_TILE':
-          return TILE_TYPES.FOREST;
+          return TILE_ID.FOREST;
         case 'NULL_EDITOR_TILE':
         default:
           return null;
@@ -261,13 +274,13 @@ class TileEditorPage extends Component {
     })();
 
     // look at what's existing, if we're about to use the same type on a tile, then make it empty
-    const existingTileType = matrixUtils.getTileAt(mapMatrix, point);
-    const isIdentitical = existingTileType === translatedEditorTile;
-    const nextTileType = !isIdentitical ? translatedEditorTile : TILE_TYPES.EMPTY;
+    const existingTileId = array2d.get(mapGrid, point.y, point.x);
+    const isIdentitical = existingTileId === translatedEditorTile;
+    const nextTileId = !isIdentitical ? translatedEditorTile : TILE_ID.EMPTY;
 
     // update that tile
-    matrixUtils.setTileAt(mapMatrix, point, nextTileType);
-    this.setState({mapMatrix: mapMatrix});
+    array2d.set(mapGrid, point.y, point.x, nextTileId);
+    this.setState({mapGrid: mapGrid});
   }
   /**
    *
@@ -286,7 +299,7 @@ class TileEditorPage extends Component {
    */
   handleOnChangeHeightValue(newHeight) {
     this.setState({mapHeight: newHeight}, () => {
-      this.updateMatrix();
+      this.updateGrid();
     });
   }
   /**
@@ -294,51 +307,51 @@ class TileEditorPage extends Component {
    */
   handleOnChangeWidthValue(newWidth) {
     this.setState({mapWidth: newWidth}, () => {
-      this.updateMatrix();
+      this.updateGrid();
     });
   }
   /**
    *
    */
-  handleNewMatrix(newMatrix) {
-    if (newMatrix.length === 0) {
+  handleNewGrid(newGrid) {
+    if (newGrid.length === 0) {
       return;
     }
 
-    const newWidth = matrixUtils.getWidth(newMatrix);
-    const newHeight = matrixUtils.getHeight(newMatrix);
+    const newWidth = array2d.width(newGrid);
+    const newHeight = array2d.height(newGrid);
 
     this.setState({
-      mapMatrix: newMatrix,
+      mapGrid: newGrid,
       mapWidth: newWidth,
       mapHeight: newHeight,
-      tileSize: this.getAutoAdjustedTileSize(newMatrix),
+      tileSize: this.getAutoAdjustedTileSize(newGrid),
     });
   }
   /**
    *
    */
-  updateMatrix() {
-    const oldMatrix = this.state.mapMatrix;
+  updateGrid() {
+    const oldGrid = this.state.mapGrid;
     const newHeight = this.state.mapHeight;
     const newWidth = this.state.mapWidth;
 
     // go through and assign old data
-    const newMatrix = matrixUtils.createMatrix(newWidth, newHeight, null);
-    matrixUtils.forEach(newMatrix, (tile, position) => {
-      const oldTileData = oldMatrix[position.y] && oldMatrix[position.y][position.x];
+    const newGrid = array2d.build(newWidth, newHeight, null);
+    array2d.eachCell(newGrid, (tile, row, column) => {
+      const oldTileData = array2d.get(oldGrid, row, column);
       if (oldTileData === null || oldTileData === undefined) {
         return;
       }
 
-      newMatrix[position.y][position.x] = oldTileData;
+      array2d.set(newGrid, row, column, oldTileData);
     });
 
     this.setState({
-      mapMatrix: newMatrix,
+      mapGrid: newGrid,
       mapHeight: newHeight,
       mapWidth: newWidth,
-      tileSize: this.getAutoAdjustedTileSize(newMatrix),
+      tileSize: this.getAutoAdjustedTileSize(newGrid),
     });
   }
   /**
@@ -354,15 +367,15 @@ class TileEditorPage extends Component {
     this.setState({selectedEditorTile: newValue});
   }
   /**
-   * @param {Matrix} matrix
+   * @param {Grid} matrix
    * @returns {Number}
    */
   getAutoAdjustedTileSize(matrix) {
     const minTileSize = 10;
     const maxTileSize = 45;
 
-    const width = matrixUtils.getWidth(matrix);
-    const height = matrixUtils.getHeight(matrix);
+    const width = array2d.width(matrix);
+    const height = array2d.height(matrix);
 
     const excessLimit = 5;
     const excessMapWidth = width > excessLimit ? (width - excessLimit) : 0;
@@ -375,25 +388,39 @@ class TileEditorPage extends Component {
    * @param {Number} idx
    */
   onChangeMapHistoryIdx(idx) {
-    const mapHistory = remoteAppState.get('mapHistory');
-    const nextMatrix = mapHistory[idx];
-    this.setState({mapHistoryIdx: idx}, () => {
-      this.handleNewMatrix(nextMatrix);
+    const history = remoteAppState.get('history');
+    const nextGrid = history[idx];
+    this.setState({historyIdx: idx}, () => {
+      this.handleNewGrid(nextGrid);
     });
   }
   /**
    *
    */
   onToggleAutoplayHistory() {
-    const mapHistory = remoteAppState.get('mapHistory');
+    const history = remoteAppState.get('history');
 
-    const {isAutoplayHistory, mapHistoryIdx} = this.state;
-    const isEndOfHistory = mapHistoryIdx === mapHistory.length - 1;
+    const {isAutoplayHistory, historyIdx} = this.state;
+    const isEndOfHistory = historyIdx === history.length - 1;
 
     this.setState({
-      mapHistoryIdx: isEndOfHistory && !isAutoplayHistory ? 0 : mapHistoryIdx,
+      historyIdx: isEndOfHistory && !isAutoplayHistory ? 0 : historyIdx,
       isAutoplayHistory: !isAutoplayHistory,
     });
+  }
+  /**
+   *
+   */
+  onClickRequestHistory() {
+    connectionManager.socket.emit(SOCKET_EVENT.DEBUG.TO_SERVER.REQUEST_MAP_HISTORY);
+    NotificationManager.info('Request sent, this might take a few seconds.');
+
+    this.setState({loading: true}, () => {
+      connectionManager.socket.on(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY, () => {
+        NotificationManager.success('History received.');
+        this.setState({loading: false});
+      })
+    })
   }
 })
 /**
@@ -425,8 +452,8 @@ class EditorPanel extends PureComponent {
     this.onChangeUseLitTiles = this.onChangeUseLitTiles.bind(this);
     this.onSelectTileEditorType = this.onSelectTileEditorType.bind(this);
 
-    this.createExportedMatrix = this.createExportedMatrix.bind(this);
-    this.handleImportMatrix = this.handleImportMatrix.bind(this);
+    this.createExportedGrid = this.createExportedGrid.bind(this);
+    this.handleImportGrid = this.handleImportGrid.bind(this);
 
     this.state = {
       showModal: false,
@@ -679,31 +706,31 @@ class EditorPanel extends PureComponent {
    *
    */
   onExportClick() {
-    const exportMatrixString = this.createExportedMatrix();
+    const exportGridString = this.createExportedGrid();
     this.setState({
       showModal: true,
-      ModalContent: () => (<ExportModal value={exportMatrixString} />),
+      ModalContent: () => (<ExportModal value={exportGridString} />),
     });
   }
   /**
    * @returns {String}
    */
-  createExportedMatrix() {
-    const {mapMatrix} = this.props;
+  createExportedGrid() {
+    const {mapGrid} = this.props;
 
     const {selectedExportType} = this.state;
     const useTileName = selectedExportType === 'EXPORT_TILE_STRING';
 
     let exportString = '[';
 
-    mapMatrix.forEach((matrixRow, rowIdx) => {
+    mapGrid.forEach((matrixRow, rowIdx) => {
       exportString += '[';
 
       matrixRow.forEach((tileData, colIdx) => {
         if (tileData === undefined) {
           exportString += null;
         } else {
-          exportString += useTileName ? TILE_TYPES_NAME[tileData] : tileData;
+          exportString += useTileName ? TILE_ID_NAME[tileData] : tileData;
         }
 
         if (colIdx < matrixRow.length - 1) {
@@ -712,7 +739,7 @@ class EditorPanel extends PureComponent {
       });
 
       exportString += ']';
-      if (rowIdx < mapMatrix.length - 1) {
+      if (rowIdx < mapGrid.length - 1) {
         exportString += ',\n';
       }
     });
@@ -727,20 +754,20 @@ class EditorPanel extends PureComponent {
   onImportClick() {
     this.setState({
       showModal: true,
-      ModalContent: () => (<ImportModal onClickModalSubmit={this.handleImportMatrix} />),
+      ModalContent: () => (<ImportModal onClickModalSubmit={this.handleImportGrid} />),
     });
   }
   /**
    *
    */
-  handleImportMatrix(matrixText) {
+  handleImportGrid(matrixText) {
     const parseResult = JSON.parse(matrixText);
     if (!Array.isArray(parseResult)) {
       console.error('Did not import a 2D Array');
       return;
     }
 
-    this.props.onNewMatrix(parseResult);
+    this.props.onNewGrid(parseResult);
     this.setState({showModal: false});
   }
   /**
@@ -815,7 +842,7 @@ class ImportModal extends Component {
         <span className='color-black fsize-4'>Import</span>
         <textarea
           className='color-black pad-2 width-full height-full boxsizing-border bor-1-gray'
-          placeholder='I want a Matrix'
+          placeholder='I want a Grid'
           onChange={this.handleOnChangeTextarea.bind(this)}
         />
 

@@ -1,14 +1,15 @@
+import Pathfinding from 'pathfinding';
 import Point from '@studiomoniker/point';
 import array2d from 'array2d';
-import {extendObservable} from 'mobx';
-
-import {TILE_TYPES} from 'constants.shared/tileTypes';
+import {extendObservable, toJS} from 'mobx';
 
 import Model from 'models.shared/Model';
 import ModelList from 'models.shared/ModelList';
 import CellModel from 'models.shared/CellModel';
 
+import * as gridUtils from 'utilities.shared/gridUtils';
 import * as mathUtils from 'utilities.shared/mathUtils';
+import * as tileUtils from 'utilities.shared/tileUtils';
 
 /**
  * class for handling Map methods
@@ -26,7 +27,7 @@ export default class GridModel extends Model {
       defaultWidth: 1,
       /** @type {Number} */
       defaultHeight: 1,
-      /** @type {TileType} */
+      /** @type {TileId} */
       defaultTile: null,
 
       /** @type {Array<Grid>} */
@@ -75,7 +76,23 @@ export default class GridModel extends Model {
    * @param {Grid} newGrid
    */
   replace(newGrid) {
-    this.get('grid').replace(newGrid);
+    // have to update their individual point references
+    const updatedGrid = array2d.map(newGrid, (cell, r, c) => {
+      if (cell == null || cell === undefined) {
+        return cell;
+      }
+
+      if (cell.set !== undefined) {
+        return new CellModel({
+          ...cell.attributes,
+          point: new Point(c, r),
+        });
+      }
+
+      return cell;
+    });
+
+    this.get('grid').replace(updatedGrid);
   }
   // -- unique model functions
   /**
@@ -84,10 +101,24 @@ export default class GridModel extends Model {
    * @returns {Grid}
    */
   snapshot() {
-    const snapshotGrid = this.map((cell) => cell.export());
+    const snapshotGrid = this.map((cell) => {
+      if (cell === null || cell === undefined) {
+        return cell;
+      }
+
+      return cell.export();
+    });
 
     this.get('history').push(snapshotGrid);
     return snapshotGrid;
+  }
+  /**
+   * creates non-mobx observed copy of the grid array
+   *
+   * @returns {Grid}
+   */
+  copyGrid() {
+    return toJS(this.get('grid'));
   }
   // -- unique grid functions
   /**
@@ -105,9 +136,9 @@ export default class GridModel extends Model {
    *
    * @param {Number} [width]
    * @param {Number} [height]
-   * @param {TileType} [tileType]
+   * @param {TileId} [tile]
    */
-  reset(width = this.get('defaultWidth'), height = this.get('defaultHeight'), tileType = this.get('defaultTile')) {
+  reset(width = this.get('defaultWidth'), height = this.get('defaultHeight'), tile = this.get('defaultTile')) {
     if (width * height > 1000) {
       console.error('Don\t do it bro!');
       return;
@@ -117,7 +148,8 @@ export default class GridModel extends Model {
     const baseGrid = array2d.buildWith(width, height, (r, c) => {
       return new CellModel({
         point: new Point(c, r),
-        tileType: tileType,
+        tile: tile,
+        region: tile,
       });
     });
 
@@ -126,6 +158,28 @@ export default class GridModel extends Model {
       defaultWidth: width,
       defaultHeight: height,
     });
+  }
+  /**
+   * finds the a* path from given pointA to pointB
+   *
+   * @param {Point} pointA
+   * @param {Point} pointB
+   * @returns {Array<Point>}
+   */
+  findPath(pointA, pointB) {
+    // create a Pathfinding Grid which is just 0s and 1s
+    const pathingGrid = new Pathfinding.Grid(this.map((cell) => {
+      const cellTile = cell.get('tile');
+      return tileUtils.isWallTile(cellTile) ? 1 : 0;
+    }));
+
+    // find the path
+    const finder = new Pathfinding.AStarFinder();
+    const coordinatePath = finder.findPath(pointA.x, pointA.y, pointB.x, pointB.y, pathingGrid);
+
+    // finder gives us Array of coordinates [x, y] - we'll convert it to a more convenient Array<Point>
+    const pointPath = coordinatePath.map((coordinate) => (new Point(coordinate[0], coordinate[1])));
+    return pointPath;
   }
   /**
    * attempts to find the top-left point of the area where all cells pass true for the callback
@@ -146,8 +200,8 @@ export default class GridModel extends Model {
 
       // randomly find a point that could fit the area
       const randomPoint = new Point(
-        mathUtils.getRandomIntInclusive(0, gridWidth - width - 1),
-        mathUtils.getRandomIntInclusive(0, gridHeight - height - 1),
+        mathUtils.getRandomInt(0, gridWidth - width - 1),
+        mathUtils.getRandomInt(0, gridHeight - height - 1),
       );
 
       // start by passing, but reject if anything in the given callback returns false
@@ -198,38 +252,84 @@ export default class GridModel extends Model {
   }
   /**
    * @param {Point} point
-   * @param {Number} [distance]
-   * @returns {Cell}
+   * @returns {Boolean}
    */
-  getAdjacent(point, distance = 1) {
-    return [
-      this.getAbove(point, distance),
-      this.getRight(point, distance),
-      this.getBelow(point, distance),
-      this.getLeft(point, distance),
-    ].filter(Boolean);
+  isWallAt(point) {
+    const cell = this.getAt(point);
+    if (cell === undefined) {
+      return true;
+    }
+
+    return tileUtils.isWallTile(cell.get('tile'));
   }
   /**
-   * @param {Point} point
-   * @param {Number} [distance]
-   * @returns {Cell}
+   * basically just makes it easier to understand which "distance" method we are using
+   *
+   * @param {Point} pointA
+   * @param {Point} pointB
+   * @returns {Number}
    */
-  getSurrounding(point, distance = 1) {
-    return [
-      this.getAbove(point, distance),
-      this.getRight(point, distance),
-      this.getBelow(point, distance),
-      this.getLeft(point, distance),
+  distance(pointA, pointB) {
+    return this.manhattan(pointA, pointB);
+  }
+  /**
+   * similar to `crop()` except the given point will be the center
+   *
+   * @param {Point} point
+   * @param {Number} width
+   * @param {Number} height
+   * @param {Function} callback
+   * @returns {Grid}
+   */
+  cropAround(point, width, height, callback) {
+    const topLeftPoint = new Point(
+      point.x - Math.floor(width / 2),
+      point.y - Math.floor(height / 2),
+    );
 
-      // diagonally
-      this.getAt(point.clone().addX(distance).addY(distance)),
-      this.getAt(point.clone().subtractX(distance).subtractY(distance)),
-      this.getAt(point.clone().addX(distance).subtractY(distance)),
-      this.getAt(point.clone().subtractX(distance).addY(distance)),
-    ].filter(Boolean);
+    if (gridUtils.isPointOutOfBounds(this.copyGrid(), topLeftPoint)) {
+      console.warn(`cropAround() ${point.toString()} is out of bounds.`);
+      // return;
+    }
+
+    return this.crop(topLeftPoint, width, height);
+  }
+  /**
+   * similar to `forArea()` except the given point will be the center
+   *
+   * @param {Point} point
+   * @param {Number} width
+   * @param {Number} height
+   * @param {Function} callback
+   */
+  forAround(point, width, height, callback) {
+    const topLeftPoint = new Point(
+      point.x - Math.floor(width / 2),
+      point.y - Math.floor(height / 2),
+    );
+
+    if (gridUtils.isPointOutOfBounds(this.copyGrid(), topLeftPoint)) {
+      console.warn(`forAround() ${point.toString()} is out of bounds.`);
+      // return;
+    }
+
+    this.forArea(topLeftPoint, width, height, callback);
+  }
+  /**
+   * pads all four sides of the grid
+   *
+   * @param {Number} times
+   * @param {CellModel} value
+   */
+  padding(times = 1, value) {
+    this.upad(times, value);
+    this.dpad(times, value);
+    this.rpad(times, value);
+    this.lpad(times, value);
   }
   // -- Array2D.js implementations
   // --- https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md
+  // -- basic
   /**
    * #getgrid-r-c
    *
@@ -237,7 +337,12 @@ export default class GridModel extends Model {
    * @returns {Cell}
    */
   getAt(point) {
-    return array2d.get(this.get('grid').slice(), point.y, point.x);
+    if (gridUtils.isPointOutOfBounds(this.copyGrid(), point)) {
+      // console.warn(`getAt() ${point.toString()} is out of bounds.`);
+      return;
+    }
+
+    return array2d.get(this.copyGrid(), point.y, point.x);
   }
   /**
    * #setgrid-r-c-value
@@ -247,10 +352,81 @@ export default class GridModel extends Model {
    * @returns {Grid}
    */
   setAt(point, value) {
-    const modifiedGrid = array2d.set(this.get('grid').slice(), point.y, point.x, value);
+    if (gridUtils.isPointOutOfBounds(this.copyGrid(), point)) {
+      // console.warn(`setAt() ${point.toString()} is out of bounds.`);
+      return;
+    }
+
+    const modifiedGrid = array2d.set(this.copyGrid(), point.y, point.x, value);
     this.replace(modifiedGrid);
     return modifiedGrid;
   }
+  // -- essentials
+  /**
+   * iterator has signature of `callback(value, row, column, grid)`
+   * #forareagrid-r-c-width-height-iterator
+   *
+   * @param {Point} point
+   * @param {Number} width
+   * @param {Number} height
+   * @returns {Grid}
+   */
+  crop(point, width, height) {
+    return array2d.crop(this.copyGrid(), point.y, point.x, width, height);
+  }
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#upadgrid-times-value
+   *
+   * @param {Number} times
+   * @param {CellModel} value
+   */
+  upad(times = 1, value) {
+    const resultingGrid = array2d.upad(this.copyGrid(), times, value);
+    this.replace(resultingGrid);
+  }
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#dpadgrid-times-value
+   *
+   * @param {Number} times
+   * @param {CellModel} value
+   */
+  dpad(times = 1, value) {
+    const resultingGrid = array2d.dpad(this.copyGrid(), times, value);
+    this.replace(resultingGrid);
+  }
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#rpadgrid-times-value
+   *
+   * @param {Number} times
+   * @param {CellModel} value
+   */
+  rpad(times = 1, value) {
+    const resultingGrid = array2d.rpad(this.copyGrid(), times, value);
+    this.replace(resultingGrid);
+  }
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#lpadgrid-times-value
+   *
+   * @param {Number} times
+   * @param {CellModel} value
+   */
+  lpad(times = 1, value) {
+    const resultingGrid = array2d.lpad(this.copyGrid(), times, value);
+    this.replace(resultingGrid);
+  }
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#fillareagrid-r-c-width-height-value
+   *
+   * @param {Point} point
+   * @param {Number} width
+   * @param {Number} height
+   * @param {CellModel} value
+   */
+  fillArea(point, width, height, value) {
+    const resultingGrid = array2d.fillArea(this.copyGrid(), point.y, point.x, width, height, value);
+    this.replace(resultingGrid);
+  }
+  // -- iteration
   /**
    * iterator has signature of `callback(value, row, column, grid)`
    * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#eachcellgrid-iterator
@@ -258,7 +434,7 @@ export default class GridModel extends Model {
    * @param {Function} callback
    */
   forEach(callback) {
-    array2d.eachCell(this.get('grid').slice(), callback);
+    array2d.eachCell(this.copyGrid(), callback);
   }
   /**
    * iterator has signature of `callback(value, row, column, grid)`
@@ -269,7 +445,7 @@ export default class GridModel extends Model {
    * @param {Function} callback
    */
   nthCell(nth, start, callback) {
-    array2d.nthCell(this.get('grid').slice(), nth, start, callback);
+    array2d.nthCell(this.copyGrid(), nth, start, callback);
   }
   /**
    * iterator has signature of `callback(value, row, column, grid)`
@@ -281,7 +457,7 @@ export default class GridModel extends Model {
    * @param {Function} callback
    */
   forArea(point, width, height, callback) {
-    array2d.forArea(this.get('grid').slice(), point.y, point.x, width, height, callback);
+    array2d.forArea(this.copyGrid(), point.y, point.x, width, height, callback);
   }
   /**
    * iterator has signature of `callback(value, row, column, grid)`
@@ -291,7 +467,7 @@ export default class GridModel extends Model {
    * @returns {Grid}
    */
   map(callback) {
-    return array2d.map(this.get('grid').slice(), callback);
+    return array2d.map(this.copyGrid(), callback);
   }
   /**
    * #pastegrid1-grid2-r-c
@@ -304,5 +480,110 @@ export default class GridModel extends Model {
     const modifiedGrid = array2d.paste(this.export().grid, otherGrid.export().grid, point.y, point.x);
     this.replace(modifiedGrid);
     return modifiedGrid;
+  }
+  /**
+   * [north, west, east, south]
+   *
+   * @param {Point} point
+   * @returns {Array<Cell>}
+   */
+  orthogonals(point) {
+    return array2d.orthogonals(this.copyGrid(), point.y, point.x);
+  }
+  /**
+   * [northwest, northeast, southwest, southeast]
+   *
+   * @param {Point} point
+   * @returns {Array<Cell>}
+   */
+  diagonals(point) {
+    return array2d.diagonals(this.copyGrid(), point.y, point.x);
+  }
+  /**
+   * [northwest, north, northeast, west, east, southwest, south, southeast]
+   *
+   * @param {Point} point
+   * @returns {Array<Cell>}
+   */
+  neighbors(point) {
+    return array2d.neighbors(this.copyGrid(), point.y, point.x);
+  }
+  /**
+   * [northwest, north, northeast, west, east, southwest, south, southeast]
+   *
+   * @param {Point} point
+   * @returns {Array<Cell>}
+   */
+  neighborhood(point) {
+    return array2d.neighborhood(this.copyGrid(), point.y, point.x);
+  }
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#euclideangrid-r1-c1-r2-c2
+   *
+   * @param {Point} pointA
+   * @param {Point} pointB
+   * @returns {Number}
+   */
+  euclidean(pointA, pointB) {
+    return array2d.euclidean(this.copyGrid(), pointA.y, pointA.x, pointB.y, pointB.x);
+  }
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#chebyshevgrid-r1-c1-r2-c2
+   *
+   * @param {Point} pointA
+   * @param {Point} pointB
+   * @returns {Number}
+   */
+  chebyshev(pointA, pointB) {
+    return array2d.chebyshev(this.copyGrid(), pointA.y, pointA.x, pointB.y, pointB.x);
+  }
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md##manhattangrid-r1-c1-r2-c2
+   *
+   * @param {Point} pointA
+   * @param {Point} pointB
+   * @returns {Number}
+   */
+  manhattan(pointA, pointB) {
+    return array2d.manhattan(this.copyGrid(), pointA.y, pointA.x, pointB.y, pointB.x);
+  }
+  // -- location/relationships
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#edgegrid-r-c
+   *
+   * @param {Point} point
+   * @returns {Boolean}
+   */
+  edge(point) {
+    return array2d.edge(this.copyGrid(), point.y, point.x);
+  }
+  // -- coordinates
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#findgrid-finder
+   *
+   * @param {Function} finder
+   * @returns {Array<Array<Point>>}
+   */
+  find(finder) {
+    const coordinateList = array2d.find(this.copyGrid(), finder);
+    const pointList = coordinateList.map((coordinate) => {
+      return new Point(coordinate[1], coordinate[0]);
+    });
+
+    return pointList;
+  }
+  /**
+   * https://github.com/matthewtoast/Array2D.js/blob/master/REFERENCE.md#contiguousgrid-finder
+   *
+   * @param {Function} finder
+   * @returns {Array<Array<Point>>}
+   */
+  contiguous(finder) {
+    const coordinateList = array2d.contiguous(this.copyGrid(), finder);
+    const pointList = array2d.map(coordinateList, (coordinate) => {
+      return new Point(coordinate[1], coordinate[0]);
+    });
+
+    return pointList;
   }
 }

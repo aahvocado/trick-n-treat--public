@@ -12,7 +12,7 @@ import * as gamestateMapHelper from 'helpers/gamestateMapHelper';
 
 import CharacterModel from 'models.shared/CharacterModel';
 import EncounterModel from 'models.shared/EncounterModel';
-import MapModel from 'models.shared/MapModel';
+import GridModel from 'models.shared/GridModel';
 import Model from 'models.shared/Model';
 import ModelList from 'models.shared/ModelList';
 
@@ -43,14 +43,14 @@ export class GamestateModel extends Model {
       characterList: new ModelList([], CharacterModel),
       /** @type {ModelList<EncounterModel>} */
       encounterList: new ModelList([], EncounterModel),
-      /** @type {MapModel} */
-      tileMapModel: new MapModel(),
-      /** @type {MapModel} */
-      lightMapModel: new MapModel(),
+      /** @type {GridModel} */
+      mapGridModel: new GridModel(),
+      /** @type {GridModel} */
+      lightingModel: new GridModel(),
 
       // -- Instance attributes
-      /** @type {ModelList<MapModel>} */
-      biomeList: new ModelList([], MapModel),
+      /** @type {ModelList<GridModel>} */
+      biomeList: new ModelList([], GridModel),
       /** @type {Array<Point>} */
       lightSourceList: [],
 
@@ -185,6 +185,10 @@ export class GamestateModel extends Model {
   /** @override */
   isWalkableAt(point) {
     return gamestateMapHelper.isWalkableAt(point);
+  }
+  /** @override */
+  isWallAt(point) {
+    return gamestateMapHelper.isWallAt(point);
   }
   /** @override */
   isNearEncounterAt(startPoint, distance) {

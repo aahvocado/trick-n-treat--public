@@ -1,5 +1,3 @@
-import {STAT_ID} from 'constants.shared/statIds';
-
 import * as statUtils from 'utilities.shared/statUtils';
 
 // one-string actions
@@ -24,7 +22,7 @@ export function createConsoleData(consoleText) {
     return {
       action: consoleAction,
       value: textParts[1],
-    }
+    };
   }
 
   // set - needs 3 parts
@@ -32,5 +30,5 @@ export function createConsoleData(consoleText) {
     action: consoleAction,
     statId: statUtils.convertStringToStat(textParts[1]),
     value: textParts[2],
-  }
+  };
 }

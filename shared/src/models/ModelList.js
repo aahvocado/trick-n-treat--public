@@ -2,7 +2,6 @@ import uuid from 'uuid/v4';
 import {
   observable,
   reaction,
-  set,
   toJS,
 } from 'mobx';
 

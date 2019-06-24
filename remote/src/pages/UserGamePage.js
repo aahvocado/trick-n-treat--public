@@ -31,13 +31,9 @@ import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 import remoteAppState from 'state/remoteAppState';
 import remoteGameState from 'state/remoteGameState';
 
-import * as gamestateHelper from 'helpers/gamestateHelper.remote';
-
 import * as connectionManager from 'managers/connectionManager';
 
 import logger from 'utilities/logger.remote';
-import * as mapUtils from 'utilities.shared/mapUtils';
-import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * page for the game
@@ -100,7 +96,7 @@ class UserGamePage extends Component {
       </div>
     }
 
-    const mapData = remoteGameState.get('mapData');
+    const mapGridModel = remoteGameState.get('mapGridModel');
     const myCharacter = remoteGameState.get('myCharacter');
     const showEncounterModal = remoteGameState.get('showEncounterModal');
 
@@ -113,7 +109,6 @@ class UserGamePage extends Component {
       isTileInspecting,
       isZoomedOut,
     } = this.state;
-
 
     return (
       <div className='bg-secondary flex-auto flex-center flex-col width-full talign-center position-relative'>
@@ -164,7 +159,7 @@ class UserGamePage extends Component {
         { isTileInspecting && hoveredTilePos !== null &&
           <TileInspectorComponent
             style={{left: '10px', top: '70px'}}
-            tileData={matrixUtils.getTileAt(mapData, hoveredTilePos)}
+            tileData={mapGridModel.getAt(hoveredTilePos).export()}
           />
         }
 
@@ -177,7 +172,7 @@ class UserGamePage extends Component {
         {/* Map */}
         <TileMapComponent
           className={remoteGameState.get('isMyTurn') ? 'bor-5-fourth' : 'bor-5-primary-darker'}
-          mapData={mapData}
+          mapGridData={mapGridModel.export().grid}
           myPosition={myCharacter.get('position')}
           myRange={myCharacter.get('movement')}
           focalPoint={myCharacter.get('position')}
@@ -288,13 +283,12 @@ class UserGamePage extends Component {
    */
   handleOnTileClick(tilePosition) {
     const myCharacter = remoteGameState.get('myCharacter');
-
-    const grid = mapUtils.createGridForPathfinding(gamestateHelper.getVisibileTileMapData());
-    const aStarPath = mapUtils.getAStarPath(grid, myCharacter.get('position'), tilePosition);
+    const mapGridModel = remoteGameState.get('mapGridModel');
+    const path = mapGridModel.findPath(myCharacter.get('position'), tilePosition);
 
     this.setState({
       selectedTilePos: tilePosition,
-      selectedPath: aStarPath,
+      selectedPath: path,
     });
   }
   /**

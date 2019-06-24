@@ -1,4 +1,4 @@
-import Point from '@studiomoniker/point';
+// import Point from '@studiomoniker/point';
 
 import {POINTS} from 'constants.shared/points';
 
@@ -28,7 +28,7 @@ export function getPointFromString(directionName) {
  * @returns {Point}
  */
 export function getRandomDirectionPoint() {
-  const direction = mathUtils.getRandomIntInclusive(0, 3);
+  const direction = mathUtils.getRandomInt(0, 3);
   switch (direction) {
     // left
     case 0:
@@ -79,6 +79,38 @@ export function createPointAbove(point, distance = 1) {
 export function createPointBelow(point, distance = 1) {
   const extendedPoint = POINTS.DOWN.clone().multiplyNum(distance);
   return point.clone().add(extendedPoint);
+}
+/**
+ * @param {Point} point
+ * @returns {Point}
+ */
+export function makePointEven(point) {
+  const pointCopy = point.clone();
+
+  if (pointCopy.x % 2 === 1) {
+    pointCopy.x += 1;
+  }
+  if (pointCopy.y % 2 === 1) {
+    pointCopy.y += 1;
+  }
+
+  return pointCopy;
+}
+/**
+ * @param {Point} point
+ * @returns {Point}
+ */
+export function makePointOdd(point) {
+  const pointCopy = point.clone();
+
+  if (pointCopy.x % 2 === 0) {
+    pointCopy.x += 1;
+  }
+  if (pointCopy.y % 2 === 0) {
+    pointCopy.y += 1;
+  }
+
+  return pointCopy;
 }
 /*
   Please note for these directional checking utilities are a little bit weird

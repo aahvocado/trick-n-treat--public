@@ -66,7 +66,7 @@ export const TILES = {
   TILE_SIZE: 42,
   TILE_TRAIL_SIZE: 4,
   TILE_HEIGHT: 3,
-  TILE_TYPES: [4], //[1, 2, 3, 4];
+  TILE_ID: [4], //[1, 2, 3, 4];
   POSITION_WIDTH: 42,
   COLOR: 0xdddddd,
   FLAT_SHADING: true,
@@ -92,7 +92,7 @@ export const TILE_REVERSE_DIRECTIONS = {
   BACKWARD: 'FORWARD',
   LEFT: 'RIGHT'
 }
-export const TILE_TYPES = {
+export const TILE_ID = {
   START: '*',
   EMPTY: 0,
   PATH: 1,

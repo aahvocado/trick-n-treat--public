@@ -128,6 +128,13 @@ export default class ClientModel extends Model {
     // client used an Item
     socket.on(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, this.onUseItem.bind(this));
 
+    // -- debug
+    socket.on(SOCKET_EVENT.DEBUG.TO_SERVER.REQUEST_MAP_HISTORY, () => {
+      logger.verbose(`. Sending Map History to ${this.get('name')}.`);
+      const historyArray = gameState.get('mapGridModel').export().history;
+      this.emitToMapHistory(historyArray);
+    });
+
     // -- console command
     socket.on(SOCKET_EVENT.DEBUG.TO_SERVER.CONSOLE_COMMAND, this.handleConsoleCommand.bind(this));
   }
@@ -211,16 +218,16 @@ export default class ClientModel extends Model {
   }
   // -- debugger emits
   /**
-   * @param {Array<Matrix>} mapHistory
+   * @param {Array<Grid>} history
    */
-  emitToMapHistory(mapHistory) {
-    this.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY, mapHistory);
+  emitToMapHistory(history) {
+    this.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY, history);
   }
   /**
-   * @param {Matrix} matrix
+   * @param {Grid} grid
    */
-  emitToTileEditor(matrix) {
-    this.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_TILE_EDITOR, matrix);
+  emitToTileEditor(grid) {
+    this.emit(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_TILE_EDITOR, grid);
   }
   /**
    * send to remote's `appLog`

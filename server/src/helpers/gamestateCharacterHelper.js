@@ -16,7 +16,6 @@ import logger from 'utilities/logger.game';
 import * as triggerHandlerUtil from 'utilities/triggerHandlerUtil';
 
 import * as conditionUtils from 'utilities.shared/conditionUtils';
-import * as mapUtils from 'utilities.shared/mapUtils';
 
 /**
  * this Helper is for `gameState` stuff that relates to Characters
@@ -167,8 +166,8 @@ export function findCharacterByClientId(clientId) {
  */
 export function updateCharacterPosition(characterModel, position) {
   // nothing to do if given direction is not walkable
-  if (!gameState.get('tileMapModel').isWalkableAt(position)) {
-    logger.warning(`Invalid location - ${position.toArray()} is unwalkable.`);
+  if (!gameState.isWalkableAt(position)) {
+    logger.warning(`Invalid location - ${position.toString()} is unwalkable.`);
     return;
   }
 
@@ -194,26 +193,26 @@ export function updateCharacterPosition(characterModel, position) {
   }, 'handleCharacterTriggerEncounter');
 }
 /**
- * attempts to move a Character tile by tile to a position
+ * attempts to move a Character tile by tile to a destination
  *
  * @param {CharacterModel} characterModel
- * @param {Point} position
+ * @param {Point} destination
  */
-export function moveCharacterTo(characterModel, position) {
+export function moveCharacterTo(characterModel, destination) {
   if (!gameState.canCharacterDoStuff(characterModel)) {
     logger.warning(`"${characterModel.get('name')}" cannot do stuff right now.`);
     return;
   }
 
   // do nothing if destination is unwalkable
-  if (!gameState.get('tileMapModel').isWalkableAt(position)) {
+  if (!gameState.isWalkableAt(destination)) {
     return;
   }
 
   // find the potential path the Character will walk,
-  const characterPos = characterModel.get('position');
-  const grid = mapUtils.createGridForPathfinding(gameState.get('tileMapModel').get('matrix'));
-  const movePath = mapUtils.getAStarPath(grid, characterPos, position);
+  const position = characterModel.get('position');
+  const mapGridModel = gameState.get('mapGridModel');
+  const movePath = mapGridModel.findPath(position, destination);
   movePath.shift(); // remove the first point, which is the one the Character is on
 
   // check if destination is too far away
@@ -222,7 +221,7 @@ export function moveCharacterTo(characterModel, position) {
     return;
   }
 
-  logger.verbose(`(moving "${characterModel.get('name')}" from [${characterPos.toArray()}] to [${position.toArray()}])`);
+  logger.verbose(`(moving "${characterModel.get('name')}" from [${position.toString()}] to [${destination.toString()}])`);
 
   // take one step at a time for moving along the path
   movePath.forEach((pathPoint) => {
@@ -230,7 +229,7 @@ export function moveCharacterTo(characterModel, position) {
       // subtract a Movement
       characterModel.modifyStat('movement', -1);
 
-      // attempt to update the character's position
+      // attempt to update the character's destination
       updateCharacterPosition(characterModel, pathPoint);
     }, 'moveCharacterTo');
 
@@ -403,7 +402,7 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
  */
 export function handleCharacterTriggerEncounter(characterModel, encounterModel) {
   const encounterLocation = encounterModel.get('location');
-  logger.verbose(`(encountered "${encounterModel.get('id')}" at [${encounterLocation.toArray()}])`);
+  logger.verbose(`(encountered "${encounterModel.get('id')}" at [${encounterLocation.toString()}])`);
 
   // check if the character on here can actually trigger this
   if (!encounterModel.canBeEncounteredBy(characterModel)) {

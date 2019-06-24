@@ -1,4 +1,5 @@
 import React, { Component, PureComponent } from 'react';
+import array2d from 'array2d';
 import Point from '@studiomoniker/point';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -16,7 +17,6 @@ import combineClassNames from 'utilities/combineClassNames';
 import * as tileStyleUtils from 'utilities/tileStyleUtils';
 
 import * as lightLevelUtils from 'utilities.shared/lightLevelUtils';
-import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  * 2D matrix visualizer
@@ -28,8 +28,8 @@ export default class TileMapComponent extends Component {
     /** @type {String} */
     className: '',
 
-    /** @type {Matrix} */
-    mapData: undefined,
+    /** @type {Grid} */
+    mapGridData: undefined,
     /** @type {Point} */
     myPosition: new Point(),
     /** @type {Number} */
@@ -57,7 +57,7 @@ export default class TileMapComponent extends Component {
       baseClassName,
       className,
       focalPoint,
-      mapData,
+      mapGridData,
       myPosition,
       myRange,
       onTileClick,
@@ -69,9 +69,9 @@ export default class TileMapComponent extends Component {
       isZoomedOut,
     } = this.props;
 
-    const scale = isZoomedOut ? 0.35 : 1;
-    const mapWidth = matrixUtils.getWidth(mapData);
-    const mapHeight = matrixUtils.getHeight(mapData);
+    const scale = isZoomedOut ? 0.2 : 1;
+    const mapWidth = array2d.width(mapGridData);
+    const mapHeight = array2d.height(mapGridData);
 
     const xDistanceFromMiddle = focalPoint.x - mapWidth / 2;
     const yDistanceFromMiddle = focalPoint.y - mapHeight / 2;
@@ -100,31 +100,31 @@ export default class TileMapComponent extends Component {
             transition: 'transform 400ms',
           }}
         >
-          { mapData.map((mapRowData, rowIdx) => {
+          { mapGridData.map((mapRowData, rowIdx) => {
             return (
               <div className='flex-row' key={`tile-map-row-${rowIdx}-key`} >
-                { mapRowData.map((tileData, colIdx) => {
-                  const tilePosition = tileData.position;
+                { mapRowData.map((cellData, colIdx) => {
+                  const cellPoint = cellData.get('point');
 
                   // assuming the path is in order, finding the index of this point on the path will tell us how far it is
-                  const pathIdx = selectedPath.findIndex((pathPoint) => pathPoint.equals(tilePosition));
+                  const pathIdx = selectedPath.findIndex((pathPoint) => pathPoint.equals(cellPoint));
                   const tileDistance = pathIdx;
 
-                  const isMyPosition = myPosition.equals(tileData.position);
+                  const isMyPosition = myPosition.equals(cellPoint);
 
                   const isOnPath = pathIdx >= 0;
-                  const isSelected = (selectedTilePos !== null && selectedTilePos.equals(tilePosition));
+                  const isSelected = (selectedTilePos !== null && selectedTilePos.equals(cellPoint));
                   const isTooFar = (tileDistance > myRange) || !isOnPath;
 
                   return (
                     <TileItemComponent
                       key={`tile-item-${colIdx}-${rowIdx}-key`}
                       // -- props already in data
-                      charactersHere={tileData.charactersHere}
-                      encounterHere={tileData.encounterHere}
-                      tileType={tileData.tileType}
-                      position={tileData.position}
-                      lightLevel={isFullyVisibleMap ? 10 : tileData.lightLevel}
+                      charactersHere={cellData.get('charactersHere')}
+                      encounterHere={cellData.get('encounterHere')}
+                      tile={cellData.get('tile')}
+                      position={cellPoint}
+                      lightLevel={isFullyVisibleMap ? 10 : cellData.get('lightLevel')}
 
                       // -- props from parent
                       tileSize={tileSize}
@@ -149,7 +149,7 @@ export default class TileMapComponent extends Component {
   }
 }
 /**
- * a single cell in the Matrix
+ * a single cell in the Grid
  */
 export class TileItemComponent extends Component {
   static defaultProps = {
@@ -164,8 +164,8 @@ export class TileItemComponent extends Component {
 
     /** @type {LightLevel} */
     lightLevel: undefined,
-    /** @type {TileType} */
-    tileType: undefined,
+    /** @type {TileId} */
+    tile: undefined,
     /** @type {Number} */
     tileSize: 15,
 
@@ -206,7 +206,7 @@ export class TileItemComponent extends Component {
       isSelected,
       isMyPosition,
       tileSize,
-      tileType,
+      tile,
     } = this.props;
 
     const isMostlyHidden = lightLevelUtils.isMostlyHidden(lightLevel);
@@ -219,7 +219,7 @@ export class TileItemComponent extends Component {
       isSelected,
       isMyPosition,
       tileSize,
-      tileType,
+      tile,
     });
 
     return (

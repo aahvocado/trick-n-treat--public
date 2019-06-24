@@ -9,6 +9,7 @@ import Model from 'models/Model'; // todo - use shared
 import logger from 'utilities/logger.remote';
 
 import * as mapGenerationUtils from 'utilities.shared/mapGenerationUtils';
+const shouldGenerateTestMap = false; // toggle this to use generate a test map in the tileEditor
 
 // TESTING
 const createDate = new Date();
@@ -55,10 +56,10 @@ export class RemoteStateModel extends Model {
       isDevMode: true,
       /** @type {Boolean} */
       isEditorMode: false,
-      /** @type {Matrix} */
-      currentTileMatrix: undefined,
-      /** @type {Array<Matrix>} */
-      mapHistory: [],
+      /** @type {Grid} */
+      currentTileGrid: undefined,
+      /** @type {Array<Grid>} */
+      history: [],
       /** @type {Boolean} */
       isDebugMenuActive: false,
       /** @type {Array} */
@@ -80,8 +81,11 @@ export class RemoteStateModel extends Model {
       },
     });
 
-    // test
-    this.generateNewMap();
+    // testing only - remove later
+    if (shouldGenerateTestMap) {
+      const testhistory = mapGenerationUtils.generateTestMap();
+      this.set({history: testhistory});
+    }
   }
   /**
    * attach listeners to the websocket
@@ -107,13 +111,13 @@ export class RemoteStateModel extends Model {
     // server gave us a matrix to display in the tileEditor
     socket.on(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_TILE_EDITOR, (matrix) => {
       logger.server('SOCKET_EVENT.DEBUG.TO_CLIENT.SET_TILE_EDITOR');
-      this.set({currentTileMatrix: matrix});
+      this.set({currentTileGrid: matrix});
     });
 
     // server gave us a map history
-    socket.on(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY, (mapHistory) => {
+    socket.on(SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY, (history) => {
       logger.server('SOCKET_EVENT.DEBUG.TO_CLIENT.SET_MAP_HISTORY');
-      this.set({mapHistory: mapHistory});
+      this.set({history: history});
     });
 
     // -- connection stuff
@@ -145,14 +149,6 @@ export class RemoteStateModel extends Model {
         isReconnecting: false,
       });
     });
-  }
-  /**
-   * generates a New Map for the current Gamestate
-   *
-   */
-  generateNewMap() {
-    const testHistory = mapGenerationUtils.generateMap();
-    this.set({mapHistory: testHistory});
   }
 }
 

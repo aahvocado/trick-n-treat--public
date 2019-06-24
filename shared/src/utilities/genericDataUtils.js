@@ -4,7 +4,7 @@ import {CHOICE_ID, GOTO_CHOICE_ID_LIST} from 'constants.shared/choiceIds';
 import {DATA_TYPE} from 'constants.shared/dataTypes';
 import {TARGET_ID} from 'constants.shared/targetIds';
 
-import * as conditionLogicUtils from 'utilities.shared/conditionLogicUtils'
+import * as conditionLogicUtils from 'utilities.shared/conditionLogicUtils';
 import * as triggerLogicUtils from 'utilities.shared/triggerLogicUtils';
 
 // -- condition
@@ -109,13 +109,13 @@ export function addConditionToData(data, newData) {
  */
 export function formatConditionData(data) {
   // put the data in order
-  let formattedData = {
+  const formattedData = {
     dataType: data.dataType,
     targetId: data.targetId,
     itemId: data.itemId || '',
     conditionLogicId: data.conditionLogicId,
     value: Number(data.value),
-  }
+  };
 
   const isItemConditionLogic = conditionLogicUtils.isItemConditionLogic(formattedData.conditionLogicId);
   if (isItemConditionLogic) {
@@ -174,7 +174,7 @@ export function createActionData(defaultData = {}) {
     label: 'Okay',
     // conditionList: [],
     ...defaultData,
-  }
+  };
 
   const isGoto = GOTO_CHOICE_ID_LIST.includes(createdTemplate.choiceId);
   if (!isGoto) {
@@ -250,13 +250,13 @@ export function addActionToData(data, newData) {
  */
 export function formatActionData(data) {
   // put the data in order
-  let formattedData = {
+  const formattedData = {
     dataType: data.dataType,
     choiceId: data.choiceId,
     gotoId: data.gotoId,
     label: data.label,
     conditionList: formatConditionList(data.conditionList),
-  }
+  };
 
   // remove empty arrays
   if (formattedData.conditionList.length <= 0) {
@@ -293,6 +293,21 @@ const triggerSchema = Joi.object().keys({
   conditionList: Joi.array().optional(),
 });
 /**
+ * @param {*} data
+ * @returns {Boolean}
+ */
+export function validateTrigger(data) {
+  const validation = Joi.validate(data, triggerSchema);
+
+  // valid if null
+  if (validation.error === null) {
+    return true;
+  }
+
+  console.warn(validation.error);
+  return false;
+}
+/**
  * @param {Object} [defaultData]
  * @returns {TriggerData}
  */
@@ -304,9 +319,9 @@ export function createTriggerData(defaultData = {}) {
     value: 1,
     // itemId: undefined,
     // conditionList: [],
-  }
+  };
 
-  return {...blankTemplate, ...defaultData}
+  return {...blankTemplate, ...defaultData};
 }
 /**
  * @param {Array<TriggerData>} list
@@ -357,14 +372,14 @@ export function addTriggerToData(data, newData) {
  */
 export function formatTriggerData(data) {
   // put the data in order
-  let formattedData = {
+  const formattedData = {
     dataType: data.dataType,
     targetId: data.targetId,
     triggerLogicId: data.triggerLogicId,
     itemId: data.itemId || '',
     value: Number(data.value),
     conditionList: formatConditionList(data.conditionList),
-  }
+  };
 
   const isItemTriggerLogic = triggerLogicUtils.isItemTriggerLogic(formattedData.triggerLogicId);
   if (isItemTriggerLogic) {

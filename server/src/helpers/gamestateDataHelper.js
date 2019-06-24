@@ -28,31 +28,26 @@ export function canCharacterDoStuff(characterModel) {
   return true;
 }
 /**
- * formats TileMapModel and the entities on the map into something more convenient
+ * formats `mapGridModel` and the entities on the map into something more convenient
  *
- * @typedef {Object} TileData
- * @property {Point} TileData.position - {x, y}
- * @property {Number} TileData.tileType
- * @property {Array<CharacterModel.export>} TileData.charactersHere
- * @property {EncounterModel.export} TileData.encounterHere
- *
- * @returns {Matrix<TileData>}
+ * @returns {Grid<TileData>}
  */
 export function getFormattedMapData() {
-  const tileMapModel = gameState.get('tileMapModel');
-  const lightMapModel = gameState.get('lightMapModel');
-  if (tileMapModel === undefined) {
+  const mapGridModel = gameState.get('mapGridModel');
+  const lightingModel = gameState.get('lightingModel');
+  if (mapGridModel === undefined) {
     return;
   }
 
-  const formattedMapData = tileMapModel.map((tileData, tilePoint) => {
-    const charactersHere = gameState.getCharactersAt(tilePoint).map((character) => (character.export()));
-    const encounterHere = gameState.findEncounterAt(tilePoint);
+  const formattedMapData = mapGridModel.map((cell) => {
+    const cellPoint = cell.get('point');
+    const charactersHere = gameState.getCharactersAt(cellPoint).map((character) => (character.export()));
+    const encounterHere = gameState.findEncounterAt(cellPoint);
 
     return {
-      position: tilePoint,
-      tileType: tileData,
-      lightLevel: lightMapModel.getTileAt(tilePoint),
+      point: cellPoint,
+      tile: cell.get('tile'),
+      lightLevel: lightingModel.getAt(cellPoint).get('tile'),
       charactersHere: charactersHere,
       encounterHere: encounterHere && encounterHere.export(),
     };

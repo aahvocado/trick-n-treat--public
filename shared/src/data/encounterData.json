@@ -61,8 +61,7 @@
     "content": "You see a nearby patch of dirt rumble... and out pops a skeleton with round, purple frames. She rattles and gives some advice, \"You would look really good wearing orange at the Sternum Ball.\"",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SWAMP",
-      "TAG_ID.TILE_TYPE.LIT_SWAMP"
+      "TILE_ID.HOME.SIDEWALK"
     ],
     "actionList": [
       {
@@ -153,10 +152,9 @@
     "content": "Oh no.. it can't be... it couldn't... not now...! A black cat with sparkling blue eyes crosses your path on the worse night imaginable! Fate has it in for you... You feel so unlucky.",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD",
-      "TAG_ID.TILE_TYPE.LIT_ROAD",
-      "TAG_ID.TILE_TYPE.GRASS"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD",
+      "TILE_ID.HOME.STREETLAMP"
     ],
     "actionList": [
       {
@@ -197,11 +195,7 @@
     "content": "You see a little glowing thing pass by in front of you. Upon closer inspection, its a fairy who's carrying a piece of candy about her size! She sees you and gives it to you and says \"I really like your costume!\"",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.WOODS",
-      "TAG_ID.TILE_TYPE.LIT_WOODS",
-      "TAG_ID.TILE_TYPE.WOODS_TWO",
-      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO",
-      "TAG_ID.TILE_TYPE.LIT_GRASS",
+      "TILE_ID.HOME.SIDEWALK",
       "TAG_ID.DESCRIPTORS.ADDS_CANDY",
       "TAG_ID.DESCRIPTORS.GIVES_ITEM"
     ],
@@ -245,9 +239,8 @@
     "content": "\"Hey, I'm not a big fan of Naffy Taffy so you can have it.\"",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_ROAD",
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP",
       "TAG_ID.DESCRIPTORS.GIVES_ITEM"
     ],
     "actionList": [
@@ -822,10 +815,10 @@
     "content": "You find a candy bar on the ground.",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD",
-      "TAG_ID.TILE_TYPE.LIT_ROAD",
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP",
+      "TILE_ID.HOME.ROAD",
+      "TILE_ID.HOME.STREETLAMP",
       "TAG_ID.DESCRIPTORS.GIVES_ITEM"
     ],
     "actionList": [
@@ -888,10 +881,10 @@
     "content": "Aww yess",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD",
-      "TAG_ID.TILE_TYPE.LIT_ROAD",
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP",
+      "TILE_ID.HOME.ROAD",
+      "TILE_ID.HOME.STREETLAMP",
       "TAG_ID.DESCRIPTORS.GIVES_ITEM"
     ],
     "actionList": [
@@ -920,8 +913,8 @@
     "content": "While walking you see a deer trotting calmly between the backyards of nearby houses. It pauses to tilt its head towards your direction.\n\nYou feel like it's weird that the deer is here and not in the woods where the wildflowers glisten with the taste of morning dew and the comfort of a shady tree... wait what?\n\nYou blink and the deer is nowhere to be seen. ",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP",
       "TAG_ID.DESCRIPTORS.LOSES_SANITY"
     ],
     "actionList": [
@@ -962,12 +955,8 @@
     "content": "Oh! It's a fudge tree!",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
-      "TAG_ID.TILE_TYPE.WOODS",
-      "TAG_ID.TILE_TYPE.WOODS_TWO",
-      "TAG_ID.TILE_TYPE.LIT_WOODS",
-      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP"
     ],
     "actionList": [
       {
@@ -1112,10 +1101,10 @@
     "content": "\"Save the environment! Start using sustainable agriculture!\" yells a little boy wearing a brown cap.\n\nHe hands you a little sandwich bag that has \"fudge seed\" labeled and says \"Here, free sample.\"",
     "isDialogue": true,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD",
-      "TAG_ID.TILE_TYPE.LIT_ROAD"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP",
+      "TILE_ID.HOME.ROAD",
+      "TILE_ID.HOME.STREETLAMP"
     ],
     "actionList": [
       {
@@ -1158,12 +1147,7 @@
     "title": "Cocoa Patch",
     "content": "There's a clearing in the woods where you see a perfect patch of dirt. You get closer and find out it's actually cocoa powder! You don't see that everyday!",
     "isDialogue": false,
-    "tagList": [
-      "TAG_ID.TILE_TYPE.WOODS",
-      "TAG_ID.TILE_TYPE.LIT_WOODS",
-      "TAG_ID.TILE_TYPE.WOODS_TWO",
-      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO"
-    ],
+    "tagList": [],
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
@@ -1202,12 +1186,7 @@
     "title": "Cocoa Patch (1)",
     "content": "You grab a handful of chocolate dirt - and brush up against something hard. You shove aside the powder and dig up a big jawbreaker!\n\n(wip)",
     "isDialogue": true,
-    "tagList": [
-      "TAG_ID.TILE_TYPE.WOODS",
-      "TAG_ID.TILE_TYPE.LIT_WOODS",
-      "TAG_ID.TILE_TYPE.WOODS_TWO",
-      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO"
-    ],
+    "tagList": [],
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
@@ -1233,12 +1212,7 @@
     "title": "Cocoa Patch (2)",
     "content": "You make a little hole in the cocoa powder and drop in your fudge seed.\n\nI bet this'll grow up a bit in say... 20 turns. (this doesn't do anything right now so have a chunk of fudge instead)",
     "isDialogue": true,
-    "tagList": [
-      "TAG_ID.TILE_TYPE.WOODS",
-      "TAG_ID.TILE_TYPE.LIT_WOODS",
-      "TAG_ID.TILE_TYPE.WOODS_TWO",
-      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO"
-    ],
+    "tagList": [],
     "actionList": [
       {
         "dataType": "DATA_TYPE.ACTION",
@@ -1265,8 +1239,8 @@
     "content": "You walk up to a rustic home that looks like it was once lovingly cared for but has now been without maintenance. There's still some decorations and the lights are on.",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
     ],
     "actionList": [
       {
@@ -1308,8 +1282,8 @@
     "content": "todo",
     "isDialogue": true,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
     ],
     "actionList": [
       {
@@ -1349,8 +1323,8 @@
     "content": "todo",
     "isDialogue": true,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
     ],
     "actionList": [
       {
@@ -1383,8 +1357,8 @@
     "content": "You hear cheers coming from the other side of the door. It sounds like they're watching a rowdy game of Galaxy Ball.",
     "isDialogue": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
     ],
     "actionList": [
       {
@@ -1426,8 +1400,8 @@
     "content": "todo",
     "isDialogue": true,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
     ],
     "actionList": [
       {
@@ -1480,8 +1454,8 @@
     "content": "todo",
     "isDialogue": true,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
     ],
     "actionList": [
       {

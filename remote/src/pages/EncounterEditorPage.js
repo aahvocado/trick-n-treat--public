@@ -27,6 +27,7 @@ import {
 import TagListEditorComponent from 'components/TagListEditorComponent';
 import TagListDropdown from 'components/TagListDropdown';
 import TargetListDropdown from 'components/TargetListDropdown';
+import TileListDropdown from 'components/TileListDropdown';
 import TriggerListEditorComponent from 'components/TriggerListEditorComponent';
 import TriggerLogicListDropdown from 'components/TriggerLogicListDropdown';
 
@@ -488,19 +489,29 @@ class EncounterEditorPage extends Component {
               }
 
               { isGeneratable &&
-                <div className='flex-col adjacent-mar-t-2'>
-                  Rarity
-                  <DropdownComponent
-                    className='bor-1-gray'
-                    selectedOption={{id: rarityId}}
-                    options={RARITY_TAG_ID_LIST.map((item) => ({
-                      data: item,
-                      id: item,
-                      label: l10n(item),
-                    }))}
-                    onSelect={(rarityId) => this.updateActiveData({rarityId: rarityId})}
-                  />
-                </div>
+                <React.Fragment>
+                  <div className='flex-col adjacent-mar-t-2'>
+                    Rarity
+                    <DropdownComponent
+                      className='bor-1-gray'
+                      selectedOption={{id: rarityId}}
+                      options={RARITY_TAG_ID_LIST.map((item) => ({
+                        data: item,
+                        id: item,
+                        label: l10n(item),
+                      }))}
+                      onSelect={(rarityId) => this.updateActiveData({rarityId: rarityId})}
+                    />
+                  </div>
+
+                  <div className='flex-col adjacent-mar-t-2'>
+                    Tiles
+                    <TileListDropdown
+                      className='bor-1-gray'
+                      // onSelect={(rarityId) => this.updateActiveData({rarityId: rarityId})}
+                    />
+                  </div>
+                </React.Fragment>
               }
             </SectionFormContainer>
 

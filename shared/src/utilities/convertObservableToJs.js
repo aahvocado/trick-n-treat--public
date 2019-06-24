@@ -1,5 +1,4 @@
 import {
-  get,
   isObservableArray,
   toJS,
 } from 'mobx';

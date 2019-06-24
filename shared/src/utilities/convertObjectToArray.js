@@ -13,7 +13,7 @@ export default function convertObjectToArray(object, options = {}) {
   let result = [];
 
   const keys = Object.keys(object);
-  keys.forEach(key => {
+  keys.forEach((key) => {
     const value = object[key];
 
     // if the value here is another object, recursively convert that as well

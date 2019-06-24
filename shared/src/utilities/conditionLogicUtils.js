@@ -27,7 +27,7 @@ export function handleGetLogicFunction(conditionData) {
     // return getItemLogicFunction(conditionData);
   }
 
-  if (isTileTypeConditionLogic(conditionData)) {
+  if (isTileIdConditionLogic(conditionData)) {
     // return getItemLogicFunction(conditionData);
   }
 }
@@ -48,14 +48,14 @@ export function getItemLogicFunction(conditionData) {
     return (inventoryList) => {
       const matchingItem = inventoryList.find((itemModel) => (itemModel.get('id') === itemId));
       return matchingItem !== undefined;
-    }
+    };
   }
 
   if (conditionLogicId === CONDITION_LOGIC_ID.DOES_NOT_HAVE_ITEM) {
     return (inventoryList) => {
       const matchingItem = inventoryList.find((itemModel) => (itemModel.get('id') === itemId));
       return matchingItem === undefined;
-    }
+    };
   }
 }
 /**
@@ -112,11 +112,11 @@ export function isPointConditionLogic(conditionLogicId) {
   return POINT_CONDITION_LOGIC_ID_LIST.includes(conditionLogicId);
 }
 /**
- * does condition depend on a TileType
+ * does condition depend on a TileId
  *
  * @param {ConditionLogicId} conditionLogicId
  * @returns {Boolean}
  */
-export function isTileTypeConditionLogic(conditionLogicId) {
+export function isTileIdConditionLogic(conditionLogicId) {
   return TILETYPE_CONDITION_LOGIC_ID_LIST.includes(conditionLogicId);
 }

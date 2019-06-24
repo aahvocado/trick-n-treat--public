@@ -11,8 +11,8 @@ export default function arrayContainsArray(superset, subset) {
     return false;
   }
 
-  for(var i = 0; i < subset.length; i++) {
-    if(superset.indexOf(subset[i]) === -1) return false;
+  for (let i = 0; i < subset.length; i++) {
+    if (superset.indexOf(subset[i]) === -1) return false;
   }
 
   return true;

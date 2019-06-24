@@ -97,7 +97,7 @@ export function updateEncounterData(data, changes) {
  */
 export function formatEncounterData(data) {
   // put the data in order
-  let formattedData = {
+  const formattedData = {
     dataType: data.dataType,
     id: data.id,
     title: data.title,
@@ -111,7 +111,7 @@ export function formatEncounterData(data) {
     isGeneratableOnce: data.isGeneratableOnce,
     rarityId: data.rarityId,
     groupId: data.groupId || '',
-  }
+  };
 
   // remove empty optional arrays
   if (formattedData.tagList.length <= 0) {
@@ -180,7 +180,7 @@ export function snipIdPrefix(idString) {
  */
 export function formatId(idString) {
   // remove white space and set to uppercase
-  const formattedString = idString.replace(/ /g,'').toUpperCase();
+  const formattedString = idString.replace(/ /g, '').toUpperCase();
 
   // return formatted string if it already has the prefix
   const split = formattedString.split('.');
@@ -203,7 +203,7 @@ export function createEncounterGroupingMap(dataList, options = {}) {
     showUngrouped = false,
   } = options;
 
-  let mapping = {};
+  const mapping = {};
 
   dataList.forEach((encounterData) => {
     const {id, groupId} = encounterData;

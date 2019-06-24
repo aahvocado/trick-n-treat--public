@@ -49,7 +49,7 @@ export function generateRandomEncounter(options) {
   const potentialEncounters = findAvailableEncounters(searchOptions);
 
   // then choose one randomly from the potential list
-  const chosenIdx = mathUtils.getRandomIntInclusive(0, potentialEncounters.length - 1);
+  const chosenIdx = mathUtils.getRandomInt(0, potentialEncounters.length - 1);
   const chosenEncounterData = potentialEncounters[chosenIdx];
   if (chosenEncounterData === undefined) {
     return null;

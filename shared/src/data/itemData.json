@@ -99,15 +99,10 @@
     "isConsumable": false,
     "isKeyItem": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD",
-      "TAG_ID.TILE_TYPE.LIT_ROAD",
-      "TAG_ID.TILE_TYPE.PLANKS",
-      "TAG_ID.TILE_TYPE.WOODS",
-      "TAG_ID.TILE_TYPE.WOODS_TWO",
-      "TAG_ID.TILE_TYPE.GRASS",
-      "TAG_ID.TILE_TYPE.LIT_GRASS"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP",
+      "TILE_ID.HOME.ROAD",
+      "TILE_ID.HOME.STREETLAMP"
     ],
     "isGeneratable": true,
     "rarityId": "TAG_ID.RARITY.UNCOMMON"
@@ -121,10 +116,10 @@
     "isConsumable": false,
     "isKeyItem": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
-      "TAG_ID.TILE_TYPE.ROAD",
-      "TAG_ID.TILE_TYPE.LIT_ROAD"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP",
+      "TILE_ID.HOME.ROAD",
+      "TILE_ID.HOME.STREETLAMP"
     ],
     "isGeneratable": true,
     "rarityId": "TAG_ID.RARITY.UNCOMMON"
@@ -138,12 +133,8 @@
     "isConsumable": false,
     "isKeyItem": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.SIDEWALK",
-      "TAG_ID.TILE_TYPE.LIT_SIDEWALK",
-      "TAG_ID.TILE_TYPE.WOODS",
-      "TAG_ID.TILE_TYPE.LIT_WOODS",
-      "TAG_ID.TILE_TYPE.WOODS_TWO",
-      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO"
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP"
     ],
     "isGeneratable": true,
     "rarityId": "TAG_ID.RARITY.UNCOMMON"
@@ -230,10 +221,7 @@
     "isConsumable": false,
     "isKeyItem": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.LIT_WOODS",
-      "TAG_ID.TILE_TYPE.LIT_WOODS_TWO",
-      "TAG_ID.TILE_TYPE.PATH",
-      "TAG_ID.TILE_TYPE.WOODS"
+      "TILE_ID.HOME.SIDEWALK"
     ],
     "conditionList": [
       {
@@ -413,9 +401,7 @@
     "isConsumable": false,
     "isKeyItem": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.PATH",
-      "TAG_ID.TILE_TYPE.GRASS",
-      "TAG_ID.TILE_TYPE.LIT_GRASS"
+      "TILE_ID.HOME.SIDEWALK"
     ],
     "isGeneratable": true,
     "rarityId": "TAG_ID.RARITY.RARE"
@@ -428,8 +414,7 @@
     "isConsumable": false,
     "isKeyItem": false,
     "tagList": [
-      "TAG_ID.TILE_TYPE.PATH",
-      "TAG_ID.TILE_TYPE.WOODS_TWO"
+      "TILE_ID.HOME.SIDEWALK"
     ],
     "isGeneratable": true,
     "rarityId": "TAG_ID.RARITY.RARE"

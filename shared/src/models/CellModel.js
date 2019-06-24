@@ -23,10 +23,12 @@ export default class CellModel extends Model {
       /** @type {Boolean} */
       right: true,
 
+      /** @type {TileId} */
+      tile: undefined,
       /** @type {Boolean} */
       filled: false,
-      /** @type {TileType} */
-      tileType: undefined,
+      /** @type {String} */
+      region: undefined,
       /** @type {Object} */
       ...newAttributes,
     });

@@ -2,8 +2,6 @@ import Joi from '@hapi/joi';
 
 import {DATA_TYPE} from 'constants.shared/dataTypes';
 
-import arrayContainsArray from 'utilities.shared/arrayContainsArray';
-import convertObjectToArray from 'utilities.shared/convertObjectToArray';
 import * as genericDataUtils from 'utilities.shared/genericDataUtils';
 
 /**
@@ -95,7 +93,7 @@ export function updateItemData(data, changes) {
  */
 export function formatItemData(data) {
   // put the data in order
-  let formattedData = {
+  const formattedData = {
     dataType: data.dataType,
     id: data.id,
     name: data.name,
@@ -108,7 +106,7 @@ export function formatItemData(data) {
     conditionList: genericDataUtils.formatConditionList(data.conditionList),
     isGeneratable: data.isGeneratable,
     rarityId: data.rarityId,
-  }
+  };
 
   // remove empty optional arrays
   if (formattedData.tagList.length <= 0) {
@@ -159,7 +157,7 @@ export function snipIdPrefix(idString) {
  */
 export function formatId(idString) {
   // remove white space and set to uppercase
-  const formattedString = idString.replace(/ /g,'').toUpperCase();
+  const formattedString = idString.replace(/ /g, '').toUpperCase();
 
   // return formatted string if it already has the prefix
   const split = formattedString.split('.');

@@ -104,5 +104,5 @@ export default {
   bracketleft: 219,
   backslash: 220,
   braketright: 221,
-  quote: 222
+  quote: 222,
 };

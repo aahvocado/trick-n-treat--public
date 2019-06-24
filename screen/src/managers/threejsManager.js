@@ -15,11 +15,11 @@ import {
 } from 'constants/three.js';
 import * as threeGeometry from 'geometry/threeGeometry.js';
 import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
-import {TILE_TYPES} from 'constants.shared/tileTypes';
+import {TILE_ID} from 'constants.shared/tileIds';
 import { initInput } from 'helpers/input';
 import * as connectionManager from 'managers/connectionManager';
 
-import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
+import * as tileUtils from 'utilities.shared/tileUtils';
 
 // Variable declaration
 let htmlContainer;
@@ -185,14 +185,14 @@ function Player(playerId, position) {
 }
 /**
  *
- * @param {Matrix} mapMatrix
- * @param {Matrix} fogMatrix
+ * @param {Grid} mapGrid
+ * @param {Grid} fogGrid
  */
-function generateTiles(mapMatrix, fogMatrix) {
-  mapMatrix.forEach(function(row, y) {
+function generateTiles(mapGrid, fogGrid) {
+  mapGrid.forEach(function(row, y) {
     row.forEach(function(mapTile, x) {
       const mapPos = { x, y };
-      const lightLevel = fogMatrix[y][x];
+      const lightLevel = fogGrid[y][x];
       const isHidden = lightLevel === LIGHT_LEVEL.HIDDEN;
 
       // add a "blank" tile if hidden,
@@ -201,25 +201,25 @@ function generateTiles(mapMatrix, fogMatrix) {
         handleAddTile({
           lightLevel: lightLevel,
           mapPos: mapPos,
-          tileType: mapTile,
+          tile: mapTile,
         });
         return;
       }
 
       // add a tile if it is walkable
-      if (tileTypeUtils.isWalkableTile(mapTile)) {
+      if (tileUtils.isWalkableTile(mapTile)) {
         handleAddTile({
           lightLevel: lightLevel,
           mapPos: mapPos,
-          tileType: mapTile,
+          tile: mapTile,
         });
       }
 
       // add things on top of the tiles
-      if (mapTile === TILE_TYPES.HOUSE) {
+      if (mapTile === TILE_ID.HOUSE) {
         addHouse(mapPos);
       }
-      if (mapTile === TILE_TYPES.SPECIAL) {
+      if (mapTile === TILE_ID.SPECIAL) {
         addSpecial(mapPos);
       }
     });
@@ -236,15 +236,15 @@ function handleAddTile(options) {
   const {
     lightLevel,
     mapPos,
-    tileType,
+    tile,
   } = options;
 
   // if a Tile is already at this Point
   const existingTile = getTileObjectAtMapPos(mapPos);
   if (existingTile) {
-    // and it is of the exact same tileType and visibility,
+    // and it is of the exact same tile and visibility,
     // we don't have to add a tile or anything
-    if (existingTile.tileType === tileType && existingTile.lightLevel === lightLevel) {
+    if (existingTile.tile === tile && existingTile.lightLevel === lightLevel) {
       return;
     }
 
@@ -269,12 +269,12 @@ function Tile(options) {
   const {
     lightLevel,
     mapPos,
-    tileType,
+    tile,
   } = options;
 
   const tile = new THREE.Group();
   tile.lightLevel = lightLevel;
-  tile.tileType = tileType;
+  tile.tile = tile;
 
   // positioning
   tile.mapPos = mapPos;

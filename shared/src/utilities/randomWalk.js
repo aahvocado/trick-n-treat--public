@@ -1,87 +1,68 @@
-import Point from '@studiomoniker/point';
+import {TILE_ID} from 'constants.shared/tileIds';
 
-import {TILE_TYPES} from 'constants.shared/tileTypes';
-import {POINTS} from 'constants.shared/points';
-
-import pickRandomWeightedChoice from 'utilities.shared/pickRandomWeightedChoice';
-import * as mapUtils from 'utilities.shared/mapUtils';
+import * as gridUtils from 'utilities.shared/gridUtils';
 import * as mathUtils from 'utilities.shared/mathUtils';
-import * as matrixUtils from 'utilities.shared/matrixUtils';
 import * as pointUtils from 'utilities.shared/pointUtils';
-import * as tileTypeUtils from 'utilities.shared/tileTypeUtils';
 
 /**
  * starts the Random Walk process to apply paths to a Map
  *  https://en.wikipedia.org/wiki/Random_walk
  *
- * @param {Matrix} matrix
+ * @param {GridModel} gridModel
  * @param {Point} point
  * @param {Number} iterations
  * @param {Object} [options]
  * @property {Number} [options.maxStepLength]
- * @property {Number} [options.stepWidth]
- * @property {TileType} [options.stepType]
+ * @property {TileId} [options.stepType]
  * @property {Boolean} [options.canOverlap]
- * @property {Boolean} [options.useWeightedDirection]
  */
-export default function randomWalk(matrix, point, iterations, options = {}) {
+export default function randomWalk(gridModel, point, iterations, options = {}) {
   const {
+    minStepLength = 3,
     maxStepLength = 5,
-    stepWidth = 1,
-    stepType = TILE_TYPES.DEBUG_WALL_WHITE,
+    stepType = TILE_ID.DEBUG.WHITE_WALL,
     canOverlap = true,
-    useWeightedDirection = false,
   } = options;
   // console.log('randomWalk()', iterations, '-', point.toString());
 
   // pick a Point which will be the direction of the next step
-  const nextDirection = (() => {
-    // weighted - prefer a direction that is farther away from the edge of the map
-    if (useWeightedDirection) {
-      return getRandomWeightedDirection(matrix, point);;
-    }
-
-    // random direction
-    return pointUtils.getRandomDirectionPoint();
-  })();
-
-  // `undefined` means we've reached a dead end
+  const nextDirection = pointUtils.getRandomDirectionPoint();
   if (nextDirection === undefined) {
     return;
   }
 
   // create Tunnel (step)
   let nextPoint = point.clone();
-  const tunnelLength = mathUtils.getRandomIntInclusive(3, maxStepLength);
+  const tunnelLength = mathUtils.getRandomInt(minStepLength, maxStepLength);
   for (let tunnelIdx = 0; tunnelIdx < tunnelLength; tunnelIdx++) {
     // find where this tunnel would be created
     const tunnelPoint = nextPoint.clone().add(nextDirection);
-
-    // stop if we are about to hit an edge
-    const nextTile = matrixUtils.getTileAt(matrix, tunnelPoint);
-    if (nextTile === undefined) {
+    if (gridUtils.isPointOutOfBounds(gridModel.copyGrid(), tunnelPoint)) {
       break;
     }
 
-    // stop if we we will hit a wall and are not allowed overlapping
-    if (tileTypeUtils.isWallTile(nextTile) && !canOverlap) {
+    // get the next tile
+    const nextCell = gridModel.getAt(tunnelPoint);
+    const nextTile = nextCell.get('tile');
+
+    // can stop creating tunnel if next tile would be the same and we're not allowed to overlap
+    const isNextTileIdentical = nextTile === stepType;
+    if (!canOverlap && isNextTileIdentical) {
       break;
     }
 
-    // if we can overlap, only overlap with the same type
-    if (tileTypeUtils.isWallTile(nextTile) && nextTile !== stepType && canOverlap) {
-      break;
+    // update cell at the point
+    if (nextCell.get('tile') !== stepType) {
+      nextCell.set({tile: stepType});
+      gridModel.snapshot();
     }
 
     // reassign `nextPoint` to where the tunnel is
     nextPoint = tunnelPoint.clone();
-
-    // set
-    matrixUtils.setTileAt(matrix, tunnelPoint, stepType);
   }
 
   // continue recursion if there are remaining steps
   if (iterations > 0) {
-    randomWalk(matrix, nextPoint, (iterations - 1), options);
+    randomWalk(gridModel, nextPoint, (iterations - 1), options);
   }
 }

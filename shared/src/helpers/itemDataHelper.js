@@ -29,7 +29,7 @@ export function getItemDataById(id) {
 export function getItemDataWithTag(tagId) {
   return ITEM_DATA.filter((item) =>
     item.tagList.includes(tagId)
-  )
+  );
 }
 /**
  * finds all items using options

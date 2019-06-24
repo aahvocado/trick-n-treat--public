@@ -1,5 +1,6 @@
 import {NotificationManager} from 'react-notifications';
 
+import array2d from 'array2d';
 import Point from '@studiomoniker/point';
 
 import {extendObservable} from 'mobx';
@@ -9,11 +10,12 @@ import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import Model from 'models/Model';
 import CharacterModel from 'models.shared/CharacterModel';
+import CellModel from 'models.shared/CellModel';
+import GridModel from 'models.shared/GridModel';
 import EncounterModel from 'models.shared/EncounterModel';
 
 import logger from 'utilities/logger.remote';
 import * as conditionUtils from 'utilities.shared/conditionUtils';
-import * as matrixUtils from 'utilities.shared/matrixUtils';
 
 /**
  *
@@ -27,8 +29,8 @@ export class RemoteGamestateModel extends Model {
       mode: GAME_MODE.INACTIVE,
       /** @type {Number} */
       round: 0,
-      /** @type {Matrix | undefined} */
-      mapData: undefined,
+      /** @type {GridModel | undefined} */
+      mapGridModel: undefined,
       /** @type {CharacterModel} */
       myCharacter: new CharacterModel(),
 
@@ -95,15 +97,17 @@ export class RemoteGamestateModel extends Model {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.UPDATE');
 
       this.updateMyCharacterData(data.myCharacter);
+      const formattedGrid = array2d.map(data.mapData, ((cellData) => new CellModel({
+        ...cellData,
+        point: new Point(cellData.point.x, cellData.point.y),
+      })));
 
       this.set({
         mode: data.mode,
         round: data.round,
-
-        mapData: matrixUtils.map(data.mapData, ((tileData) => ({
-          ...tileData,
-          position: new Point(tileData.position.x, tileData.position.y),
-        }))),
+        mapGridModel: new GridModel({
+          grid: formattedGrid,
+        })
       });
     });
 
@@ -139,7 +143,7 @@ export class RemoteGamestateModel extends Model {
 
       this.set({
         mode: GAME_MODE.INACTIVE,
-        mapData: undefined,
+        mapGridModel: undefined,
         myCharacter: new CharacterModel(),
         activeEncounter: new EncounterModel(),
         showEncounterModal: false,
@@ -159,7 +163,8 @@ export class RemoteGamestateModel extends Model {
    */
   isGameReady() {
     const isModeReady = this.get('mode') !== GAME_MODE.INACTIVE;
-    const isMapReady = this.get('mapData') !== undefined;
+    const mapGridModel = this.get('mapGridModel');
+    const isMapReady = mapGridModel !== undefined && mapGridModel.get('isDefined');
     const isCharacterReady = this.get('myCharacter').get('characterId') !== undefined;
     return isModeReady && isMapReady && isCharacterReady;
   }
