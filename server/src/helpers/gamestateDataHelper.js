@@ -14,7 +14,7 @@ import gameState from 'state/gameState';
  */
 export function canCharacterDoStuff(characterModel) {
   // can't do anything if game is not active, or if it is currently working
-  if (!gameState.get('isActive') || gameState.get('mode') === GAME_MODE.WORKING) {
+  if (!gameState.get('isReady')) {
     return false;
   }
 

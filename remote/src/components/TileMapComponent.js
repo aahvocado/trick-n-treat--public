@@ -4,7 +4,8 @@ import Point from '@studiomoniker/point';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {
-  faComment,
+  faExclamation,
+  faQuestion,
   faUser,
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -252,7 +253,7 @@ export class TileItemComponent extends Component {
         <MapEntityIconComponent
           key={`entity-icon-${renderedEntities.length}-key`}
           entityIdx={renderedEntities.length}
-          icon={faComment}
+          icon={encounterHere.isImmediate ? faExclamation : faQuestion}
         />
       )
     };

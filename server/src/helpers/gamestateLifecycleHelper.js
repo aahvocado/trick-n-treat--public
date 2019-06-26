@@ -172,9 +172,6 @@ export function handleEndOfAction(characterModel) {
     return;
   }
 
-  // game is ready
-  gameState.set({mode: GAME_MODE.READY});
-
   // immediately update clientList otherwise
   gameState.insertIntoFunctionQueue(() => {
     serverState.emitGameUpdate();

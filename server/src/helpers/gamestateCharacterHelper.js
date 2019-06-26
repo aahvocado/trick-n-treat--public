@@ -160,6 +160,7 @@ export function findCharacterByClientId(clientId) {
 // -- action functions
 /**
  * changes a Character's Position to given Position
+ *  even movement functions will call this
  *
  * @param {CharacterModel} characterModel
  * @param {Point} position
@@ -187,10 +188,13 @@ export function updateCharacterPosition(characterModel, position) {
     return;
   }
 
-  // there is an Encounter, so add the handler to the front of the FunctionQueue
-  gameState.insertIntoFunctionQueue(() => {
-    gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
-  }, 'handleCharacterTriggerEncounter');
+  // if there is an Encounter and it should trigger immediately,
+  //  add the handler to the front of the FunctionQueue
+  if (encounterModel.get('isImmediate')) {
+    gameState.insertIntoFunctionQueue(() => {
+      gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
+    }, 'handleCharacterTriggerEncounter');
+  }
 }
 /**
  * attempts to move a Character tile by tile to a destination
@@ -224,18 +228,26 @@ export function moveCharacterTo(characterModel, destination) {
   logger.verbose(`(moving "${characterModel.get('name')}" from [${position.toString()}] to [${destination.toString()}])`);
 
   // take one step at a time for moving along the path
-  movePath.forEach((pathPoint) => {
+  movePath.forEach((pathPoint, idx) => {
+    // `startOfAction` lifecycle every step
     gameState.addToFunctionQueue(() => {
-      // subtract a Movement
-      characterModel.modifyStat('movement', -1);
+      gameState.handleStartOfAction();
+    }, 'handleStartOfAction');
 
-      // attempt to update the character's destination
+    // execute the actual changing of location
+    gameState.addToFunctionQueue(() => {
+      characterModel.modifyStat('movement', -1);
       updateCharacterPosition(characterModel, pathPoint);
     }, 'moveCharacterTo');
 
     // lifecycle handle end of action between every step
     // (but if there is an Encounter, it will go in front of this)
     gameState.addToFunctionQueue(() => {
+      // after all movement is complete, we can set the mode to ready
+      if (idx === movePath.length - 1) {
+        gameState.set({mode: GAME_MODE.READY});
+      }
+
       gameState.handleEndOfAction(characterModel);
     }, 'handleEndOfAction');
   });
@@ -305,6 +317,22 @@ export function handleCharacterUseItem(characterModel, itemModel) {
 
   // update
   serverState.emitGameUpdate();
+}
+/**
+ * Character examining encounter
+ *
+ * @param {CharacterModel} characterModel
+ */
+export function handleCharacterExamineEncounter(characterModel) {
+  const characterLocation = characterModel.get('position');
+  const encounterModel = gameState.findEncounterAt(characterLocation);
+  if (encounterModel === undefined) {
+    logger.warning(`${characterModel.get('name')} attempted to examine nothing at ${characterLocation.toString()} .`)
+    return;
+  }
+
+  // trigger the Encounter
+  gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
 }
 /**
  * Character has chosen an Action
@@ -392,6 +420,7 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
   // always handle end of action lifecycle
   gameState.addToFunctionQueue(() => {
     gameState.handleEndOfAction(characterModel);
+    gameState.set({mode: GAME_MODE.READY});
   }, 'handleEndOfAction');
 }
 /**

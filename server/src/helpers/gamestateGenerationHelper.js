@@ -219,7 +219,7 @@ export function generateHouses(gridModel, options) {
  * @param {Point} location
  */
 export function placeEncounter(mapGridModel, location) {
-  const tagsToSearch = [];
+  const tilesToSearch = [];
 
   // wip - use the tile as a tag for searching
   const tile = mapGridModel.getAt(location).get('tile');
@@ -231,42 +231,42 @@ export function placeEncounter(mapGridModel, location) {
   }
 
   if (tile === TILE_ID.HOME.SIDEWALK) {
-    tagsToSearch.push('TILE_ID.HOME.SIDEWALK');
+    tilesToSearch.push('TILE_ID.HOME.SIDEWALK');
   }
   if (tile === TILE_ID.HOME.ROAD) {
-    tagsToSearch.push('TILE_ID.HOME.ROAD');
+    tilesToSearch.push('TILE_ID.HOME.ROAD');
   }
   if (tile === TILE_ID.HOME.LAWN) {
-    tagsToSearch.push('TILE_ID.HOME.LAWN');
+    tilesToSearch.push('TILE_ID.HOME.LAWN');
   }
   if (tile === TILE_ID.HOME.STREETLAMP) {
-    tagsToSearch.push('TILE_ID.HOME.STREETLAMP');
+    tilesToSearch.push('TILE_ID.HOME.STREETLAMP');
   }
 
   if (tile === TILE_ID.HOME.SIDEWALK2) {
-    tagsToSearch.push('TILE_ID.HOME.SIDEWALK2');
+    tilesToSearch.push('TILE_ID.HOME.SIDEWALK2');
   }
   if (tile === TILE_ID.HOME.ROAD2) {
-    tagsToSearch.push('TILE_ID.HOME.ROAD2');
+    tilesToSearch.push('TILE_ID.HOME.ROAD2');
   }
   if (tile === TILE_ID.HOME.LAWN2) {
-    tagsToSearch.push('TILE_ID.HOME.LAWN2');
+    tilesToSearch.push('TILE_ID.HOME.LAWN2');
   }
   if (tile === TILE_ID.HOME.STREETLAMP2) {
-    tagsToSearch.push('TILE_ID.HOME.STREETLAMP2');
+    tilesToSearch.push('TILE_ID.HOME.STREETLAMP2');
   }
 
   if (tile === TILE_ID.HOME.SIDEWALK3) {
-    tagsToSearch.push('TILE_ID.HOME.SIDEWALK3');
+    tilesToSearch.push('TILE_ID.HOME.SIDEWALK3');
   }
   if (tile === TILE_ID.HOME.ROAD3) {
-    tagsToSearch.push('TILE_ID.HOME.ROAD3');
+    tilesToSearch.push('TILE_ID.HOME.ROAD3');
   }
   if (tile === TILE_ID.HOME.LAWN3) {
-    tagsToSearch.push('TILE_ID.HOME.LAWN3');
+    tilesToSearch.push('TILE_ID.HOME.LAWN3');
   }
   if (tile === TILE_ID.HOME.STREETLAMP3) {
-    tagsToSearch.push('TILE_ID.HOME.STREETLAMP3');
+    tilesToSearch.push('TILE_ID.HOME.STREETLAMP3');
   }
 
   // find an encounter and model using this criteria
@@ -275,7 +275,7 @@ export function placeEncounter(mapGridModel, location) {
     dataType: DATA_TYPE.ENCOUNTER,
     isGeneratable: true,
     rarityId: pickRandomWeightedChoice(rarityTagChoices),
-    includeTags: tagsToSearch,
+    includeTiles: tilesToSearch,
   });
 
   // there are no matches if we get `null`

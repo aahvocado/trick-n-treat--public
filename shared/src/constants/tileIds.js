@@ -9,7 +9,7 @@ import convertObjectToArray from 'utilities.shared/convertObjectToArray';
  *
  * @typedef {Number} TileId
  */
-const TILE_ID_MAP = {
+const TILE_STRINGS = {
   EMPTY: 'TILE_ID.EMPTY',
   DEBUG: {
     BLACK: 'TILE_ID.DEBUG.BLACK',
@@ -71,10 +71,13 @@ const TILE_ID_MAP = {
  *
  * @type {Object}
  */
-export const TILE_ID = convertBaseToId(TILE_ID_MAP, 0);
+export const TILE_ID = convertBaseToId(TILE_STRINGS, 0);
 /** @type {Array} */
 // export const TILE_ID_LIST = convertObjectToArray(TILE_ID);
 /**
+ * map each tileId to a number
+ * - currently poorly and improperly using numbers
+ *
  * @param  {Object} baseMap
  * @param  {Number} [baseIdNum]
  * @returns {Object}
@@ -99,6 +102,9 @@ function convertBaseToId(baseMap, baseIdNum = 0) {
       const idNum = (idx * 2) + baseIdNum;
       const idWallNum = idNum + 1;
 
+      // increment by 2 for the base tile and wall tile
+      baseIdNum += 2;
+
       // assign
       result[key] = idNum;
       result[`${key}_WALL`] = idWallNum;
@@ -112,9 +118,28 @@ function convertBaseToId(baseMap, baseIdNum = 0) {
  * @example { 0: 'EMPTY', 1: 'EMPTY_WALL', 2: 'BLACK' }
  * @type {Object}
  */
-export const TILE_ID_NAME = convertIdToName(TILE_ID);
+export const TILE_ID_MAP = convertIdToNum(TILE_ID);
+/**
+ * @param  {Object} baseMap
+ * @returns {Object}
+ */
+function convertIdToNum(baseMap) {
+  let result = {};
+
+  Object.keys(baseMap).forEach((key) => {
+    const value = baseMap[key];
+    if (typeof value === 'object') {
+      const nestedObject = convertIdToNum(value);
+      result = {...result, ...nestedObject};
+    } else {
+      result[value] = key;
+    }
+  });
+
+  return result;
+};
 /** @type {Array} */
-export const TILE_ID_NAME_LIST = convertObjectToArray(TILE_ID_NAME);
+export const TILE_ID_NAME_MAP = convertIdToName(TILE_STRINGS);
 /**
  * @param  {Object} nameMap
  * @returns {Object}
@@ -134,6 +159,10 @@ function convertIdToName(nameMap) {
 
   return result;
 };
+/** @type {Array} */
+export const TILE_ID_STRING_LIST = Object.keys(TILE_ID_NAME_MAP).map((key) => key);
+/** @type {Array} */
+export const TILE_ID_NAME_LIST = convertObjectToArray(TILE_ID_NAME_MAP);
 /**
  *
  */

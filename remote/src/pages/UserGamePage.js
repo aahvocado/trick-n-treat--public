@@ -45,6 +45,8 @@ class UserGamePage extends Component {
     super(props);
 
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.focusCharacterTile = this.focusCharacterTile.bind(this);
+    this.onGameUpdate = this.onGameUpdate.bind(this);
 
     this.toggleItemModal = this.toggleItemModal.bind(this);
 
@@ -53,6 +55,7 @@ class UserGamePage extends Component {
     this.handleMoveToOnClick = this.handleMoveToOnClick.bind(this);
     this.onClickChoice = this.onClickChoice.bind(this);
     this.onClickUseItem = this.onClickUseItem.bind(this);
+    this.onClickExamine = this.onClickExamine.bind(this);
 
     this.state = {
       /** @type {Point} */
@@ -75,10 +78,15 @@ class UserGamePage extends Component {
   /** @override */
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyDown);
+
+    // the first time this is mounted, we want to wait until the game is ready so we can focus myLocation
+    connectionManager.socket.on(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, this.onGameUpdate);
   }
   /** @override */
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleKeyDown);
+
+    connectionManager.socket.off(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, this.onGameUpdate);
   }
   /** @override */
   render() {
@@ -89,7 +97,7 @@ class UserGamePage extends Component {
     }
 
     // show loading
-    if (!remoteGameState.get('isGameReady')) {
+    if (!remoteGameState.get('isActive')) {
       return <div className='color-white bg-secondary flex-auto pad-v-2 flex-col-center width-full'>
         (waiting for map data)
         <SpinnerComponent className='mar-v-3' />
@@ -109,6 +117,14 @@ class UserGamePage extends Component {
       isTileInspecting,
       isZoomedOut,
     } = this.state;
+
+    const myLocation = remoteGameState.get('myLocation');
+    const isSelectingMyLocation = selectedTilePos !== null && myLocation.equals(selectedTilePos);
+
+    const encounterHere = mapGridModel.getAt(myLocation).get('encounterHere');
+    const isEncounterHere = encounterHere !== undefined;
+
+    const shouldShowLookButton = isSelectingMyLocation && isEncounterHere;
 
     return (
       <div className='bg-secondary flex-auto flex-center flex-col width-full talign-center position-relative'>
@@ -165,13 +181,14 @@ class UserGamePage extends Component {
 
         {/* Info Bar */}
         <div className='bg-primary pad-v-1 flex-row-center color-tertiary'>
-          <FontAwesomeIcon className='flex-none adjacent-mar-l-2' icon={remoteGameState.get('isMyTurn') ? faPlay : faPause} />
+          <FontAwesomeIcon className='flex-none adjacent-mar-l-2' icon={remoteGameState.get('isReady') ? faPlay : faPause} />
           <div className='flex-none adjacent-mar-l-2' >{`Round ${remoteGameState.get('round')}`}</div>
         </div>
 
         {/* Map */}
         <TileMapComponent
-          className={remoteGameState.get('isMyTurn') ? 'bor-5-fourth' : 'bor-5-primary-darker'}
+          // className={remoteGameState.get('isReady') ? 'bor-5-fourth' : 'bor-5-primary-darker'}
+          className='bor-5-primary-darker'
           mapGridData={mapGridModel.export().grid}
           myPosition={myCharacter.get('position')}
           myRange={myCharacter.get('movement')}
@@ -200,20 +217,22 @@ class UserGamePage extends Component {
           Items
         </ButtonComponent>
 
-        <ButtonComponent
-          className='position-fixed fsize-5 f-bold adjacent-mar-l-2'
-          style={{
-            top: '515px',
-            right: '35px',
-            width: '100px',
-            height: '100px',
-          }}
-          theme={BUTTON_THEME.ORANGE_CIRCLE}
-          disabled={!this.canMove()}
-          onClick={this.handleMoveToOnClick}
-        >
-          Move
-        </ButtonComponent>
+        { !shouldShowLookButton &&
+          <ActionButton
+            style={{top: '515px', right: '35px'}}
+            disabled={!this.canMove()}
+            onClick={this.handleMoveToOnClick}
+            children='Move'
+          />
+        }
+
+        { shouldShowLookButton &&
+          <ActionButton
+            style={{top: '515px', right: '35px'}}
+            onClick={this.onClickExamine}
+            children='Look'
+          />
+        }
       </div>
     )
   }
@@ -240,7 +259,7 @@ class UserGamePage extends Component {
 
     // f - focus `selectedTilePos` onto character
     if (evt.keyCode === keycodes.f) {
-      this.setState({selectedTilePos: remoteGameState.get('myCharacter').get('position').clone()});
+      this.focusCharacterTile();
     }
     // i - toggle inventory
     if (evt.keyCode === keycodes.i) {
@@ -353,6 +372,9 @@ class UserGamePage extends Component {
       selectedTilePos: null,
       selectedPath: [],
     });
+
+    // create a listener so after server finishes moving, we can focus the character
+    connectionManager.socket.on(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, this.onGameUpdate);
   }
   /**
    * selected an action from the Encounter
@@ -398,4 +420,55 @@ class UserGamePage extends Component {
     logger.user(`user used ${itemData.name}`);
     connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, itemData);
   }
+  /**
+   * examine tile
+   *
+   */
+  onClickExamine() {
+    logger.user(`examined encounter at ${remoteGameState.get('myLocation').toString()}`);
+    connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.EXAMINE_ENCOUNTER);
+  }
+  /**
+   * sets the currently selectedTilePos to the character's location
+   */
+  focusCharacterTile() {
+    this.setState({selectedTilePos: remoteGameState.get('myCharacter').get('position').clone()});
+  }
+  /**
+   * checks for when the game changes modes so we know when moving ends
+   *
+   * @@param {Object} data
+   */
+  onGameUpdate(data) {
+    if (data.mode !== 'GAME_MODE.WORKING') {
+      console.log('onGameUpdate');
+      this.focusCharacterTile();
+
+      // no need to listen afterwords
+      connectionManager.socket.off(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, this.onGameUpdate);
+    }
+  }
+
 });
+
+class ActionButton extends Component {
+  render() {
+    const {
+      style = {},
+      ...otherProps
+    } = this.props;
+
+    return (
+      <ButtonComponent
+        className='position-fixed fsize-5 f-bold adjacent-mar-l-2'
+        style={{
+          width: '100px',
+          height: '100px',
+          ...style,
+        }}
+        theme={BUTTON_THEME.ORANGE_CIRCLE}
+        {...otherProps}
+      />
+    )
+  }
+}

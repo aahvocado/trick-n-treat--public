@@ -44,13 +44,26 @@ export class RemoteGamestateModel extends Model {
     const _this = this;
     extendObservable(this.attributes, {
       /** @type {Boolean} */
-      get isGameReady() {
-        return _this.isGameReady();
+      get isActive() {
+        return _this.isActive();
+      },
+      /** @type {Boolean} */
+      get isReady() {
+        return _this.get('isActive') && !_this.get('isWorking');
+      },
+      /** @type {Boolean} */
+      get isWorking() {
+        return _this.get('mode') === GAME_MODE.WORKING;
       },
       /** @type {Boolean} */
       get isMyTurn() {
         const characterModel = _this.get('myCharacter');
         return characterModel.get('isActive');
+      },
+      /** @type {Point} */
+      get myLocation() {
+        const characterModel = _this.get('myCharacter');
+        return characterModel.get('position');
       },
       /** @type {Array<InventoryData>} */
       get formattedInventoryList() {
@@ -161,11 +174,12 @@ export class RemoteGamestateModel extends Model {
   /**
    * @returns {Boolean}
    */
-  isGameReady() {
+  isActive() {
     const isModeReady = this.get('mode') !== GAME_MODE.INACTIVE;
     const mapGridModel = this.get('mapGridModel');
     const isMapReady = mapGridModel !== undefined && mapGridModel.get('isDefined');
     const isCharacterReady = this.get('myCharacter').get('characterId') !== undefined;
+
     return isModeReady && isMapReady && isCharacterReady;
   }
   /**

@@ -128,6 +128,9 @@ export default class ClientModel extends Model {
     // client used an Item
     socket.on(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, this.onUseItem.bind(this));
 
+    // client is examining an Encounter
+    socket.on(SOCKET_EVENT.GAME.TO_SERVER.EXAMINE_ENCOUNTER, this.onExamineEncounter.bind(this));
+
     // -- debug
     socket.on(SOCKET_EVENT.DEBUG.TO_SERVER.REQUEST_MAP_HISTORY, () => {
       logger.verbose(`. Sending Map History to ${this.get('name')}.`);
@@ -159,6 +162,12 @@ export default class ClientModel extends Model {
   onUseItem(itemData) {
     const itemModel = new ItemModel(itemData);
     gameState.handleCharacterUseItem(this.get('myCharacter'), itemModel);
+  }
+  /**
+   *
+   */
+  onExamineEncounter() {
+    gameState.handleCharacterExamineEncounter(this.get('myCharacter'));
   }
   /**
    * @param {Object} consoleData

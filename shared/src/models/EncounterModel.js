@@ -28,6 +28,8 @@ export default class EncounterModel extends Model {
       tagList: [],
       /** @type {Array<TriggerData>} */
       triggerList: [],
+      /** @type {Boolean} */
+      isImmediate: false,
 
       // -- instance data
       /** @type {Point} */

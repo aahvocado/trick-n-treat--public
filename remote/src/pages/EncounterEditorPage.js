@@ -28,6 +28,7 @@ import TagListEditorComponent from 'components/TagListEditorComponent';
 import TagListDropdown from 'components/TagListDropdown';
 import TargetListDropdown from 'components/TargetListDropdown';
 import TileListDropdown from 'components/TileListDropdown';
+import TileListEditorComponent from 'components/TileListEditorComponent';
 import TriggerListEditorComponent from 'components/TriggerListEditorComponent';
 import TriggerLogicListDropdown from 'components/TriggerLogicListDropdown';
 
@@ -76,6 +77,7 @@ class EncounterEditorPage extends Component {
     this.addAction = this.addAction.bind(this);
     this.addCondition = this.addCondition.bind(this);
     this.addTag = this.addTag.bind(this);
+    this.addTile = this.addTile.bind(this);
     this.addTrigger = this.addTrigger.bind(this);
 
     this.copyActiveDataToClipboard = this.copyActiveDataToClipboard.bind(this);
@@ -134,9 +136,11 @@ class EncounterEditorPage extends Component {
       isGeneratableOnce = false,
       rarityId = '',
       isDialogue = false,
+      isImmediate = false,
       actionList = [],
       conditionList = [],
       tagList = [],
+      tileList = [],
       triggerList = [],
     } = activeData;
 
@@ -462,6 +466,13 @@ class EncounterEditorPage extends Component {
                 checked={isDialogue}
                 onChange={() => this.updateActiveData({isDialogue: !isDialogue})}
               />
+
+              <ToggleComponent
+                className='adjacent-mar-t-2'
+                children='Immediate'
+                checked={isImmediate}
+                onChange={() => this.updateActiveData({isImmediate: !isImmediate})}
+              />
             </SectionFormContainer>
 
             {/* Generation */}
@@ -503,26 +514,36 @@ class EncounterEditorPage extends Component {
                       onSelect={(rarityId) => this.updateActiveData({rarityId: rarityId})}
                     />
                   </div>
-
-                  <div className='flex-col adjacent-mar-t-2'>
-                    Tiles
-                    <TileListDropdown
-                      className='bor-1-gray'
-                      // onSelect={(rarityId) => this.updateActiveData({rarityId: rarityId})}
-                    />
-                  </div>
                 </React.Fragment>
               }
             </SectionFormContainer>
 
-            {/* Tag List */}
-            <SectionFormContainer header='Tags' name='form7'
+            {/* Tile List */}
+            <SectionFormContainer header='Tiles' name='form7'
               showIcon
               iconOptions={{
                 style: {right: '-40px', top: '0'},
                 children: '7',
               }}
             >
+              <TileListDropdown
+                className='fsize-3 bor-1-gray adjacent-mar-t-2'
+                placeholder='New Tile...'
+                onSelect={this.addTile}
+              />
+
+              { tileList.length > 0 &&
+                <TileListEditorComponent
+                  className='fsize-2 flex-col flexwrap-yes adjacent-mar-t-2'
+                  itemClassName='adjacent-mar-t-1'
+                  dataList={tileList}
+                  onEdit={(updatedData) => this.updateActiveData({tileList: updatedData})}
+                />
+              }
+            </SectionFormContainer>
+
+            {/* Tag List */}
+            <SectionFormContainer header='Tags'>
               <TagListDropdown
                 className='fsize-3 bor-1-gray adjacent-mar-t-2'
                 placeholder='New Tag...'
@@ -841,6 +862,33 @@ class EncounterEditorPage extends Component {
 
     // add it
     activeData.tagList.push(tagId);
+
+    // update the data
+    this.setState({
+      activeData: deepClone(activeData),
+      hasChanges: true,
+    });
+  }
+  /**
+   * adds a Tile to the active Encounter
+   *
+   * @param {String} tileId
+   */
+  addTile(tileId) {
+    const { activeData } = this.state;
+
+    // create array if it does not exist
+    if (activeData.tileList === undefined) {
+      activeData.tileList = [];
+    }
+
+    // check if it already already has the tag
+    if (activeData.tileList.includes(tileId)) {
+      return;
+    }
+
+    // add it
+    activeData.tileList.push(tileId);
 
     // update the data
     this.setState({

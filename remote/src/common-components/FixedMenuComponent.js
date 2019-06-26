@@ -24,7 +24,7 @@ export default class FixedMenuComponent extends PureComponent {
     /** @type {Function} */
     onClickOverlay: () => {},
   };
-  /** @default */
+  /** @override */
   constructor(props) {
     super(props);
 
@@ -36,14 +36,14 @@ export default class FixedMenuComponent extends PureComponent {
       isDisabled: props.active === undefined ? false : !props.active,
     }
   };
-  /** @default */
+  /** @override */
   componentDidUpdate() {
     // if we were disabled, but now we are active, we can not worry about being disabled anymore
     if (this.state.isDisabled && this.props.active) {
       this.setState({ isDisabled: false });
     }
   };
-  /** @default */
+  /** @override */
   render() {
     const {
       active,

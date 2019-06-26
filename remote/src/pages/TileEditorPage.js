@@ -26,7 +26,7 @@ import TileInspectorComponent from 'components/TileInspectorComponent';
 import {LIGHT_LEVEL} from 'constants.shared/lightLevelIds';
 import {
   TILE_ID,
-  TILE_ID_NAME,
+  TILE_ID_NAME_MAP,
 } from 'constants.shared/tileIds';
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
@@ -730,7 +730,7 @@ class EditorPanel extends PureComponent {
         if (tileData === undefined) {
           exportString += null;
         } else {
-          exportString += useTileName ? TILE_ID_NAME[tileData] : tileData;
+          exportString += useTileName ? TILE_ID_NAME_MAP[tileData] : tileData;
         }
 
         if (colIdx < matrixRow.length - 1) {

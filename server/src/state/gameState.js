@@ -63,9 +63,17 @@ export class GamestateModel extends Model {
     // computed attributes - (have to pass in `this` as context because getters have their own context)
     const _this = this;
     extendObservable(this.attributes, {
-      /** @type {CharacterModel | null} */
+      /** @type {Boolean} */
       get isActive() {
         return _this.get('mode') !== GAME_MODE.INACTIVE && _this.get('mode') !== GAME_MODE.PAUSED;
+      },
+      /** @type {Boolean} */
+      get isReady() {
+        return _this.get('isActive') && !_this.get('isWorking');
+      },
+      /** @type {Boolean} */
+      get isWorking() {
+        return _this.get('mode') === GAME_MODE.WORKING;
       },
       /** @type {CharacterModel | null} */
       get currentCharacter() {
@@ -160,6 +168,10 @@ export class GamestateModel extends Model {
   /** @override */
   handleCharacterUseItem(characterModel, itemModel) {
     gamestateCharacterHelper.handleCharacterUseItem(characterModel, itemModel);
+  }
+  /** @override */
+  handleCharacterExamineEncounter(characterModel) {
+    gamestateCharacterHelper.handleCharacterExamineEncounter(characterModel);
   }
   /** @override */
   handleCharacterChoseAction(characterModel, encounterId, actionData) {

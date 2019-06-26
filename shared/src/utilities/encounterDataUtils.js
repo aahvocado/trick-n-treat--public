@@ -28,10 +28,14 @@ const encounterSchema = Joi.object().keys({
   tagList: Joi.array().optional(),
   triggerList: Joi.array().optional(),
   conditionList: Joi.array().optional(),
+
   isDialogue: Joi.boolean().required(),
+  isImmediate: Joi.boolean().optional(),
   isGeneratable: Joi.boolean().required(),
   isGeneratableOnce: Joi.boolean().optional(),
   rarityId: Joi.string().optional(),
+  tileList: Joi.array().optional(),
+
   groupId: Joi.string().optional(),
 });
 /**
@@ -60,6 +64,7 @@ export function createEncounterData(defaultData = {}) {
     title: undefined,
     content: undefined,
     isDialogue: false,
+    isImmediate: false,
     actionList: [genericDataUtils.createActionData()],
     // tagList: [],
     // triggerList: [],
@@ -103,6 +108,7 @@ export function formatEncounterData(data) {
     title: data.title,
     content: data.content,
     isDialogue: data.isDialogue,
+    isImmediate: data.isImmediate,
     tagList: data.tagList || [],
     actionList: genericDataUtils.formatActionList(data.actionList),
     triggerList: genericDataUtils.formatTriggerList(data.triggerList),
@@ -110,6 +116,7 @@ export function formatEncounterData(data) {
     isGeneratable: data.isGeneratable,
     isGeneratableOnce: data.isGeneratableOnce,
     rarityId: data.rarityId,
+    tileList: data.tileList,
     groupId: data.groupId || '',
   };
 
@@ -247,6 +254,8 @@ export function filterEncounterList(dataList, options) {
   const {
     includeTags = [],
     excludeTags = [],
+    includeTiles = [],
+    excludeTiles = [],
     ...filteredProperties
   } = options;
 
@@ -254,10 +263,12 @@ export function filterEncounterList(dataList, options) {
     const {
       dataType,
       isDialogue,
+      isImmediate,
       isGeneratable,
       groupId,
       rarityId,
       tagList,
+      tileList,
     } = encounterData;
 
     // check filtering by `dataType`
@@ -267,6 +278,11 @@ export function filterEncounterList(dataList, options) {
 
     // check filtering by `isDialogue`
     if (filteredProperties.isDialogue !== undefined && isDialogue !== filteredProperties.isDialogue) {
+      return false;
+    }
+
+    // check filtering by `isImmediate`
+    if (filteredProperties.isImmediate !== undefined && isImmediate !== filteredProperties.isImmediate) {
       return false;
     }
 
@@ -285,7 +301,7 @@ export function filterEncounterList(dataList, options) {
       return false;
     }
 
-    // check for tag filters
+    // check for includes tag filters
     if (includeTags.length > 0) {
       // not going to match with no tags at all
       if (tagList === undefined || tagList.length <= 0) {
@@ -299,7 +315,7 @@ export function filterEncounterList(dataList, options) {
       }
     }
 
-    // check for tag filters
+    // check for excludes tag filters
     if (excludeTags.length > 0 && tagList !== undefined) {
       // free pass if tagList is empty
       if (tagList === undefined || tagList.length <= 0) {
@@ -309,6 +325,34 @@ export function filterEncounterList(dataList, options) {
       // excludes all of these tags
       const doesExcludeTags = !arrayContainsArray(tagList, excludeTags);
       if (!doesExcludeTags) {
+        return false;
+      }
+    }
+
+    // check for includes Tile filters
+    if (includeTiles.length > 0) {
+      // not going to match with no Tiles at all
+      if (tileList === undefined || tileList.length <= 0) {
+        return false;
+      }
+
+      // includes all of these Tiles
+      const doesIncludeTiles = arrayContainsArray(tileList, includeTiles);
+      if (!doesIncludeTiles) {
+        return false;
+      }
+    }
+
+    // check for excludes Tile filters
+    if (excludeTiles.length > 0 && tileList !== undefined) {
+      // free pass if tileList is empty
+      if (tileList === undefined || tileList.length <= 0) {
+        return true;
+      }
+
+      // excludes all of these Tiles
+      const doesExcludeTiles = !arrayContainsArray(tileList, excludeTiles);
+      if (!doesExcludeTiles) {
         return false;
       }
     }
