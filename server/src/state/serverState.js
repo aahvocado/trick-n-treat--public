@@ -188,14 +188,13 @@ export class ServerStateModel extends Model {
     logger.server('emitGameUpdate()');
     const gameClients = this.get('gameClients');
 
-    // format the map data as it will be the same for everyone
-    const formattedMapData = gameState.getFormattedMapData();
-
     // send each client some gamestate data along with their own character data
     gameClients.forEach((clientModel) => {
+      const clientCharacter = clientModel.get('myCharacter');
+
       clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, {
-        mapData: formattedMapData,
-        myCharacter: clientModel.get('myCharacter').export(),
+        mapData: gameState.getFormattedMapDataFor(clientCharacter),
+        myCharacter: clientCharacter.export(),
         mode: gameState.get('mode'),
         round: gameState.get('round'),
       });

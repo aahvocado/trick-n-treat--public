@@ -8,6 +8,7 @@ import {GOTO_CHOICE_ID_LIST} from 'constants.shared/choiceIds';
 import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 import DropdownComponent from 'common-components/DropdownComponent';
 import IconButtonComponent from 'common-components/IconButtonComponent';
+import ToggleComponent from 'common-components/ToggleComponent';
 
 import ActionListDropdown from 'components/ActionListDropdown';
 import ConditionListEditorComponent from 'components/ConditionListEditorComponent';
@@ -137,6 +138,7 @@ export class ActionDataEditorComponent extends PureComponent {
       conditionList = [],
       label,
       gotoId,
+      willEndTurn = true,
     } = data;
 
     return (
@@ -193,14 +195,23 @@ export class ActionDataEditorComponent extends PureComponent {
           />
         }
 
-        {/* Button to add another Condition */}
-        <ButtonComponent
-          className='fsize-2 aself-start flex-none borradius-b-2 borwidth-t-0 bor-h-1-gray bor-b-1-gray'
-          theme={BUTTON_THEME.WHITE}
-          onClick={() => this.onClickAddCondition()}
-        >
-          Add Condition
-        </ButtonComponent>
+        {/* Tabular buttons */}
+        <div className='flex-row flex-none'>
+          <ButtonComponent
+            className='fsize-2 aself-start flex-none borradius-b-2 borwidth-t-0 bor-h-1-gray bor-b-1-gray adjacent-mar-l-2'
+            theme={BUTTON_THEME.WHITE}
+            onClick={() => this.onClickAddCondition()}
+          >
+            Add Condition
+          </ButtonComponent>
+
+          <ToggleComponent
+            className='bg-white pad-2 fsize-2 aself-start flex-none borradius-b-2 borwidth-t-0 bor-h-1-gray bor-b-1-gray adjacent-mar-l-2'
+            children='Ends Turn'
+            checked={willEndTurn}
+            onChange={() => onEdit({willEndTurn: !willEndTurn})}
+          />
+        </div>
       </div>
     )
   }

@@ -128,6 +128,9 @@ export default class ClientModel extends Model {
     // client used an Item
     socket.on(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, this.onUseItem.bind(this));
 
+    // client ended their turn
+    socket.on(SOCKET_EVENT.GAME.TO_SERVER.END_TURN, this.onEndTurn.bind(this));
+
     // client is examining an Encounter
     socket.on(SOCKET_EVENT.GAME.TO_SERVER.EXAMINE_ENCOUNTER, this.onExamineEncounter.bind(this));
 
@@ -162,6 +165,12 @@ export default class ClientModel extends Model {
   onUseItem(itemData) {
     const itemModel = new ItemModel(itemData);
     gameState.handleCharacterUseItem(this.get('myCharacter'), itemModel);
+  }
+  /**
+   *
+   */
+  onEndTurn() {
+    gameState.handleCharacterEndTurn(this.get('myCharacter'));
   }
   /**
    *

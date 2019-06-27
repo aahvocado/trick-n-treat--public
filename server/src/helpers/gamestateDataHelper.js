@@ -1,5 +1,3 @@
-import {GAME_MODE} from 'constants.shared/gameModes';
-
 import gameState from 'state/gameState';
 
 // import logger from 'utilities/logger.game';
@@ -50,6 +48,36 @@ export function getFormattedMapData() {
       lightLevel: lightingModel.getAt(cellPoint).get('tile'),
       charactersHere: charactersHere,
       encounterHere: encounterHere && encounterHere.export(),
+    };
+  });
+
+  return formattedMapData;
+}
+/**
+ * formats `mapGridModel` and the entities on the map into something more convenient
+ *
+ * @param {CharacterModel} characterModel
+ * @returns {Grid<TileData>}
+ */
+export function getFormattedMapDataFor(characterModel) {
+  const mapGridModel = gameState.get('mapGridModel');
+  const lightingModel = gameState.get('lightingModel');
+  if (mapGridModel === undefined) {
+    return;
+  }
+
+  const formattedMapData = mapGridModel.map((cell) => {
+    const cellPoint = cell.get('point');
+    const charactersHere = gameState.getCharactersAt(cellPoint).map((character) => (character.export()));
+    const encounterHere = gameState.findEncounterAt(cellPoint);
+
+    return {
+      point: cellPoint,
+      tile: cell.get('tile'),
+      lightLevel: lightingModel.getAt(cellPoint).get('tile'),
+      charactersHere: charactersHere,
+      encounterHere: encounterHere && encounterHere.export(),
+      canBeEncountered: encounterHere === undefined ? null : encounterHere.canBeEncounteredBy(characterModel),
     };
   });
 

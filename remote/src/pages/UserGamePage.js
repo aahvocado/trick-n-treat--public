@@ -56,6 +56,7 @@ class UserGamePage extends Component {
     this.onClickChoice = this.onClickChoice.bind(this);
     this.onClickUseItem = this.onClickUseItem.bind(this);
     this.onClickExamine = this.onClickExamine.bind(this);
+    this.onClickEndTurn = this.onClickEndTurn.bind(this);
 
     this.state = {
       /** @type {Point} */
@@ -121,10 +122,11 @@ class UserGamePage extends Component {
     const myLocation = remoteGameState.get('myLocation');
     const isSelectingMyLocation = selectedTilePos !== null && myLocation.equals(selectedTilePos);
 
-    const encounterHere = mapGridModel.getAt(myLocation).get('encounterHere');
+    const currentCell = mapGridModel.getAt(myLocation);
+    const encounterHere = currentCell.get('encounterHere');
     const isEncounterHere = encounterHere !== undefined;
 
-    const shouldShowLookButton = isSelectingMyLocation && isEncounterHere;
+    const shouldShowLookButton = isSelectingMyLocation && isEncounterHere && currentCell.get('canBeEncountered');
 
     return (
       <div className='bg-secondary flex-auto flex-center flex-col width-full talign-center position-relative'>
@@ -203,23 +205,21 @@ class UserGamePage extends Component {
         />
 
         {/* Action Buttons */}
-        <ButtonComponent
-          className='position-fixed fsize-5 f-bold adjacent-mar-l-2'
+        <ActionButton
           style={{
-            top: '515px',
-            left: '35px',
-            width: '90px',
-            height: '90px',
+            left: '70px',
           }}
-          theme={BUTTON_THEME.ORANGE_CIRCLE}
-          onClick={() => { this.toggleItemModal()}}
+          disabled={!remoteGameState.get('isReady') || !remoteGameState.get('isMyTurn')}
+          onClick={this.onClickEndTurn}
         >
-          Items
-        </ButtonComponent>
+          End Turn
+        </ActionButton>
 
         { !shouldShowLookButton &&
           <ActionButton
-            style={{top: '515px', right: '35px'}}
+            style={{
+              left: '50%', width: '110px', height: '110px',
+            }}
             disabled={!this.canMove()}
             onClick={this.handleMoveToOnClick}
             children='Move'
@@ -228,11 +228,24 @@ class UserGamePage extends Component {
 
         { shouldShowLookButton &&
           <ActionButton
-            style={{top: '515px', right: '35px'}}
+            style={{
+              left: '50%', width: '110px', height: '110px',
+            }}
+            disabled={!remoteGameState.get('isReady') || !remoteGameState.get('isMyTurn')}
             onClick={this.onClickExamine}
             children='Look'
           />
         }
+
+        <ActionButton
+          style={{
+            right: '70px',
+            transform: 'translateX(50%)',
+          }}
+          onClick={() => { this.toggleItemModal()}}
+        >
+          Items
+        </ActionButton>
       </div>
     )
   }
@@ -429,6 +442,12 @@ class UserGamePage extends Component {
     connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.EXAMINE_ENCOUNTER);
   }
   /**
+   * manual end turn
+   */
+  onClickEndTurn() {
+    connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.END_TURN);
+  }
+  /**
    * sets the currently selectedTilePos to the character's location
    */
   focusCharacterTile() {
@@ -441,14 +460,12 @@ class UserGamePage extends Component {
    */
   onGameUpdate(data) {
     if (data.mode !== 'GAME_MODE.WORKING') {
-      console.log('onGameUpdate');
       this.focusCharacterTile();
 
       // no need to listen afterwords
       connectionManager.socket.off(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, this.onGameUpdate);
     }
   }
-
 });
 
 class ActionButton extends Component {
@@ -460,10 +477,12 @@ class ActionButton extends Component {
 
     return (
       <ButtonComponent
-        className='position-fixed fsize-5 f-bold adjacent-mar-l-2'
+        className='position-fixed fsize-5 f-bold'
         style={{
-          width: '100px',
-          height: '100px',
+          top: '515px',
+          width: '90px',
+          height: '90px',
+          transform: 'translateX(-50%)',
           ...style,
         }}
         theme={BUTTON_THEME.ORANGE_CIRCLE}

@@ -137,6 +137,7 @@ export class RemoteGamestateModel extends Model {
 
       const encounterModel = new EncounterModel();
       encounterModel.import(data);
+
       this.set({
         activeEncounter: encounterModel,
         showEncounterModal: true,

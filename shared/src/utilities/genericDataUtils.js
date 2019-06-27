@@ -146,6 +146,7 @@ const actionSchema = Joi.object().keys({
   gotoId: Joi.string().required(),
   label: Joi.string().required(),
   conditionList: Joi.array().optional(),
+  willEndTurn: Joi.boolean().required(),
 });
 /**
  * @param {*} data
@@ -173,6 +174,7 @@ export function createActionData(defaultData = {}) {
     gotoId: undefined,
     label: 'Okay',
     // conditionList: [],
+    willEndTurn: true,
     ...defaultData,
   };
 
@@ -256,6 +258,7 @@ export function formatActionData(data) {
     gotoId: data.gotoId,
     label: data.label,
     conditionList: formatConditionList(data.conditionList),
+    willEndTurn: data.willEndTurn,
   };
 
   // remove empty arrays
@@ -266,6 +269,10 @@ export function formatActionData(data) {
   // no need for a `gotoId` if `choiceId` does not support it
   if (!GOTO_CHOICE_ID_LIST.includes(formattedData.choiceId)) {
     delete formattedData.gotoId;
+  }
+
+  if (formattedData.willEndTurn === undefined) {
+    formattedData.willEndTurn = true;
   }
 
   // all done

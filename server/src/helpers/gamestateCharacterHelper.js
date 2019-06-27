@@ -319,6 +319,28 @@ export function handleCharacterUseItem(characterModel, itemModel) {
   serverState.emitGameUpdate();
 }
 /**
+ * Character has ended their turn
+ *
+ * @param {CharacterModel} characterModel
+ */
+export function handleCharacterEndTurn(characterModel) {
+  // clean up the previously active character,
+  // - they are longer active
+  // - reset their movement
+  characterModel.set({
+    isActive: false,
+    movement: characterModel.get('movementBase'),
+  });
+
+  // immediately send a Game Update
+  serverState.emitGameUpdate();
+
+  // handle the end of turn lifecycle
+  gameState.addToFunctionQueue(() => {
+    gameState.handleEndOfTurn();
+  }, 'handleEndOfTurn');
+}
+/**
  * Character examining encounter
  *
  * @param {CharacterModel} characterModel
@@ -327,7 +349,7 @@ export function handleCharacterExamineEncounter(characterModel) {
   const characterLocation = characterModel.get('position');
   const encounterModel = gameState.findEncounterAt(characterLocation);
   if (encounterModel === undefined) {
-    logger.warning(`${characterModel.get('name')} attempted to examine nothing at ${characterLocation.toString()} .`)
+    logger.warning(`${characterModel.get('name')} attempted to examine nothing at ${characterLocation.toString()} .`);
     return;
   }
 
@@ -373,18 +395,14 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
     gameState.handleStartOfAction();
   }, 'handleStartOfAction');
 
-  // look at the choice, if it's a basic confirmation to close the `Encounter`
+  // look at the choice to see if it's a basic confirmation to close the `Encounter`
   const {choiceId} = actionData;
   if (choiceId === CHOICE_ID.CONFIRM) {
-    // add the simple function of closing the encounter to the queue
     gameState.addToFunctionQueue(() => {
-      // clear out `activeEncounter`
-      gameState.set({activeEncounter: null});
+      gameState.onFinishEncounter(characterModel, activeEncounter, actionData);
+    }, 'onFinishEncounter');
 
-      // tell the client their encounter is now null
-      const clientModel = serverState.findClientByCharacter(characterModel);
-      clientModel.emitEncounterClose();
-    }, 'closeEncounter');
+    return;
   }
 
   // everything else goes to another Encounter
@@ -422,6 +440,40 @@ export function handleCharacterChoseAction(characterModel, encounterId, actionDa
     gameState.handleEndOfAction(characterModel);
     gameState.set({mode: GAME_MODE.READY});
   }, 'handleEndOfAction');
+}
+/**
+ * the Encounter is now closed (and will not go to another Encounter)
+ *  so check if the turn needs to end
+ *
+ * @param {CharacterModel} characterModel
+ * @param {EncounterModel} encounterModel
+ * @param {ActionData} actionData
+ */
+export function onFinishEncounter(characterModel, encounterModel, actionData) {
+  // clear out `activeEncounter`
+  gameState.set({activeEncounter: null});
+
+  // remove encounters from the world
+  if (encounterModel.get('isMarkedForDeletion')) {
+    gameState.removeMarkedEncounters();
+  };
+
+  // tell the client their encounter is now null
+  const clientModel = serverState.findClientByCharacter(characterModel);
+  clientModel.emitEncounterClose();
+
+  // always handle end of action lifecycle
+  gameState.addToFunctionQueue(() => {
+    gameState.handleEndOfAction(characterModel);
+    gameState.set({mode: GAME_MODE.READY});
+  }, 'handleEndOfAction');
+
+  // immediately end turn if the action chosen does so
+  if (actionData.willEndTurn) {
+    gameState.addToFunctionQueue(() => {
+      gameState.handleCharacterEndTurn(characterModel);
+    }, 'handleCharacterEndTurn');
+  }
 }
 /**
  * picks a random adjacent point that a given character can be on

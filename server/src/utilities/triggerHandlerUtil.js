@@ -62,7 +62,7 @@ export function handleGetLogicFunction(triggerData, characterModel) {
   }
 
   if (triggerLogicUtils.isSubtractTriggerLogic(triggerLogicId)) {
-    return getAddLogicFunction(triggerData);
+    return getSubtractLogicFunction(triggerData);
   }
 }
 /**

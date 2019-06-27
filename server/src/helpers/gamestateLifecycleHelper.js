@@ -85,8 +85,8 @@ export function handleStartGame(clientList) {
 
   // after map is generated, update the world the first time
   gameState.addToFunctionQueue(() => {
-    updateEncounters();
-    updateLighting();
+    gameState.updateEncounters();
+    gameState.updateLighting();
   }, 'updateWorld');
 
   // after map is generated, update the clientList
@@ -167,8 +167,8 @@ export function handleEndOfAction(characterModel) {
   // if Character can no longer move, it's time to end their turn
   if (!characterModel.canMove()) {
     gameState.addToFunctionQueue(() => {
-      gameState.handleEndOfTurn();
-    }, 'handleEndOfTurn');
+      gameState.handleCharacterEndTurn(characterModel);
+    }, 'handleCharacterEndTurn');
     return;
   }
 
@@ -206,22 +206,14 @@ export function handleEndOfTurn() {
 
   // remove the previous `currentCharacter`
   const currentTurnQueue = gameState.get('turnQueue').slice();
-  const previousCharacter = currentTurnQueue.shift();
+  currentTurnQueue.shift();
 
   // set the new `turnQueue`
   gameState.set({turnQueue: currentTurnQueue});
 
-  // clean up the previously active character,
-  // - they are longer active
-  // - reset their movement
-  previousCharacter.set({
-    isActive: false,
-    movement: previousCharacter.get('movementBase'),
-  });
-
   // update world
-  updateEncounters();
-  // updateLighting();
+  gameState.updateEncounters();
+  // gameState.updateLighting();
 
   // immediately send a Game Update
   serverState.emitGameUpdate();
@@ -300,6 +292,14 @@ export function initTurnQueue() {
  */
 export function updateEncounters() {
   logger.lifecycle('. updateEncounters()');
+
+  gameState.removeMarkedEncounters();
+}
+/**
+ * looks through Encounters to see if any of them needs updates
+ */
+export function removeMarkedEncounters() {
+  logger.lifecycle('. removeMarkedEncounters()');
 
   const encounterList = gameState.get('encounterList');
   const filteredList = encounterList.filter((encounterModel) => !encounterModel.get('isMarkedForDeletion'));

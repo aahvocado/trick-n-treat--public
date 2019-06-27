@@ -132,6 +132,18 @@ export class GamestateModel extends Model {
   handleEndOfRound() {
     gamestateLifecycleHelper.handleEndOfRound();
   }
+  /** @override */
+  updateEncounters() {
+    gamestateLifecycleHelper.updateEncounters();
+  }
+  /** @override */
+  removeMarkedEncounters() {
+    gamestateLifecycleHelper.removeMarkedEncounters();
+  }
+  /** @override */
+  updateLighting() {
+    gamestateLifecycleHelper.updateLighting();
+  }
   // -- Character methods - gamestateCharacterHelper.js
   /** @override */
   createCharacterForClient(clientModel) {
@@ -170,12 +182,20 @@ export class GamestateModel extends Model {
     gamestateCharacterHelper.handleCharacterUseItem(characterModel, itemModel);
   }
   /** @override */
+  handleCharacterEndTurn(characterModel) {
+    gamestateCharacterHelper.handleCharacterEndTurn(characterModel);
+  }
+  /** @override */
   handleCharacterExamineEncounter(characterModel) {
     gamestateCharacterHelper.handleCharacterExamineEncounter(characterModel);
   }
   /** @override */
   handleCharacterChoseAction(characterModel, encounterId, actionData) {
     gamestateCharacterHelper.handleCharacterChoseAction(characterModel, encounterId, actionData);
+  }
+  /** @override */
+  onFinishEncounter(characterModel, encounterModel, actionData) {
+    gamestateCharacterHelper.onFinishEncounter(characterModel, encounterModel, actionData);
   }
   /** @override */
   handleCharacterTriggerEncounter(characterModel, encounterModel) {
@@ -264,6 +284,10 @@ export class GamestateModel extends Model {
   /** @override */
   getFormattedMapData() {
     return gamestateDataHelper.getFormattedMapData();
+  }
+  /** @override */
+  getFormattedMapDataFor(characterModel) {
+    return gamestateDataHelper.getFormattedMapDataFor(characterModel);
   }
 }
 /**
