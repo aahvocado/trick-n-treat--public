@@ -35,6 +35,9 @@ export class RemoteGamestateModel extends Model {
       myCharacter: new CharacterModel(),
 
       /** @type {Boolean} */
+      isGameComplete: false,
+
+      /** @type {Boolean} */
       showEncounterModal: false,
       /** @type {EncounterModel} */
       activeEncounter: new EncounterModel(),
@@ -149,6 +152,17 @@ export class RemoteGamestateModel extends Model {
       logger.server('SOCKET_EVENT.GAME.TO_CLIENT.CLOSE_ENCOUNTER');
 
       this.set({showEncounterModal: false});
+    });
+
+    // Game is Complete
+    socket.on(SOCKET_EVENT.GAME.TO_CLIENT.COMPLETE, () => {
+      logger.server('SOCKET_EVENT.GAME.TO_CLIENT.COMPLETE');
+
+      this.set({
+        mode: GAME_MODE.INACTIVE,
+        showEncounterModal: false,
+        isGameComplete: true,
+      });
     });
 
     // Game is ending

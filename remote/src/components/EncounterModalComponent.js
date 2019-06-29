@@ -5,6 +5,8 @@ import ModalComponent from 'common-components/ModalComponent';
 
 import TriggerDisplayComponent from 'components/TriggerDisplayComponent';
 
+import * as triggerLogicUtils from 'utilities.shared/triggerLogicUtils';
+
 /**
  *
  */
@@ -33,7 +35,7 @@ export default class EncounterModalComponent extends PureComponent {
       triggerList = [],
     } = encounterData;
 
-    const triggersToShow = triggerList.filter((triggerData) => triggerData.canBeTriggered);
+    const triggersToShow = triggerList.filter((triggerData) => triggerData.canBeTriggered && !triggerLogicUtils.isHiddenTrigger(triggerData.triggerLogicId));
 
     return (
       <ModalComponent

@@ -24,7 +24,7 @@ export default class CharacterSheetComponent extends PureComponent {
       baseClassName,
       className,
       characterData,
-      // ...otherProps
+      ...otherProps
     } = this.props;
 
     const {
@@ -43,6 +43,7 @@ export default class CharacterSheetComponent extends PureComponent {
     return (
       <div
         className={combineClassNames(baseClassName, className)}
+        {...otherProps}
       >
         <CharacterSheetRow
           label='health'

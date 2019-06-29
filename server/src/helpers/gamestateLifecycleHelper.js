@@ -158,6 +158,12 @@ export function handleEndOfAction(characterModel) {
     return;
   }
 
+  // ya died
+  if (characterModel.get('health') <= 0) {
+    gameState.handleCompleteGame();
+    return;
+  }
+
   // if Character can no longer move, it's time to end their turn
   if (!characterModel.canMove()) {
     gameState.addToFunctionQueue(() => {
@@ -253,6 +259,25 @@ export function handleStartOfRound() {
 export function handleEndOfRound() {
   logger.lifecycle('handleEndOfRound()');
 
+  // any players dead?
+  serverState.get('gameClients').forEach((client) => {
+    const characterModel = client.get('myCharacter');
+    if (characterModel.get('health') <= 0) {
+      gameState.handleCompleteGame();
+      return;
+    }
+  });
+
+  // check if next round would be over the round limit
+  if (gameState.get('round') + 1 > gameState.get('roundLimit')) {
+    // finish the game
+    gameState.addToFunctionQueue(() => {
+      gameState.handleCompleteGame();
+    }, 'handleCompleteGame');
+
+    return;
+  }
+
   // update
   serverState.emitGameUpdate();
 
@@ -260,6 +285,23 @@ export function handleEndOfRound() {
   gameState.addToFunctionQueue(() => {
     gameState.handleStartOfRound();
   }, 'handleStartOfRound');
+}
+/**
+ * end of the game
+ */
+export function handleCompleteGame() {
+  logger.lifecycle('handleCompleteGame()');
+
+  // clear some states
+  gameState.set({
+    mode: GAME_MODE.INACTIVE,
+    activeEncounter: null,
+  });
+
+  // immediately tell all gameClients that the game has ended
+  gameState.insertIntoFunctionQueue(() => {
+    serverState.get('gameClients').forEach((client) => client.emitGameComplete());
+  }, 'emitGameComplete');
 }
 /**
  * builds a Turn Queue based on stuff

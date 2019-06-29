@@ -97,6 +97,11 @@ class UserGamePage extends Component {
       return <Redirect to='/' />
     }
 
+    // redirect to game complete
+    if (remoteGameState.get('isGameComplete') && remoteAppState.get('isInGame')) {
+      return <Redirect to='/complete' />
+    }
+
     // show loading
     if (!remoteGameState.get('isActive')) {
       return <div className='color-white bg-secondary flex-auto pad-v-2 flex-col-center width-full'>

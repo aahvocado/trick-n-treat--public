@@ -234,6 +234,12 @@ export default class ClientModel extends Model {
   emitGameEnd() {
     this.emit(SOCKET_EVENT.GAME.TO_CLIENT.END);
   }
+  /**
+   * tell the client the game has completed
+   */
+  emitGameComplete() {
+    this.emit(SOCKET_EVENT.GAME.TO_CLIENT.COMPLETE);
+  }
   // -- debugger emits
   /**
    * @param {Array<Grid>} history

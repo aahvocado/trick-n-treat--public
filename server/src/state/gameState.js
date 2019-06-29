@@ -37,6 +37,8 @@ export class GamestateModel extends Model {
       activeEncounter: null,
       /** @type {Number} */
       round: 0,
+      /** @type {Number} */
+      roundLimit: 50,
 
       // -- Entity attributes
       /** @type {ModelList<CharacterModel>} */
@@ -131,6 +133,10 @@ export class GamestateModel extends Model {
   /** @override */
   handleEndOfRound() {
     gamestateLifecycleHelper.handleEndOfRound();
+  }
+  /** @override */
+  handleCompleteGame() {
+    gamestateLifecycleHelper.handleCompleteGame();
   }
   /** @override */
   updateEncounters() {

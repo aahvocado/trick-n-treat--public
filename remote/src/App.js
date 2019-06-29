@@ -14,6 +14,7 @@ import DebugMenu from 'components/DebugMenu';
 import WebsocketConnectionIndicator from 'components/WebsocketConnectionIndicator';
 
 import EncounterEditorPage from 'pages/EncounterEditorPage';
+import GameCompletePage from 'pages/GameCompletePage';
 import ItemEditorPage from 'pages/ItemEditorPage';
 import TileEditorPage from 'pages/TileEditorPage';
 import UserGamePage from 'pages/UserGamePage';
@@ -62,6 +63,8 @@ class App extends Component {
           <Route path="/lobby" component={UserLobbyPage} />
 
           <Route path="/game" component={UserGamePage} />
+
+          <Route path="/complete" component={GameCompletePage} />
 
           <Route path="/encounter_editor" component={EncounterEditorPage} />
 

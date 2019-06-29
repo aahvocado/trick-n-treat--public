@@ -1004,7 +1004,7 @@
         "dataType": "DATA_TYPE.ACTION",
         "choiceId": "CHOICE_ID.CONFIRM",
         "label": "Leave the fudge tree alone",
-        "willEndTurn": true
+        "willEndTurn": false
       }
     ],
     "triggerList": [
