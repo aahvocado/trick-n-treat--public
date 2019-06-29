@@ -83,7 +83,7 @@ export default class ClientModel extends Model {
    */
   attachServerListeners() {
     const socket = this.get('socket');
-    logger.new(`+ Client "${this.get('name')}" connected.`);
+    logger.new(`Client "${this.get('name')}" connected.`);
 
     // client wants to "Game Start"
     socket.on(SOCKET_EVENT.LOBBY.TO_SERVER.START, () => {
@@ -106,7 +106,7 @@ export default class ClientModel extends Model {
      * disconnected, so remove client from the list
      */
     socket.on('disconnect', () => {
-      logger.old(`- Client "${this.get('name')}" disconnected.`);
+      logger.old(`Client "${this.get('name')}" disconnected.`);
 
       const clientList = serverState.get('clientList');
       const clientIdx = clientList.findIndex((client) => client.get('sessionId') === socket.id);

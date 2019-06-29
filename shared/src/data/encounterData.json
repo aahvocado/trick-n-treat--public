@@ -1552,5 +1552,114 @@
       "TILE_ID.HOME.ROAD",
       "TILE_ID.HOME.SIDEWALK"
     ]
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.HIDEOUT_HOUSE",
+    "title": "Trick and Treater's Hideout",
+    "content": "What a cool base!",
+    "isDialogue": false,
+    "isImmediate": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.HIDEOUT_DROPOFF",
+        "label": "Drop off your candies",
+        "willEndTurn": false
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.HIDEOUT_NAP",
+        "label": "Take a nap",
+        "willEndTurn": false
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Head out",
+        "willEndTurn": false
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "78"
+    ],
+    "groupId": "Hideout grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.HIDEOUT_DROPOFF",
+    "title": "Dropping off candies",
+    "content": "One day you'll drop em all off, but for now it's just 10.",
+    "isDialogue": false,
+    "isImmediate": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Head out",
+        "willEndTurn": false
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 10,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.CHARACTER.CANDIES",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 9
+          }
+        ]
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "78"
+    ],
+    "groupId": "Hideout grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.HIDEOUT_NAP",
+    "title": "Nap time",
+    "content": "Healy nappy time",
+    "isDialogue": false,
+    "isImmediate": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Ahhh",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.CHARACTER.HEALTH",
+            "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+            "value": 10
+          }
+        ]
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "78"
+    ],
+    "groupId": "Hideout grouping"
   }
 ]

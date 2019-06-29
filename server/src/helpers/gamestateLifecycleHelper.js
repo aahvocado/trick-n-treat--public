@@ -83,12 +83,6 @@ export function handleStartGame(clientList) {
     gamestateGenerationHelper.generateNewMap();
   }, 'generateNewMap');
 
-  // after map is generated, update the world the first time
-  gameState.addToFunctionQueue(() => {
-    gameState.updateEncounters();
-    gameState.updateLighting();
-  }, 'updateWorld');
-
   // after map is generated, update the clientList
   gameState.addToFunctionQueue(() => {
     serverState.emitLobbyUpdate();

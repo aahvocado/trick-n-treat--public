@@ -230,6 +230,9 @@ export function removeDeadEnds(gridModel) {
       .filter((adjacentCell) => adjacentCell !== undefined)
       .filter((adjacentCell) => !tileUtils.isWallTile(adjacentCell.get('tile')));
     const neighborCell = adjacentWalkableCells[0];
+    if (neighborCell === undefined) {
+      continue;
+    }
 
     // check if the neighbor is a dead end
     const neighborAdjacentCells = gridModel.orthogonals(neighborCell.get('point'))

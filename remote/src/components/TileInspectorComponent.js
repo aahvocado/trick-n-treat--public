@@ -3,8 +3,6 @@ import React, {PureComponent} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faSearch} from '@fortawesome/free-solid-svg-icons'
 
-import {TILE_ID_MAP} from 'constants.shared/tileIds';
-
 /**
  *
  */
@@ -48,7 +46,7 @@ export default class TileInspectorComponent extends PureComponent {
 
         <div className='flex-col flex-auto aitems-start adjacent-mar-l-2'>
           <div className='adjacent-mar-t-1'>{`Position: ${point.x}, ${point.y}`}</div>
-          <div className='adjacent-mar-t-1'>{`Tile Type: ${TILE_ID_MAP[tile]}`}</div>
+          <div className='adjacent-mar-t-1'>{`Tile Type: ${tile}`}</div>
           <div className='adjacent-mar-t-1'>{`Region: ${region}`}</div>
           <div className='adjacent-mar-t-1'>{`Light Level: ${lightLevel}`}</div>
           <div className='adjacent-mar-t-1'>{`Characters: ${charactersHere.length}`}</div>

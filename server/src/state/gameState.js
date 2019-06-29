@@ -255,6 +255,10 @@ export class GamestateModel extends Model {
   findEncounterAt(point) {
     return gamestateEncounterHelper.findEncounterAt(point);
   }
+  /** @override */
+  findEncounterById(encounterId, options) {
+    return gamestateEncounterHelper.findEncounterById(encounterId, options);
+  }
   // -- Function Queue - gamestateFunctionQueueHelper.js
   /** @override */
   addToFunctionQueue(action, name) {

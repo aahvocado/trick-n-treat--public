@@ -35,7 +35,7 @@ export function createQueuedFunction(baseFunction, name) {
   // create the function object
   const queuedFunction = () => {
     return new Promise((resolve) => {
-      logger.verbose(`. [[resolving "${newFunctionName}"]]`);
+      logger.queue(`. [[resolving "${newFunctionName}"]]`);
 
       // actually call the function here
       baseFunction();

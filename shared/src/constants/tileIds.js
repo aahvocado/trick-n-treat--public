@@ -9,7 +9,7 @@ import convertObjectToArray from 'utilities.shared/convertObjectToArray';
  *
  * @typedef {Number} TileId
  */
-const TILE_STRINGS = {
+const TILE_ID_BASE = {
   EMPTY: 'TILE_ID.EMPTY',
   DEBUG: {
     BLACK: 'TILE_ID.DEBUG.BLACK',
@@ -34,6 +34,8 @@ const TILE_STRINGS = {
   },
 
   HOME: {
+    HIDEOUT: 'TILE_ID.HOME.HIDEOUT',
+
     HOUSE: 'TILE_ID.HOME.HOUSE',
     SIDEWALK: 'TILE_ID.HOME.SIDEWALK',
     ROAD: 'TILE_ID.HOME.ROAD',
@@ -61,85 +63,77 @@ const TILE_STRINGS = {
     TREE: 'TILE_ID.PARK.TREE',
   },
 };
+export const TILE_NUM_ID = {};
+export const TILE_ID = TILE_ID_BASE;
+createCompleteIds(TILE_ID, TILE_NUM_ID);
 /**
- * TileId will map the above object to a number starting with 0,
- *  don't use the actual number since this list can be dynamic as more tiles are added
- *
- * example
- * - `TILE_ID.EMPTY: 0`
- * - `TILE_ID.EMPTY_WALL: 1`
- *
- * @type {Object}
+ * @param {Object} idMap
+ * @param {Object} numMap
+ * @param {Number} [idNum]
  */
-export const TILE_ID = convertBaseToId(TILE_STRINGS, 0);
-/** @type {Array} */
-// export const TILE_ID_LIST = convertObjectToArray(TILE_ID);
-/**
- * map each tileId to a number
- * - currently poorly and improperly using numbers
- *
- * @param  {Object} baseMap
- * @param  {Number} [baseIdNum]
- * @returns {Object}
- */
-function convertBaseToId(baseMap, baseIdNum = 0) {
-  const result = {};
-
-  const keys = Object.keys(baseMap);
+function createCompleteIds(idMap, numMap, idNum = 0) {
+  const keys = Object.keys(idMap);
   keys.forEach((key, idx) => {
-    const value = baseMap[key];
+    if (numMap[key] === undefined) {
+      numMap[key] = {};
+    };
 
-    // if the value here is another object, recursively convert that as well
+    const value = idMap[key];
     if (typeof value === 'object') {
-      const nestedObject = convertBaseToId(value, baseIdNum);
-      result[key] = nestedObject;
-
-      baseIdNum += Object.keys(nestedObject).length;
+      createCompleteIds(idMap[key], numMap[key], idNum);
+      idNum += Object.keys(value).length * 2;
+      // idMap[key] = nestedObject;
+      // numMap[key] = nestedObject;
     } else {
-      // use the index as the id,
-      // - add offset
-      // - multiply by 2 to account for the wall which is going to be + 1 of the base tile
-      const idNum = (idx * 2) + baseIdNum;
-      const idWallNum = idNum + 1;
+      idMap[`${key}_WALL`] = `${value}_WALL`;
 
-      // increment by 2 for the base tile and wall tile
-      baseIdNum += 2;
-
-      // assign
-      result[key] = idNum;
-      result[`${key}_WALL`] = idWallNum;
+      numMap[key] = idNum;
+      numMap[`${key}_WALL`] = idNum + 1;
+      idNum += 2;
     }
   });
-
-  return result;
-}
-/**
- * this is the reverse of the above Key/Value map,
- * @example { 0: 'EMPTY', 1: 'EMPTY_WALL', 2: 'BLACK' }
- * @type {Object}
- */
-export const TILE_ID_MAP = convertIdToNum(TILE_ID);
+};
+/** @type {Array} */
+export const TILE_NUM_TO_STRING_MAP = convertNumToString(TILE_NUM_ID, TILE_ID);
 /**
  * @param  {Object} baseMap
+ * @param  {Object} trackMap
  * @returns {Object}
  */
-function convertIdToNum(baseMap) {
+function convertNumToString(baseMap, trackMap) {
   let result = {};
 
-  Object.keys(baseMap).forEach((key) => {
+  const keys = Object.keys(baseMap);
+  keys.forEach((key) => {
     const value = baseMap[key];
     if (typeof value === 'object') {
-      const nestedObject = convertIdToNum(value);
-      result = {...result, ...nestedObject};
+      result = {...result, ...convertNumToString(value, trackMap[key])};
     } else {
-      result[value] = key;
+      result[value] = trackMap[key];
     }
   });
 
   return result;
 };
 /** @type {Array} */
-export const TILE_ID_NAME_MAP = convertIdToName(TILE_STRINGS);
+export const TILE_STRING_TO_NUM_MAP = reverseMap(TILE_NUM_TO_STRING_MAP);
+/**
+ * @param  {Object} baseMap
+ * @returns {Object}
+ */
+function reverseMap(baseMap) {
+  const result = {};
+
+  const keys = Object.keys(baseMap);
+  keys.forEach((key) => {
+    const value = baseMap[key];
+    result[value] = Number(key);
+  });
+
+  return result;
+};
+/** @type {Array} */
+export const TILE_ID_NAME_MAP = convertIdToName(TILE_NUM_ID);
 /**
  * @param  {Object} nameMap
  * @returns {Object}
@@ -167,7 +161,13 @@ export const TILE_ID_NAME_LIST = convertObjectToArray(TILE_ID_NAME_MAP);
  *
  */
 export const TILE_ID_HOUSE_LIST = [
+  TILE_ID.HOME.HIDEOUT,
   TILE_ID.HOME.HOUSE,
   TILE_ID.HOME.HOUSE2,
   TILE_ID.HOME.HOUSE3,
 ];
+
+// console.log('TILE_ID', TILE_ID);
+// console.log('TILE_NUM_ID', TILE_NUM_ID);
+// console.log('TILE_NUM_TO_STRING_MAP', TILE_NUM_TO_STRING_MAP);
+// console.log('TILE_STRING_TO_NUM_MAP', TILE_STRING_TO_NUM_MAP);

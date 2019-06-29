@@ -1,18 +1,38 @@
-import {TILE_ID_HOUSE_LIST} from 'constants.shared/tileIds';
+import {
+  TILE_ID_HOUSE_LIST,
+  TILE_NUM_TO_STRING_MAP,
+  TILE_STRING_TO_NUM_MAP,
+} from 'constants.shared/tileIds';
 
+/**
+ * @param {TileId} tileId
+ * @returns {TileNum}
+ */
+export function getTileNum(tileId) {
+  return TILE_STRING_TO_NUM_MAP[tileId];
+}
+/**
+ * @param {TileNum} tileNum
+ * @returns {TileId}
+ */
+export function getTileId(tileNum) {
+  return TILE_NUM_TO_STRING_MAP[tileNum];
+}
 /**
  * @param {TileId} tile
  * @returns {Boolean}
  */
 export function isWalkableTile(tile) {
-  return tile % 2 === 0;
+  const tileNum = getTileNum(tile);
+  return tileNum % 2 === 0;
 }
 /**
  * @param {TileId} tile
  * @returns {Boolean}
  */
 export function isWallTile(tile) {
-  return tile % 2 === 1;
+  const tileNum = getTileNum(tile);
+  return tileNum % 2 === 1;
 }
 /**
  * @param {TileId} tile
@@ -38,7 +58,10 @@ export function convertToWalkableTile(tile) {
     return tile;
   }
 
-  return tile - 1;
+  // console.log('convertToWalkableTile', tile);
+  // console.log('getTileNum', getTileNum(tile));
+  const tileNum = getTileNum(tile);
+  return getTileId(tileNum - 1);
 }
 /**
  * @param {TileId} tile
@@ -49,5 +72,6 @@ export function convertToWallTile(tile) {
     return tile;
   }
 
-  return tile + 1;
+  const tileNum = getTileNum(tile);
+  return getTileId(tileNum + 1);
 }

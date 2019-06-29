@@ -160,6 +160,18 @@ export default class GridModel extends Model {
     });
   }
   /**
+   * @param {Point} point
+   * @param {Cell} value
+   */
+  setTileAt(point, value) {
+    const cell = this.getAt(point);
+    if (cell === undefined) {
+      return;
+    }
+
+    cell.set({tile: value});
+  }
+  /**
    * finds the a* path from given pointA to pointB
    *
    * @param {Point} pointA

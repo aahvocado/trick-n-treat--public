@@ -1,5 +1,3 @@
-import Point from '@studiomoniker/point';
-
 import {
   HOME_BIOME_SETTINGS,
   // GRAVEYARD_BIOME_SETTINGS,
@@ -12,10 +10,8 @@ import {TAG_ID} from 'constants.shared/tagIds';
 import {TILE_ID} from 'constants.shared/tileIds';
 
 import CellModel from 'models.shared/CellModel';
-import GridModel from 'models.shared/GridModel';
 
 import gameState from 'state/gameState';
-import serverState from 'state/serverState';
 
 import logger from 'utilities/logger.game';
 
@@ -55,53 +51,77 @@ export function generateNewMap() {
   mapGridModel.set({history: []});
   mapGridModel.reset(MAP_WIDTH, MAP_HEIGHT, TILE_ID.EMPTY_WALL);
 
-  logger.game('+ Generating Home Region');
-  generateHomeGrid(mapGridModel, {
-    width: HOME_BIOME_SETTINGS.width,
-    height: HOME_BIOME_SETTINGS.height,
-    location: HOME_BIOME_SETTINGS.location,
-    tileToUse: TILE_ID.HOME.SIDEWALK,
-  });
-
-  logger.game('+ Generating Park Regions');
-  const regionIterations = 8;
-  for (let iteration = 0; iteration < regionIterations; iteration++) {
-    const randomWidth = mathUtils.getRandomOdd(3, 7);
-    const randomHeight = mathUtils.getRandomOdd(3, 7);
-
-    // pick a coordinate to place this region
-    const randomLocation = mapGridModel.findFitPoint(randomWidth + 2, randomHeight + 2, (cell) => {
-      return cell !== undefined && tileUtils.isWallTile(cell.get('tile'));
+  gameState.insertIntoFunctionQueue(() => {
+    logger.game('+ Generating Home Region');
+    generateHomeGrid(mapGridModel, {
+      width: HOME_BIOME_SETTINGS.width,
+      height: HOME_BIOME_SETTINGS.height,
+      location: HOME_BIOME_SETTINGS.location,
+      tileToUse: TILE_ID.HOME.SIDEWALK,
     });
 
-    if (randomLocation === undefined) {
-      break;
+    logger.game('+ Updating Starting Tile');
+    mapGridModel.setTileAt(MAP_START, TILE_ID.HOME.HIDEOUT);
+
+    const homeEncounter = gameState.findEncounterById('ENCOUNTER_ID.HIDEOUT_HOUSE', {location: MAP_START});
+    gameState.get('encounterList').push(homeEncounter);
+  }, 'generate home region', 0);
+
+  gameState.insertIntoFunctionQueue(() => {
+    logger.game('+ Generating Park Regions');
+    const regionIterations = 8;
+    for (let iteration = 0; iteration < regionIterations; iteration++) {
+      const randomWidth = mathUtils.getRandomOdd(3, 7);
+      const randomHeight = mathUtils.getRandomOdd(3, 7);
+
+      // pick a coordinate to place this region
+      const randomLocation = mapGridModel.findFitPoint(randomWidth + 2, randomHeight + 2, (cell) => {
+        return cell !== undefined && tileUtils.isWallTile(cell.get('tile'));
+      });
+
+      if (randomLocation === undefined) {
+        break;
+      }
+
+      generateParkGrid(mapGridModel, {
+        width: randomWidth,
+        height: randomHeight,
+        location: pointUtils.makePointEven(randomLocation),
+        tileToUse: TILE_ID.PARK.GRASS,
+      });
     }
+  }, 'generate park regions', 1);
 
-    generateParkGrid(mapGridModel, {
-      width: randomWidth,
-      height: randomHeight,
-      location: pointUtils.makePointEven(randomLocation),
-      tileToUse: TILE_ID.PARK.GRASS,
+  gameState.insertIntoFunctionQueue(() => {
+    logger.game('+ Generating Paths');
+    mazeUtils.generateMazeEverywhere(mapGridModel, {
+      tileToUse: TILE_ID.HOME.ROAD,
     });
-  }
+  }, 'generate paths', 2);
 
-  logger.game('+ Generating Paths');
-  mazeUtils.generateMazeEverywhere(mapGridModel, {
-    tileToUse: TILE_ID.HOME.ROAD,
-  });
+  gameState.insertIntoFunctionQueue(() => {
+    logger.game('+ Connecting Regions');
+    mapGenerationUtils.connectRegions(mapGridModel, {
+      tileToUse: TILE_ID.HOME.ROAD,
+    });
+  }, 'connect regions', 3);
 
-  logger.game('+ Connecting Regions');
-  mapGenerationUtils.connectRegions(mapGridModel, {
-    tileToUse: TILE_ID.HOME.ROAD,
-  });
+  gameState.insertIntoFunctionQueue(() => {
+    logger.game('+ Removing Dead Ends');
+    mazeUtils.removeDeadEnds(mapGridModel);
+  }, 'remove dead ends', 4);
 
-  logger.game('+ Removing Dead Ends');
-  mazeUtils.removeDeadEnds(mapGridModel);
+  // after map is generated, update the world the first time
+  gameState.insertIntoFunctionQueue(() => {
+    gameState.updateEncounters();
+    gameState.updateLighting();
+  }, 'updateWorld', 5);
 
   // done
-  console.timeEnd('MapGenTime');
-  mapGridModel.snapshot();
+  gameState.insertIntoFunctionQueue(() => {
+    console.timeEnd('MapGenTime');
+    mapGridModel.snapshot();
+  }, 'finish generation', 6);
 }
 /**
  * generates a New Map for the current Gamestate
@@ -219,8 +239,6 @@ export function generateHouses(gridModel, options) {
  * @param {Point} location
  */
 export function placeEncounter(mapGridModel, location) {
-  const tilesToSearch = [];
-
   // wip - use the tile as a tag for searching
   const tile = mapGridModel.getAt(location).get('tile');
 
@@ -230,44 +248,8 @@ export function placeEncounter(mapGridModel, location) {
     return;
   }
 
-  if (tile === TILE_ID.HOME.SIDEWALK) {
-    tilesToSearch.push('TILE_ID.HOME.SIDEWALK');
-  }
-  if (tile === TILE_ID.HOME.ROAD) {
-    tilesToSearch.push('TILE_ID.HOME.ROAD');
-  }
-  if (tile === TILE_ID.HOME.LAWN) {
-    tilesToSearch.push('TILE_ID.HOME.LAWN');
-  }
-  if (tile === TILE_ID.HOME.STREETLAMP) {
-    tilesToSearch.push('TILE_ID.HOME.STREETLAMP');
-  }
-
-  if (tile === TILE_ID.HOME.SIDEWALK2) {
-    tilesToSearch.push('TILE_ID.HOME.SIDEWALK2');
-  }
-  if (tile === TILE_ID.HOME.ROAD2) {
-    tilesToSearch.push('TILE_ID.HOME.ROAD2');
-  }
-  if (tile === TILE_ID.HOME.LAWN2) {
-    tilesToSearch.push('TILE_ID.HOME.LAWN2');
-  }
-  if (tile === TILE_ID.HOME.STREETLAMP2) {
-    tilesToSearch.push('TILE_ID.HOME.STREETLAMP2');
-  }
-
-  if (tile === TILE_ID.HOME.SIDEWALK3) {
-    tilesToSearch.push('TILE_ID.HOME.SIDEWALK3');
-  }
-  if (tile === TILE_ID.HOME.ROAD3) {
-    tilesToSearch.push('TILE_ID.HOME.ROAD3');
-  }
-  if (tile === TILE_ID.HOME.LAWN3) {
-    tilesToSearch.push('TILE_ID.HOME.LAWN3');
-  }
-  if (tile === TILE_ID.HOME.STREETLAMP3) {
-    tilesToSearch.push('TILE_ID.HOME.STREETLAMP3');
-  }
+  // at the base level, include filter to have the tile the encounter is on
+  const tilesToSearch = [tile];
 
   // find an encounter and model using this criteria
   const encounterModel = gameState.generateRandomEncounter({

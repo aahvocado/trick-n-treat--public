@@ -205,47 +205,44 @@ class UserGamePage extends Component {
         />
 
         {/* Action Buttons */}
-        <ActionButton
+        <div
+          className='position-fixed width-full flex-row jcontent-center aitems-start'
           style={{
-            left: '70px',
+            top: '515px',
           }}
-          disabled={!remoteGameState.get('isReady') || !remoteGameState.get('isMyTurn')}
-          onClick={this.onClickEndTurn}
         >
-          End Turn
-        </ActionButton>
-
-        { !shouldShowLookButton &&
           <ActionButton
-            style={{
-              left: '50%', width: '110px', height: '110px',
-            }}
-            disabled={!this.canMove()}
-            onClick={this.handleMoveToOnClick}
-            children='Move'
-          />
-        }
-
-        { shouldShowLookButton &&
-          <ActionButton
-            style={{
-              left: '50%', width: '110px', height: '110px',
-            }}
             disabled={!remoteGameState.get('isReady') || !remoteGameState.get('isMyTurn')}
-            onClick={this.onClickExamine}
-            children='Look'
-          />
-        }
+            onClick={this.onClickEndTurn}
+          >
+            End Turn
+          </ActionButton>
 
-        <ActionButton
-          style={{
-            right: '70px',
-            transform: 'translateX(50%)',
-          }}
-          onClick={() => { this.toggleItemModal()}}
-        >
-          Items
-        </ActionButton>
+          { !shouldShowLookButton &&
+            <ActionButton
+              style={{width: '120px', height: '120px'}}
+              disabled={!this.canMove()}
+              onClick={this.handleMoveToOnClick}
+              children='Move'
+            />
+          }
+
+          { shouldShowLookButton &&
+            <ActionButton
+              style={{width: '120px', height: '120px'}}
+              disabled={!remoteGameState.get('isReady') || !remoteGameState.get('isMyTurn')}
+              onClick={this.onClickExamine}
+              children='Look'
+            />
+          }
+
+          <ActionButton
+            disabled={!remoteGameState.get('isReady') || !remoteGameState.get('isMyTurn')}
+            onClick={() => { this.toggleItemModal()}}
+          >
+            Items
+          </ActionButton>
+        </div>
       </div>
     )
   }
@@ -404,6 +401,8 @@ class UserGamePage extends Component {
     logger.user(`User selected "${actionData.choiceId}" for encounter "${activeEncounter.get('id')}"`);
     connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.CHOSE_ACTION, activeEncounter.get('id'), actionData);
 
+    connectionManager.socket.on(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, this.onGameUpdate);
+
     this.setState({
       selectedTilePos: null,
       selectedPath: [],
@@ -432,6 +431,8 @@ class UserGamePage extends Component {
 
     logger.user(`user used ${itemData.name}`);
     connectionManager.socket.emit(SOCKET_EVENT.GAME.TO_SERVER.USE_ITEM, itemData);
+
+    connectionManager.socket.on(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, this.onGameUpdate);
   }
   /**
    * examine tile
@@ -477,12 +478,10 @@ class ActionButton extends Component {
 
     return (
       <ButtonComponent
-        className='position-fixed fsize-5 f-bold'
+        className='adjacent-mar-l-2 fsize-5 f-bold'
         style={{
-          top: '515px',
           width: '90px',
           height: '90px',
-          transform: 'translateX(-50%)',
           ...style,
         }}
         theme={BUTTON_THEME.ORANGE_CIRCLE}

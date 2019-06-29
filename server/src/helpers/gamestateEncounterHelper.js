@@ -80,3 +80,24 @@ export function findEncounterAt(point) {
     return point.equals(encounterLocation);
   });
 }
+/**
+ * @param {EncounterId} encounterId
+ * @param {Object} options
+ * @returns {EncounterData}
+ */
+export function findEncounterById(encounterId, options) {
+  const {
+    location,
+  } = options;
+
+  const foundEncounterData = availableEncounterList.find((encounterData) => encounterData.id === encounterId);
+  if (foundEncounterData === undefined) {
+    return null;
+  }
+
+  // create and return the encounter
+  return new EncounterModel({
+    ...foundEncounterData,
+    location: location,
+  });
+}

@@ -1,4 +1,5 @@
 
+
 /**
  * @typedef {String} LogType
  */
@@ -13,6 +14,8 @@ export const LOG_TYPES = {
   ERROR: 'ERROR-LOG-TYPE',
   WARNING: 'WARNING-LOG-TYPE',
   VERBOSE: 'VERBOSE-LOG-TYPE',
+
+  QUEUE: 'QUEUE-LOG-TYPE',
 };
 /**
  * @link https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
@@ -28,6 +31,8 @@ const LOGGING_STYLES = {
   [LOG_TYPES.ERROR]: '\x1b[91m', // bright red
   [LOG_TYPES.WARNING]: '\x1b[33m', // yellow
   [LOG_TYPES.VERBOSE]: '\x1b[35m', // magenta
+
+  [LOG_TYPES.QUEUE]: '\x1b[33m', // brown
 };
 /**
  * @param {LogType} logType
@@ -42,34 +47,38 @@ export function log(logType, ...args) {
  */
 export default {
   server: (...args) => {
-    log(LOG_TYPES.SERVER, ...args);
+    log(LOG_TYPES.SERVER, '❖', ...args);
   },
 
   lifecycle: (...args) => {
-    log(LOG_TYPES.LIFECYCLE, ...args);
+    log(LOG_TYPES.LIFECYCLE, '☼', ...args);
   },
 
   game: (...args) => {
-    log(LOG_TYPES.GAME, ...args);
+    log(LOG_TYPES.GAME, '✪', ...args);
   },
 
   new: (...args) => {
-    log(LOG_TYPES.NEW, ...args);
+    log(LOG_TYPES.NEW, '+', ...args);
   },
 
   old: (...args) => {
-    log(LOG_TYPES.OLD, ...args);
+    log(LOG_TYPES.OLD, '-', ...args);
   },
 
   error: (...args) => {
-    log(LOG_TYPES.ERROR, ...args);
+    log(LOG_TYPES.ERROR, '‼', ...args);
   },
 
   warning: (...args) => {
-    log(LOG_TYPES.WARNING, ...args);
+    log(LOG_TYPES.WARNING, '!', ...args);
   },
 
   verbose: (...args) => {
     log(LOG_TYPES.VERBOSE, ...args);
+  },
+
+  queue: (...args) => {
+    // log(LOG_TYPES.QUEUE, '➻', ...args);
   },
 };
