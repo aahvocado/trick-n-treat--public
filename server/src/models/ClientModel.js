@@ -29,7 +29,7 @@ export default class ClientModel extends Model {
       /** @type {String} */
       clientId: undefined,
       /** @type {String} */
-      clientType: CLIENT_TYPE.REMOTE,
+      clientType: CLIENT_TYPE.UNKNOWN,
       /** @type {Socket.IO-Client} */
       socket: undefined,
       /** @type {String} */
@@ -85,13 +85,16 @@ export default class ClientModel extends Model {
     const socket = this.get('socket');
     logger.new(`Client "${this.get('name')}" connected.`);
 
+    // client wants to "Join" as a client type
+    socket.once(SOCKET_EVENT.LOBBY.TO_SERVER.JOIN, this.onJoinedAsClient.bind(this));
+
     // client wants to "Game Start"
     socket.on(SOCKET_EVENT.LOBBY.TO_SERVER.START, () => {
       serverState.handleStartGame();
     });
 
-    // client wants to "Join" game in session
-    socket.on(SOCKET_EVENT.LOBBY.TO_SERVER.JOIN, () => {
+    // client wants to "Rejoin" game in session
+    socket.on(SOCKET_EVENT.LOBBY.TO_SERVER.REJOIN, () => {
       gameState.handleClientRejoin(this);
     });
 
@@ -100,6 +103,7 @@ export default class ClientModel extends Model {
     socket.on(SOCKET_EVENT.DEBUG.TO_SERVER.RESTART_GAME, () => {
       serverState.handleRestartGame();
     });
+
 
     // -- generic events
     /**
@@ -143,6 +147,20 @@ export default class ClientModel extends Model {
 
     // -- console command
     socket.on(SOCKET_EVENT.DEBUG.TO_SERVER.CONSOLE_COMMAND, this.handleConsoleCommand.bind(this));
+  }
+  /**
+   * client chose a type
+   *
+   * @param {ClientType} clientType
+   */
+  onJoinedAsClient(clientType) {
+    this.set({clientType: clientType});
+
+    // tell the client that we have accepted their chosen type
+    this.emit(SOCKET_EVENT.LOBBY.TO_CLIENT.SET_CLIENTTYPE, clientType);
+
+    // tell everyone
+    serverState.emitLobbyUpdate();
   }
   // -- Game Listener methods
   /**

@@ -201,6 +201,10 @@ export class RemoteGamestateModel extends Model {
    * @param {Object} data
    */
   updateMyCharacterData(data) {
+    if (data === null || data === undefined) {
+      return;
+    }
+
     // hold onto if it was previously this character's turn
     const wasMyTurn = this.get('isMyTurn');
 

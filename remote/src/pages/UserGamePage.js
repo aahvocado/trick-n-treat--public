@@ -12,6 +12,8 @@ import {
 
 import {
   TILE_SIZE,
+  REMOTE_MAP_CONTAINER_WIDTH,
+  REMOTE_MAP_CONTAINER_HEIGHT,
 } from 'constants/styleConstants';
 
 import {STAT_ID} from 'constants.shared/statIds';
@@ -26,6 +28,7 @@ import TileInspectorComponent from 'components/TileInspectorComponent';
 import TileMapComponent from 'components/TileMapComponent';
 
 import keycodes from 'constants.shared/keycodes';
+import {CLIENT_TYPE} from 'constants.shared/clientTypes';
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import remoteAppState from 'state/remoteAppState';
@@ -93,8 +96,12 @@ class UserGamePage extends Component {
   render() {
     // redirect to Home page if not connected
     if (!remoteAppState.get('isConnected')) {
-      remoteAppState.set({isInGame: false});
-      return <Redirect to='/' />
+      return <Redirect to='/home' />
+    }
+
+    // if client is a screen, redirect to their appropriate page
+    if (remoteAppState.get('isInGame') && remoteAppState.get('clientType') === CLIENT_TYPE.SCREEN) {
+      return <Redirect to='/screen' />
     }
 
     // redirect to game complete
@@ -203,6 +210,8 @@ class UserGamePage extends Component {
           selectedTilePos={selectedTilePos}
           selectedPath={selectedPath}
           tileSize={TILE_SIZE}
+          containerWidth={REMOTE_MAP_CONTAINER_WIDTH}
+          containerHeight={REMOTE_MAP_CONTAINER_HEIGHT}
           isFullyVisibleMap={isFullyVisibleMap}
           isZoomedOut={isZoomedOut}
           onTileClick={this.handleOnTileClick}

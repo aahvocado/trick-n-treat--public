@@ -2,6 +2,7 @@ import {NotificationManager} from 'react-notifications';
 
 import {extendObservable} from 'mobx';
 
+import {CLIENT_TYPE} from 'constants.shared/clientTypes';
 import {SOCKET_EVENT} from 'constants.shared/socketEvents';
 
 import Model from 'models/Model'; // todo - use shared
@@ -12,6 +13,7 @@ import * as mapGenerationUtils from 'utilities.shared/mapGenerationUtils';
 const shouldGenerateTestMap = false; // toggle this to use generate a test map in the tileEditor
 
 // TESTING
+const useSingleClient = false;
 const createDate = new Date();
 const _name = (() => {
   const firsts = ['amazing', 'cool', 'ticklish', 'rainbow', 'cheerful', 'sleepy', 'poopy', 'rectangular', 'transparent', 'plaid', 'laughing'];
@@ -32,8 +34,13 @@ export class RemoteStateModel extends Model {
       /** @type {String} */
       name: _name,
       /** @type {String} */
-      _clientId: `${_name}-${createDate.getTime()}`,
-      clientId: 'TEST_REMOTE_USER',
+      clientId: useSingleClient ? 'TEST_REMOTE_USER' : `${_name}-${createDate.getTime()}`,
+      /** @type {ClientType} */
+      clientType: CLIENT_TYPE.UNKNOWN,
+
+      // -- state stuff
+      /** @type {Boolean} */
+      isLoading: false,
 
       // -- my client state - from the server
       /** @type {Boolean} */
@@ -100,7 +107,13 @@ export class RemoteStateModel extends Model {
         isGameInProgress: data.isGameInProgress,
         isInLobby: data.isInLobby,
         isInGame: data.isInGame,
+        isLoading: false,
       });
+    });
+
+    // server has accepted our change in `clientType`
+    socket.once(SOCKET_EVENT.LOBBY.TO_CLIENT.SET_CLIENTTYPE, (clientType) => {
+      this.set({clientType: clientType});
     });
 
     // server wants us to add something to the `appLog`
@@ -139,6 +152,8 @@ export class RemoteStateModel extends Model {
         isConnected: false,
         isReconnecting: false,
         isGameInProgress: false,
+        isInGame: false,
+        isInLobby: false,
         lobbyData: [],
       });
     });
@@ -161,8 +176,6 @@ const isPathEditorMode = currentPath === '/encounter_editor' || currentPath === 
  * @type {RemoteStateModel}
  */
 const remoteAppState = new RemoteStateModel({
-  isInLobby: currentPath === '/lobby',
-  isInGame: currentPath === '/game',
   isEditorMode: isPathEditorMode,
 });
 export default remoteAppState;

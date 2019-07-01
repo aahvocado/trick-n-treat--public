@@ -1,5 +1,6 @@
 import {MAP_WIDTH, MAP_HEIGHT} from 'constants/mapSettings';
 
+import {CLIENT_TYPE} from 'constants.shared/clientTypes';
 import {GAME_MODE} from 'constants.shared/gameModes';
 import {TILE_ID} from 'constants.shared/tileIds';
 
@@ -69,6 +70,11 @@ export function handleStartGame(clientList) {
 
   // create Characters for each Client that is part of the game
   clientList.forEach((clientModel) => {
+    // not for screen clients
+    if (clientModel.get('clientType') === CLIENT_TYPE.SCREEN) {
+      return;
+    }
+
     const newCharacterModel = gameState.createCharacterForClient(clientModel);
     gameState.get('characterList').push(newCharacterModel);
   });
@@ -260,7 +266,7 @@ export function handleEndOfRound() {
   logger.lifecycle('handleEndOfRound()');
 
   // any players dead?
-  serverState.get('gameClients').forEach((client) => {
+  serverState.get('remoteClientsInGame').forEach((client) => {
     const characterModel = client.get('myCharacter');
     if (characterModel.get('health') <= 0) {
       gameState.handleCompleteGame();

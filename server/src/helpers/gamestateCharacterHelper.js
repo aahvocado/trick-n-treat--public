@@ -70,7 +70,22 @@ export function handleClientRejoin(clientModel) {
     return;
   }
 
-  // only allow existing rejoins for now
+  // screen clients can join anytime
+  if (clientModel.get('clientType') === CLIENT_TYPE.SCREEN) {
+    logger.game(`${clientModel.get('name')} successfully rejoined as a screen!`);
+    clientModel.set({
+      isInLobby: false,
+      isInGame: true,
+    });
+
+    // now that they've rejoined, update
+    serverState.emitLobbyUpdate();
+    serverState.emitGameUpdate();
+
+    return;
+  };
+
+  // only allow existing rejoins for players for now
   const clientId = clientModel.get('clientId');
   const existingCharacter = gameState.findCharacterByClientId(clientId);
   if (existingCharacter === undefined) {
@@ -90,14 +105,9 @@ export function handleClientRejoin(clientModel) {
   serverState.emitLobbyUpdate();
   serverState.emitGameUpdate();
 
-  // check if there is a `currentCharacter`
+  // does the `currentCharacter` belong to the client that just rejoined?
   const currentCharacter = gameState.get('currentCharacter');
-  if (currentCharacter === null) {
-    return;
-  }
-
-  // is it the user that just rejoined?
-  if (currentCharacter.get('clientId') !== clientId) {
+  if (currentCharacter === null || currentCharacter.get('clientId') !== clientId) {
     return;
   }
 
@@ -127,6 +137,12 @@ export function getCurrentCharacter() {
   const currentCharacter = characterList.find((characterModel) => {
     return characterModel.get('isActive');
   });
+
+  // no `active` character means lifecycle is in an in-between state
+  //  (such as end of a round)
+  if (currentCharacter === undefined) {
+    return null;
+  }
 
   return currentCharacter;
 }

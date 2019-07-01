@@ -9,11 +9,6 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons'
 
-import {
-  MAP_CONTAINER_WIDTH,
-  MAP_CONTAINER_HEIGHT,
-} from 'constants/styleConstants';
-
 import combineClassNames from 'utilities/combineClassNames';
 import * as tileStyleUtils from 'utilities/tileStyleUtils';
 
@@ -41,12 +36,16 @@ export default class TileMapComponent extends Component {
     /** @type {Point} */
     focalPoint: new Point(),
     /** @type {Point} */
-    selectedTilePos: undefined,
+    selectedTilePos: null,
     /** @type {Path} */
     selectedPath: [],
 
     /** @type {Number} */
     tileSize: 15,
+    /** @type {Number} */
+    containerWidth: 15,
+    /** @type {Number} */
+    containerHeight: 15,
     /** @type {Boolean} */
     isFullyVisibleMap: false,
     /** @type {Boolean} */
@@ -66,6 +65,8 @@ export default class TileMapComponent extends Component {
       selectedTilePos,
       selectedPath,
       tileSize,
+      containerWidth,
+      containerHeight,
       isFullyVisibleMap,
       isZoomedOut,
     } = this.props;
@@ -90,8 +91,8 @@ export default class TileMapComponent extends Component {
       <div
         className={combineClassNames(baseClassName, className)}
         style={{
-          width: `${MAP_CONTAINER_WIDTH}px`,
-          height: `${MAP_CONTAINER_HEIGHT}px`,
+          width: `${containerWidth}px`,
+          height: `${containerHeight}px`,
         }}
       >
         {/** inner container - this will move around, so it's effectively the "camera" */}

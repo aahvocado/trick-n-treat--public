@@ -69,6 +69,14 @@ export class ServerStateModel extends Model {
       get screenClients() {
         return _this.get('clientList').filter((client) => (client.get('clientType') === CLIENT_TYPE.SCREEN));
       },
+      /** @type {Array<ClientModel>} */
+      get remoteClientsInGame() {
+        return _this.get('clientList').filter((client) => client.get('clientType') === CLIENT_TYPE.REMOTE && client.get('isInGame'));
+      },
+      /** @type {Array<ClientModel>} */
+      get screenClientsInGame() {
+        return _this.get('clientList').filter((client) => client.get('clientType') === CLIENT_TYPE.SCREEN && client.get('isInGame'));
+      },
     });
   }
   /**
@@ -190,14 +198,28 @@ export class ServerStateModel extends Model {
 
     // send each client some gamestate data along with their own character data
     gameClients.forEach((clientModel) => {
-      const clientCharacter = clientModel.get('myCharacter');
+      const clientType = clientModel.get('clientType');
+      // remote is based on their own character
+      if (clientType === CLIENT_TYPE.REMOTE) {
+        const clientCharacter = clientModel.get('myCharacter');
+        clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, {
+          mapData: gameState.getFormattedMapDataFor(clientCharacter),
+          myCharacter: clientCharacter.export(),
+          mode: gameState.get('mode'),
+          round: gameState.get('round'),
+        });
+      }
 
-      clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, {
-        mapData: gameState.getFormattedMapDataFor(clientCharacter),
-        myCharacter: clientCharacter.export(),
-        mode: gameState.get('mode'),
-        round: gameState.get('round'),
-      });
+      // screen is based on the current character
+      if (clientType === CLIENT_TYPE.SCREEN) {
+        const currentCharacter = gameState.get('currentCharacter');
+        clientModel.emit(SOCKET_EVENT.GAME.TO_CLIENT.UPDATE, {
+          myCharacter: currentCharacter === null ? null : currentCharacter.export(),
+          mapData: gameState.getFormattedMapData(),
+          mode: gameState.get('mode'),
+          round: gameState.get('round'),
+        });
+      }
     });
   }
 }

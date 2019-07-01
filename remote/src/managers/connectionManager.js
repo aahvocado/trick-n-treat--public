@@ -18,7 +18,7 @@ export function connect() {
     reconnect: false,
     reconnectionAttempts: 1,
     query: {
-      clientType: CLIENT_TYPE.REMOTE,
+      clientType: CLIENT_TYPE.UNKNOWN,
       name: remoteAppState.get('name'),
       clientId: remoteAppState.get('clientId'),
     },

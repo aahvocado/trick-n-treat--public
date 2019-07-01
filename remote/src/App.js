@@ -15,7 +15,9 @@ import WebsocketConnectionIndicator from 'components/WebsocketConnectionIndicato
 
 import EncounterEditorPage from 'pages/EncounterEditorPage';
 import GameCompletePage from 'pages/GameCompletePage';
+import HomePage from 'pages/HomePage';
 import ItemEditorPage from 'pages/ItemEditorPage';
+import ScreenGamePage from 'pages/ScreenGamePage';
 import TileEditorPage from 'pages/TileEditorPage';
 import UserGamePage from 'pages/UserGamePage';
 import UserLobbyPage from 'pages/UserLobbyPage';
@@ -58,11 +60,15 @@ class App extends Component {
           <TitleRouteButton />
 
           {/* Page Content */}
-          <Route exact path="/" component={UserLobbyPage} />
+          <Route exact path="/" component={HomePage} />
+
+          <Route path="/home" component={HomePage} />
 
           <Route path="/lobby" component={UserLobbyPage} />
 
           <Route path="/game" component={UserGamePage} />
+
+          <Route path="/screen" component={ScreenGamePage} />
 
           <Route path="/complete" component={GameCompletePage} />
 
