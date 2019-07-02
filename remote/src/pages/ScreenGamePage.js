@@ -101,7 +101,7 @@ class UserGamePage extends Component {
         {/* Tile Inspection */}
         { isTileInspecting && hoveredTilePos !== null &&
           <TileInspectorComponent
-            style={{left: '10px', top: '70px'}}
+            style={{right: '10px', top: '0px'}}
             tileData={mapGridModel.getAt(hoveredTilePos).export()}
           />
         }

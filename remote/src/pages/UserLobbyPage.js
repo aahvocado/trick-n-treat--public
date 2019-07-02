@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { observer } from 'mobx-react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDesktop, faMobileAlt } from '@fortawesome/free-solid-svg-icons'
+import {faDesktop, faMobileAlt, faGenderless} from '@fortawesome/free-solid-svg-icons'
 
 import ButtonComponent, { BUTTON_THEME } from 'common-components/ButtonComponent';
 
@@ -144,7 +144,7 @@ class LobbyListRow extends PureComponent {
 
     return (
       <li className={`color-white adjacent-mar-t-1 ${isLocalUser ? 'f-bold' : ''} flex-row-center`}>
-        <FontAwesomeIcon className='mar-r-2' icon={clientType === CLIENT_TYPE.SCREEN ? faDesktop : faMobileAlt} />
+        <FontAwesomeIcon className='mar-r-2' icon={clientType === CLIENT_TYPE.UNKNOWN ? faGenderless : (clientType === CLIENT_TYPE.SCREEN ? faDesktop : faMobileAlt)} />
         <span>{ name }</span>
       </li>
     );

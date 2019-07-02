@@ -38,35 +38,37 @@ class HomePage extends Component {
     const name = remoteAppState.get('name');
 
     return (
-      <div className='bg-secondary pad-2 flex-auto flex-center flex-col talign-center'>
-        <h2 className='color-white adjacent-mar-t-2 pad-v-2 flex-none'>
+      <div className='bg-secondary pad-3 flex-auto flex-center flex-col talign-center'>
+        <h2 className='color-white adjacent-mar-t-4 flex-none'>
           { isConnected ? `Welcome, ${name}, to the Candy Cosmos!` : 'You do not have a connection to the cosmos...' }
         </h2>
 
         <div
-          className='flex-row-center adjacent-mar-t-2'
+          className='flex-row-center adjacent-mar-t-4'
           style={{height: '300px'}}
         >
           <ButtonComponent
-            className='fsize-6 pad-2 f-bold flex-col-center height-full adjacent-mar-l-2'
+            className='pad-2 f-bold flex-col-center height-full adjacent-mar-l-2'
             style={{width: '150px'}}
             theme={BUTTON_THEME.ORANGE}
             disabled={!isConnected}
             onClick={this.onClickJoinAsRemote}
           >
-            <span className='mar-b-3'>Join as a Joyful Treater</span>
-            <FontAwesomeIcon icon={faMobileAlt} />
+            <span className='fsize-4 mar-b-1'>Join as a</span>
+            <span className='fsize-7 mar-b-3'>Joyous Treater</span>
+            <FontAwesomeIcon className='fsize-7' icon={faMobileAlt} />
           </ButtonComponent>
 
           <ButtonComponent
-            className='fsize-6 pad-2 f-bold flex-col-center height-full adjacent-mar-l-2'
+            className='pad-2 f-bold flex-col-center height-full adjacent-mar-l-2'
             style={{width: '150px'}}
             theme={BUTTON_THEME.ORANGE}
             disabled={!isConnected}
             onClick={this.onClickJoinAsScreen}
           >
-            <span className='mar-b-3'>Join as a Cosmic Watcher</span>
-            <FontAwesomeIcon icon={faDesktop} />
+            <span className='fsize-4 mar-b-1'>Join as a</span>
+            <span className='fsize-7 mar-b-3'>Cosmic Watcher</span>
+            <FontAwesomeIcon className='fsize-7' icon={faDesktop} />
           </ButtonComponent>
         </div>
       </div>

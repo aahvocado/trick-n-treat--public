@@ -362,12 +362,21 @@ export function handleCharacterEndTurn(characterModel) {
  * @param {CharacterModel} characterModel
  */
 export function handleCharacterExamineEncounter(characterModel) {
+  const movement = characterModel.get('movement');
+  if (movement < 1) {
+    logger.warning(`${characterModel.get('name')} needs at least 1 movement to be examining.`);
+    return;
+  }
+
   const characterLocation = characterModel.get('position');
   const encounterModel = gameState.findEncounterAt(characterLocation);
   if (encounterModel === undefined) {
-    logger.warning(`${characterModel.get('name')} attempted to examine nothing at ${characterLocation.toString()} .`);
+    logger.warning(`${characterModel.get('name')} attempted to examine nothing at ${characterLocation.toString()}.`);
     return;
   }
+
+  // it costs 1 movement
+  characterModel.set({movement: movement - 1});
 
   // trigger the Encounter
   gameState.handleCharacterTriggerEncounter(characterModel, encounterModel);
