@@ -1,0 +1,38 @@
+import convertObjectToArray from 'utilities.shared/convertObjectToArray';
+
+/**
+ * @typedef {String} StatId
+ */
+export const STAT_ID = {
+  GREED: 'STAT_ID.GREED',
+  HEALTH: 'STAT_ID.HEALTH',
+  LUCK: 'STAT_ID.LUCK',
+  MOVEMENT: 'STAT_ID.MOVEMENT',
+  SANITY: 'STAT_ID.SANITY',
+  VISION: 'STAT_ID.VISION',
+
+  CANDIES: 'STAT_ID.CANDIES',
+  TRICKY: 'STAT_ID.TRICKY',
+  TREATY: 'STAT_ID.TREATY',
+  POSITION: 'STAT_ID.POSITION',
+
+  BASE: {
+    GREED: 'STAT_ID.BASE.GREED',
+    HEALTH: 'STAT_ID.BASE.HEALTH',
+    LUCK: 'STAT_ID.BASE.LUCK',
+    MOVEMENT: 'STAT_ID.BASE.MOVEMENT',
+    SANITY: 'STAT_ID.BASE.SANITY',
+    VISION: 'STAT_ID.BASE.VISION',
+  },
+
+  DEFAULT: {
+    GREED: 'STAT_ID.DEFAULT.GREED',
+    HEALTH: 'STAT_ID.DEFAULT.HEALTH',
+    LUCK: 'STAT_ID.DEFAULT.LUCK',
+    MOVEMENT: 'STAT_ID.DEFAULT.MOVEMENT',
+    SANITY: 'STAT_ID.DEFAULT.SANITY',
+    VISION: 'STAT_ID.DEFAULT.VISION',
+  },
+};
+/** @type {Array<StatId>} */
+export const STAT_ID_LIST = convertObjectToArray(STAT_ID);

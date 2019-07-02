@@ -1,0 +1,1665 @@
+[
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.DEBUG_ENCOUNTER",
+    "title": "Developer Encounter",
+    "content": "This is the first Encounter in the list and we use it to mess around.",
+    "isDialogue": false,
+    "isImmediate": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.FREE_TAFFY",
+        "label": "Go to get Free Candy",
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.CHARACTER.SANITY",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 1
+          }
+        ],
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.GUMMY_VIAL",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 100,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.CHARACTER.CANDIES",
+            "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+            "value": 40
+          }
+        ]
+      }
+    ],
+    "isGeneratable": false
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FASHION_ADVICE",
+    "title": "Graveyard Fashion Advice (1)",
+    "content": "You see a nearby patch of dirt rumble... and out pops a skeleton with round, purple frames. She rattles and gives some advice, \"You would look really good wearing orange at the Sternum Ball.\"",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.FASHION_ADVICE_2",
+        "label": "\"Thanks for the suggestion\"",
+        "willEndTurn": false
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.FASHION_ADVICE_3",
+        "label": "\"Oh no, you need help getting back in your grave!\"",
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.CHARACTER.SANITY",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 5
+          }
+        ],
+        "willEndTurn": false
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK"
+    ],
+    "groupId": "Fashion Advice Group"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FASHION_ADVICE_2",
+    "title": "Graveyard Fashion Advice (2)",
+    "content": "She giggles really excitedly and it makes a rattle so joyful that you giggle, too! You both giggle until you have to wipe the tears from your face.",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Whew!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Fashion Advice Group"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FASHION_ADVICE_3",
+    "title": "Graveyard Fashion Advice (3)",
+    "content": "You caress her and slowly help her lay back on her dirt bed. All while she's telling how cute you look and that orange really would suit you. I bet you're totally blushing. ",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Blush",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.SANITY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Fashion Advice Group"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.BLACK_CAT",
+    "title": "The Darkness Meows",
+    "content": "Oh no.. it can't be... it couldn't... not now...! A black cat with sparkling blue eyes crosses your path on the worse night imaginable! Fate has it in for you... You feel so unlucky.",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.LUCK",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 2
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "isGeneratableOnce": false,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ]
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.CANDY_FAIRY",
+    "title": "Blessed by the Fairy",
+    "content": "You see a little glowing thing pass by in front of you. Upon closer inspection, its a fairy who's carrying a piece of candy about her size! She sees you and gives it to you and says \"I really like your costume!\"",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Thanks!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.GUMMY_VIAL",
+        "value": 1
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK"
+    ]
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FREE_TAFFY",
+    "title": "Free Naffy Taffy?",
+    "content": "\"Hey, I'm not a big fan of Naffy Taffy so you can have it.\"",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Thanks!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.GUMMY_VIAL",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "isGeneratableOnce": false,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK"
+    ]
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_ATDOOR",
+    "title": "Friendly House (at the door)",
+    "content": "You come up to a nicely decorated house. There's bunch of candy corn lights leading up to the front porch, where some crudely carved jack-o-lanterns smile at you. It's a house you've been to many times before and you know they always have full-size candy bars!",
+    "isDialogue": false,
+    "tagList": [
+      "TAG_ID.DESCRIPTORS.ADDS_SANITY"
+    ],
+    "actionList": [
+      {
+        "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TRICK",
+        "label": "Trick",
+        "conditionList": [
+          {
+            "targetId": "TARGET_ID.ENCOUNTER.UNIQUE_TRICKS",
+            "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+            "value": 1
+          }
+        ],
+        "willEndTurn": false
+      },
+      {
+        "choiceId": "CHOICE_ID.TREAT",
+        "gotoId": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TREAT",
+        "label": "Treat",
+        "willEndTurn": false
+      }
+    ],
+    "triggerList": [
+      {
+        "targetId": "TARGET_ID.CHARACTER.SANITY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
+    "groupId": "Friendly House Group"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TREAT",
+    "title": "Friendly House (treat)",
+    "content": "You ring the doorbell and are greeted by your cheerful neighbor wearing a giant sponge outfit!\n\n\"Nya ha ha! How ya doing? Here's some candy fella!\"",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Thanks!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 5
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TREATY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Friendly House Group"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.FRIENDLY_HOUSE_ENCOUNTER_TRICK",
+    "title": "Friendly House (trick)",
+    "content": "You Trick the house into opening up and spook the friendly neighbor! He spills a bunch of candy - and you greedily snatch a bunch of them up before dashing away.\n\nYou hear a cry behind you - \"You've soiled it!\".",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 15
+      },
+      {
+        "targetId": "TARGET_ID.CHARACTER.GREED",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TRICKY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Friendly House Group"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_ATDOOR",
+    "title": "Undecorated House (at the door)",
+    "content": "You arrive in front of a completely undecorated house. There's no decorations, none. There's a bunch of other houses that aren't decorated but for some reason this one's extra upsetting. Well, at least the lights are on.",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICKCHOICES",
+        "label": "Trick",
+        "conditionList": [
+          {
+            "targetId": "TARGET_ID.ENCOUNTER.UNIQUE_TRICKS",
+            "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+            "value": 1
+          }
+        ],
+        "willEndTurn": false
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TREAT",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TREAT",
+        "label": "Treat",
+        "willEndTurn": false
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "groupId": "Undecorated House Group"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICKCHOICES",
+    "title": "Undecorated House (trick choices)",
+    "content": "Yeah! You could play a Trick at this unstylish house!",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK1",
+        "label": "Tell the owner",
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK2",
+        "label": "Place a plastic pumpkin",
+        "conditionList": [
+          {
+            "targetId": "TARGET_ID.ITEM.ALL",
+            "itemId": "ITEM_ID.PLASTIC_PUMPKIN",
+            "conditionLogicId": "CONDITION_LOGIC_ID.HAS_ITEM",
+            "value": 1
+          }
+        ],
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK3",
+        "label": "Decorate with cobwebs",
+        "conditionList": [
+          {
+            "targetId": "TARGET_ID.ITEM.ALL",
+            "itemId": "ITEM_ID.COTTON_COBWEB",
+            "conditionLogicId": "CONDITION_LOGIC_ID.HAS_ITEM",
+            "value": 1
+          }
+        ],
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TRICKY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Undecorated House Group"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TREAT",
+    "title": "Undecorated House (treat)",
+    "content": "You ring the doorbell and out comes a comfy lady. She looks pretty nonchalant as she reaches into her sweatpants pocket with a handful of candy and tosses it in your bucket.",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Sweet!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TREATY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 9
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Undecorated House Group"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK1",
+    "title": "Undecorated House (trick 1)",
+    "content": "You ring the doorbell and a nonchalant lady opens the door. Just as she's reaching into sweatpants pocket you speak up, \"Hey, it would be really nice if there was a Halloween atmosphere around here.\"\n\nShe shrugs while saying, \"I guess I might have plastic pumpkin around here somewhere.\" She walks behind the door and reappears with the supposed pumpkin and hands it to you and flashes a weary smile and says \"There we go.\"\n",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.PLASTIC_PUMPKIN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Undecorated House Group"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK2",
+    "title": "Undecorated House (trick 2)",
+    "content": "You place a Plastic Pumpkin on the front step of this undecorated house. You pat the pumpkin and name it Gina. With the house no longer undecorated, you feel your work here is done!",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.TAKE",
+        "itemId": "ITEM_ID.PLASTIC_PUMPKIN",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.GREED",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 2
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Undecorated House Group"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.UNDECORATED_HOUSE_TRICK3",
+    "title": "Undecorated House (trick 3)",
+    "content": "You take your Cotton Cobwebs and stretch it around the pillars around the front. You name the two plastic spiders Andy and Amy. With the house no longer undecorated, you feel your work here is done!",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.TAKE",
+        "itemId": "ITEM_ID.COTTON_COBWEB",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.GREED",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 2
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Undecorated House Group"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY1)",
+    "title": "Candy Mountain to the Moon (buy1)",
+    "content": "\"Many thanks, tiny neighbor!\"",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Thanks!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.BIG_GUMMY_BEAR",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 5
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Quest to the Moon"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY2)",
+    "title": "Candy Mountain to the Moon (buy2)",
+    "content": "\"Many thanks, tiny neighbor!\"",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Thanks!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.CHOCOLATE_COVERED_PEANUTS_N_PRETZELS",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 5
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Quest to the Moon"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(QUESTION)",
+    "title": "Candy Mountain to the Moon (question)",
+    "content": "\"Mountain is tiny and moon is far. Many kind friends help me but I worry moon will go away.\"",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(YESHELP)",
+        "label": "Can I help?",
+        "conditionList": [
+          {
+            "targetId": "TARGET_ID.CHARACTER.GREED",
+            "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+            "value": 5
+          }
+        ],
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "I'll come by later, Lonnie.",
+        "willEndTurn": true
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Quest to the Moon"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(YESHELP)",
+    "title": "Candy Mountain to the Moon (Yes Help)",
+    "content": "\"You are tiny but with big heart, many thanks. Here is half moon necklace. Other half belongs to Lonnie's best friend, Monnie. Me and Monnie promise one day to go the moon together but fought over caramel candy bar at his house. Please tell Monnie that Lonnie sorry and want him go to moon together.\"",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "I'll look for Monnie!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.LONNIE_NECKLACE",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Quest to the Moon"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(LONNIE_MAIN)",
+    "title": "Candy Mountain to the Moon (Lonnie Main)",
+    "content": "\"Hello tiny neighbor! Moon is looking beautiful, yes? I making big candy mountain to go visit moon. Tiny neighbor, you give small candies to me and I give big candy to you.\"",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY1)",
+        "label": "I want a Gummy Bear (5 candies)",
+        "conditionList": [
+          {
+            "targetId": "TARGET_ID.CHARACTER.CANDIES",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 4
+          }
+        ],
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(BUY2)",
+        "label": "I want some Chocolate Covered P&Ps (5 candies)",
+        "conditionList": [
+          {
+            "targetId": "TARGET_ID.CHARACTER.CANDIES",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 4
+          }
+        ],
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(QUESTION)",
+        "label": "How is your candy mountain?",
+        "conditionList": [
+          {
+            "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TRIGGER_COUNT",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 4
+          },
+          {
+            "targetId": "TARGET_ID.ITEM.ALL",
+            "itemId": "ITEM_ID.LONNIE_NECKLACE",
+            "conditionLogicId": "CONDITION_LOGIC_ID.DOES_NOT_HAVE_ITEM",
+            "value": 1
+          }
+        ],
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "I'll come by later",
+        "willEndTurn": true
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.CHARACTER.GREED",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 5
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.RARE",
+    "groupId": "Quest to the Moon"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.CANDY_MOUNTAIN_TO_THE_MOON_(MONNIE_MAIN)",
+    "title": "Candy Mountain to the Moon (Monnie Main)",
+    "content": "\"I am Monnie. I like caramel.\"",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "I'll come by later",
+        "willEndTurn": false
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
+    "groupId": "Quest to the Moon"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.RANDOM_CANDY_BAR",
+    "title": "Candy on the Ground",
+    "content": "You find a candy bar on the ground.",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.RANDOM_CANDY_BAR_2",
+        "label": "Pick it up",
+        "willEndTurn": false
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Ignore it",
+        "willEndTurn": false
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 0
+          }
+        ]
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_VISITORS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ],
+    "groupId": "Candy on the Ground grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.RANDOM_CANDY_BAR_2",
+    "title": "Candy on the Ground (pick up)",
+    "content": "Aww yess",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Cool",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.SNICKERSNACK_BAR",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ],
+    "groupId": "Candy on the Ground grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.VISION_DEER_1",
+    "title": "The Vision Deer",
+    "content": "While walking you see a deer trotting calmly between the backyards of nearby houses. It pauses to tilt its head towards your direction.\n\nYou feel like it's weird that the deer is here and not in the woods where the wildflowers glisten with the taste of morning dew and the comfort of a shady tree... wait what?\n\nYou blink and the deer is nowhere to be seen. ",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "I feel a yearning for greener pastures",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.VISION",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.SANITY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "isGeneratableOnce": true,
+    "rarityId": "TAG_ID.RARITY.RARE",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.STREETLAMP"
+    ],
+    "groupId": "Vision Deer grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FUDGE_TREE_MAIN",
+    "title": "The Fudging Tree (main)",
+    "content": "Oh! It's a fudge tree!",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TREAT",
+        "gotoId": "ENCOUNTER_ID.FUDGE_TREE_(TREAT)",
+        "label": "Pick some candy",
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.FUDGE_TREE_(TRICK)",
+        "label": "Chop it down",
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ITEM.ALL",
+            "itemId": "ITEM_ID.LOLLIPOP_AXE",
+            "conditionLogicId": "CONDITION_LOGIC_ID.HAS_ITEM",
+            "value": 1
+          }
+        ],
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Leave the fudge tree alone",
+        "willEndTurn": false
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.DELETE",
+        "value": 1,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TREATS",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 3
+          }
+        ]
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TREATS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 3
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "isGeneratableOnce": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK"
+    ],
+    "groupId": "The Fudging Tree grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FUDGE_TREE_(TREAT)",
+    "title": "The Fudging Tree (pick)",
+    "content": "You manage to pick a few candies from the lower hanging branches of the fudge tree.",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Thanks, tree!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 6
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "The Fudging Tree grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FUDGE_TREE_(TRICK)",
+    "title": "The Fudging Tree (chop)",
+    "content": "Using your axe, you easily chop down the fudge tree. ",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Not bad for a hard night's work",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.FUDGE_CHUNK",
+        "value": 3
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.GREED",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 2
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "The Fudging Tree grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.FUDGE_SEED",
+    "title": "Fudge Boy",
+    "content": "\"Save the environment! Start using sustainable agriculture!\" yells a little boy wearing a brown cap.\n\nHe hands you a little sandwich bag that has \"fudge seed\" labeled and says \"Here, free sample.\"",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Oh, cool",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.FUDGE_PIECE",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.FUDGE_SEED",
+        "value": 1
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TRIGGER_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ],
+    "groupId": "The Fudging Tree grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.COCOA_PATCH_MAIN",
+    "title": "Cocoa Patch",
+    "content": "There's a clearing in the woods where you see a perfect patch of dirt. You get closer and find out it's actually cocoa powder! You don't see that everyday!",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.COCOA_PATCH_1",
+        "label": "Take-a lil' bit of cocoa",
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.COCOA_PATCH_2",
+        "label": "Plant a fudge seed",
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ITEM.ALL",
+            "itemId": "ITEM_ID.FUDGE_SEED",
+            "conditionLogicId": "CONDITION_LOGIC_ID.HAS_ITEM",
+            "value": 1
+          }
+        ],
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Leave the dirt alone",
+        "willEndTurn": true
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.UNCOMMON",
+    "groupId": "Cocoa Patch grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.COCOA_PATCH_1",
+    "title": "Cocoa Patch (1)",
+    "content": "You grab a handful of chocolate dirt - and brush up against something hard. You shove aside the powder and dig up a big jawbreaker!\n\n(wip)",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Cool!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.FUDGE_PIECE",
+        "value": 2
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Cocoa Patch grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.COCOA_PATCH_2",
+    "title": "Cocoa Patch (2)",
+    "content": "You make a little hole in the cocoa powder and drop in your fudge seed.\n\nI bet this'll grow up a bit in say... 20 turns. (this doesn't do anything right now so have a chunk of fudge instead)",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Cool!",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.FUDGE_CHUNK",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "groupId": "Cocoa Patch grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.RUSTIC_HOUSE_(MAIN)",
+    "title": "Rustic House (door)",
+    "content": "You walk up to a rustic home that looks like it was once lovingly cared for but has now been without maintenance. There's still some decorations and the lights are on.",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.RUSTIC_HOUSE_(TRICK)",
+        "label": "Trick",
+        "willEndTurn": false
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TREAT",
+        "gotoId": "ENCOUNTER_ID.RUSTIC_HOUSE_(TREAT)",
+        "label": "Treat",
+        "willEndTurn": false
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "isGeneratableOnce": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ],
+    "groupId": "Rustic House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.RUSTIC_HOUSE_(TRICK)",
+    "title": "Rustic House (trick)",
+    "content": "todo",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TRICKY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.ITEM.ALL",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.GIVE",
+        "itemId": "ITEM_ID.LOLLI_SHOVEL",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ],
+    "groupId": "Rustic House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.RUSTIC_HOUSE_(TREAT)",
+    "title": "Rustic House (treat)",
+    "content": "todo",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TREATY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 7
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ],
+    "groupId": "Rustic House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(MAIN)",
+    "title": "Sports Fan House (door)",
+    "content": "You hear cheers coming from the other side of the door. It sounds like they're watching a rowdy game of Galaxy Ball.",
+    "isDialogue": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TRICK",
+        "gotoId": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(TRICK)",
+        "label": "Trick",
+        "willEndTurn": false
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.TREAT",
+        "gotoId": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(TREAT)",
+        "label": "Treat",
+        "willEndTurn": false
+      }
+    ],
+    "conditionList": [
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.TOTAL_TRICKS",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.CONDITION",
+        "targetId": "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT",
+        "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "isGeneratableOnce": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ],
+    "groupId": "Sports Fan House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(TRICK)",
+    "title": "Sports Fan House (trick)",
+    "content": "todo",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "label": "I want that gigantic candy rope (5 fudge chunks)",
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.ITEM.ALL",
+            "itemId": "ITEM_ID.FUDGE_CHUNK",
+            "conditionLogicId": "CONDITION_LOGIC_ID.HAS_ITEM",
+            "value": 1
+          }
+        ],
+        "willEndTurn": true
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TRICKY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.SANITY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ],
+    "groupId": "Sports Fan House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.SPORTSFAN_HOUSE_(TREAT)",
+    "title": "Sports Fan House (treat)",
+    "content": "todo",
+    "isDialogue": true,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Okay",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.TREATY",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 3
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "TILE_ID.HOME.SIDEWALK",
+      "TILE_ID.HOME.ROAD"
+    ],
+    "groupId": "Sports Fan House grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.ENCOUNTER",
+    "id": "ENCOUNTER_ID.POKEY_CANDY",
+    "title": "Ouchy Free Candy Forever",
+    "content": "Poke!\n\nFeel free to visit me again!",
+    "isDialogue": false,
+    "isImmediate": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Ouch! Oh, sweet candy!",
+        "willEndTurn": false
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 2
+      },
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 1
+      }
+    ],
+    "isGeneratable": true,
+    "rarityId": "TAG_ID.RARITY.COMMON",
+    "tileList": [
+      "TILE_ID.HOME.ROAD",
+      "TILE_ID.HOME.SIDEWALK"
+    ]
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.HIDEOUT_HOUSE",
+    "title": "Trick and Treater's Hideout",
+    "content": "What a cool base!",
+    "isDialogue": false,
+    "isImmediate": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.HIDEOUT_DROPOFF",
+        "label": "Drop off your candies",
+        "willEndTurn": false
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.GOTO",
+        "gotoId": "ENCOUNTER_ID.HIDEOUT_NAP",
+        "label": "Take a nap",
+        "willEndTurn": false
+      },
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Head out",
+        "willEndTurn": false
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "78"
+    ],
+    "groupId": "Hideout grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.HIDEOUT_DROPOFF",
+    "title": "Dropping off candies",
+    "content": "One day you'll drop em all off, but for now it's just 10.",
+    "isDialogue": false,
+    "isImmediate": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Head out",
+        "willEndTurn": false
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.CANDIES",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.SUBTRACT",
+        "value": 10,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.CHARACTER.CANDIES",
+            "conditionLogicId": "CONDITION_LOGIC_ID.GREATER_THAN",
+            "value": 9
+          }
+        ]
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "78"
+    ],
+    "groupId": "Hideout grouping"
+  },
+  {
+    "dataType": "DATA_TYPE.HOUSE",
+    "id": "ENCOUNTER_ID.HIDEOUT_NAP",
+    "title": "Nap time",
+    "content": "Healy nappy time",
+    "isDialogue": false,
+    "isImmediate": false,
+    "actionList": [
+      {
+        "dataType": "DATA_TYPE.ACTION",
+        "choiceId": "CHOICE_ID.CONFIRM",
+        "label": "Ahhh",
+        "willEndTurn": true
+      }
+    ],
+    "triggerList": [
+      {
+        "dataType": "DATA_TYPE.TRIGGER",
+        "targetId": "TARGET_ID.CHARACTER.HEALTH",
+        "triggerLogicId": "TRIGGER_LOGIC_ID.ADD",
+        "value": 1,
+        "conditionList": [
+          {
+            "dataType": "DATA_TYPE.CONDITION",
+            "targetId": "TARGET_ID.CHARACTER.HEALTH",
+            "conditionLogicId": "CONDITION_LOGIC_ID.LESS_THAN",
+            "value": 10
+          }
+        ]
+      }
+    ],
+    "isGeneratable": false,
+    "tileList": [
+      "78"
+    ],
+    "groupId": "Hideout grouping"
+  }
+]

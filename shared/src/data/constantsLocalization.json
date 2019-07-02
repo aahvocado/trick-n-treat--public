@@ -1,0 +1,90 @@
+{
+  "CONDITION_LOGIC_ID.EQUALS": "Equals",
+  "CONDITION_LOGIC_ID.LESS_THAN": "Less Than",
+  "CONDITION_LOGIC_ID.GREATER_THAN": "Greater Than",
+  "CONDITION_LOGIC_ID.AT_LOCATION": "Character at Location",
+  "CONDITION_LOGIC_ID.HAS_ITEM": "Character has Item",
+  "CONDITION_LOGIC_ID.DOES_NOT_HAVE_ITEM": "Character does not have Item",
+
+  "CHOICE_ID.CONFIRM": "Confirm",
+  "CHOICE_ID.GOTO": "Go To",
+  "CHOICE_ID.TRICK": "Trick",
+  "CHOICE_ID.TREAT": "Treat",
+
+  "DATA_TYPE.ENCOUNTER": "Encounter",
+  "DATA_TYPE.HOUSE": "House",
+
+  "STAT_ID.CANDIES": "Candies",
+  "STAT_ID.HEALTH": "Health",
+  "STAT_ID.GREED": "Greed",
+  "STAT_ID.MOVEMENT": "Movement",
+  "STAT_ID.SANITY": "Sanity",
+  "STAT_ID.VISION": "Vision",
+  "STAT_ID.TRICKY": "Tricky",
+  "STAT_ID.TREATY": "Treaty",
+  "STAT_ID.LUCK": "Luck",
+
+  "STAT_ID.BASE.HEALTH": "Health (Base)",
+  "STAT_ID.BASE.GREED": "Greed (Base)",
+  "STAT_ID.BASE.MOVEMENT": "Movement (Base)",
+  "STAT_ID.BASE.SANITY": "Sanity (Base)",
+  "STAT_ID.BASE.VISION": "Vision (Base)",
+  "STAT_ID.BASE.LUCK": "Luck (Base)",
+
+  "STAT_ID.DEFAULT.HEALTH": "Health (Default)",
+  "STAT_ID.DEFAULT.GREED": "Greed (Default)",
+  "STAT_ID.DEFAULT.MOVEMENT": "Movement (Default)",
+  "STAT_ID.DEFAULT.SANITY": "Sanity (Default)",
+  "STAT_ID.DEFAULT.VISION": "Vision (Default)",
+  "STAT_ID.DEFAULT.LUCK": "Luck (Default)",
+
+  "TAG_ID.TYPE.DEBUG": "Debug",
+  "TAG_ID.TYPE.ENCOUNTER": "Encounter",
+  "TAG_ID.TYPE.HOUSE": "House",
+  "TAG_ID.TYPE.ITEM": "Item",
+
+  "TAG_ID.DESCRIPTORS.GIVES_ITEM": "Gives Item",
+  "TAG_ID.DESCRIPTORS.ADDS_CANDY": "Adds Candy",
+  "TAG_ID.DESCRIPTORS.LOSES_CANDY": "Loses Candy",
+  "TAG_ID.DESCRIPTORS.ADDS_HEALTH": "Adds Health",
+  "TAG_ID.DESCRIPTORS.LOSES_HEALTH": "Loses Health",
+  "TAG_ID.DESCRIPTORS.ADDS_SANITY": "Adds Sanity",
+  "TAG_ID.DESCRIPTORS.LOSES_SANITY": "Loses Sanity",
+
+  "TAG_ID.RARITY.COMMON": "Common",
+  "TAG_ID.RARITY.UNCOMMON": "Uncommon",
+  "TAG_ID.RARITY.RARE": "Rare",
+
+  "TARGET_ID.CHARACTER.CANDIES": "Candies",
+  "TARGET_ID.CHARACTER.HEALTH": "Health",
+  "TARGET_ID.CHARACTER.GREED": "Greed",
+  "TARGET_ID.CHARACTER.MOVEMENT": "Movement",
+  "TARGET_ID.CHARACTER.SANITY": "Sanity",
+  "TARGET_ID.CHARACTER.VISION": "Vision",
+  "TARGET_ID.CHARACTER.TRICKY": "Tricky",
+  "TARGET_ID.CHARACTER.TREATY": "Treaty",
+  "TARGET_ID.CHARACTER.LUCK": "Luck",
+
+  "TARGET_ID.ENCOUNTER.CHARACTER_TRIGGER_COUNT": "Character Trigger Count",
+  "TARGET_ID.ENCOUNTER.CHARACTER_TRICK_COUNT": "Character Trick Count",
+  "TARGET_ID.ENCOUNTER.CHARACTER_TREAT_COUNT": "Character Treat Count",
+
+  "TARGET_ID.ENCOUNTER.TOTAL_VISITORS": "Total Visitors",
+  "TARGET_ID.ENCOUNTER.TOTAL_TRICKS": "Total Tricks",
+  "TARGET_ID.ENCOUNTER.TOTAL_TREATS": "Total Treats",
+
+  "TARGET_ID.ENCOUNTER.UNIQUE_VISITORS": "Unique Visitors",
+  "TARGET_ID.ENCOUNTER.UNIQUE_TRICKS": "Unique Trickers",
+  "TARGET_ID.ENCOUNTER.UNIQUE_TREATS": "Unique Treators",
+
+  "TARGET_ID.ITEM.ALL": "Item",
+
+  "TRIGGER_LOGIC_ID.ADD": "Add",
+  "TRIGGER_LOGIC_ID.SUBTRACT": "Subtract",
+  "TRIGGER_LOGIC_ID.GIVE": "Give",
+  "TRIGGER_LOGIC_ID.TAKE": "Take",
+  "TRIGGER_LOGIC_ID.MOVE": "Move",
+  "TRIGGER_LOGIC_ID.DELETE": "Mark for Deletion",
+
+  "undefined": "undefined"
+}

@@ -1,0 +1,37 @@
+{
+  "name": "@tnt/trick-n-treat",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "compile:remote": "echo \"compiling the Remote project is not available\"",
+    "compile:screen": "npm install --prefix ./screen; npm run compile --prefix ./screen",
+    "compile:server": "npm install --prefix ./server; npm run compile --prefix ./server",
+    "compile:all": "npm run compile:remote && npm run compile:screen && npm run compile:server",
+    "start:remote": "npm run start --prefix ./remote",
+    "start:screen": "npm run start --prefix ./screen",
+    "start:server": "npm run start --prefix ./server",
+    "start:all": "npm run compile:all && npm run start:remote && npm run start:screen && npm run start:server",
+    "start": "echo \"Starting all projects is still a WIP\" && npm run start:all"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "author": "Aidan Arrowood & Daniel Xiao",
+  "description": "This is a social digital board game inspired by Betrayal at House on the Hill where a group of friends explore a neighborhood looking for treats!",
+  "homepage": "https://github.com/aahvocado/trick-n-treat#readme",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:aahvocado/trick-n-treat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aahvocado/trick-n-treat/issues"
+  },
+  "keywords": [
+    "party",
+    "game",
+    "javascript",
+    "digital",
+    "boardgame"
+  ]
+}
