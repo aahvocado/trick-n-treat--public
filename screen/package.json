@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
-    "webpack-cli": "^3.1.2"
+    "webpack-cli": "^3.3.12"
   },
   "author": "Aidan Arrowood & Daniel Xiao",
   "license": "UNLICENSED",
